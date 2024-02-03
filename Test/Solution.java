@@ -1,38 +1,27 @@
-import java.util.PriorityQueue;
+import java.util.Arrays;
 
 class Solution {
-    public int[] numsGame(int[] nums) {
-        final int Mod = (int) 1e9 + 7;
+    public int maxFrequencyScore(int[] nums, long k) {
+        Arrays.sort(nums);
         int n = nums.length;
-        int[] ans = new int[n];
-        // 用一个大根堆 left 维护较小的一半，其元素和为 leftSum；
-        // 用一个小根堆 right 维护较大的一半，其元素和为 rightSum
-        PriorityQueue<Integer> left = new PriorityQueue<>((a, b) -> b - a); // 大根堆 从大到小
-        PriorityQueue<Integer> right = new PriorityQueue<>();  // 小根堆 从小到大
-        long leftSum = 0L, rightSum = 0L;
+        long[] prefix = new long[n + 1];
         for (int i = 0; i < n; i++) {
-            int b = nums[i] - i;
-            if (i % 2 == 0) { // 前缀和为奇数
-                // 维护两个堆 left < right
-                if (!left.isEmpty() && left.peek() > b) {
-                    leftSum += b - left.peek();
-                    left.offer(b);
-                    b = left.poll();
-                }
-                right.offer(b);
-                rightSum += b;
-                ans[i] = (int) ((rightSum - leftSum - right.peek()) % Mod);
-            }else{ // 前缀和为偶数
-                if (right.peek() < b) {
-                    rightSum += b - right.peek();
-                    right.offer(b);
-                    b = right.poll();
-                }
-                leftSum += b;
-                left.offer(b);
-                ans[i] = (int) ((rightSum - leftSum) % Mod);
+            prefix[i + 1] = prefix[i] + nums[i];
+        }
+        int ans = 0, left = 0;
+        for (int right = 0; right < n; right++) {
+            while (distanceSum(prefix, nums, left, right, (left + right) / 2) > k) {
+                left++;
             }
+            ans = Math.max(ans, right - left + 1);
         }
         return ans;
+    }
+
+    // 把 nums[l] 到 nums[r] 都变成 nums[i]的距离
+    private long distanceSum(long[] prefix, int[] nums, int left, int right, int median) {
+        long leftSum = (long) nums[median] * (median - left) - (prefix[median] - prefix[left]);
+        long rightSum = prefix[right + 1] - prefix[median + 1] - (long) (right - median) * nums[median];
+        return leftSum + rightSum;
     }
 }

@@ -125,4 +125,91 @@ public class problemImpl implements problem {
     }
 
 
+    private static final int[] pal = new int[109999];
+    static {
+        // 严格按顺序从小到大生成回文数（不用字符串转换）
+        int palIdx = 0;
+        for (int base = 1; base <= 10000; base *= 10) {
+            // 生成奇数长度回文数
+            for (int i = base; i < base * 10; i++) {
+                int x = i;
+                for (int t = i / 10; t > 0; t /= 10) {
+                    x = x * 10 + t % 10;
+                }
+                pal[palIdx++] = x;
+            }
+            // 生成偶数长度回文数
+            if (base <= 1000) {
+                for (int i = base; i < base * 10; i++) {
+                    int x = i;
+                    for (int t = i; t > 0; t /= 10) {
+                        x = x * 10 + t % 10;
+                    }
+                    pal[palIdx++] = x;
+                }
+            }
+        }
+        pal[palIdx++] = 1_000_000_001; // 哨兵，防止下面代码中的 i 下标越界
+    }
+    public long minimumCost(int[] nums) {
+        // 注：排序只是为了找中位数，如果用快速选择算法，可以做到 O(n)
+        Arrays.sort(nums);
+        int n = nums.length;
+        // 二分找中位数右侧最近的回文数
+        int i = lowerBound(nums[(n - 1) / 2]);
+        // 回文数在中位数范围内
+        if (pal[i] <= nums[n / 2]) {
+            return cost(nums, i);
+        }
+        // 枚举离中位数最近的两个回文数 pal[i-1] 和 pal[i]
+        return Math.min(cost(nums, i - 1), cost(nums, i));
+    }
+
+    private long cost(int[] nums, int i) {
+        int target = pal[i];
+        long ans = 0;
+        for (int x : nums) {
+            ans += Math.abs(x - target);
+        }
+        return ans;
+    }
+
+    private int lowerBound(int target) {
+        int left = 0, right = pal.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (pal[mid] < target) {
+                left = mid + 1;
+            }else{
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+
+    public int maxFrequencyScore(int[] nums, long k) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        long[] prefix = new long[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefix[i + 1] = prefix[i] + nums[i];
+        }
+        int ans = 0, left = 0;
+        for (int right = 0; right < n; right++) {
+            while (distanceSum(prefix, nums, left, right, (left + right) / 2) > k) {
+                left++;
+            }
+            ans = Math.max(ans, right - left + 1);
+        }
+        return ans;
+    }
+
+    // 把 nums[l] 到 nums[r] 都变成 nums[i]的距离
+    private long distanceSum(long[] prefix, int[] nums, int left, int right, int median) {
+        long leftSum = (long) nums[median] * (median - left) - (prefix[median] - prefix[left]);
+        long rightSum = prefix[right + 1] - prefix[median + 1] - (long) (right - median) * nums[median];
+        return leftSum + rightSum;
+    }
+
 }

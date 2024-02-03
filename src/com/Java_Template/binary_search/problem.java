@@ -31,6 +31,8 @@ import java.util.List;
  * 2560. 打家劫舍 IV（https://leetcode.cn/problems/house-robber-iv/）经典二分DP来check
  * 2234. 花园的最大总美丽值（https://leetcode.cn/problems/maximum-total-beauty-of-the-gardens/description/）前缀和加二分枚举
  * 2861. 最大合金数(https://leetcode.cn/problems/maximum-number-of-alloys/description/?envType=daily-question&envId=2024-01-27)
+ * 2601. 质数减法运算(https://leetcode.cn/problems/prime-subtraction-operation/description/)
+ * 2602. 使数组元素全部相等的最少操作次数（https://leetcode.cn/problems/minimum-operations-to-make-all-array-elements-equal/description/）
  */
 public interface problem {
     // 4. 寻找两个正序数组的中位数
@@ -59,4 +61,10 @@ public interface problem {
 
     // 2861. 最大合金数
     public int maxNumberOfAlloys(int n, int k, int budget, List<List<Integer>> composition, List<Integer> stock, List<Integer> cost);
+
+    // 2601. 质数减法运算
+    public boolean primeSubOperation(int[] nums);
+
+    // 2602. 使数组元素全部相等的最少操作次数
+    public List<Long> minOperations(int[] nums, int[] queries);
 }

@@ -8,6 +8,25 @@ import java.util.function.Predicate;
  * 日期：2024/1/17 10:40
  */
 public class template {
+
+    /**
+     * 查找满足条件的最大整数（查找小于等于target的最大整数下标）
+     * 输入{1，2，3，4，5}，3
+     * 返回 2
+     */
+    private int lowerBound(int[] nums, int target) { // 左开右开
+        int left = -1, right = nums.length;
+        while (left + 1 < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) { // 这里也可以取小于等于
+                left = mid;
+            }else{
+                right = mid;
+            }
+        }
+        return right;
+    }
+
     /**
      * 查找满足条件的最小整数 x
      *

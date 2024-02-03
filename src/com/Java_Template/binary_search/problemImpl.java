@@ -1,5 +1,7 @@
 package com.Java_Template.binary_search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -277,6 +279,92 @@ public class problemImpl implements problem {
             }
         }
         return ans;
+    }
+
+    private static final int MX = 1000;
+    private static final List<Integer> primes = new ArrayList<>(); // 质数数组
+    static {
+        boolean[] np = new boolean[MX + 1];
+        primes.add(0);
+        for (int i = 2; i <= MX; i++) {
+            if (!np[i]) {
+                primes.add(i);
+                for (int j = i; j <= MX / i; j++) {
+                    np[i * j] = true;
+                }
+            }
+        }
+    }
+    public boolean primeSubOperation(int[] nums) {
+        //设 pre是上一个减完后的数字，x=nums[i]为当前数字。
+        //设 p是满足 x−p>pre的最大质数，换言之，p是小于 x−pre的最大质数，这可以预处理质数列表后，用二分查找得到。
+        int pre = 0;
+        for (int x : nums) {
+            if (x <= pre) { // 如果后一个数不减都大于前一个数，直接false
+                return false;
+            }
+            int j = lowerBound(primes, x - pre); // 查找小于target的最大数  贪心
+            pre = x - primes.get(j);
+        }
+        return true;
+    }
+
+    private int lowerBound(List<Integer> nums, int target) { // 查找小于target的最大数  贪心
+        // 这种写法不对，我们需要的是往左边走，所以当取等时，应该时left = mid - 1, 而不是left = mid + 1;
+//        int left = 0, right = nums.size() - 1;
+//        while (left < right) {
+//            int mid = left + (right - left) / 2;
+//            if (nums.get(mid) > target) {
+//                right = mid - 1;
+//            }else{
+//                left = mid + 1;
+//            }
+//        }
+//        return nums.get(left) < target ? left : left - 1;
+
+        int left = 0, right = nums.size() - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return nums.get(left) < target ? left : left - 1;
+    }
+
+
+    public List<Long> minOperations(int[] nums, int[] queries) {
+        int n = nums.length;
+        long[] prefix = new long[n + 1]; // 前缀和记得留n+1的空间,开long型
+        Arrays.sort(nums);
+        for (int i = 0; i < n; i++) {
+            prefix[i + 1] = prefix[i] + nums[i];
+        }
+        ArrayList<Long> ans = new ArrayList<>();
+        for (int q : queries) {
+            int j = lowerBound(nums, q); // 找小于q的最大值下标
+            long left = (long) q * j - prefix[j];
+            long right = prefix[n] - prefix[j] - (long) q * (n - j);
+            ans.add(left + right);
+        }
+        return ans;
+    }
+
+    private int lowerBound(int[] nums, int target) {
+        int left = -1, right = nums.length; // 开区间 (left, right)
+        while (left + 1 < right) { // 区间不为空
+            // 循环不变量：
+            // nums[left] < target
+            // nums[right] >= target
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target)
+                left = mid; // 范围缩小到 (mid, right)
+            else
+                right = mid; // 范围缩小到 (left, mid)
+        }
+        return right;
     }
 
 }
