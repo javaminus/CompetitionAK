@@ -1,27 +1,23 @@
-import java.util.Arrays;
+import java.util.PriorityQueue;
 
 class Solution {
-    public int maxFrequencyScore(int[] nums, long k) {
-        Arrays.sort(nums);
-        int n = nums.length;
-        long[] prefix = new long[n + 1];
-        for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + nums[i];
-        }
-        int ans = 0, left = 0;
-        for (int right = 0; right < n; right++) {
-            while (distanceSum(prefix, nums, left, right, (left + right) / 2) > k) {
-                left++;
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        solution.maxSlidingWindow(new int[]{1}, 1);
+    }
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        int right = 0, left = 0, n = nums.length;
+        int[] ans = new int[n - k + 1];
+        while (right < n) {
+            pq.offer(nums[right]);
+            if (right + 1 - left < k) {
+                right++;
             }
-            ans = Math.max(ans, right - left + 1);
+            if (right + 1 - left == k) {
+                ans[left++] = pq.poll();
+            }
         }
         return ans;
-    }
-
-    // 把 nums[l] 到 nums[r] 都变成 nums[i]的距离
-    private long distanceSum(long[] prefix, int[] nums, int left, int right, int median) {
-        long leftSum = (long) nums[median] * (median - left) - (prefix[median] - prefix[left]);
-        long rightSum = prefix[right + 1] - prefix[median + 1] - (long) (right - median) * nums[median];
-        return leftSum + rightSum;
     }
 }

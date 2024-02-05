@@ -1,28 +1,10 @@
-/*
-import java.util.Arrays;
-
-class Solution {
-    public int maxResult(int[] nums, int k) {
-        int n = nums.length;
-        int[] dp = new int[n];
-        Arrays.fill(dp, Integer.MIN_VALUE);
-        dp[0] = nums[0];
-        for (int i = 1; i < n; i++) {
-            dp[i] = Integer.MIN_VALUE;
-            for (int j = 1; j <= k; j++) {
-                if (i - j < 0) {
-                    continue;
-                }
-                dp[i] = Math.max(nums[i] + dp[i - j], dp[i]);
-            }
-        }
-        return dp[n - 1];
-    }
-}*/
+package com.Java_Template.deque;
 
 import java.util.ArrayDeque;
 
-class Solution {
+public class problemImpl implements problem {
+
+    @Override
     public int[] maxSlidingWindow(int[] nums, int k) {
         int n = nums.length;
         int[] ans = new int[n - k + 1];
