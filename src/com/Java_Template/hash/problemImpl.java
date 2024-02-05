@@ -81,4 +81,37 @@ public class problemImpl implements problem {
         }
         return false;
     }
+
+    @Override
+    public int numOfSubarrays(int[] arr) {
+        // 动态规划+前缀和+数学
+        int Mod = (int) 1e9 + 7, sum = 0, ans = 0, oddSum = 0, evenSum = 1;
+        for (int a : arr) {
+            sum += a;
+            if ((sum & 1) == 1) {
+                oddSum++;
+                ans = (ans + evenSum) % Mod;
+            }else{
+                evenSum++;
+                ans = (ans + oddSum) % Mod;
+            }
+        }
+        return ans % Mod;
+    }
+
+    @Override
+    public int findMaxLength(int[] nums) {
+        int ans = 0, n = nums.length, sum = 0;
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        cnt.put(sum, -1);
+        for (int i = 0; i < n; i++) {
+            sum += nums[i] == 1 ? 1 : -1;
+            if (cnt.containsKey(sum)) {
+                ans = Math.max(ans, i - cnt.get(sum));
+            }else{
+                cnt.put(sum, i);
+            }
+        }
+        return ans;
+    }
 }

@@ -34,6 +34,7 @@ import java.util.List;
  * 230. 二叉搜索树中第K小的元素(https://leetcode.cn/problems/kth-smallest-element-in-a-bst/description/?envType=study-plan-v2&envId=top-interview-150)
  * 98. 验证二叉搜索树(https://leetcode.cn/problems/validate-binary-search-tree/description/?envType=study-plan-v2&envId=top-interview-150)
  * LCR 047. 二叉树剪枝(https://leetcode.cn/problems/pOCWxh/description/)
+ * 二叉树的堂兄弟节点 II(https://leetcode.cn/problems/cousins-in-binary-tree-ii/description/?envType=daily-question&envId=2024-02-07)
  */
 public interface problem {
     // 104. 二叉树的最大深度
@@ -96,4 +97,6 @@ public interface problem {
     // LCR 047. 二叉树剪枝
     public TreeNode pruneTree(TreeNode root);
 
+    // 2641. 二叉树的堂兄弟节点 II
+    public TreeNode replaceValueInTree(TreeNode root);
 }

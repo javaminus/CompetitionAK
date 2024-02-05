@@ -1,11 +1,15 @@
 package com.Java_Template.sliding_window;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeMap;
+
 /**
  * @author Minus
  * @date 2024/2/5 14:50
  */
 public class problemImpl implements problem {
-
     @Override
     public int numberOfSubarrays(int[] nums, int k) {
         int left = 0, right = 0, oddCnt = 0, ans = 0, n = nums.length;
@@ -28,6 +32,99 @@ public class problemImpl implements problem {
                 left++;
                 oddCnt--;
             }
+        }
+        return ans;
+    }
+
+    @Override
+    public int longestSubarray(int[] nums, int limit) { // 方法一：滑动窗口+单调队列
+        int n = nums.length, ans = 1;
+        ArrayDeque<Integer> queue1 = new ArrayDeque<>(); // 大 -> 小
+        ArrayDeque<Integer> queue2 = new ArrayDeque<>(); // 小 -> 大
+        int left = 0, right = 0;
+        while (right < n) {
+            while (!queue1.isEmpty() && nums[queue1.peekLast()] < nums[right]) {
+                queue1.pollLast();
+            }
+            while (!queue2.isEmpty() && nums[queue2.peekLast()] > nums[right]) {
+                queue2.pollLast();
+            }
+            queue1.offerLast(right);
+            queue2.offerLast(right);
+            while (!queue1.isEmpty() && !queue2.isEmpty() && nums[queue1.peekFirst()] - nums[queue2.peekFirst()] > limit) {
+                if (nums[queue1.peekFirst()] == nums[left]) {
+                    queue1.pollFirst();
+                }
+                if (nums[queue2.peekFirst()] == nums[left]) {
+                    queue2.pollFirst();
+                }
+                left++;
+            }
+            ans = Math.max(ans, right - left + 1);
+            right++;
+        }
+        return ans;
+    }
+
+    public int longestSubarray2(int[] nums, int limit) { // 方法二：滑动窗口+有序数组
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        int n = nums.length, ans = 1;
+        int left = 0, right = 0;
+        while (right < n) {
+            map.put(nums[right], map.getOrDefault(nums[right], 0) + 1);
+            while (map.lastKey() - map.firstKey() > limit) {
+                map.put(nums[left], map.get(nums[left]) - 1);
+                if (map.get(nums[left]) == 0) {
+                    map.remove(nums[left]);
+                }
+                left++;
+            }
+            ans = Math.max(ans, right - left + 1);
+            right++;
+        }
+        return ans;
+    }
+
+    @Override
+    public int maximumRobots(int[] chargeTimes, int[] runningCosts, long budget) {
+        int n = chargeTimes.length;
+        int left = 0, right = 0, ans = 0;
+        long sum = 0;
+        ArrayDeque<Integer> queue = new ArrayDeque<>(); // 大 -> 小
+        while (right < n) {
+            while (!queue.isEmpty() && chargeTimes[queue.peekLast()] <= chargeTimes[right]) {
+                queue.pollLast();
+            }
+            queue.offerLast(right);
+            sum += runningCosts[right];
+            while (!queue.isEmpty() && chargeTimes[queue.peekFirst()] + (right - left + 1) * sum > budget) {
+                if (queue.peekFirst() == left) {
+                    queue.pollFirst();
+                }
+                sum -= runningCosts[left++];
+            }
+            ans = Math.max(ans, right - left + 1);
+            right++;
+        }
+        return ans;
+    }
+
+    @Override
+    public int countCompleteSubarrays(int[] nums) {
+        HashSet<Integer> set = new HashSet<>();
+        for (int num : nums) set.add(num);
+        int m = set.size();
+        int ans = 0, left = 0;
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        for (int num : nums) {
+            cnt.merge(num, 1, Integer::sum);
+            while (cnt.size() == m) {
+                int x = nums[left++];
+                if (cnt.merge(x, -1, Integer::sum) == 0) {
+                    cnt.remove(x);
+                }
+            }
+            ans += left;
         }
         return ans;
     }

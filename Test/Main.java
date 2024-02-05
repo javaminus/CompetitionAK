@@ -1,20 +1,26 @@
-import java.util.Scanner;
-// 1:无需package
-// 2: 类名必须Main, 不可修改
-
+import java.io.*;
 public class Main {
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        //在此输入您的代码...
-        int A = scan.nextInt();
-        int B = scan.nextInt();
-        int S = scan.nextInt();
-        int T = scan.nextInt();
-        long ans = 0;
-        if (B < A) {
-
-        }
-        System.out.println(ans);
-        scan.close();
+    static PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
+    static StreamTokenizer st = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
+    static BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+    public static void main(String[] args) throws Exception{
+        //代码区
+        pw.println();
+        pw.flush();//使用快读快些模版最后必须刷新缓冲区
+    }
+    public static String nextLine() throws Exception {
+        return bf.readLine();
+    }
+    public static int nextInt() throws Exception {
+        st.nextToken();
+        return (int) st.nval;
+    }
+    public static long nextLong() throws Exception {
+        st.nextToken();
+        return (long) st.nval;
+    }
+    public static double nextDouble() throws Exception {
+        st.nextToken();
+        return st.nval;
     }
 }

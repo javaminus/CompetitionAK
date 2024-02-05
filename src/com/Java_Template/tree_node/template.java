@@ -181,5 +181,48 @@ class TreeOrder{
         return ret;
     }
 
+
+    // 垂序遍历
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        // 存储遍历结果的临时数组，每个元素为 [行号, 列号, 值]
+        ArrayList<int[]> data = new ArrayList<>();
+        // 执行深度优先搜索遍历二叉树
+        dfs(root, 0, 0, data);
+
+        // 根据列号、行号、值的顺序进行排序
+        data.sort((a, b) -> a[1] != b[1] ? a[1] - b[1] : a[0] != b[0] ? a[0] - b[0] : a[2] - b[2]);
+
+        // 用于存储最终结果的列表
+        ArrayList<List<Integer>> ans = new ArrayList<>();
+        // 上一列的值，初始为负无穷小
+        int lastCol = Integer.MIN_VALUE;
+
+        // 遍历排序后的结果，按列将值添加到结果列表中
+        for (int[] d : data) {
+            if (d[1] != lastCol) {
+                // 如果列号不同，表示进入新的一列，创建一个新的列表
+                lastCol = d[1];
+                ans.add(new ArrayList<>());
+            }
+            // 将当前值添加到最后一个列表中
+            ans.get(ans.size() - 1).add(d[2]);
+        }
+
+        return ans;
+    }
+
+    // 深度优先搜索遍历二叉树，同时记录行号、列号和值
+    private void dfs(TreeNode root, int row, int col, List<int[]> data) {
+        if (root == null) {
+            return;
+        }
+        // 将当前节点的行号、列号和值添加到临时数组中
+        data.add(new int[]{row, col, root.val});
+        // 递归遍历左子树，行号加1，列号减1
+        dfs(root.left, row + 1, col - 1, data);
+        // 递归遍历右子树，行号加1，列号加1
+        dfs(root.right, row + 1, col + 1, data);
+    }
+
 }
 

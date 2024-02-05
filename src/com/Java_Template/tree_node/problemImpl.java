@@ -736,6 +736,38 @@ public class problemImpl implements problem{
     }
 
 
+    // 2641. 二叉树的堂兄弟节点 II
+    @Override
+    public TreeNode replaceValueInTree(TreeNode root) {
+        ArrayDeque<TreeNode> queue = new ArrayDeque<>();
+        root.val = 0;
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            ArrayDeque<TreeNode> queue2 = new ArrayDeque<>();
+            int sum = 0;
+            for (TreeNode fa : queue) {
+                if (fa.left != null) {
+                    sum += fa.left.val;
+                    queue2.offer(fa.left);
+                }
+                if (fa.right != null) {
+                    sum += fa.right.val;
+                    queue2.offer(fa.right);
+                }
+            }
+            for (TreeNode fa : queue) {
+                int childSum = (fa.left != null ? fa.left.val : 0) + (fa.right != null ? fa.right.val : 0);
+                if (fa.left != null) {
+                    fa.left.val = sum - childSum;
+                }
+                if (fa.right != null) {
+                    fa.right.val = sum - childSum;
+                }
+            }
+            queue = queue2;
+        }
+        return root;
+    }
 
 }
 

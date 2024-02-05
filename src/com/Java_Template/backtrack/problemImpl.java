@@ -1,8 +1,14 @@
-class Solution {
+package com.Java_Template.backtrack;
+
+/**
+ *
+ */
+public class problemImpl implements problem{
     private boolean[][] visited;
     private final int[][] directions = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     private char[][] board;
     private String word;
+    @Override
     public boolean exist(char[][] board, String word) {
         this.board = board;
         this.word = word;
