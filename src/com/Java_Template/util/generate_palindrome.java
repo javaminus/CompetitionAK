@@ -1,8 +1,7 @@
 package com.Java_Template.util;
 
 /**
- * @author Minus
- * @date 2024/2/2 15:47
+ * 严格按顺序从小到大生成回文数（不用字符串转换）
  */
 public class generate_palindrome {
     private static final int[] pal = new int[109999];

@@ -1,0 +1,66 @@
+java中list转array
+在Java中，可以使用以下几种方式将List转换为Array:
+
+使用toArray()方法:
+
+List list = new ArrayList<>();
+
+list.add(1);
+
+list.add(2);
+
+list.add(3);
+
+Integer[] array = list.toArray(new Integer[list.size()]);
+
+// 利用泛型数组创建新数组，将List转换为Array
+
+使用toArray()方法和遍历List:
+
+List list = new ArrayList<>();
+
+list.add(1);
+
+list.add(2);
+
+list.add(3);
+
+Integer[] array = new Integer[list.size()];
+
+for (int i = 0; i < list.size(); i++) {
+
+array[i] = list.get(i);
+
+}
+
+// 先利用toArray()方法获取Object数组，然后通过循环遍历将Object数组转换为Integer数组
+
+使用Stream API:
+
+List list = new ArrayList<>();
+
+list.add(1);
+
+list.add(2);
+
+list.add(3);
+
+Integer[] array = list.stream().toArray(Integer[]::new);
+
+// 将List通过Stream API转换为Integer数组
+
+使用第三方库如Apache Commons Collections:
+
+List list = new ArrayList<>();
+
+list.add(1);
+
+list.add(2);
+
+list.add(3);
+
+Integer[] array = new Integer[list.size()];
+
+array = list.toArray(array);
+
+// 使用Apache Commons Collections的toArray()方法将List转换为Array

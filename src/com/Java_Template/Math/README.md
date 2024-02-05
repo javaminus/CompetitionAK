@@ -1,0 +1,1 @@
+- 进制转换：直接Integer.toString(num,需要转换的进制)

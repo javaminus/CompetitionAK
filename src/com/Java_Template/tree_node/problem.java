@@ -19,6 +19,7 @@ import java.util.List;
  * 101. 对称二叉树(https://leetcode.cn/problems/symmetric-tree/description/?envType=study-plan-v2&envId=top-interview-150)
  * 105. 从前序与中序遍历序列构造二叉树(https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)
  * 106. 从中序与后序遍历序列构造二叉树(https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)
+ * 889. 根据前序和后序遍历构造二叉树(https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-postorder-traversal/description/?envType=daily-question&envId=2024-02-22)
  * 117. 填充每个节点的下一个右侧节点指针 II(https://leetcode.cn/problems/populating-next-right-pointers-in-each-node-ii/?envType=study-plan-v2&envId=top-interview-150)
  * 114. 二叉树展开为链表(https://leetcode.cn/problems/flatten-binary-tree-to-linked-list/?envType=study-plan-v2&envId=top-interview-150)
  * 112. 路径总和(https://leetcode.cn/problems/path-sum/description/?envType=study-plan-v2&envId=top-interview-150)
@@ -27,6 +28,7 @@ import java.util.List;
  * 173. 二叉搜索树迭代器(https://leetcode.cn/problems/binary-search-tree-iterator/description/?envType=study-plan-v2&envId=top-interview-150)
  * 222. 完全二叉树的节点个数(https://leetcode.cn/problems/count-complete-tree-nodes/description/?envType=study-plan-v2&envId=top-interview-150)
  * 236. 二叉树的最近公共祖先(https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)
+ * 235. 二叉搜索树的最近公共祖先(https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-search-tree/description/?envType=daily-question&envId=2024-02-25)
  * 199. 二叉树的右视图(https://leetcode.cn/problems/binary-tree-right-side-view/description/?envType=study-plan-v2&envId=top-interview-150)
  * 637. 二叉树的层平均值(https://leetcode.cn/problems/average-of-levels-in-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)
  * 103. 二叉树的锯齿形层序遍历(https://leetcode.cn/problems/binary-tree-zigzag-level-order-traversal/description/?envType=study-plan-v2&envId=top-interview-150)
@@ -35,6 +37,8 @@ import java.util.List;
  * 98. 验证二叉搜索树(https://leetcode.cn/problems/validate-binary-search-tree/description/?envType=study-plan-v2&envId=top-interview-150)
  * LCR 047. 二叉树剪枝(https://leetcode.cn/problems/pOCWxh/description/)
  * 二叉树的堂兄弟节点 II(https://leetcode.cn/problems/cousins-in-binary-tree-ii/description/?envType=daily-question&envId=2024-02-07)
+ * 2867. 统计树中的合法路径数目(https://leetcode.cn/problems/count-valid-paths-in-a-tree/description/?envType=daily-question&envId=2024-02-27)
+ * 2673. 使二叉树所有路径值相等的最小代价(https://leetcode.cn/problems/make-costs-of-paths-equal-in-a-binary-tree/description/?envType=daily-question&envId=2024-02-28)
  */
 public interface problem {
     // 104. 二叉树的最大深度
@@ -54,6 +58,9 @@ public interface problem {
 
     // 106. 从中序与后序遍历序列构造二叉树
     public TreeNode buildTree1(int[] inorder, int[] postorder);
+
+    // 889. 根据前序和后序遍历构造二叉树
+    public TreeNode constructFromPrePost(int[] pre, int[] post);
 
     // 117. 填充每个节点的下一个右侧节点指针 II
     public Node connect(Node root);
@@ -75,6 +82,9 @@ public interface problem {
 
     // 236. 二叉树的最近公共祖先
     public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q);
+
+    // 235. 二叉搜索树的最近公共祖先
+    public TreeNode lowestCommonAncestor1(TreeNode root, TreeNode p, TreeNode q);
 
     // 199. 二叉树的右视图
     public List<Integer> rightSideView(TreeNode root);

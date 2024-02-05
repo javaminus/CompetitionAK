@@ -1,28 +1,22 @@
+import networkx as nx
 import matplotlib.pyplot as plt
 
-# 月份和对应的数据
-months = [3, 6, 9, 12]
-BMD = [240, 260, 230, 180]
-A_pg_mL = [150, 160, 190, 240]
+# 定义节点和边
+edges = [[0,1],[6,7],[0,2],[6,8],[0,3],[6,9],[0,4],[6,10],[0,5],[6,11],
+         [1,2],[7,8],[1,3],[7,9],[1,4],[7,10],[1,5],[7,11],
+         [2,3],[8,9],[2,4],[8,10],[2,5],[8,11],
+         [3,4],[9,10],[3,5],[9,11],[4,5],[10,11]]
 
-# 创建一个新的图表
-fig, ax1 = plt.subplots()
+# 创建图形对象
+G = nx.Graph()
 
-ax1.plot(months, BMD, 'o-', label='BMD', color='orange')
-ax1.set_xlabel('Month')
-ax1.set_ylabel('BMD', color='blue')
-ax1.tick_params('y', colors='blue')
+# 添加节点和边到图形对象
+for edge in edges:
+    G.add_edge(edge[0], edge[1])
 
-# 创建第二个y轴，共享x轴
-ax2 = ax1.twinx()
-ax2.bar(months, A_pg_mL, alpha=0.5, label='A pg/mL', color='blue')
-ax2.set_ylabel('A pg/mL', color='orange')
-ax2.tick_params('y', colors='orange')
+# 绘制图形
+pos = nx.spring_layout(G)  # 定义节点位置
+nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_color='black', font_size=8, edge_color='gray', linewidths=0.5)
 
-# 添加图例
-ax1.legend(loc='upper left')
-ax2.legend(loc='upper right')
-
-# 显示图表
-plt.title('BMD and A pg/mL over Months')
+# 显示图形
 plt.show()

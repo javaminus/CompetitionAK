@@ -33,6 +33,7 @@ import java.util.List;
  * 2861. 最大合金数(https://leetcode.cn/problems/maximum-number-of-alloys/description/?envType=daily-question&envId=2024-01-27)
  * 2601. 质数减法运算(https://leetcode.cn/problems/prime-subtraction-operation/description/)
  * 2602. 使数组元素全部相等的最少操作次数（https://leetcode.cn/problems/minimum-operations-to-make-all-array-elements-equal/description/）
+ * 100200. 标记所有下标的最早秒数 I(https://leetcode.cn/problems/earliest-second-to-mark-indices-i/description/)
  */
 public interface problem {
     // 4. 寻找两个正序数组的中位数
@@ -67,4 +68,7 @@ public interface problem {
 
     // 2602. 使数组元素全部相等的最少操作次数
     public List<Long> minOperations(int[] nums, int[] queries);
+
+    // 100200. 标记所有下标的最早秒数 I
+    public int earliestSecondToMarkIndices(int[] nums, int[] changeIndices);
 }

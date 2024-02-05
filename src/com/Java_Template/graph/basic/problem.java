@@ -1,5 +1,7 @@
 package com.Java_Template.graph.basic;
 
+import java.util.List;
+
 /**
  * 997. 找到小镇的法官(https://leetcode.cn/problems/find-the-town-judge/description/)
  * 1791. 找出星型图的中心节点(https://leetcode.cn/problems/find-center-of-star-graph/)
@@ -11,6 +13,10 @@ package com.Java_Template.graph.basic;
  * 310. 最小高度树(https://leetcode.cn/problems/minimum-height-trees/description/) 将图转换为树，返回树的最小高度的根节点集合 NOTE 树形DP模板题
  * 547. 省份数量(https://leetcode.cn/problems/number-of-provinces/description/) NOTE 求图有多少个非连通子图
  * 785. 判断二分图(https://leetcode.cn/problems/is-graph-bipartite/description/)
+ * 797. 所有可能的路径（https://leetcode.cn/problems/all-paths-from-source-to-target/description/）
+ * 841. 钥匙和房间(https://leetcode.cn/problems/keys-and-rooms/description/)
+ * 2242. 节点序列的最大得分(https://leetcode.cn/problems/maximum-score-of-a-node-sequence/description/)
+ * 3067. 在带权树网络中统计可连接服务器对数目(https://leetcode.cn/problems/count-pairs-of-connectable-servers-in-a-weighted-tree-network/description/)
  */
 public interface problem {
     // 997. 找到小镇的法官
@@ -39,4 +45,13 @@ public interface problem {
 
     //  785. 判断二分图
     public boolean isBipartite(int[][] graph);
+
+    // 797. 所有可能的路径
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph);
+
+    // 2242. 节点序列的最大得分
+    public int maximumScore(int[] scores, int[][] edges);
+
+    // 3067. 在带权树网络中统计可连接服务器对数目
+    public int[] countPairsOfConnectableServers(int[][] edges, int signalSpeed);
 }

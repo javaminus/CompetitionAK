@@ -8,6 +8,10 @@ import java.util.List;
  * 题目：
  *
  * ===================================力扣===================================
+ *
+ *
+ * 1505. 最多 K 次交换相邻数位后得到的最小整数(https://leetcode.cn/problems/minimum-possible-integer-after-at-most-k-adjacent-swaps-on-digits/description/)
+ * 100246. 将元素分配到两个数组中 II(https://leetcode.cn/problems/distribute-elements-into-two-arrays-ii/description/) 树状数组灵活运用
  * 2426. 满足不等式的数对数目(https://leetcode.cn/problems/number-of-pairs-satisfying-inequality/description/) 统计前缀和
  * LCR 170. 交易逆序对的总数(https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/description/) 统计前缀和
  * 315. 计算右侧小于当前元素的个数(https://leetcode.cn/problems/count-of-smaller-numbers-after-self/description/) 统计前缀和
@@ -59,6 +63,8 @@ import java.util.List;
  *
  * 135. 二维树状数组3（https://loj.ac/p/135）区间修改，区间查询
  * 134. 二维树状数组2（https://loj.ac/p/134）区间修改，单点查询
+ *
+ *
  *
  * 参考：OI WiKi（https://oi-wiki.org/ds/fenwick/）
  */

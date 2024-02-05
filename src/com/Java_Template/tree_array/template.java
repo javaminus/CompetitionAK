@@ -12,6 +12,90 @@ package com.Java_Template.tree_array;
  * 通过二分查找的方式计算排名作为离散化之后的值。当然这里也可以不去重，不影响排名。
  */
 
+// 推荐模板1
+class NumArray {
+    private int[] nums;
+    private int[] tree;
+
+    // NumArray(int[] nums) 用整数数组 nums 初始化对象
+    public NumArray(int[] nums) {
+        int n = nums.length;
+        this.nums = nums;
+        tree = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            tree[i] += nums[i - 1];
+            int nxt = i + (i & -i); // 下一个关键区间的右端点
+            if (nxt <= n) {
+                tree[nxt] += tree[i];
+            }
+        }
+    }
+
+
+    // void update(int index, int val) 将 nums[index] 的值 更新 为 val
+    public void update(int index, int val) {
+        int delta = val - nums[index];
+        nums[index] = val;
+        for (int i = index + 1; i < tree.length; i += i & -i) {
+            tree[i] += delta;
+        }
+    }
+
+    private int prefixSum(int i) {
+        int s = 0;
+        for (; i > 0; i &= i - 1) { // i -= i & -i 的另一种写法
+            s += tree[i];
+        }
+        return s;
+    }
+
+    // int sumRange(int left, int right) 返回数组 nums 中索引 left 和索引 right 之间（ 包含 ）的nums元素的 和 （即，nums[left] + nums[left + 1], ..., nums[right]）
+    public int sumRange(int left, int right) {
+        return prefixSum(right + 1) - prefixSum(left);
+    }
+}
+
+
+// 推荐模板2
+class BIT {
+    // 最大数组长度
+    private int maxN;
+    // 树状数组存储结构
+    private int[] treeArray;
+
+    // 构造函数，初始化树状数组
+    public BIT(int maxN) {
+        this.maxN = maxN;
+        treeArray = new int[maxN + 1];
+    }
+
+    // 获取x的二进制表示中最低位的1所对应的值
+    public int lowBit(int x) {
+        return x & (-x);
+    }
+
+    // 更新操作，将数组中位置x的元素加dt
+    public void update(int x,int dt) {
+        while (x <= maxN) {
+            treeArray[x]+=dt;
+            x += lowBit(x);
+        }
+    }
+
+    // 查询操作，获取数组前缀和，即位置1到位置x的所有元素的和
+    public int query(int x) {
+        int res = 0;
+        while (x >= 1) {
+            res += treeArray[x];
+            x -= lowBit(x);
+        }
+        return res;
+    }
+}
+
+
+
+
 // 树状数组模板
 class BitTree {
     // 最大数组长度
@@ -49,38 +133,4 @@ class BitTree {
     }
 }
 
-class BIT {
-    // 最大数组长度
-    private int maxN;
-    // 树状数组存储结构
-    private int[] treeArray;
 
-    // 构造函数，初始化树状数组
-    public BIT(int maxN) {
-        this.maxN = maxN;
-        treeArray = new int[maxN + 1];
-    }
-
-    // 获取x的二进制表示中最低位的1所对应的值
-    public int lowBit(int x) {
-        return x & (-x);
-    }
-
-    // 更新操作，将数组中位置x的元素加1
-    public void update(int x,int dt) {
-        while (x <= maxN) {
-            treeArray[x]+=dt;
-            x += lowBit(x);
-        }
-    }
-
-    // 查询操作，获取数组前缀和，即位置1到位置x的所有元素的和
-    public int query(int x) {
-        int res = 0;
-        while (x >= 1) {
-            res += treeArray[x];
-            x -= lowBit(x);
-        }
-        return res;
-    }
-}

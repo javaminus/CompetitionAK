@@ -4,8 +4,8 @@ package com.Java_Template.util;
  * @author Minus
  * @date 2024/1/30 14:33
  */
-public class CalMode {
-    // Boyer-Moore投票算法
+public class cal_mode {
+    // Boyer-Moore投票算法 求众数
     public static int majorityElement(int[] nums) {
         int candidate = 0;
         int count = 0;

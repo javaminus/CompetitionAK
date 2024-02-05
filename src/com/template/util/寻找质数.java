@@ -4,7 +4,7 @@ package com.template.util;
  * @author Minus
  * @date 2023/12/9 20:00
  */
-public class 寻找质数 {
+class 寻找质数 {
     public static int findLargestPrime(int n) {
         for (int i = n; i >= 2; i--) {
             if (isPrime(i)) {

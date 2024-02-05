@@ -367,4 +367,49 @@ public class problemImpl implements problem {
         return right;
     }
 
+
+    // 100200. 标记所有下标的最早秒数 I
+    public int earliestSecondToMarkIndices(int[] nums, int[] changeIndices) {
+        int n = nums.length, m = changeIndices.length;
+        if (n > m) {
+            return -1;
+        }
+        int[] tmp = new int[n];
+        int left = n, right = m;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (check(nums, changeIndices, tmp, mid)) {
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return left > m ? -1 : left;
+    }
+
+    private boolean check(int[] nums, int[] changeIndices, int[] tmp, int mid) {
+        Arrays.fill(tmp, -1);
+        for (int i = 0; i < mid; i++) {
+            tmp[changeIndices[i] - 1] = i;
+        }
+        for (int t : tmp) {
+            if (t < 0) {
+                return false;
+            }
+        }
+        int cnt = 0;
+        for (int i = 0; i < mid; i++) {
+            int index = changeIndices[i] - 1;
+            if (i == tmp[index]) {
+                if (cnt < nums[i]) {
+                    return false;
+                }
+                cnt -= nums[i];
+            }else{
+                cnt++;
+            }
+        }
+        return true;
+    }
+
 }

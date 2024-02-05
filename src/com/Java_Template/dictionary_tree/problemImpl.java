@@ -1,6 +1,6 @@
 package com.Java_Template.dictionary_tree;
 
-import java.util.HashMap;
+import java.util.*;
 
 /**
  *
@@ -26,4 +26,120 @@ public class problemImpl implements problem {
         }
         return ans;
     }
+
+    // 212. 单词搜索 II  写法一:使用hash表构造字典树
+    private int[][] directions = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private Set<String> ans;
+    @Override
+    public List<String> findWords(char[][] board, String[] words) {
+        Trie root = new Trie();
+        for (String word : words) {
+            root.insert(word);
+        }
+        ans = new HashSet<>();
+        int m = board.length, n = board[0].length;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                dfs(board, root, i, j);
+            }
+        }
+        return new ArrayList<>(ans);
+    }
+
+    private void dfs(char[][] board, Trie root, int i, int j) {
+        char ch = board[i][j];
+        if (!root.children.containsKey(ch)) {
+            return;
+        }
+        root = root.children.get(ch);
+        if (!"".equals(root.word)) {
+            ans.add(root.word);
+        }
+        board[i][j] = '#'; // 因为一个字母只能用一次
+        for (int[] d : directions) {
+            int newi = i + d[0], newj = j + d[1];
+            if (newi >= 0 && newi < board.length && newj >= 0 && newj < board[0].length) {
+                dfs(board, root, newi, newj);
+            }
+        }
+        board[i][j] = ch; // 回溯
+    }
+    class Trie{
+        private String word; // 将isEnd换成word
+        private Map<Character, Trie> children;
+
+        public Trie(){
+            this.word = "";
+            this.children = new HashMap<Character, Trie>();
+        }
+        public void insert(String word) {
+            Trie root = this;
+            for (char c : word.toCharArray()) {
+                root.children.computeIfAbsent(c, k -> new Trie()); // 等价于 if(!root.children.contains(c)) {root.children.put(c,new Trie());}
+                root = root.children.get(c);
+            }
+            root.word = word;
+        }
+    }
+
+
+/*  写法二:使用数组构造字典树
+    private int[][] directions = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    private Set<String> ans;
+    public List<String> findWords(char[][] board, String[] words) {
+        int m = board.length, n = board[0].length;
+        ans = new HashSet<>();
+        Trie root = new Trie();
+        for (String word : words) {
+            root.insert(word);
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                dfs(board, root, i, j);
+            }
+        }
+        return new ArrayList<>(ans);
+    }
+
+    private void dfs(char[][] board, Trie root, int i, int j) {
+        char ch = board[i][j];
+        if (root.children[ch - 'a'] == null) {
+            return;
+        }
+        root = root.children[ch - 'a'];
+        if (!"".equals(root.word)) {
+            ans.add(root.word);
+        }
+        board[i][j] = '}';
+        for (int[] d : directions) {
+            int newi = i + d[0], newj = j + d[1];
+            if (newi >= 0 && newi < board.length && newj >= 0 && newj < board[0].length) {
+                dfs(board, root, newi, newj);
+            }
+        }
+        board[i][j] = ch;
+    }
+
+    class Trie{
+        private String word;
+        private Trie[] children;
+
+        public Trie(){
+            this.word = "";
+            this.children = new Trie[200];
+        }
+
+        public void insert(String word) {
+            Trie root = this;
+            for (char c : word.toCharArray()) {
+                int index = c - 'a';
+                if (root.children[index] == null) {
+                    root.children[index] = new Trie();
+                }
+                root = root.children[index];
+            }
+            root.word = word;
+        }
+    }*/
+
 }

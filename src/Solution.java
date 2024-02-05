@@ -1,40 +1,38 @@
+import java.util.Arrays;
+
 class Solution {
-    private boolean[][] visited;
-    private final int[][] directions = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-    private char[][] board;
-    private String word;
-    public boolean exist(char[][] board, String word) {
-        this.board = board;
-        this.word = word;
-        int m = board.length, n = board[0].length;
-        visited = new boolean[m][n];
+    char[] s;
+    int[][] memo;
+    public int countNumbersWithUniqueDigits(int n) {
+        s = Integer.toString((int) Math.pow(10, n) - 1).toCharArray();
+        int m = s.length;
+        memo = new int[m][1 << 10];
         for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dfs(i, j, 0)) {
-                    return true;
-                }
-            }
+            Arrays.fill(memo[i], -1);
         }
-        return false;
+        return dfs(0, 0, true, false) + 1;
     }
-    private boolean dfs(int i, int j, int index) {
-        if (word.charAt(index) != board[i][j]) {
-            return false;
+
+    private int dfs(int i,int mask, boolean isLimit ,boolean isNum) {
+        if (i == s.length) {
+            return isNum ? 1 : 0;
         }
-        if (index == word.length() - 1) {
-            return true;
+        if (!isLimit && isNum && memo[i][mask] != -1) {
+            return memo[i][mask];
         }
-        visited[i][j] = true;
-        for (int[] d : directions) {
-            int newi = i + d[0], newj = j + d[1];
-            if (newi >= 0 && newi < board.length && newj >= 0 && newj < board[0].length && !visited[newi][newj]) {
-                if (dfs(newi, newj, index + 1)) {
-                    return true;
-                }
+        int ans = 0;
+        if (!isNum) {
+            ans += dfs(i + 1, mask, false, false);
+        }
+        int upper = isLimit ? s[i] - '0' : 9;
+        for (int d = isNum ? 0 : 1; d <= upper; d++) {
+            if ((mask >> d & 1) == 0) {
+                ans += dfs(i + 1, mask | 1 << d, isLimit && d == upper, true);
             }
         }
-        // 不选这个点进  回溯
-        visited[i][j] = false;
-        return false;
+        if (!isLimit && isNum) {
+            memo[i][mask] = ans;
+        }
+        return ans;
     }
 }

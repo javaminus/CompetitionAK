@@ -1,9 +1,6 @@
 package com.Java_Template.graph.basic;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 class Node{
@@ -95,7 +92,7 @@ public class problemImpl implements problem {
         return visited[destination];
     }
 
-    // 广度优先
+    // 深度优先
     /* public boolean validPath(int n, int[][] edges, int source, int destination) {
         List<Integer>[] g = new List[n];
         for (int i = 0; i < n; i++) {
@@ -353,6 +350,138 @@ public class problemImpl implements problem {
         }
         return true;
     }
+
+    // 797. 所有可能的路径
+    ArrayList<List<Integer>> ans1;
+    Deque<Integer> stack;
+    int n;
+    @Override
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        n = graph.length;
+        ans1 = new ArrayList<>();
+        stack = new ArrayDeque<>();
+        stack.offerLast(0);
+        dfs(graph, 0);
+        return ans1;
+    }
+
+    private void dfs(int[][] graph, int x) {
+        if (x == n) {
+            ans1.add(new ArrayList<>(stack));
+            return;
+        }
+        for (int y : graph[x]) {
+            stack.offerLast(y);
+            dfs(graph, y);
+            stack.pollLast();
+        }
+    }
+
+    // 2242. 节点序列的最大得分
+    //  暴力超时写法
+//    boolean[] visited;
+//    int ans = -1;
+//    public int maximumScore(int[] scores, int[][] edges) {
+//        int n = scores.length;
+//        List<Integer>[] g = new List[n];
+//        Arrays.setAll(g, e -> new ArrayList<Integer>());
+//        visited = new boolean[n];
+//        for (int[] edge : edges) {
+//            int x = edge[0], y = edge[1];
+//            g[x].add(y);
+//            g[y].add(x);
+//        }
+//        for (int i = 0; i < n; i++) {
+//            dfs(g, scores, 0, i, scores[i]);
+//        }
+//        return ans;
+//    }
+//
+//    private void dfs(List<Integer>[] g, int[] scores, int len, int x, int sum) {
+//        if (len == 3) {
+//            System.out.println(sum);
+//            ans = Math.max(ans, sum);
+//            return;
+//        }
+//        visited[x] = true;
+//        for (int y : g[x]) {
+//            if (!visited[y]) {
+//                dfs(g, scores, len + 1, y, sum + scores[y]);
+//            }
+//        }
+//        visited[x] = false;  // 恢复visited数组为先前的状态
+//    }
+    @Override
+    public int maximumScore(int[] scores, int[][] edges) { // 换根写法
+        int n = scores.length;
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(new int[]{scores[y], y});
+            g[y].add(new int[]{scores[x], x});
+        }
+        for (int i = 0; i < n; i++) {
+            if (g[i].size() > 3) {
+                g[i].sort((a, b) -> b[0] - a[0]);
+                g[i] = new ArrayList<>(g[i].subList(0, 3)); // 左闭右开
+            }
+        }
+        for (List<int[]> gi : g) {
+            if (gi.size() > 3) {
+                gi.sort((a, b) -> b[0] - a[0]);
+                gi = new ArrayList<>(gi.subList(0, 3));
+            }
+        }
+        int ans = -1;
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            for (int[] p : g[x]) {
+                int a = p[1];
+                for (int[] q : g[y]) {
+                    int b = q[1];
+                    if (a != b && a != y && b != x) {
+                        ans = Math.max(ans, scores[a] + scores[b] + scores[x] + scores[y]);
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 3067. 在带权树网络中统计可连接服务器对数目
+    @Override
+    public int[] countPairsOfConnectableServers(int[][] edges, int signalSpeed) {
+        int n = edges.length + 1;
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], w = edge[2];
+            g[x].add(new int[]{y, w});
+            g[y].add(new int[]{x, w});
+        }
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int[] j : g[i]) {
+                int cnt = dfs(g, signalSpeed, j[0], i, j[1]);
+                ans[i] += cnt * sum;
+                sum += cnt;
+            }
+        }
+        return ans;
+    }
+
+    private int dfs(List<int[]>[] g, int signal, int x, int fa, int total) {
+        int ans = total % signal == 0 ? 1 : 0;
+        for (int[] y : g[x]) {
+            if (y[0] != fa) {
+                ans += dfs(g, signal, y[0], x, total + y[1]);
+            }
+        }
+        return ans;
+    }
+
 
 
 }

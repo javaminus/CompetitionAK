@@ -178,62 +178,82 @@ public class problemImpl implements problem{
     }
 
     // 105. 从前序与中序遍历序列构造二叉树
-    private Map<Integer, Integer> indexMap;
-    public TreeNode myBuildTree(int[] preorder, int[] inorder, int preorder_left, int preorder_right, int inorder_left, int inorder_right) {
-        if (preorder_left > preorder_right) {
+    private Map<Integer, Integer> map;
+
+    public TreeNode myBuildTree(int[] preorder, int root, int left, int right) {
+        if (left > right) {
             return null;
         }
-
-        // 前序遍历中的第一个节点就是根节点
-        int preorder_root = preorder_left;
-        // 在中序遍历中定位根节点
-        int inorder_root = indexMap.get(preorder[preorder_root]);
-
-        // 先把根节点建立出来
-        TreeNode root = new TreeNode(preorder[preorder_root]);
-        // 得到左子树中的节点数目
-        int size_left_subtree = inorder_root - inorder_left;
-        // 递归地构造左子树，并连接到根节点
-        // 先序遍历中「从 左边界+1 开始的 size_left_subtree」个元素就对应了中序遍历中「从 左边界 开始到 根节点定位-1」的元素
-        root.left = myBuildTree(preorder, inorder, preorder_left + 1, preorder_left + size_left_subtree, inorder_left, inorder_root - 1);
-        // 递归地构造右子树，并连接到根节点
-        // 先序遍历中「从 左边界+1+左子树节点数目 开始到 右边界」的元素就对应了中序遍历中「从 根节点定位+1 到 右边界」的元素
-        root.right = myBuildTree(preorder, inorder, preorder_left + size_left_subtree + 1, preorder_right, inorder_root + 1, inorder_right);
-        return root;
+        int index = map.get(preorder[root]);
+        TreeNode node = new TreeNode(preorder[root]);
+        node.left = myBuildTree(preorder, root + 1, left, index - 1);
+        // `index - left + root + 1`含义为在preorder中node的右子树根节点的索引，其中index- left：node的左子树的节点个数；root就是当前节点node在前序preorder中的位置。
+        node.right = myBuildTree(preorder, index - left + root + 1, index + 1, right);
+        return node;
     }
 
     @Override
     public TreeNode buildTree(int[] preorder, int[] inorder) {
         int n = preorder.length;
         // 构造哈希映射，帮助我们快速定位根节点
-        indexMap = new HashMap<Integer, Integer>();
+        map = new HashMap<>();
         for (int i = 0; i < n; i++) {
-            indexMap.put(inorder[i], i);
+            map.put(inorder[i], i);
         }
-        return myBuildTree(preorder, inorder, 0, n - 1, 0, n - 1);
+        return myBuildTree(preorder, 0, 0, n - 1);
     }
 
     // 106. 从中序与后序遍历序列构造二叉树
-    HashMap<Integer,Integer> memo = new HashMap<>();
-    int[] post;
     @Override
     public TreeNode buildTree1(int[] inorder, int[] postorder) {
-        for(int i = 0;i < inorder.length; i++) memo.put(inorder[i], i);
-        post = postorder;
-        TreeNode root = buildTree(0, inorder.length - 1, 0, post.length - 1);
-        return root;
+        map = new HashMap<>();
+        int n = inorder.length;
+        for (int i = 0; i < n; i++) {
+            map.put(inorder[i], i);
+        }
+        return myBuildTree1(postorder, n - 1, 0, n - 1);
     }
 
-    public TreeNode buildTree(int is, int ie, int ps, int pe) {
-        if(ie < is || pe < ps) return null;
-
-        int root = post[pe];
-        int ri = memo.get(root);
-
-        TreeNode node = new TreeNode(root);
-        node.left = buildTree(is, ri - 1, ps, ps + ri - is - 1);
-        node.right = buildTree(ri + 1, ie, ps + ri - is, pe - 1);
+    private TreeNode myBuildTree1(int[] postorder, int root, int left, int right) {
+        if (left > right) {
+            return null;
+        }
+        int index = map.get(postorder[root]);
+        TreeNode node = new TreeNode(postorder[root]);
+        // root - (right - index) - 1
+        // right - index:右子树的长度
+        node.left = myBuildTree1(postorder, root - right + index - 1, left, index - 1);
+        node.right = myBuildTree1(postorder, root - 1, index + 1, right);
         return node;
+    }
+
+    int[] pre, post;
+    // 889. 根据前序和后序遍历构造二叉树
+    @Override
+    public TreeNode constructFromPrePost(int[] pre, int[] post) {
+        this.pre = pre;
+        this.post = post;
+        return make(0, 0, pre.length);
+    }
+
+    // (i0, i1, N) 指的是 pre[i0:i0+N], post[i1:i1+N].
+    public TreeNode make(int i0, int i1, int N) {
+        // 如果节点数量为0，返回null
+        if (N == 0) return null;
+        // 创建根节点，值为先序遍历数组的第一个元素
+        TreeNode root = new TreeNode(pre[i0]);
+
+        // 如果节点数量为1，直接返回根节点
+        if (N == 1) return root;
+        int L = 1;
+        // 寻找左子树的根节点在后序遍历数组中的位置
+        for (; L < N; ++L)
+            if (post[i1 + L - 1] == pre[i0 + 1])
+                break;
+        // 递归构建左子树和右子树
+        root.left = make(i0 + 1, i1, L);
+        root.right = make(i0 + L + 1, i1 + L, N - 1 - L);
+        return root;
     }
 
     // 117. 填充每个节点的下一个右侧节点指针 II
@@ -486,6 +506,18 @@ public class problemImpl implements problem{
         return left;
     }
 
+    // 235. 二叉搜索树的最近公共祖先
+    @Override
+    public TreeNode lowestCommonAncestor1(TreeNode root, TreeNode p, TreeNode q) {
+        if (p.val < root.val && q.val < root.val) {
+            return lowestCommonAncestor1(root.left, p, q);
+        }
+        if (p.val > root.val && q.val > root.val) {
+            return lowestCommonAncestor1(root.right, p, q);
+        }
+        return root;
+    }
+
 
     // 199. 二叉树的右视图
     // bfs容易想到，dfs就不容易了
@@ -627,10 +659,11 @@ public class problemImpl implements problem{
 
 
     // 530. 二叉搜索树的最小绝对差 dfs
-    int ans, pre;
+    int ans;
+    int pre1;
     public int getMinimumDifference(TreeNode root) {
         ans = Integer.MAX_VALUE;
-        pre = -1;
+        pre1 = -1;
         dfs(root);
         return ans;
     }
@@ -640,11 +673,11 @@ public class problemImpl implements problem{
             return;
         }
         dfs(root.left);
-        if (pre == -1) {
-            pre = root.val;
+        if (pre1 == -1) {
+            pre1 = root.val;
         }else{
-            ans = Math.min(ans, root.val - pre);
-            pre = root.val;
+            ans = Math.min(ans, root.val - pre1);
+            pre1 = root.val;
         }
         dfs(root.right);
     }

@@ -1,6 +1,7 @@
 package com.Java_Template.dp.interval_dp;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 区间dp[i][j]，i就是数组的左边，j就是数组右边
@@ -42,5 +43,22 @@ public class problemImpl implements problem {
             res = Math.max(res, dfs(i + 1, j - 1, target) + 1);
         }
         return memo[i][j] = res;
+    }
+
+    @Override
+    public boolean wordBreak(String s, List<String> wordDict) {
+        // HashSet<String> set = new HashSet<>(wordDict); 可以使用set去重,以及set的查找
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (dp[j] && wordDict.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[n];
     }
 }

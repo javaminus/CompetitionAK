@@ -1,9 +1,10 @@
 package com.Java_Template.graph.union_find;
 
 /**
- * 并查集
+ * 并查集 (合并，查询)
  */
 public class template {
+
     public void union(int[] parent, int index1, int index2) {
         parent[find(parent, index1)] = find(parent, index2);
     }

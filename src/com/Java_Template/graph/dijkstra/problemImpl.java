@@ -1,13 +1,12 @@
 package com.Java_Template.graph.dijkstra;
 
-import java.util.Arrays;
+import java.util.*;
 
 /**
- * @author Minus
- * @date 2024/1/29 12:07
+ * Dijkstra
  */
 public class problemImpl implements problem {
-
+    // 朴素Dijkstra版本 不推荐，推荐下面的堆优化版本
     @Override
     public int networkDelayTime(int[][] times, int n, int k) { // Dijkstra算法求距离点k的最大距离
         final int INF = Integer.MAX_VALUE / 2;
@@ -42,7 +41,8 @@ public class problemImpl implements problem {
         int ans = Arrays.stream(distance).max().getAsInt();
         return ans == INF ? -1 : ans;
     }
-/* public int networkDelayTime(int[][] times, int n, int k) { // 使用一个小根堆来寻找「未确定节点」中与起点距离最近的点
+/*  堆优化版本
+    public int networkDelayTime(int[][] times, int n, int k) { // 使用一个小根堆来寻找「未确定节点」中与起点距离最近的点
         // 定义一个常量 INF 表示无穷大，为防止溢出，取 Integer.MAX_VALUE 的一半
         final int INF = Integer.MAX_VALUE / 2;
         // 创建一个邻接表，用于表示图的结构
@@ -84,8 +84,110 @@ public class problemImpl implements problem {
     }*/
 
 
+    // 1976. 到达目的地的方案数
+    public int countPaths(int n, int[][] roads) {
+        int Mod = (int) 1e9 + 7;
+        long INF = Long.MAX_VALUE / 2;
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] road : roads) {
+            int x = road[0], y = road[1], z = road[2];
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        long[] dist = new long[n];
+        Arrays.fill(dist, INF);
+        int[] dp = new int[n];
+        dp[0] = 1;
+        dist[0] = 0;
+        PriorityQueue<long[]> pq = new PriorityQueue<>((a, b) -> Long.compare(a[1], b[1]));
+        pq.offer(new long[]{0, 0});
+        while (!pq.isEmpty()) {
+            long[] poll = pq.poll();
+            int x = (int) poll[0];
+            long road = poll[1];
+            if (dist[x] < road) {
+                continue;
+            }
+            for (int[] e : g[x]) {
+                int y = e[0];
+                long z = e[1];
+                if (dist[y] > dist[x] + z) {
+                    dist[y] = dist[x] + z;
+                    dp[y] = dp[x];
+                    pq.offer(new long[]{y, dist[y]});
+                } else if (dist[y] == dist[x] + z) {
+                    dp[y] = (dp[y] + dp[x]) % Mod;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
 
 
+
+    // 1514. 概率最大的路径
+    public double maxProbability(int n, int[][] edges, double[] succProb, int start, int end) {
+
+        // 构造图
+        List<double[]>[] graph = new ArrayList[n];
+        for(int i = 0; i < n; i++){
+            graph[i] = new ArrayList<double[]>();
+        }
+        for(int i = 0; i < edges.length; i++){
+            int idstart = edges[i][0];
+            int idend = edges[i][1];
+            double weight = succProb[i];
+
+            graph[idstart].add(new double[]{idend, weight});
+            graph[idend].add(new double[]{idstart, weight});
+        }
+
+        // 自定义排序，优先更新概率大的节点
+        Queue<State> pq = new PriorityQueue<State>((a, b) -> {  // NOTE 学会！！！
+            if(a.prop > b.prop){
+                return -1;
+            }else if(a.prop < b.prop){
+                return 1;
+            }else{
+                return 0;
+            }
+        });
+        pq.offer(new State(start, 1));
+
+        double[] res = new double[n];
+        res[start] = 1;
+        while(!pq.isEmpty()){
+            State curNode = pq.poll();
+            // 找到了，因为这个节点已经是队列里概率最大的节点了，再通过其他节点去更新这个节点，只会越更新概率越小，所以不用找了，这个就是我们要的答案。
+            if(curNode.id == end){ // 减枝
+                return curNode.prop;
+            }
+
+            // 更新邻居的概率
+            for(double[] neighbor : graph[curNode.id]){
+                int nextID = (int)neighbor[0];
+                double nextProp = curNode.prop * neighbor[1];
+                if(nextProp > res[nextID]){
+                    res[nextID] = nextProp;
+                    pq.offer(new State(nextID, nextProp));
+                }
+
+            }
+        }
+
+        return res[end];
+    }
+}
+
+class State{
+    int id;
+    double prop;
+
+    State(int id, double prop){
+        this.id = id;
+        this.prop = prop;
+    }
 
 
 }
