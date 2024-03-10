@@ -1,8 +1,8 @@
+package test;
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 public class Main{
     public static void main(String args[]) throws IOException{
@@ -14,20 +14,11 @@ public class Main{
             nums[i] = sc.nextInt();
             mx = Math.max(mx, nums[i]);
         }
-        TreeSet<Integer> set = new TreeSet<>();
-        for (int i = 1; i <= mx * 2; i++) {
-            if (lowBit(i) == i) {
-                set.add(i);
-            }
-        }
-        HashMap<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < n; i++) {
-            map.put(nums[i], i);
-        }
         int ans = 0;
         for (int i = 0; i < n; i++) {
-            for (int x : set) {
-                if (map.containsKey(x - nums[i]) && map.get(x - nums[i]) > i) {
+            for (int j = i + 1; j < n; j++) {
+                if (lowBit(nums[i] + nums[j]) == nums[i] + nums[j]) {
+                    System.out.println(nums[i] + " " + nums[j]);
                     ans++;
                 }
             }

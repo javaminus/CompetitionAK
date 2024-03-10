@@ -412,4 +412,42 @@ public class problemImpl implements problem {
         return true;
     }
 
+
+    // 2386. 找出数组的第 K 大和
+    private int cnt;
+    @Override
+    public long kSum(int[] nums, int k) {
+        long sum = 0, right = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] >= 0) {
+                sum += nums[i];
+            }else{
+                nums[i] = -nums[i];
+            }
+            right += nums[i];
+        }
+        Arrays.sort(nums);
+        long left = 0;
+        while (left <= right) {
+            long mid = left + (right - left) / 2;
+            cnt = k - 1;
+            dfs(0, mid, nums);
+            if (cnt == 0) { // 找到 k 个元素和不超过 mid 的子序列
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return sum - right - 1;
+    }
+
+    private void dfs(int i, long s, int[] nums) {
+        if (cnt == 0 || i == nums.length || s < nums[i]) {
+            return;
+        }
+        cnt--;
+        dfs(i + 1, s - nums[i], nums); // 选
+        dfs(i + 1, s, nums); // 不选
+    }
+
 }

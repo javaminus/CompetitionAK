@@ -1,30 +1,18 @@
 import java.io.*;
 import java.math.BigInteger;
 import java.util.StringTokenizer;
+
 public class Main{
     public static void main(String args[]) throws IOException{
         Read sc = new Read();
         int n = sc.nextInt();
-        int m = sc.nextInt();
-        int[] steps = new int[m];
-        for (int i = 0; i < m; i++) {
-            steps[i] = sc.nextInt() % n;
-        }
-        boolean[] dp = new boolean[n];
-        dp[0] = true;
-        for (int i = 0; i < m; i++) {
-            boolean[] arrived = new boolean[n];
-            for (int j = 0; j < n; j++) {
-                if (dp[j]) {
-                    arrived[(j + steps[i]) % n] = true;
-                    arrived[(j - steps[i] + n) % n] = true;
-                }
-            }
-            dp = arrived;
-        }
-        System.out.println(dp[0] ? "YES" : "NO");
+        System.out.println((-1 % 26));
         sc.bw.flush();
         sc.bw.close();
+    }
+
+    private static int lowBit(int x) {
+        return x & (-x);
     }
 
 }
