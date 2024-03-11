@@ -128,5 +128,49 @@ public class problemImpl implements problem {
         return true;
     }
 
+    // 2528. 最大化城市的最小电量
+    public long maxPower(int[] stations, int r, int k) {
+        int n = stations.length;
+        long[] sum = new long[n + 1];
+        for (int i = 0; i < n; i++) {
+            sum[i + 1] = stations[i] + sum[i];
+        }
+        long[] power = new long[n];
+        long mx = Long.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            power[i] = sum[Math.min(n, i + r + 1)] - sum[Math.max(0, i - r)]; // 妙妙屋
+            mx = Math.min(mx, power[i]);
+        }
+        long left = mx, right = mx + k;
+        while (left <= right) {
+            long mid = left + (right - left) / 2;
+            if (check(power, n, k, r, mid)) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return left - 1;
+    }
+    private boolean check(long[] power, int n, int k, int r, long minPower) {
+        long cntD = 0, need = 0;
+        long[] diff = new long[n + 1]; // 差分数组, 与cntD是同时一套出现的
+        for (int i = 0; i < n; i++) {
+            cntD += diff[i];
+            long m = minPower - power[i] - cntD;
+            if (m > 0) {
+                need += m;
+                if (need > k) { // 如果需要的电量 > 可提供的电量
+                    return false;
+                }
+                cntD += m;
+                if (i + 2 * r + 1 < n) {
+                    diff[i + 2 * r + 1] -= m;
+                }
+            }
+        }
+        return true;
+    }
+
 
 }

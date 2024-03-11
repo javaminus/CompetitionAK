@@ -7,6 +7,7 @@ package com.Java_Template.array.diff_array;
  * 2406. 将区间分为最少组数(https://leetcode.cn/problems/divide-intervals-into-minimum-number-of-groups/description/)
  * 2381. 字母移位 II(https://leetcode.cn/problems/shifting-letters-ii/description/)
  * 2772. 使数组中的所有元素都等于零(https://leetcode.cn/problems/apply-operations-to-make-all-array-elements-equal-to-zero/description/)
+ * 2528. 最大化城市的最小电量(https://leetcode.cn/problems/maximize-the-minimum-powered-city/description/)
  */
 public interface problem {
     // 1094. 拼车
@@ -23,4 +24,7 @@ public interface problem {
 
     // 2772. 使数组中的所有元素都等于零
     public boolean checkArray(int[] nums, int k);
+
+    // 2528. 最大化城市的最小电量
+    public long maxPower(int[] stations, int r, int k);
 }
