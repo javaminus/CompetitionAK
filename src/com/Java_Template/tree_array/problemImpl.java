@@ -1,9 +1,6 @@
 package com.Java_Template.tree_array;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class problemImpl implements problem {
 
@@ -156,5 +153,56 @@ public class problemImpl implements problem {
     }*/
 
 
+    public String minInteger(String num, int k) {
+        int n = num.length();
+        StringBuilder ans = new StringBuilder();
+        Queue<Integer>[] position = new Queue[10];
+        Arrays.setAll(position, e -> new LinkedList<Integer>()); // 这里只能使用LinkedList
+        for (int i = 0; i < n; i++) {
+            position[num.charAt(i) - '0'].offer(i + 1);
+        }
+        BitTree1 bitTree = new BitTree1(n);
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (!position[j].isEmpty()) {
+                    int step = position[j].peek() - i + bitTree.query(n) - bitTree.query(position[j].peek());
+                    if (step <= k) {
+                        k -= step;
+                        ans.append(j);
+                        bitTree.update(position[j].poll(), 1);
+                        break;
+                    }
+                }
+            }
+        }
+        return ans.toString();
+    }
+
+    class BitTree1{
+        int[] tree;
+
+        public BitTree1(int n) {
+            tree = new int[n + 1];
+        }
+
+        private int lowBit(int i) {
+            return i & -i;
+        }
+        public void update(int i, int val) {
+            while (i < tree.length) {
+                tree[i] += val;
+                i += lowBit(i);
+            }
+        }
+
+        public int query(int i) {
+            int ans = 0;
+            while (i > 0) {
+                ans += tree[i];
+                i -= lowBit(i);
+            }
+            return ans;
+        }
+    }
 }
 

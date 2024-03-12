@@ -36,6 +36,10 @@ import java.util.List;
  * 100200. 标记所有下标的最早秒数 I(https://leetcode.cn/problems/earliest-second-to-mark-indices-i/description/)
  * 2386. 找出数组的第 K 大和(https://leetcode.cn/problems/find-the-k-sum-of-an-array/description/?envType=daily-question&envId=2024-03-09) 二分+回溯，难死人（2648）
  * 2528. 最大化城市的最小电量(https://leetcode.cn/problems/maximize-the-minimum-powered-city/description/)
+ * 2517. 礼盒的最大甜蜜度(https://leetcode.cn/problems/maximum-tastiness-of-candy-basket/description/)
+ * 2439. 最小化数组中的最大值(https://leetcode.cn/problems/minimize-maximum-of-array/description/)
+ * 1552. 两球之间的磁力(https://leetcode.cn/problems/magnetic-force-between-two-balls/description/)
+ * 2616. 最小化数对的最大差值(https://leetcode.cn/problems/minimize-the-maximum-difference-of-pairs/)
  */
 public interface problem {
     // 4. 寻找两个正序数组的中位数
@@ -76,4 +80,10 @@ public interface problem {
 
     // 2386. 找出数组的第 K 大和
     public long kSum(int[] nums, int k);
+
+    // 2517. 礼盒的最大甜蜜度
+    public int maximumTastiness(int[] price, int k);
+
+    // 2439. 最小化数组中的最大值
+    public int minimizeArrayValue(int[] nums);
 }

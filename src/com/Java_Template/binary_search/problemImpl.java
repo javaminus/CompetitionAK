@@ -450,4 +450,68 @@ public class problemImpl implements problem {
         dfs(i + 1, s, nums); // 不选
     }
 
+
+    // 2517. 礼盒的最大甜蜜度
+    public int maximumTastiness(int[] price, int k) {
+        int n = price.length;
+        Arrays.sort(price);
+        int left = 0, right = price[n - 1] - price[0];
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (check(price, n, k, mid)) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left - 1;
+    }
+    private boolean check(int[] price, int n, int k, int minTarget) {
+        int cnt = 1, p = price[0];
+        for (int i = 1; i < n; i++) {
+            if (price[i] - p >= minTarget) {
+                cnt++;
+                p = price[i];
+            }
+        }
+        if (cnt < k) {
+            return false;
+        }
+        return true;
+    }
+
+
+    // 2439. 最小化数组中的最大值
+    public int minimizeArrayValue(int[] nums) {
+        int n = nums.length;
+        int left = Integer.MAX_VALUE, right = Integer.MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            left = Math.min(left, nums[i]);
+            right = Math.max(right, nums[i]);
+        }
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (check1(nums, n, mid)) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return right + 1;
+    }
+    private boolean check1(int[] nums, int n, int limit) {
+        long t = 0;
+        for (int i = 0; i < n; i++) {
+            if (nums[i] > limit) {
+                if (nums[i] - limit > t) {
+                    return false;
+                }
+                t -= nums[i] - limit;
+            }else{
+                t += limit - nums[i];
+            }
+        }
+        return true;
+    }
+
 }
