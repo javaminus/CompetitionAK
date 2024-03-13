@@ -18,7 +18,7 @@ public class problemImpl implements problem {
         return ans;
     }
 
-    // 1017. 负二进制转换
+    // 1017. 负二进制转换 
     public String baseNeg2(int n) {
         if (n == 0) {
             return "0";
