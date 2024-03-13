@@ -11,6 +11,7 @@ import java.util.List;
  *
  *
  * 1505. 最多 K 次交换相邻数位后得到的最小整数(https://leetcode.cn/problems/minimum-possible-integer-after-at-most-k-adjacent-swaps-on-digits/description/)
+ *
  * 100246. 将元素分配到两个数组中 II(https://leetcode.cn/problems/distribute-elements-into-two-arrays-ii/description/) 树状数组灵活运用
  * 2426. 满足不等式的数对数目(https://leetcode.cn/problems/number-of-pairs-satisfying-inequality/description/) 统计前缀和
  * LCR 170. 交易逆序对的总数(https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/description/) 统计前缀和
@@ -86,6 +87,9 @@ public interface problem {
 
     // 1626. 无矛盾的最佳球队
     public int bestTeamScore(int[] scores, int[] ages);
+
+    // 1505. 最多 K 次交换相邻数位后得到的最小整数
+    public String minInteger(String num, int k);
 
 
 

@@ -31,4 +31,38 @@ public class ProblemImpl implements problem {
         List<Integer> res = new KMP().search(sb.toString().toCharArray(), pSb.toString().toCharArray());
         return res.size();
     }
+
+    /**
+     * @param arr
+     * @return
+     * 3076. 数组中的最短非公共子字符串
+     */
+    @Override
+    public String[] shortestSubstrings(String[] arr) {
+        int n = arr.length;
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            int m = arr[i].length();
+            String t = "";
+            for (int size = 1; size < m && t.isEmpty(); size++) {
+                for (int j = 0; j <= m - size; j++) {
+                    String sub = arr[i].substring(j, j + size);
+                    if ((t.isEmpty() || sub.compareTo(t) < 0) && check(arr, i, sub)) {
+                        t = sub;
+                    }
+                }
+            }
+            ans[i] = t;
+        }
+        return ans;
+    }
+
+    private boolean check(String[] arr, int k, String sub) {
+        for (int i = 0; i < arr.length; i++) {
+            if (i != k && arr[i].contains(sub)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

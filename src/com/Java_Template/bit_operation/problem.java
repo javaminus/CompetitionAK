@@ -10,6 +10,9 @@ package com.Java_Template.bit_operation;
  * LCR 190. 加密运算(https://leetcode.cn/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/description/) 位运算实现加法
  * Problem: LCR 003. 比特位计数(https://leetcode.cn/problems/w3tCBm/description/)
  * 190. 颠倒二进制位(https://leetcode.cn/problems/reverse-bits/description/) return Integer.reverse(n);
+ * 可结合的元素对【算法赛】(https://www.lanqiao.cn/problems/17021/learning/?contest_id=174) 蓝桥杯
+ *
+ *
  * 2354. 优质数对的数目（https://leetcode.cn/problems/number-of-excellent-pairs/）需要脑筋急转弯确定位 1 的规律进行哈希计数枚举即可
  * 260. 只出现一次的数字 III（https://leetcode.cn/problems/single-number-iii/）利用位运算两个相同元素异或和为0的特点，以及lowbit进行分组确定两个只出现一次的元素
  * 6365. 将整数减少到零需要的最少操作数（https://leetcode.cn/problems/minimum-operations-to-reduce-an-integer-to-0/）n 加上或减去 2 的某个幂使得 n 变为 0 的最少操作数
