@@ -7,7 +7,7 @@ import java.util.List;
 
 public class problemImpl implements problem{
     // 扩散元素
-    public int minimumSeconds(List<Integer> nums) {
+    public int minimumSeconds(List<Integer> nums) { // 最终所有元素一定变成了一个在 nums 中的数。枚举这个数。
         int n = nums.size(), ans = n;
         HashMap<Integer, List<Integer>> map = new HashMap<>(); // < num, {相同num对应的下标集合} >
         for (int i = 0; i < n; i++) {
@@ -16,7 +16,7 @@ public class problemImpl implements problem{
         for (List<Integer> list : map.values()) {
             int mx = n - list.get(list.size() - 1) + list.get(0); // 计算两边的长度： _________(包含当前遍历的key)__________
             for (int i = 1; i < list.size(); i++) {
-                mx = Math.max(mx, list.get(i) - list.get(i - 1));
+                mx = Math.max(mx, list.get(i) - list.get(i - 1)); // 计算中间位置，其实就是求最大“间隔”
             }
             ans = Math.min(ans, mx);
         }
