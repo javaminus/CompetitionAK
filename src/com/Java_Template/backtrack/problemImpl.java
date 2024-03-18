@@ -43,4 +43,24 @@ public class problemImpl implements problem{
         visited[i][j] = false;
         return false;
     }
+
+
+    // 494. 目标和
+    int ans = 0;
+    public int findTargetSumWays(int[] nums, int target) {
+        backtrack(nums, target, 0, 0);
+        return ans;
+    }
+    private void backtrack(int[] nums, int target, int index, int sum) {
+        if (index == nums.length) {
+            if (sum == target) {
+                ans++;
+            }
+        }else{
+            backtrack(nums, target, index + 1, sum + nums[index]);
+            backtrack(nums, target, index + 1, sum - nums[index]);
+        }
+    }
+
+
 }
