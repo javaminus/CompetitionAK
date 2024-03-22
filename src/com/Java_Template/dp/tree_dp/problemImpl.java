@@ -214,7 +214,6 @@ public class problemImpl implements problem {
         getMaxSum(root);
         return maxSum;
     }
-
     /**
      * @return {sum,lowerBound,upperBound,isBST}
      */
@@ -235,5 +234,153 @@ public class problemImpl implements problem {
             maxSum = Math.max(maxSum, sum);
         }
         return new int[]{sum, lowBound, upperBound, isBST};
+    }
+
+    // 337. 打家劫舍 III
+    public int rob(TreeNode root) {
+        int[] res = dfs337(root);
+        return Math.max(res[0], res[1]);
+    }
+    /**
+     * {不选当前节点的sum,选择当前节点的sum}
+     */
+    private int[] dfs337(TreeNode root) {
+        if (root == null) {
+            return new int[]{0, 0};
+        }
+        int[] left = dfs337(root.left);
+        int[] right = dfs337(root.right);
+        int rob = left[0] + right[0] + root.val; // 选当前节点，不可以选下一层节点
+        int notRob = Math.max(left[0], left[1]) + Math.max(right[0], right[1]); // 不选当前节点，那么下一层可以选，也可以不选
+        return new int[]{notRob, rob};
+    }
+
+
+    // 543. 二叉树的直径
+    public int diameterOfBinaryTree(TreeNode root) {
+        dfsPro543(root);
+        return ans1 - 1; // 我的ans其实是统计的节点总数
+    }
+
+    private int[] dfs543(TreeNode root) {
+        if (root == null) {
+            return new int[]{0, 0};
+        }
+        int[] left = dfs543(root.left), right = dfs543(root.right);
+        ans1 = Math.max(ans1, Math.max(left[0], left[1]) + Math.max(right[0], right[1]) + 1); // 当前节点作为根节点
+        return new int[]{Math.max(left[0], left[1]) + 1, Math.max(right[0], right[1]) + 1};
+    }
+
+    // 优化
+    private int dfsPro543(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int left = dfsPro543(root.left);
+        int right = dfsPro543(root.right);
+        ans1 = Math.max(ans1, left + right + 1);
+        return Math.max(left, right) + 1;
+    }
+
+    // 2646. 最小化旅行的价格总和
+    int[] cnt, price;
+    int end;
+    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips) {
+        g = new ArrayList[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        cnt = new int[n];
+        for (int[] trip : trips) {
+            end = trip[1];
+            dfs2646(trip[0], -1);
+        }
+        this.price = price;
+        int[] ans = robDfs(0, -1);
+        return Math.min(ans[0], ans[1]);
+    }
+    private boolean dfs2646(int x, int fa) {
+        if (x == end) {
+            cnt[x]++;
+            return true;
+        }
+        for (int y : g[x]) {
+            if (y != fa && dfs2646(y, x)) {
+                cnt[x]++; // x 是 end 的祖先节点，也就在路径上
+                return true;
+            }
+        }
+        return false;
+    }
+    // 打家劫舍III {不变，变}
+    private int[] robDfs(int x, int fa) {
+        int notHalve = price[x] * cnt[x];
+        int halve = notHalve / 2;
+        for (int y : g[x]) {
+            if (y != fa) {
+                int[] res = robDfs(y, x);
+                notHalve += Math.min(res[0], res[1]);
+                halve += res[0];
+            }
+        }
+        return new int[]{notHalve, halve};
+    }
+
+
+    // 2246. 相邻字符不同的最长路径  学习构造树结构以及树形dp
+    String s;
+    public int longestPath(int[] parent, String s) {
+        int n = s.length();
+        this.s = s;
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int i = 1; i < n; i++) {
+            g[parent[i]].add(i);
+        }
+        dfs(0);
+        return ans1 + 1;
+    }
+    private int dfs(int x) {
+        int maxLen = 0; // 以当前节点为起点的最长单向路径
+        for (int y : g[x]) {
+            int len = dfs(y) + 1;
+            if (s.charAt(y) != s.charAt(x)) {
+                ans1 = Math.max(ans1, maxLen + len);
+                maxLen = Math.max(maxLen, len);
+            }
+        }
+        return maxLen;
+    }
+
+
+
+    // 968. 监控二叉树
+    public int minCameraCover(TreeNode root) {
+        int[] ans = dfs968(root);
+        return Math.min(ans[0], ans[1]);
+    }
+    /**
+     * @return {sum,至少一个子节点带摄像头，父节点带摄像头}
+     *
+     * 动态规划需要定义状态，由于每个结点被监控的情况有三种，因此每个结点的状态值包括三项，分别对应三种情况的最小摄像头数量。
+     * 每个结点的状态使用长度为 3 的数组 cameras 表示，分别对应三种情况下的以该结点作为根结点的子树被完全监控的最小摄像头数量，
+     * 其中 cameras[0]表示该结点安装摄像头的最小摄像头数量(所以初始化为无穷大)，cameras[1]表示该结点的至少一个子结点安装摄像头的最小摄像头数量，cameras[2]表示该结点的父结点安装摄像头的最小摄像头数量。
+     * 以下将 cameras[0]、cameras[1]、cameras[2]分别称为状态 0、状态 1、状态 2。
+     * 动态规划的边界情况是空结点，空结点不能安装摄像头，因此用 +∞表示空结点安装摄像头的最小摄像头数量，用 0表示空结点不安装摄像头的最小摄像头数量，对应的状态值为 [+∞,0,0]。
+     */
+    private int[] dfs968(TreeNode root) {
+        if (root == null) {
+            return new int[]{Integer.MAX_VALUE / 2, 0, 0};
+        }
+        int[] leftCameras = dfs968(root.left);
+        int[] rightCameras = dfs968(root.right);
+        int[] cameras = new int[3];
+        cameras[0] = Math.min(Math.min(leftCameras[0], leftCameras[1]), leftCameras[2]) + Math.min(Math.min(rightCameras[0], rightCameras[1]), rightCameras[2]) + 1;// 当前节点装上摄像头，数量加一
+        cameras[1] = Math.min(leftCameras[0] + rightCameras[0], Math.min(leftCameras[1] + rightCameras[0], leftCameras[0] + rightCameras[1]));
+        cameras[2] = Math.min(leftCameras[0], leftCameras[1]) + Math.min(rightCameras[0], rightCameras[1]);
+        return new int[]{cameras[0], cameras[1], cameras[2]};
     }
 }

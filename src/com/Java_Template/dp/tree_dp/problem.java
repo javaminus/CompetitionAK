@@ -15,6 +15,11 @@ package com.Java_Template.dp.tree_dp;
  * 124. 二叉树中的最大路径和(https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/) 好题 模板题
  * 98. 验证二叉搜索树(https://leetcode.cn/problems/validate-binary-search-tree/description/)
  * 1373. 二叉搜索子树的最大键值和(https://leetcode.cn/problems/maximum-sum-bst-in-binary-tree/description/)
+ * 337. 打家劫舍 III(https://leetcode.cn/problems/house-robber-iii/description/)
+ * 543. 二叉树的直径(https://leetcode.cn/problems/diameter-of-binary-tree/description/)
+ * 2646. 最小化旅行的价格总和(https://leetcode.cn/problems/minimize-the-total-price-of-the-trips/description/) 树形dp 综合题 2238
+ * 2246. 相邻字符不同的最长路径(https://leetcode.cn/problems/longest-path-with-different-adjacent-characters/)
+ * 968. 监控二叉树(https://leetcode.cn/problems/binary-tree-cameras/description/) 状态转移麻了
  */
 public interface problem {
     // 834. 树中距离之和
@@ -34,4 +39,19 @@ public interface problem {
 
     // 1373. 二叉搜索子树的最大键值和
     public int maxSumBST(TreeNode root);
+
+    // 337. 打家劫舍 III
+    public int rob(TreeNode root);
+
+    // 543. 二叉树的直径
+    public int diameterOfBinaryTree(TreeNode root);
+
+    // 2646. 最小化旅行的价格总和
+    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips);
+
+    // 2246. 相邻字符不同的最长路径
+    public int longestPath(int[] parent, String s);
+
+    // 968. 监控二叉树
+    public int minCameraCover(TreeNode root);
 }
