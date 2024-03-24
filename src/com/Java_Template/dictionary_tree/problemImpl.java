@@ -142,4 +142,49 @@ public class problemImpl implements problem {
         }
     }*/
 
+
+    // 100268. 最长公共后缀查询 手搓字典树的快乐哈哈哈
+    public int[] stringIndices(String[] wordsContainer, String[] wordsQuery) {
+        Trie1 root = new Trie1();
+        // 插入操作
+        for (int i = 0; i < wordsContainer.length; i++) {
+            char[] s = wordsContainer[i].toCharArray();
+            int len = s.length;
+            Trie1 cur = root;
+            if (len < cur.minLen) {
+                cur.minLen = len;
+                cur.i = i;
+            }
+            for (int j = len - 1; j >= 0; j--) {
+                int c = s[j] - 'a';
+                if (cur.children[c] == null) {
+                    cur.children[c] = new Trie1();
+                }
+                cur = cur.children[c];
+                if (len < cur.minLen) {
+                    cur.minLen = len;
+                    cur.i = i;
+                }
+            }
+        }
+        int n = wordsQuery.length;
+        int[] ans = new int[n];
+        // 查询操作
+        for (int i = 0; i < n; i++) {
+            Trie1 cur = root;
+            char[] s = wordsQuery[i].toCharArray();
+            for (int j = s.length - 1; j >= 0 && cur.children[s[j] - 'a'] != null; j--) {
+                cur = cur.children[s[j] - 'a'];
+            }
+            ans[i] = cur.i;
+        }
+        return ans;
+    }
+
+    class Trie1{
+        Trie1[] children = new Trie1[26];
+        int minLen = Integer.MAX_VALUE; // 最小长度
+        int i; // 下标
+    }
+
 }

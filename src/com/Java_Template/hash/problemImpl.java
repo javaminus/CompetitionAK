@@ -1,7 +1,9 @@
 package com.Java_Template.hash;
 
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class problemImpl implements problem {
 
@@ -111,6 +113,43 @@ public class problemImpl implements problem {
             }else{
                 cnt.put(sum, i);
             }
+        }
+        return ans;
+    }
+
+
+    // 100258. 最高频率的 ID
+    @Override
+    public long[] mostFrequentIDs(int[] nums, int[] freq) {
+        /**
+         * 易懂的写法
+          int n = nums.length;
+          long[] ans = new long[n];
+          TreeMap<Long, Integer> freqMap = new TreeMap<>(Collections.reverseOrder()); // 出现次数的次数
+          HashMap<Integer, Long> cnt = new HashMap<>();
+          for (int i = 0; i < n; i++) {
+              int x = nums[i];
+              int f = freqMap.merge(cnt.get(x), -1, Integer::sum);
+              if (cnt.containsKey(x) && f == 0) { // 移除一个之前的旧数据
+                  freqMap.remove(cnt.get(x));
+              }
+              freqMap.merge(cnt.merge(x, (long) freq[i], Long::sum), 1, Integer::sum);
+              ans[i] = freqMap.firstKey();
+          }
+          return ans;
+         *
+         */
+        int n = nums.length;
+        long[] ans = new long[n];
+        TreeMap<Long, Integer> freqMap = new TreeMap<>(Collections.reverseOrder()); // 出现次数的次数
+        HashMap<Integer, Long> cnt = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            if (cnt.containsKey(x) && freqMap.merge(cnt.get(x), -1, Integer::sum) == 0) { // 移除一个之前的旧数据
+                freqMap.remove(cnt.get(x));
+            }
+            freqMap.merge(cnt.merge(x, (long) freq[i], Long::sum), 1, Integer::sum);
+            ans[i] = freqMap.firstKey();
         }
         return ans;
     }

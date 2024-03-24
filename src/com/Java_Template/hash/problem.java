@@ -11,6 +11,7 @@ package com.Java_Template.hash;
  * Problem: 523. 连续的子数组和(https://leetcode.cn/problems/continuous-subarray-sum/description/) 同余定理
  * 1524. 和为奇数的子数组数目（https://leetcode.cn/problems/number-of-sub-arrays-with-odd-sum/description/）
  * 525. 连续数组(https://leetcode.cn/problems/contiguous-array/description/) 难想
+ * 100258. 最高频率的 ID（https://leetcode.cn/problems/most-frequent-ids/description/）双哈希表
  */
 public interface problem {
     // 00183. 最大好子数组和
@@ -33,4 +34,7 @@ public interface problem {
 
     // 525. 连续数组
     public int findMaxLength(int[] nums);
+
+    // 100258. 最高频率的 ID
+    public long[] mostFrequentIDs(int[] nums, int[] freq);
 }
