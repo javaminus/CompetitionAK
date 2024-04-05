@@ -1,5 +1,8 @@
 package com.Java_Template.backtrack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  */
@@ -60,6 +63,54 @@ public class problemImpl implements problem{
             backtrack(nums, target, index + 1, sum + nums[index]);
             backtrack(nums, target, index + 1, sum - nums[index]);
         }
+    }
+
+
+    // 78.子集
+    int[] nums;
+    List<List<Integer>> ans1;
+    List<Integer> path;
+    public List<List<Integer>> subsets(int[] nums) {
+        this.nums = nums;
+        ans1 = new ArrayList<>();
+        path = new ArrayList<>();
+        dfs(0);
+        return ans1;
+    }
+    private void dfs(int i) {
+        ans1.add(new ArrayList<>(path));
+        if (i == nums.length) {
+            return;
+        }
+        for (int j = i; j < nums.length; j++) {
+            path.add(nums[j]);
+            dfs(j + 1);
+            path.remove(path.size() - 1);
+        }
+    }
+
+
+    // 894. 所有可能的真二叉树
+    public List<TreeNode> allPossibleFBT(int n) {
+        ArrayList<TreeNode> ans = new ArrayList<>();
+        if (n % 2 == 0) {
+            return ans;
+        }
+        if (n == 1) {
+            ans.add(new TreeNode(0));
+            return ans;
+        }
+        for (int i = 1; i < n; i += 2) {
+            List<TreeNode> left = allPossibleFBT(i);
+            List<TreeNode> right = allPossibleFBT(n - i - 1);
+            for (TreeNode l : left) {
+                for (TreeNode r : right) {
+                    TreeNode node = new TreeNode(0, l, r);
+                    ans.add(node);
+                }
+            }
+        }
+        return ans;
     }
 
 

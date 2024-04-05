@@ -52,4 +52,38 @@ public class problemImpl implements problem {
         }
         return ans;
     }
+
+    // 2192. 有向无环图中一个节点的所有祖先
+    public List<List<Integer>> getAncestors(int n, int[][] edges){
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[y].add(x); // 逆序dfs
+        }
+        List[] ans = new List[n];
+        Arrays.setAll(ans, e -> new ArrayList<Integer>());
+        boolean[] visited = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(visited, false);
+            dfs(g, visited, i);
+            visited[i] = false;
+            for (int j = 0; j < n; j++) {
+                if (visited[j]) {
+                    ans[i].add(j);
+                }
+            }
+        }
+        return Arrays.asList(ans);
+    }
+
+    private void dfs(List<Integer>[] g, boolean[] visited, int x) {
+        visited[x] = true;
+        for (int y : g[x]) {
+            if (!visited[y]) {
+                dfs(g, visited, y);
+            }
+        }
+    }
+
 }

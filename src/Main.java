@@ -1,17 +1,24 @@
+import com.clone.Animal;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Scanner;
-// 1:无需package
-// 2: 类名必须Main, 不可修改
 
 public class Main {
+    static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        //在此输入您的代码...
-        int T = scan.nextInt();
-        while (T-- > 0) {
-            int n = scan.nextInt();
-            int x = scan.nextInt();
+        Animal animal1 = new Animal("老虎");
+        Animal animal2 = new Animal("老虎");
+        System.out.println(animal1.equals(animal2));
+        System.out.println(animal1==animal2);
+        String s1 = "老虎";
+        String s2 = "老虎";
+        System.out.println(s1.equals(s2));
+        System.out.println(s1 == s2);
 
-        }
-        scan.close();
+        String s3 = new String("老虎");
+        String s4 = new String("老虎");
+        System.out.println(s3.equals(s4));
+        System.out.println(s3 == s4);
     }
 }

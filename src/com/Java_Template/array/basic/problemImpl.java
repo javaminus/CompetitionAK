@@ -1,6 +1,7 @@
 package com.Java_Template.array.basic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,5 +22,52 @@ public class problemImpl implements problem{
             ans = Math.min(ans, mx);
         }
         return ans / 2;  // 时间复杂度：O(n)，其中 n 为 nums 的长度。 空间复杂度：O(n)
+    }
+
+    // 2952. 需要添加的硬币的最小数量
+    public int minimumAddedCoins(int[] coins, int target) {
+        // 填充法
+        Arrays.sort(coins);
+        int ans = 0, s = 0, i = 0;
+        while (s < target) {
+            if (i < coins.length && coins[i] <= s + 1) {
+                s += coins[i++];
+            }else{
+                s += s + 1;
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    // 330. 按要求补齐数组
+    public int minPatches(int[] nums, int n) {
+        Arrays.sort(nums);
+        long s = 0;
+        int  ans = 0, i = 0;
+        while (s < n) {
+            if (i < nums.length && nums[i] <= s + 1) {
+                s += nums[i++];
+            }else{
+                s += s + 1;
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+
+    // 1798. 你能构造出连续值的最大数目
+    public int getMaximumConsecutive(int[] coins) {
+        Arrays.sort(coins);
+        int i = 0, s = 0;
+        while (true) {
+            if (i < coins.length && coins[i] <= s + 1) {
+                s += coins[i++];
+            } else {
+                break;
+            }
+        }
+        return s + 1;
     }
 }

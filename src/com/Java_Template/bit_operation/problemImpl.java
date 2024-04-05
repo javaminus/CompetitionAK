@@ -59,4 +59,44 @@ public class problemImpl implements problem {
         return n >>> 16 | n << 16;
     }
 
+    // 2401. 最长优雅子数组
+    public int longestNiceSubarray(int[] nums) {
+        // 方法一
+//        int ans = 0;
+//        for (int i = 0; i < nums.length; i++) {
+//            int j = i, or = 0;
+//            while (j >= 0 && (or & nums[j]) == 0) {
+//                or |= nums[j--];
+//            }
+//            ans = Math.max(ans, i - j);
+//        }
+//        return ans;
+        // 方法二 滑动窗口
+        int ans = 0;
+        for (int left = 0, right = 0, or = 0; right < nums.length; right++) {
+            while ((or & nums[right]) > 0) { // 有交集
+                or ^= nums[left++]; // 从 or 中去掉集合 nums[left]
+            }
+            or |= nums[right];
+            ans = Math.max(ans, right - left + 1);
+        }
+        return ans;
+    }
+
+
+    // 2680. 最大或值
+    public long maximumOr(int[] nums, int k) {
+        int n = nums.length;
+        long[] suffix = new long[n + 1];
+        for (int i = n - 1; i >= 0; i--) {
+            suffix[i] = suffix[i + 1] | nums[i];
+        }
+        long ans = 0, pre = 0;
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, pre | ((long) nums[i] << k) | suffix[i + 1]);
+            pre |= nums[i];
+        }
+        return ans;
+    }
+
 }

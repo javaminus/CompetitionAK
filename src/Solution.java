@@ -1,20 +1,31 @@
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.TreeMap;
-
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode() {}
+    TreeNode(int val) { this.val = val; }
+    TreeNode(int val, TreeNode left, TreeNode right) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+}
 class Solution {
-    public long[] mostFrequentIDs(int[] nums, int[] freq) {
-        TreeMap<Long, Integer> frequency = new TreeMap<>(Collections.reverseOrder());
-        HashMap<Integer, Long> cnt = new HashMap<>();
-        int n = nums.length;
-        long[] ans = new long[n];
-        for (int i = 0; i < n; i++) {
-            if (cnt.containsKey(nums[i]) && frequency.merge(cnt.get(nums[i]), -1, Integer::sum) == 0) { // 移除出现次数为cnt.get[nums[i]]的旧数据
-                frequency.remove(cnt.get(nums[i]));
-            }
-            frequency.merge(cnt.merge(nums[i], (long) freq[i], Long::sum), 1, Integer::sum);
-            ans[i] = frequency.firstKey();
-        }
+    private int ans = 0;
+    public int maxAncestorDiff(TreeNode root) {
+        dfs(root);
         return ans;
+    }
+    // 自底向上 {子树的最小值，子树最大值}
+    private int[] dfs(TreeNode root) {
+        if (root == null) {
+            return new int[]{Integer.MAX_VALUE, Integer.MIN_VALUE};
+        }
+        int[] left = dfs(root.left);
+        int[] right = dfs(root.right);
+        int minX = Math.min(root.val, Math.min(left[0], right[0]));
+        int maxX = Math.max(root.val, Math.max(left[1], right[1]));
+        ans = Math.max(ans, Math.max(root.val - minX, maxX - root.val));
+        return new int[]{minX, maxX};
     }
 }

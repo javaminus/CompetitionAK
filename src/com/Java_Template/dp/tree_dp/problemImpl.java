@@ -135,23 +135,16 @@ public class problemImpl implements problem {
     }
     private int[] dfs1372(TreeNode root) {
         if (root == null) {
-            return new int[]{0, 0}; // 可以不写
+            return new int[]{0, 0};
         }
-        int[] lengths = new int[2];
-        if (root.left != null) {
-            int[] left = dfs1372(root.left);
-            lengths[0] = left[1] + 1;
-        }
-        if (root.right != null) {
-            int[] right = dfs1372(root.right);
-            lengths[1] = right[0] + 1;
-        }
-        maxLength = Math.max(maxLength, Math.max(lengths[0], lengths[1]));
-        return lengths;
+        int[] left = dfs1372(root.left);
+        int[] right = dfs1372(root.right);
+        int[] length = new int[2];
+        length[0] = left[1] + 1;
+        length[1] = right[0] + 1;
+        maxLength = Math.max(maxLength, Math.max(length[0], length[1]));
+        return length;
     }
-
-
-
 
     // 124. 二叉树中的最大路径和  后续遍历思想，也就是自底向上，dp思想
     private int ans2 = Integer.MIN_VALUE;
@@ -363,7 +356,7 @@ public class problemImpl implements problem {
         return Math.min(ans[0], ans[1]);
     }
     /**
-     * @return {sum,至少一个子节点带摄像头，父节点带摄像头}
+     * @return {当前节点安装摄像头sum,至少一个子节点带摄像头sum，父节点带摄像头sum}
      *
      * 动态规划需要定义状态，由于每个结点被监控的情况有三种，因此每个结点的状态值包括三项，分别对应三种情况的最小摄像头数量。
      * 每个结点的状态使用长度为 3 的数组 cameras 表示，分别对应三种情况下的以该结点作为根结点的子树被完全监控的最小摄像头数量，
@@ -381,6 +374,25 @@ public class problemImpl implements problem {
         cameras[0] = Math.min(Math.min(leftCameras[0], leftCameras[1]), leftCameras[2]) + Math.min(Math.min(rightCameras[0], rightCameras[1]), rightCameras[2]) + 1;// 当前节点装上摄像头，数量加一
         cameras[1] = Math.min(leftCameras[0] + rightCameras[0], Math.min(leftCameras[1] + rightCameras[0], leftCameras[0] + rightCameras[1]));
         cameras[2] = Math.min(leftCameras[0], leftCameras[1]) + Math.min(rightCameras[0], rightCameras[1]);
-        return new int[]{cameras[0], cameras[1], cameras[2]};
+        return cameras;
+    }
+
+    // 1026. 节点与其祖先之间的最大差值
+    private int res = 0;
+    public int maxAncestorDiff(TreeNode root) {
+        dfs1026(root);
+        return res;
+    }
+    // 自底向上 {子树的最小值，子树最大值}
+    private int[] dfs1026(TreeNode root) {
+        if (root == null) {
+            return new int[]{Integer.MAX_VALUE, Integer.MIN_VALUE};
+        }
+        int[] left = dfs1026(root.left);
+        int[] right = dfs1026(root.right);
+        int minX = Math.min(root.val, Math.min(left[0], right[0]));
+        int maxX = Math.max(root.val, Math.max(left[1], right[1]));
+        res = Math.max(res, Math.max(root.val - minX, maxX - root.val));
+        return new int[]{minX, maxX};
     }
 }
