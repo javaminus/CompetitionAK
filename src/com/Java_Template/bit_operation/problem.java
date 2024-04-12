@@ -7,17 +7,21 @@ package com.Java_Template.bit_operation;
  * 异或经典性质：(4*i)^(4*i+1)^(4*i+2)^(4*i+3)=0  (2*n)^(2*n+1)=1
  * 异或经典性质：(duplicate&b)^(duplicate&c) = duplicate&(b^c)
  * ===================================力扣===================================
- * <p>
+ * <p> 与或
  * 2401. 最长优雅子数组(https://leetcode.cn/problems/longest-nice-subarray/description/)
  * 2680. 最大或值(https://leetcode.cn/problems/maximum-or/description/)
- *
- *
- *
- *
- *
- *
- *
- *
+ * 2411. 按位或最大的最小子数组长度(https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/) OR模板秒杀
+ * 898. 子数组按位或操作(https://leetcode.cn/problems/bitwise-ors-of-subarrays/description/) OR模板秒杀
+ * 1521. 找到最接近目标值的函数值(https://leetcode.cn/problems/find-a-value-of-a-mysterious-function-closest-to-target/description/) OR模板秒杀
+ * <p>
+ * <p> 异或
+ * 1310. 子数组异或查询(https://leetcode.cn/problems/xor-queries-of-a-subarray/description/) 模板题：区间值查询
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
  * LCR 190. 加密运算(https://leetcode.cn/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/description/) 位运算实现加法
  * Problem: LCR 003. 比特位计数(https://leetcode.cn/problems/w3tCBm/description/)
  * 190. 颠倒二进制位(https://leetcode.cn/problems/reverse-bits/description/) return Integer.reverse(n);
@@ -103,5 +107,18 @@ public interface problem {
 
     // 2680. 最大或值
     public long maximumOr(int[] nums, int k);
+
+    // 2411. 按位或最大的最小子数组长度
+    public int[] smallestSubarrays(int[] nums);
+
+    // 898. 子数组按位或操作
+    public int subarrayBitwiseORs(int[] nums);
+
+    // 1521. 找到最接近目标值的函数值
+    public int closestToTarget(int[] nums, int target);
+
+    // ------------------------------------------------异或----------------------------------------------------------
+    // 1310. 子数组异或查询
+    public int[] xorQueries(int[] arr, int[][] queries);
 
 }

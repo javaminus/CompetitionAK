@@ -1,4 +1,4 @@
-package com.Java_Template;//Java快读快写模板，不定时更新优化内容
+package com.Java_Template.io;//Java快读快写模板，不定时更新优化内容
 
 
 import java.io.*;

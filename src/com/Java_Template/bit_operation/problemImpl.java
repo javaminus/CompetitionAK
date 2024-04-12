@@ -1,5 +1,8 @@
 package com.Java_Template.bit_operation;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 /**
  * @author Minus
  * @date 2024/1/20 19:54
@@ -99,4 +102,86 @@ public class problemImpl implements problem {
         return ans;
     }
 
+
+    // 2411. 按位或最大的最小子数组长度(https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/)
+    public int[] smallestSubarrays(int[] nums) {
+        int n = nums.length;
+        int[] ans = new int[n];
+        ArrayList<int[]> ors = new ArrayList<int[]>(); // (按位或的值,对应子数组的右端点的最小值)
+        for (int i = n - 1; i >= 0; --i) {
+            ors.add(new int[]{0, i});
+            int k = 0;
+            for (int[] or : ors) {
+                or[0] |= nums[i];
+                if (ors.get(k)[0] == or[0])
+                    ors.get(k)[1] = or[1]; // 合并相同值，下标取最小的
+                else ors.set(++k, or);
+            }
+            ors.subList(k + 1, ors.size()).clear(); // 清空 ors 列表中从索引 k + 1 到末尾的所有元素。也就是去重
+            // 本题只用到了 ors[0]，如果题目改成任意给定数值，可以在 ors 中查找
+            ans[i] = ors.get(0)[1] - i + 1;
+        }
+        return ans;
+    }
+
+    // 898. 子数组按位或操作
+    public int subarrayBitwiseORs(int[] nums) {
+        int n = nums.length;
+        ArrayList<int[]> ors = new ArrayList<int[]>();
+        HashSet<Integer> set = new HashSet<>();
+        for (int i = n - 1; i >= 0; i--) {
+            ors.add(new int[]{0, i});
+            int k = 0;
+            for (int[] or : ors) {
+                or[0] |= nums[i];
+                if (ors.get(k)[0] == or[0]) {
+                    ors.get(k)[1] = or[1];
+                }else{
+                    ors.set(++k, or);
+                }
+                set.add(or[0]);
+            }
+            ors.subList(k + 1, ors.size()).clear();
+        }
+        return set.size();
+    }
+
+    // 1521. 找到最接近目标值的函数值
+    public int closestToTarget(int[] nums, int target) {
+        int n = nums.length;
+        ArrayList<int[]> ands = new ArrayList<>();
+        int ans = Integer.MAX_VALUE;
+        for (int i = n - 1; i >= 0; i--) {
+            ands.add(new int[]{nums[i], i});
+            int k = 0;
+            for (int[] and : ands) {
+                and[0] &= nums[i];
+                if (and[0] == ands.get(k)[0]) {
+                    ands.get(k)[1] = and[1];
+                }else{
+                    ands.set(++k, and);
+                }
+                ans = Math.min(ans, Math.abs(and[0] - target));
+            }
+            ands.subList(k + 1, ands.size()).clear();
+        }
+        return ans;
+    }
+
+
+    // 1310. 子数组异或查询
+    public int[] xorQueries(int[] arr, int[][] queries) {
+        int n = arr.length;
+        int[] pre = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            pre[i + 1] = pre[i] ^ arr[i];
+        }
+        int[] ans = new int[queries.length];
+        int k = 0;
+        for (int[] q : queries) {
+            int from = q[0], to = q[1];
+            ans[k++] = pre[to + 1] ^ pre[from];
+        }
+        return ans;
+    }
 }

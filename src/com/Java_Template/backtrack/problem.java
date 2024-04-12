@@ -10,6 +10,10 @@ import java.util.List;
  * 79. 单词搜索(https://leetcode.cn/problems/word-search/description/)
  * 494. 目标和(https://leetcode.cn/problems/target-sum/description/)
  * 894. 所有可能的真二叉树(https://leetcode.cn/problems/all-possible-full-binary-trees/description/?envType=daily-question&envId=2024-04-02) 1784这题应该有2000的难度
+ *
+ *
+ *
+ * 蓝桥杯十四届java研究生组第二题(https://www.lanqiao.cn/problems/3552/learning/)
  */
 public interface problem {
     public boolean exist(char[][] board, String word);

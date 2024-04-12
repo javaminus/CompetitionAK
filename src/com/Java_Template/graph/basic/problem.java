@@ -17,6 +17,7 @@ import java.util.List;
  * 841. 钥匙和房间(https://leetcode.cn/problems/keys-and-rooms/description/)
  * 2242. 节点序列的最大得分(https://leetcode.cn/problems/maximum-score-of-a-node-sequence/description/)
  * 3067. 在带权树网络中统计可连接服务器对数目(https://leetcode.cn/problems/count-pairs-of-connectable-servers-in-a-weighted-tree-network/description/)
+ * 3108. 带权图里旅途的最小代价(https://leetcode.cn/problems/minimum-cost-walk-in-weighted-graph/description/)
  */
 public interface problem {
     // 997. 找到小镇的法官
@@ -54,4 +55,7 @@ public interface problem {
 
     // 3067. 在带权树网络中统计可连接服务器对数目
     public int[] countPairsOfConnectableServers(int[][] edges, int signalSpeed);
+
+    // 3108. 带权图里旅途的最小代价
+    public int[] minimumCost(int n, int[][] edges, int[][] query);
 }

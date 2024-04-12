@@ -1,7 +1,10 @@
 package com.Java_Template.backtrack;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  *
@@ -114,4 +117,50 @@ public class problemImpl implements problem{
     }
 
 
+
+
+}
+
+// 蓝桥杯十四届java研究生组第二题(https://www.lanqiao.cn/problems/3552/learning/)
+class Main1 {
+    static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+    private static int[][] nums = new int[5][5];
+    private static int ans = 0;
+    public static void main(String[] args) {
+        nums[0][0] = 1;
+        nums[0][1] = 0;
+        nums[0][2] = 1;
+        nums[0][3] = 0;
+        nums[0][4] = 1;
+        dfs(1, 0);
+        System.out.println(ans);
+        sc.close();
+    }
+
+    private static void dfs(int i, int j) { // 行列
+        if (i == 5) {
+            if (nums[4][0] == 1) {
+                ans++;
+            }
+            return;
+        }
+
+        for (int k = 0; k < 3; k++) {
+            if (k == 0) {
+                nums[i][j] = nums[i - 1][j] & nums[i - 1][j + 1];
+            }
+            if (k == 1) {
+                nums[i][j] = nums[i - 1][j] | nums[i - 1][j + 1];
+            }
+            if (k == 2) {
+                nums[i][j] = nums[i - 1][j] ^ nums[i - 1][j + 1];
+            }
+            if (j == 4 - i) {
+                dfs(i + 1, 0);
+            }else{
+                dfs(i, j + 1);
+            }
+        }
+
+    }
 }

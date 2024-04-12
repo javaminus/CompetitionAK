@@ -483,6 +483,44 @@ public class problemImpl implements problem {
     }
 
 
+    // 3108. 带权图里旅途的最小代价
+    public int[] minimumCost(int n, int[][] edges, int[][] query) {
+        List[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], z = edge[2];
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        int[] ids = new int[n]; // 记录每个点所在连通块的编号
+        Arrays.fill(ids, -1);
+        ArrayList<Integer> ccAnd = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (ids[i] < 0) {
+                ccAnd.add(dfs(ids, ccAnd.size(), g, i));
+            }
+        }
+        int[] ans = new int[query.length];
+        for (int i = 0; i < query.length; i++) {
+            int from = query[i][0], to = query[i][1];
+            ans[i] = from == to ? 0 : ids[from] == ids[to] ? ccAnd.get(ids[from]) : -1;
+        }
+        return ans;
+
+    }
+    private int dfs(int[] ids, int curId, List<int[]>[] g, int x) {
+        ids[x] = curId;
+        int and = -1;
+        for (int[] y : g[x]) {
+            and &= y[1];
+            if (ids[y[0]] < 0) { // 没有被访问
+                and &= dfs(ids, curId, g, y[0]);
+            }
+        }
+        return and;
+    }
+
+
 
 }
 
