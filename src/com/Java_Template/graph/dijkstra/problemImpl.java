@@ -125,16 +125,15 @@ public class problemImpl implements problem {
     }
 
 
-
     // 1514. 概率最大的路径
     public double maxProbability(int n, int[][] edges, double[] succProb, int start, int end) {
 
         // 构造图
         List<double[]>[] graph = new ArrayList[n];
-        for(int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             graph[i] = new ArrayList<double[]>();
         }
-        for(int i = 0; i < edges.length; i++){
+        for (int i = 0; i < edges.length; i++) {
             int idstart = edges[i][0];
             int idend = edges[i][1];
             double weight = succProb[i];
@@ -145,11 +144,11 @@ public class problemImpl implements problem {
 
         // 自定义排序，优先更新概率大的节点
         Queue<State> pq = new PriorityQueue<State>((a, b) -> {  // NOTE 学会！！！
-            if(a.prop > b.prop){
+            if (a.prop > b.prop) {
                 return -1;
-            }else if(a.prop < b.prop){
+            } else if (a.prop < b.prop) {
                 return 1;
-            }else{
+            } else {
                 return 0;
             }
         });
@@ -157,18 +156,18 @@ public class problemImpl implements problem {
 
         double[] res = new double[n];
         res[start] = 1;
-        while(!pq.isEmpty()){
+        while (!pq.isEmpty()) {
             State curNode = pq.poll();
             // 找到了，因为这个节点已经是队列里概率最大的节点了，再通过其他节点去更新这个节点，只会越更新概率越小，所以不用找了，这个就是我们要的答案。
-            if(curNode.id == end){ // 减枝
+            if (curNode.id == end) { // 减枝
                 return curNode.prop;
             }
 
             // 更新邻居的概率
-            for(double[] neighbor : graph[curNode.id]){
-                int nextID = (int)neighbor[0];
+            for (double[] neighbor : graph[curNode.id]) {
+                int nextID = (int) neighbor[0];
                 double nextProp = curNode.prop * neighbor[1];
-                if(nextProp > res[nextID]){
+                if (nextProp > res[nextID]) {
                     res[nextID] = nextProp;
                     pq.offer(new State(nextID, nextProp));
                 }
@@ -178,16 +177,58 @@ public class problemImpl implements problem {
 
         return res[end];
     }
+
+    /*  3112. 访问消失节点的最少时间
+        给你一个二维数组 edges 表示一个 n 个点的无向图，其中 edges[i] = [ui, vi, lengthi] 表示节点 ui 和节点 vi 之间有一条需要 lengthi 单位时间通过的无向边。
+
+        同时给你一个数组 disappear ，其中 disappear[i] 表示节点 i 从图中消失的时间点，在那一刻及以后，你无法再访问这个节点。
+
+        注意，图有可能一开始是不连通的，两个节点之间也可能有多条边。
+
+        请你返回数组 answer ，answer[i] 表示从节点 0 到节点 i 需要的 最少 单位时间。如果从节点 0 出发 无法 到达节点 i ，那么 answer[i] 为 -1 。*/
+    public int[] minimumTime(int n, int[][] edges, int[] disappear) { // dijkstra堆优化模板
+        final int INF = Integer.MAX_VALUE / 2;
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], z = edge[2];
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        int[] dist = new int[n];
+        Arrays.fill(dist, INF);
+        dist[0] = 0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        pq.offer(new int[]{0, 0});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int x = poll[0], len = poll[1];
+            if (dist[x] < len) {
+                continue;
+            }
+            for (int[] e : g[x]) {
+                int y = e[0], d = e[1];
+                if (dist[y] > dist[x] + d && dist[x] + d < disappear[y]) {
+                    dist[y] = dist[x] + d;
+                    pq.offer(new int[]{y, dist[y]});
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (dist[i] >= INF) {
+                dist[i] = -1;
+            }
+        }
+        return dist;
+    }
 }
 
 class State{
     int id;
     double prop;
 
-    State(int id, double prop){
+    State(int id, double prop) {
         this.id = id;
         this.prop = prop;
     }
-
-
 }

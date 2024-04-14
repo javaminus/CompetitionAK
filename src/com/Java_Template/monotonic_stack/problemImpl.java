@@ -113,5 +113,27 @@ public class problemImpl implements problem {
         return ans;
     }
 
+    /*  100273. 边界元素是最大值的子数组数目
+        给你一个 正 整数数组 nums 。
+        请你求出 nums 中有多少个子数组，满足子数组中 第一个 和 最后一个 元素都是这个子数组中的 最大 值。
+ */
+    public long numberOfSubarrays(int[] nums) {
+        int n = nums.length;
+        long ans = n;
+        ArrayDeque<int[]> stack = new ArrayDeque<>();
+        stack.offerLast(new int[]{Integer.MAX_VALUE, 1}); // 添加哨兵，可以不用判空
+        for (int x : nums) {
+            while (x > stack.peekLast()[0]) { // 如果当前元素大于栈底元素，那么前面的元素就没用了
+                stack.pollLast();
+            }
+            if (x == stack.peekLast()[0]) {
+                ans += stack.peekLast()[1]++;
+            }else{ // 小于栈顶
+                stack.offerLast(new int[]{x, 1});
+            }
+        }
+        return ans;
+    }
+
 
 }

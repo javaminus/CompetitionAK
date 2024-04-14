@@ -514,4 +514,48 @@ public class problemImpl implements problem {
         return true;
     }
 
+    /*  100267. 单面值组合的第 K 小金额
+        给你一个整数数组 coins 表示不同面额的硬币，另给你一个整数 k 。
+        你有无限量的每种面额的硬币。但是，你 不能 组合使用不同面额的硬币。
+        返回使用这些硬币能制造的 第 kth 小 金额*/
+    // NOTE:遇到这种第几小/大的问题，往二分想
+    public long findKthSmallest(int[] coins, int k) {
+        long left = k, right = (long) Arrays.stream(coins).max().getAsInt() * k;
+        while (left <= right) {
+            long mid = left + (right - left) / 2;
+            if (check(mid, k, coins)) {
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return right + 1;
+    }
+
+    private boolean check(long m, int k, int[] coins) {
+        long cnt = 0;
+        next:
+        for (int i = 1; i < (1 << coins.length); i++) { // 1<<coins.length这么多组合
+            long lcmRes = 1;
+            for (int j = 0; j < coins.length; j++) {
+                if ((i >> j & 1) == 1) { // 如果选择银币j
+                    lcmRes = lcm(lcmRes, coins[j]);
+                    if (lcmRes > m) {
+                        continue next; // 当代码执行到 continue next; 时，它会跳到标签 next 所指定的位置，也就是外层 for 循环的下一个迭代。
+                    }
+                }
+            }
+            cnt += Integer.bitCount(i) % 2 == 1 ? m / lcmRes : -m / lcmRes; // 容斥原理
+        }
+        return cnt >= k;
+    }
+
+    private long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    private long lcm(long a, long b) {
+        return a * b / gcd(a, b);
+    }
+
 }

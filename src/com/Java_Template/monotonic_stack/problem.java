@@ -10,6 +10,7 @@ import java.util.List;
  * 901. 股票价格跨度(https://leetcode.cn/problems/online-stock-span/description/)
  * 1124. 表现良好的最长时间段(https://leetcode.cn/problems/longest-well-performing-interval/description/) 1908
  * 42. 接雨水(https://leetcode.cn/problems/trapping-rain-water/description/)
+ * 100273. 边界元素是最大值的子数组数目(https://leetcode.cn/problems/find-the-number-of-subarrays-where-boundary-elements-are-maximum/description/)
  */
 public interface problem {
     // Problem: 2866. 美丽塔 II
@@ -23,4 +24,7 @@ public interface problem {
 
     // 42. 接雨水
     public int trap(int[] height);
+
+    // 100273. 边界元素是最大值的子数组数目
+    public long numberOfSubarrays(int[] nums);
 }

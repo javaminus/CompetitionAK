@@ -40,6 +40,7 @@ import java.util.List;
  * 2439. 最小化数组中的最大值(https://leetcode.cn/problems/minimize-maximum-of-array/description/)
  * 1552. 两球之间的磁力(https://leetcode.cn/problems/magnetic-force-between-two-balls/description/)
  * 2616. 最小化数对的最大差值(https://leetcode.cn/problems/minimize-the-maximum-difference-of-pairs/)
+ * 100267. 单面值组合的第 K 小金额(https://leetcode.cn/problems/kth-smallest-amount-with-single-denomination-combination/description/) 广义容斥原理+二分
  */
 public interface problem {
     // 4. 寻找两个正序数组的中位数
@@ -86,4 +87,8 @@ public interface problem {
 
     // 2439. 最小化数组中的最大值
     public int minimizeArrayValue(int[] nums);
+
+
+    // 100267. 单面值组合的第 K 小金额
+    public long findKthSmallest(int[] coins, int k);
 }
