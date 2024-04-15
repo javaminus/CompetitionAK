@@ -1,4 +1,4 @@
-package com.Java_Template.dp.dp_package;
+package com.Java_Template.dp.package_dp;
 
 import java.util.List;
 

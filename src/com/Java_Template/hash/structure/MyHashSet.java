@@ -1,4 +1,4 @@
-package com.Java_Template.hash;
+package com.Java_Template.hash.structure;
 
 import java.util.Iterator;
 import java.util.LinkedList;
