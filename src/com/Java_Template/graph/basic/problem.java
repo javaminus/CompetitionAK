@@ -18,6 +18,7 @@ import java.util.List;
  * 2242. 节点序列的最大得分(https://leetcode.cn/problems/maximum-score-of-a-node-sequence/description/)
  * 3067. 在带权树网络中统计可连接服务器对数目(https://leetcode.cn/problems/count-pairs-of-connectable-servers-in-a-weighted-tree-network/description/)
  * 3108. 带权图里旅途的最小代价(https://leetcode.cn/problems/minimum-cost-walk-in-weighted-graph/description/)
+ * 924. 尽量减少恶意软件的传播(https://leetcode.cn/problems/minimize-malware-spread/description/?envType=daily-question&envId=2024-04-16) 求连通数量
  */
 public interface problem {
     // 997. 找到小镇的法官
@@ -58,4 +59,7 @@ public interface problem {
 
     // 3108. 带权图里旅途的最小代价
     public int[] minimumCost(int n, int[][] edges, int[][] query);
+
+    // 924. 尽量减少恶意软件的传播
+    public int minMalwareSpread(int[][] graph, int[] initial);
 }

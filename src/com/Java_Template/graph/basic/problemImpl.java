@@ -520,6 +520,71 @@ public class problemImpl implements problem {
         return and;
     }
 
+    // 传入一个邻接矩阵int[][] graph ，学到知识：如何扫邻接矩阵的图，如何求图中的连通块大小。 状态机都来了~
+    /*  924. 尽量减少恶意软件的传播
+        给出了一个由 n 个节点组成的网络，用 n × n 个邻接矩阵图 graph 表示。在节点网络中，当 graph[i][j] = 1 时，表示节点 i 能够直接连接到另一个节点 j。
+        一些节点 initial 最初被恶意软件感染。只要两个节点直接连接，且其中至少一个节点受到恶意软件的感染，那么两个节点都将被恶意软件感染。这种恶意软件的传播将继续，直到没有更多的节点可以被这种方式感染。
+        假设 M(initial) 是在恶意软件停止传播之后，整个网络中感染恶意软件的最终节点数。
+        如果从 initial 中移除某一节点能够最小化 M(initial)， 返回该节点。如果有多个节点满足条件，就返回索引最小的节点。
+        请注意，如果某个节点已从受感染节点的列表 initial 中删除，它以后仍有可能因恶意软件传播而受到感染。*/
+    /*
+     * 思路：我们要找的是只包含一个被感染节点的连通块，并且这个连通块越大越好。
+     * 算法如下：
+        遍历 initial 中的节点 x。
+        如果 x 没有被访问过，那么从 x 开始 DFS，同时用一个 vis 数组标记访问过的节点。
+        DFS 过程中，统计连通块的大小 size。
+        DFS 过程中，记录访问到的在 initial 中的节点。
+        DFS 结束后，如果发现该连通块只有一个在 initial 中的节点，并且该连通块的大小比最大的连通块更大，那么更新最大连通块的大小，以及答案节点 xxx。如果一样大，就更新答案节点的最小值。
+        最后，如果没找到符合要求的节点，返回 min(initial)；否则返回答案节点。
+
+        如何表达出「连通块内有一个或多个被感染的节点」呢？要记录被感染的节点列表吗？其实无需记录节点列表，而是用如下状态机：
+        初始状态为 −1。
+        如果状态是 −1，在找到被感染的节点 x 后，状态变为 x。
+        如果状态是非负数 x，在找到另一个被感染的节点后，状态变为 −2。如果状态已经是 −2，则不变。
+        此外，可以用一个哈希表或者布尔数组，记录哪些点在 initial 中，从而在 DFS 中快速判断当前节点是否在 initial 中。
+
+     */
+    private int nodeId, size;
+    public int minMalwareSpread(int[][] graph, int[] initial) {
+        int n = graph.length;
+        boolean[] visited = new boolean[n];
+        boolean[] isInitial = new boolean[n];
+        int mn = Integer.MAX_VALUE;
+        for (int i : initial) {
+            isInitial[i] = true;
+            mn = Math.min(mn, i);
+        }
+        int ans = -1;
+        int maxSize = 0;
+        for (int x : initial) {
+            if (visited[x]) {
+                continue;
+            }
+            nodeId = -1;
+            size = 0;
+            dfs(visited, x, graph, isInitial);
+            if (nodeId >= 0 && (size > maxSize || size == maxSize && nodeId < ans)) {
+                ans = nodeId;
+                maxSize = size;
+            }
+        }
+        return ans < 0 ? mn : ans;
+    }
+    private void dfs(boolean[] visited, int x, int[][] graph, boolean[] isInitial) {
+        visited[x] = true;
+        size++;
+        // 按照状态机更新nodeId
+        if (nodeId != -2 && isInitial[x]) {
+            nodeId = nodeId == -1 ? x : -2;
+        }
+        for (int y = 0; y < graph[x].length; y++) {
+            if (graph[x][y] == 1 && !visited[y]) {
+                dfs(visited, y, graph, isInitial);
+            }
+        }
+    }
+
+
 
 
 }

@@ -14,6 +14,7 @@ import java.util.List;
  * 474. 一和零(https://leetcode.cn/problems/ones-and-zeroes/description/)
  * 1155. 掷骰子等于目标和的方法数(https://leetcode.cn/problems/number-of-dice-rolls-with-target-sum/description/) 组合背包OR多重背包，差分
  * 1049. 最后一块石头的重量 II(https://leetcode.cn/problems/last-stone-weight-ii/description/)
+ * 2787. 将一个数字表示成幂的和的方案数(https://leetcode.cn/problems/ways-to-express-an-integer-as-sum-of-powers/description/)
  * <p>
  * 完全背包问题
  * 322. 零钱兑换(https://leetcode.cn/problems/coin-change/)
@@ -47,6 +48,10 @@ public interface problem {
     // 494. 目标和
     public int findTargetSumWays(int[] nums, int target);
 
+
+    // 2787. 将一个数字表示成幂的和的方案数
+    public int numberOfWays(int n, int x);
+
     // 518. 零钱兑换 II
     public int change(int amount, int[] coins);
 
@@ -55,5 +60,6 @@ public interface problem {
 
     // 879. 盈利计划
     public int profitableSchemes(int n, int minProfit, int[] group, int[] profit);
+
 
 }
