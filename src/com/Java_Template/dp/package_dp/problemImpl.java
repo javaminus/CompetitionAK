@@ -73,7 +73,7 @@ public class problemImpl implements problem {
         return dp[amount] == Integer.MAX_VALUE / 2 ? -1 : dp[amount];
     }
 
-    // 2585. 获得分数的方法数
+    // 2585. 获得分数的方法数 多重背包
     int Mod = (int) 1e9 + 7;
     public int waysToReachTarget(int target, int[][] types) {
         int[] dp = new int[target + 1];
@@ -555,6 +555,92 @@ public class problemImpl implements problem {
             }
         }
         return dp[k];
+    }
+
+
+    /*  2902. 和带限制的子多重集合的数目  多重背包（2759） 看不懂，跳过咯
+        给你一个下标从 0 开始的非负整数数组 nums 和两个整数 l 和 r 。
+        请你返回 nums 中子多重集合的和在闭区间 [l, r] 之间的 子多重集合的数目 。
+        由于答案可能很大，请你将答案对 109 + 7 取余后返回。
+        子多重集合 指的是从数组中选出一些元素构成的 无序 集合，每个元素 x 出现的次数可以是 0, 1, ..., occ[x] 次，其中 occ[x] 是元素 x 在数组中的出现次数。
+        注意：
+        如果两个子多重集合中的元素排序后一模一样，那么它们两个是相同的 子多重集合 。
+        空 集合的和是 0 。*/
+    public int countSubMultisets(List<Integer> nums, int l, int r) {
+        final int MOD = 1_000_000_007;
+        int total = 0;
+        HashMap<Integer,Integer> cnt = new HashMap<Integer, Integer>();
+        for (int x : nums) {
+            total += x;
+            cnt.merge(x, 1, Integer::sum);
+        }
+        if (l > total) {
+            return 0;
+        }
+
+        r = Math.min(r, total);
+        int[] f = new int[r + 1];
+        f[0] = cnt.getOrDefault(0, 0) + 1;
+        cnt.remove(0);
+
+        int sum = 0;
+        for (Map.Entry<Integer, Integer> e : cnt.entrySet()) {
+            int x = e.getKey(), c = e.getValue();
+            sum = Math.min(sum + x * c, r);
+            for (int j = x; j <= sum; j++) {
+                f[j] = (f[j] + f[j - x]) % MOD; // 原地计算同余前缀和
+            }
+            for (int j = sum; j >= x * (c + 1); j--) {
+                f[j] = (f[j] - f[j - x * (c + 1)] + MOD) % MOD; // 两个同余前缀和的差
+            }
+        }
+
+        int ans = 0;
+        for (int i = l; i <= r; ++i) {
+            ans = (ans + f[i]) % MOD;
+        }
+        return ans;
+    }
+
+    /*  1981. 最小化目标值与所选元素的差
+        给你一个大小为 m x n 的整数矩阵 mat 和一个整数 target 。
+        从矩阵的 每一行 中选择一个整数，你的目标是 最小化 所有选中元素之 和 与目标值 target 的 绝对差 。
+        返回 最小的绝对差 。
+        a 和 b 两数字的 绝对差 是 a - b 的绝对值*/
+    // 这里每行一定要选一个数
+    public int minimizeTheDifference(int[][] mat, int target) {
+        int m = mat.length, n = mat[0].length;
+        int sum = 0;
+        for (int i = 0; i < m; i++) {
+            int mx = 0;
+            for (int j = 0; j < n; j++) {
+                mx = Math.max(mx, mat[i][j]);
+            }
+            sum += mx;
+        }
+        boolean[][] dp = new boolean[m][sum + 1];
+        for (int j : mat[0]) {
+            dp[0][j] = true;
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = sum; j >= 0; j--) {
+                for (int k = 0; k < n; k++) {
+                    if (j >= mat[i][k]) {
+                        dp[i][j] = dp[i][j] | dp[i - 1][j - mat[i][k]];
+                    }
+                }
+            }
+        }
+        int ans = Integer.MAX_VALUE;
+        for (int i = 1; i <= sum; i++) {
+            if (dp[m - 1][i] && Math.abs(i - target) < ans) {
+                ans = Math.abs(i - target);
+                if (ans == 0) {
+                    return ans;
+                }
+            }
+        }
+        return ans;
     }
 
 
