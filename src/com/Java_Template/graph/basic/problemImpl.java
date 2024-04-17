@@ -584,6 +584,98 @@ public class problemImpl implements problem {
         }
     }
 
+    /*  928. 尽量减少恶意软件的传播 II
+        给定一个由 n 个节点组成的网络，用 n x n 个邻接矩阵 graph 表示。在节点网络中，只有当 graph[i][j] = 1 时，节点 i 能够直接连接到另一个节点 j。
+        一些节点 initial 最初被恶意软件感染。只要两个节点直接连接，且其中至少一个节点受到恶意软件的感染，那么两个节点都将被恶意软件感染。这种恶意软件的传播将继续，直到没有更多的节点可以被这种方式感染。
+        假设 M(initial) 是在恶意软件停止传播之后，整个网络中感染恶意软件的最终节点数。
+        我们可以从 initial 中删除一个节点，并完全移除该节点以及从该节点到任何其他节点的任何连接。
+        请返回移除后能够使 M(initial) 最小化的节点。如果有多个节点满足条件，返回索引 最小的节点 。*/
+    // BF暴力解法
+    private HashSet<Integer> set;
+    public int minMalwareSpreadII_BF(int[][] graph, int[] initial) {
+        int n = graph.length;
+        int mn = Integer.MAX_VALUE;
+        for (int x : initial) {
+            mn = Math.min(mn, x);
+        }
+        int ans = -1;
+        int minSize = n;
+        for (int x : initial) { // 枚举移除被感染的点
+            set = new HashSet<>();
+            boolean[] visited = new boolean[n];
+            visited[x] = true;
+            for (int y : initial) {
+                if (y == x) { // 移除
+                    continue;
+                }
+                dfs(graph, y, visited);
+            }
+            if (set.size() < minSize || set.size() == minSize && x < ans) {
+                minSize = set.size();
+                ans = x;
+            }
+        }
+        return ans < 0 ? mn : ans;
+    }
+    private void dfs(int[][] graph, int x, boolean[] visited) {
+        visited[x] = true;
+        set.add(x);
+        for (int y = 0; y < graph[x].length; y++) {
+            if (graph[x][y] == 1 && !visited[y]) {
+                dfs(graph, y, visited);
+            }
+        }
+    }
+
+    // O(n^2) 的解法
+    // private int nodeId, size;
+    public int minMalwareSpreadII(int[][] graph, int[] initial) {
+        int n = graph.length;
+        boolean[] visited = new boolean[n];
+        boolean[] isInitial = new boolean[n];
+        int mn = Integer.MAX_VALUE;
+        for (int x : initial) {
+            isInitial[x] = true;
+            mn = Math.min(mn, x);
+        }
+        int[] cnt = new int[n];
+        for (int i = 0; i < n; i++) {
+            if (visited[i] || isInitial[i]) {
+                continue;
+            }
+            nodeId = -1;
+            size = 0;
+            dfs(graph, isInitial, visited, i);
+            if (nodeId > -1) {
+                cnt[nodeId] += size;
+            }
+        }
+        int maxCnt = 0;
+        int minNodeId = -1;
+        for (int i = 0; i < n; i++) { // 下标已经从小往大了
+            if (cnt[i] > maxCnt) {
+                maxCnt = cnt[i];
+                minNodeId = i;
+            }
+        }
+        return minNodeId < 0 ? mn : minNodeId;
+    }
+    private void dfs(int[][] graph, boolean[] isInitial, boolean[] visited, int x) {
+        visited[x] = true;
+        size++;
+        for (int y = 0; y < graph[x].length; y++) {
+            if (graph[x][y] == 0) {
+                continue;
+            }
+            if (isInitial[y]) {
+                if (nodeId != -2 && nodeId != y) {
+                    nodeId = nodeId == -1 ? y : -2;
+                }
+            } else if (!visited[y]) {
+                dfs(graph, isInitial, visited, y);
+            }
+        }
+    }
 
 
 
