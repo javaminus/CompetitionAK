@@ -1,24 +1,52 @@
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 class Solution {
-    private char[] s, t;
-    private int[][] memo;
+    public int[] findOriginalArray(int[] changed) {
+        int n = changed.length;
+        if (n % 2 == 1) {
+            return new int[0];
+        }
+        int[] ans = new int[n / 2];
+        int ansId = 0;
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        for (int x : changed) {
+            cnt.merge(x, 1, Integer::sum);
+        }
+        int cnt0 = cnt.getOrDefault(0, 0);
+        if (cnt0 % 2 == 1) {
+            return new int[0];
+        }
+        cnt.remove(0);
+        HashSet<Integer> done = new HashSet<>();
+        for (int x : cnt.keySet()) {
+            if (done.contains(x) || x % 2 == 0 && cnt.containsKey(x / 2)) {
+                continue;
+            }
+            while (cnt.containsKey(x)) {
+                done.add(x);
+                int cntX = cnt.get(x);
+                int cnt2x = cnt.getOrDefault(x * 2, 0);
+                if (cntX > cnt2x) {
+                    return new int[0];
+                }
+                for (int i = 0; i < cntX; i++) {
+                    if (ansId > ans.length) {
+                        return new int[0];
+                    }
+                    ans[ansId++] = x;
+                }
+                if (cnt2x > cntX) {
+                    cnt.put(x * 2, cnt2x - cntX);
+                    x *= 2;
+                }else{
+                    done.add(x * 2);
+                    x *= 4;
+                }
 
-    public int minDistance(String text1, String text2) {
-        s = text1.toCharArray();
-        t = text2.toCharArray();
-        int n = s.length, m = t.length;
-        memo = new int[n][m];
-        for (int i = 0; i < n; i++)
-            Arrays.fill(memo[i], -1); // -1 表示还没有计算过
-        return dfs(n - 1, m - 1);
-    }
+            }
+        }
+        return ans;
 
-    private int dfs(int i, int j) {
-        if (i < 0) return j + 1;
-        if (j < 0) return i + 1;
-        if (memo[i][j] != -1) return memo[i][j]; // 之前算过了
-        if (s[i] == t[j]) return memo[i][j] = dfs(i - 1, j - 1);
-        return memo[i][j] = Math.min(Math.min(dfs(i - 1, j), dfs(i, j - 1)), dfs(i - 1, j - 1)) + 1;
     }
 }
