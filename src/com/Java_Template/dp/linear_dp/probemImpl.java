@@ -378,5 +378,132 @@ public class probemImpl {
         return new String(ans);
     }
 
+    /*  1639. 通过给定词典构造目标字符串的方案数
+        给你一个字符串列表 words 和一个目标字符串 target 。words 中所有字符串都 长度相同  。
+        你的目标是使用给定的 words 字符串列表按照下述规则构造 target ：
+        从左到右依次构造 target 的每一个字符。
+        为了得到 target 第 i 个字符（下标从 0 开始），当 target[i] = words[j][k] 时，你可以使用 words 列表中第 j 个字符串的第 k 个字符。
+        一旦你使用了 words 中第 j 个字符串的第 k 个字符，你不能再使用 words 字符串列表中任意单词的第 x 个字符（x <= k）。也就是说，所有单词下标小于等于 k 的字符都不能再被使用。
+        请你重复此过程直到得到目标字符串 target 。
+        请注意， 在构造目标字符串的过程中，你可以按照上述规定使用 words 列表中 同一个字符串 的 多个字符 。
+        请你返回使用 words 构造 target 的方案数。由于答案可能会很大，请对 109 + 7 取余 后返回。
+        （译者注：此题目求的是有多少个不同的 k 序列，详情请见示例。）*/
+    private static final int Mod = (int) (1e9 + 7);
+    public int numWays(String[] words, String target) {
+        int m = words[0].length(), n = target.length();
+        int[][] dp = new int[n + 1][m + 1]; // dp[i][j]表示从前j个字母选择构成target[:i]的方案数
+        Arrays.fill(dp[0], 1); // 构成空字串的方案数，都是1
+        int[][] cnt = new int[m + 1][26]; // cnt[i][j]表示前i个字符构成字符（j+'a'）的方案数
+        for (String s : words) {
+            for (int i = 0; i < m; i++) {
+                cnt[i + 1][s.charAt(i) - 'a']++;
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            int c = target.charAt(i - 1) - 'a';
+            int t = m - (n - i);
+            for (int j = i; j <= t; j++) {
+                long ans = (long) cnt[j][c] * dp[i - 1][j - 1] + dp[i][j - 1];
+                dp[i][j] = (int) (ans % Mod);
+            }
+        }
+        return dp[n][m];
+    }
+
+    /*  1883. 准时抵达会议现场的最小跳过休息次数
+        给你一个整数 hoursBefore ，表示你要前往会议所剩下的可用小时数。要想成功抵达会议现场，你必须途经 n 条道路。道路的长度用一个长度为 n 的整数数组 dist 表示，其中 dist[i] 表示第 i 条道路的长度（单位：千米）。另给你一个整数 speed ，表示你在道路上前进的速度（单位：千米每小时）。
+        当你通过第 i 条路之后，就必须休息并等待，直到 下一个整数小时 才能开始继续通过下一条道路。注意：你不需要在通过最后一条道路后休息，因为那时你已经抵达会议现场。
+        例如，如果你通过一条道路用去 1.4 小时，那你必须停下来等待，到 2 小时才可以继续通过下一条道路。如果通过一条道路恰好用去 2 小时，就无需等待，可以直接继续。
+        然而，为了能准时到达，你可以选择 跳过 一些路的休息时间，这意味着你不必等待下一个整数小时。注意，这意味着与不跳过任何休息时间相比，你可能在不同时刻到达接下来的道路。
+        例如，假设通过第 1 条道路用去 1.4 小时，且通过第 2 条道路用去 0.6 小时。跳过第 1 条道路的休息时间意味着你将会在恰好 2 小时完成通过第 2 条道路，且你能够立即开始通过第 3 条道路。
+        返回准时抵达会议现场所需要的 最小跳过次数 ，如果 无法准时参会 ，返回 -1 。*/
+/*    public int minSkips(int[] dist, int speed, int hoursBefore) {
+        int sumDist = Arrays.stream(dist).sum();
+        if (sumDist > (long) hoursBefore * speed) {
+            return -1;
+        }
+
+        int n = dist.length;
+        int[][] memo = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        for (int i = 0; ; i++) {
+            if (dfs(i, n - 2, memo, dist, speed) + dist[n - 1] <= (long) speed * hoursBefore) {
+                return i;
+            }
+        }
+    }
+    // 定义dfs(i,j) 为最多跳过i次到达dist[j]需要的时间*speed，本质还是比较时间
+    private int dfs(int i, int j, int[][] memo, int[] dist, int speed) {
+        // 递归边界
+        if (j < 0) {
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        // 不跳过
+        int res = (dfs(i, j - 1, memo, dist, speed) + dist[j] + speed - 1) / speed * speed;
+        // 如果可以tiaog
+        if (i > 0) {
+            res = Math.min(res, dfs(i - 1, j - 1, memo, dist, speed) + dist[j]);
+        }
+        return memo[i][j] = res;
+    }*/
+    public int minSkips(int[] dist, int speed, int hoursBefore) {
+        int sumDist = Arrays.stream(dist).sum();
+        if (sumDist > (long) hoursBefore * speed) {
+            return -1;
+        }
+
+        int n = dist.length;
+        int[][] dp = new int[n][n];
+        for (int i = 0; ; i++) {
+            for (int j = 0; j < n - 1; j++) {
+                dp[i][j + 1] = (dp[i][j] + dist[j] + speed - 1) / speed * speed;
+                if (i > 0) {
+                    dp[i][j + 1] = Math.min(dp[i][j + 1], dp[i - 1][j] + dist[j]);
+                }
+            }
+            if (dp[i][n - 1] + dist[n - 1] <= (long) speed * hoursBefore) {
+                return i;
+            }
+        }
+    }
+
+    /*  44. 通配符匹配
+        给你一个输入字符串 (s) 和一个字符模式 (p) ，请你实现一个支持 '?' 和 '*' 匹配规则的通配符匹配：
+        '?' 可以匹配任何单个字符。
+        '*' 可以匹配任意字符序列（包括空字符序列）。
+        判定匹配成功的充要条件是：字符模式必须能够 完全匹配 输入字符串（而不是部分匹配）。*/
+    public boolean isMatch(String s, String p) {
+        /*  dp[0][0]=True，即当字符串 sss 和模式 ppp 均为空时，匹配成功；
+            dp[i][0]=False，即空模式无法匹配非空字符串；
+            dp[0][j] 需要分情况讨论：因为星号才能匹配空字符串，所以只有当模式 p 的前 j 个字符均为星号时，dp[0][j] 才为真。*/
+        int m = s.length(), n = p.length();
+        boolean[][] dp = new boolean[m + 1][n + 1]; // dp[i][j]表示s的前i个字符与p的前j个字符匹配
+        dp[0][0] = true; // 两个字符串都是空串
+        for (int i = 0; i < n; i++) {
+            if (p.charAt(i) == '*') {
+                dp[0][i + 1] = true;
+            }else{
+                break; // 保证连续
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (s.charAt(i) == p.charAt(j) || p.charAt(j) == '?') {
+                    dp[i + 1][j + 1] = dp[i][j];
+                }
+                if (p.charAt(j) == '*') {
+                    dp[i + 1][j + 1] = dp[i + 1][j] || dp[i][j + 1];
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
+
 
 }
