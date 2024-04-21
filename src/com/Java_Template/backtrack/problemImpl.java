@@ -2,9 +2,7 @@ package com.Java_Template.backtrack;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  *
@@ -190,4 +188,116 @@ class Main1 {
             list.remove(list.size() - 1);
         }
     }*/
+
+    /*  216. 组合总和 III
+        只使用数字1到9
+        每个数字 最多使用一次
+        返回 所有可能的有效组合的列表 。该列表不能包含相同的组合两次，组合可以以任何顺序返回。*/
+/*    private List<List<Integer>> ans;
+    private List<Integer> path;
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        ans = new ArrayList<>();
+        path = new ArrayList<>();
+        dfs(1, 0, 0, k, n);
+        return ans;
+    }
+    private void dfs(int i, int sum, int digitSum, int k, int n) {
+        if (sum == n && digitSum == k) {
+            ans.add(new ArrayList<>(path));
+        }
+        if (i > 9 || digitSum > k || sum > n) {
+            return;
+        }
+        for (int j = i; j < 10; j++) {
+            path.add(j);
+            dfs(j + 1, sum + j, digitSum + 1, k, n); // 选择这个数
+            path.remove(path.size() - 1);
+        }
+    }*/
+
+    /*  LCR 082. 组合总和 II
+        给定一个可能有重复数字的整数数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+        candidates 中的每个数字在每个组合中只能使用一次，解集不能包含重复的组合。*/
+    /*  import java.util.*;
+
+        class Solution {
+            List<List<Integer>> ans;
+            List<Integer> path;
+            public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+                ans = new ArrayList<>();
+                path = new ArrayList<>();
+                Arrays.sort(candidates);
+                dfs(0, 0, candidates, target);
+                // res.addAll(ans);
+                return ans;
+            }
+            private void dfs(int index, int sum, int[] candidates, int target) {
+                if (sum == target) {
+                    ans.add(new ArrayList<>(path));
+                    return;
+                }
+                if (index == candidates.length || sum > target) {
+                    return;
+                }
+                for (int i = index; i < candidates.length; i++) {
+                    if (i > index && candidates[i] == candidates[i- 1]) { // i>index证明i与index在同一层 去重
+                        continue;
+                    }
+                    path.add(candidates[i]);
+                    dfs(i + 1, sum + candidates[i], candidates, target);
+                    path.remove(path.size() - 1);
+                }
+            }
+        }*/
+
+    /*  LCR 050. 路径总和 III
+        给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
+        路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。*/
+    public int pathSum(TreeNode root, long targetSum) { // 暴力写法
+        if (root == null) {
+            return 0;
+        }
+        long ans = dfs(root, targetSum, 0);
+        ans += pathSum(root.left, targetSum);
+        ans += pathSum(root.right, targetSum);
+        return (int) ans;
+    }
+    private long dfs(TreeNode root, long targetSum, long sum) {
+        if (root == null) {
+            return 0;
+        }
+        long ret = 0;
+        sum += root.val;
+        if (sum == targetSum) {
+            ret++;
+        }
+        ret += dfs(root.left, targetSum, sum);
+        ret += dfs(root.right, targetSum, sum);
+        return ret;
+    }
+
+    // 优化成O(n)的时间复杂度
+    Map<Long, Integer> sumCountMap = new HashMap<>(); // HashMap的key是前缀和， value是该前缀和的节点数量，记录数量是因为有出现复数路径的可能。
+    public int pathSum1(TreeNode root, long targetSum) {
+        if (root == null) {
+            return 0;
+        }
+        sumCountMap.put(0L, 1);
+        return getCounts(root, targetSum, root.val);
+    }
+    private int getCounts(TreeNode root, long targetSum, long sum) {
+        // 当前前缀和减去目标值 如果Map中有记录，则说明从某一点到当前节点的和等于目标值target，比如target = 10, 然后1 -> 1 -> 5 -> 4 -> 9 ->1 这一组的前缀和为【1，2，7，11，20，21】，当我们来到点4时，有11 - target = 1,则刚好有前缀和为1的一个节点
+        int cnt = sumCountMap.getOrDefault(sum - targetSum, 0); // 两节点间的路径和 = 两节点的前缀和之差
+        sumCountMap.merge(sum, 1, Integer::sum);
+        if (root.left != null) {
+            cnt += getCounts(root.left, targetSum, sum + root.left.val);
+        }
+        if (root.right != null) {
+            cnt += getCounts(root.right, targetSum, sum + root.right.val);
+        }
+        sumCountMap.merge(sum, -1, Integer::sum); // 状态恢复
+        return cnt;
+    }
+
+
 }
