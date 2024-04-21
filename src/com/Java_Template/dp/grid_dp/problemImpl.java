@@ -473,4 +473,71 @@ private void dfs(int[][] grid, int sum, int i, int j, int m, int n, int k) {
         long ans = Arrays.stream(dp[m - 1]).max().getAsLong();
         return ans;
     }
+
+    /*  100290. 使矩阵满足条件的最少操作次数
+        给你一个大小为 m x n 的二维矩形 grid 。每次 操作 中，你可以将 任一 格子的值修改为 任意 非负整数。完成所有操作后，你需要确保每个格子 grid[i][j] 的值满足：
+
+        如果下面相邻格子存在的话，它们的值相等，也就是 grid[i][j] == grid[i + 1][j]（如果存在）。
+        如果右边相邻格子存在的话，它们的值不相等，也就是 grid[i][j] != grid[i][j + 1]（如果存在）。
+        请你返回需要的 最少 操作数目。*/
+    public int minimumOperations(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] memo = new int[n][11];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        int[][] cnt = new int[n][10];
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < m; i++) {
+                cnt[j][grid[i][j]]++;
+            }
+        }
+        return m * n - dfs(n - 1, 10, memo, cnt);
+    }
+    private int dfs(int i, int j, int[][] memo, int[][] cnt) { // dfs(i,j) 表示前i列全部变成j最大保留的数目
+        if (i < 0) {
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        int res = 0;
+        for (int k = 0; k < 10; k++) {
+            if (k != j) {
+                res = Math.max(res, dfs(i - 1, k, memo, cnt) + cnt[i][k]);
+            }
+        }
+        return memo[i][j] = res;
+    }
+    public int minimumOperations_DP(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] cnt = new int[n][10];
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < m; i++) {
+                cnt[j][grid[i][j]]++;
+            }
+        }
+        int[][] dp = new int[n][10]; // dp[i][j]表示第i列变成j能保留的最多数
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], -1);
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (i == 0) {
+                    dp[i][j] = cnt[i][j];
+                    continue;
+                }
+                for (int k = 0; k < 10; k++) {
+                    if (j != k) {
+                        dp[i][j] = Math.max(dp[i][j], dp[i - 1][k] + cnt[i][j]);
+                    }
+                }
+            }
+        }
+        int mx = 0;
+        for (int i = 0; i < 10; i++) {
+            mx = Math.max(mx, dp[n - 1][i]);
+        }
+        return m * n - mx;
+    }
 }

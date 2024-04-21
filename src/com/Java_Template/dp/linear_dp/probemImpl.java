@@ -1,6 +1,8 @@
 package com.Java_Template.dp.linear_dp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Minus
@@ -503,6 +505,690 @@ public class probemImpl {
         }
         return dp[m][n];
     }
+
+    /*  10. 正则表达式匹配
+        给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '*' 的正则表达式匹配。
+        '.' 匹配任意单个字符
+        '*' 匹配零个或多个前面的那一个元素
+        所谓匹配，是要涵盖 整个 字符串 s的，而不是部分字符串。*/
+    public boolean isMatchs(String s, String p) { // 看不懂啊~
+        int m = s.length();
+        int n = p.length();
+        boolean[][] dp = new boolean[m + 1][n + 1];
+        dp[0][0] = true;
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (p.charAt(j - 1) == '*') {
+                    dp[i][j] = dp[i][j - 2];
+                    if (matches(s, p, i, j - 1)) {
+                        dp[i][j] = dp[i][j] || dp[i - 1][j];
+                    }
+                }else{
+                    if (matches(s, p, i, j)) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    }
+                }
+            }
+        }
+        return dp[m][n];
+    }
+    private boolean matches(String s, String p, int i, int j) {
+        if (i == 0) {
+            return false;
+        }
+        if (p.charAt(j - 1) == '.') {
+            return true;
+        }
+        return s.charAt(i - 1) == p.charAt(j - 1);
+    }
+
+
+    /*  300. 最长递增子序列  LIS问题
+        给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
+        子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的
+        子序列。*/
+    // dfs(i) 表示以 nums[i] 结尾的最长递增子序列（LIS）的长度。
+    public int lengthOfLIS(int[] nums) { // O(n^2)的时间复杂度 ，使用二分可以优化到O(n*logn)的时间复杂度
+        int n = nums.length;
+        int[] dp = new int[n];
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i]) {
+                    dp[i] = Math.max(dp[i], dp[j]);
+                }
+            }
+            ans = Math.max(ans, ++dp[i]);
+        }
+        return ans;
+    }
+
+    // 二分贪心
+    // g[i]表示长度为i+1的ls的末尾值最小元素 这不算动态规划了，应该算贪心
+    public int lengthOfLIS_2(int[] nums) {
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int x : nums) {
+            int j = lowerBound(g, x);
+            if (j == g.size()) {
+                g.add(x);
+            }else{
+                g.set(j, x);
+            }
+        }
+        return g.size();
+    }
+    private int lowerBound(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }
+
+    /*public int lengthOfLIS(int[] nums) { // 解法三：树状数组，维护区间最大长度
+        int n = nums.length;
+        // 离散化
+        int[] temp = nums.clone();
+        Arrays.sort(temp);
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            map.putIfAbsent(temp[i], i + 1);
+        }
+        BIT bit = new BIT(n);
+        for (int i = 0; i < n; i++) {
+            int x = map.get(nums[i]);
+            int len = Math.max(bit.query(x - 1), 0) + 1;
+            bit.update(x, len);
+        }
+        return bit.query(n);
+    }
+
+    class BIT{ // 维护区间的最大长度
+        int n;
+        int[] treeArr; // 存储当前位置的最大长度
+
+        public BIT(int n) {
+            this.n = n;
+            treeArr = new int[n + 1];
+        }
+
+        private int lowBit(int x) {
+            return x & -x;
+        }
+
+        private void update(int x, int len) {
+            while (x <= n) {
+                if (treeArr[x] < len) {
+                    treeArr[x] = len;
+                }
+                x += lowBit(x);
+            }
+        }
+
+        public int query(int x) { // 查找最长度len
+            int res = Integer.MIN_VALUE;
+            while (x > 0) {
+                res = Math.max(res, treeArr[x]);
+                x -= lowBit(x);
+            }
+            return res;
+        }
+    }*/
+
+
+    /*  673. 最长递增子序列的个数
+        给定一个未排序的整数数组 nums ， 返回最长递增子序列的个数 。
+        注意 这个数列必须是 严格 递增的。*/
+    public int findNumberOfLIS(int[] nums) { // 动态规划 O(n^2), 使用二分+贪心可以得到O(n*logn)的时空复杂度
+        int n = nums.length, ans = 0, maxLength = 0;
+        int[] dp = new int[n];
+        int[] cnt = new int[n];
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+            cnt[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    if (dp[j] + 1 > dp[i]) {
+                        dp[i] = dp[j] + 1;
+                        cnt[i] = cnt[j];
+                    } else if (dp[j] + 1 == dp[i]) {
+                        cnt[i] += cnt[j];
+                    }
+                }
+            }
+            if (dp[i] > maxLength) {
+                maxLength = dp[i];
+                ans = cnt[i];
+            } else if (dp[i] == maxLength) {
+                ans += cnt[i];
+            }
+        }
+        return ans;
+    }
+
+    /*public int findNumberOfLIS(int[] nums) { // 推荐做法！！！
+        // 树状数组给我的感觉就是内嵌一个二分查找，之前我对树状数组的理解就仅限于求前缀和，显然现在的理解更加深刻
+        int n = nums.length;
+        int[] temp = nums.clone();
+        Arrays.sort(temp);
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            map.putIfAbsent(temp[i], i+1); // 下标从1开始
+        }
+        BIT bit = new BIT(n);
+        for (int i = 0; i < n; i++) {
+            int x = map.get(nums[i]); // 获取下标
+            int[] info = bit.query(x - 1);
+            int len = info[0], cnt = info[1];
+            bit.update(x, new int[]{len + 1, Math.max(1, cnt)});
+        }
+        return bit.query(n - 1)[1];
+    }
+
+    class BIT{
+        int n;
+        int[][] treeArr; // {len,cnt}
+
+        public BIT(int n) {
+            this.n = n;
+            treeArr = new int[n + 1][2];
+        }
+
+        public int[] query(int x) { // {len,cnt} 查询最大长度与次数
+            int len = 0, cnt = 0;
+            while (x > 0) {
+                if (len == treeArr[x][0]) {
+                    cnt += treeArr[x][1];
+                } else if (len < treeArr[x][0]) {
+                    len = treeArr[x][0];
+                    cnt = treeArr[x][1];
+                }
+                x -= lowBit(x);
+            }
+            return new int[]{len, cnt};
+        }
+
+        private void update(int x, int[] info) {
+            while (x <= n) {
+                int len = treeArr[x][0], cnt = treeArr[x][1];
+                if (len == info[0]) {
+                    cnt += info[1];
+                } else if (len < info[0]) {
+                    len = info[0];
+                    cnt = info[1];
+                }
+                treeArr[x][0] = len;
+                treeArr[x][1] = cnt;
+                x += lowBit(x);
+            }
+        }
+
+        private int lowBit(int x) {
+            return x & -x;
+        }
+    }*/
+    /*class Solution { // 看不懂 （垃圾做法，抛弃，不如树状数组）
+    public int findNumberOfLIS(int[] nums) {
+        int n = nums.length;
+        // 创建一个数组，用于存储长度为i的递增子序列的列表
+        List<int[]>[] len = new ArrayList[n];
+        Arrays.setAll(len, e -> new ArrayList<Integer>());
+        int size = 0; // 当前递增子序列的长度
+        for(int num : nums){
+            // 在len数组中找到num应该插入的位置
+            int index = binarySearchLength(len, size, num);
+            int count = 1; // 默认num作为新的递增子序列的起点，所以count为1
+
+            // 如果index大于0，说明num可以接在某个长度为index的递增子序列后面
+            if(index > 0){
+                List<int[]> list = len[index-1];
+                int pos = binarySearchIndex(list, num); // 找到num在该递增子序列中的插入位置
+                // 计算以num结尾的递增子序列的个数
+                count = list.get(list.size()-1)[1] - (pos == 0 ? 0 : list.get(pos - 1)[1]);
+            }
+            // 如果len[index]为空，说明需要新增一个长度为index+1的递增子序列
+            if(len[index].size()==0){
+                len[index].add(new int[]{num, count});
+                size++;
+            } else {
+                // 否则，在长度为index+1的递增子序列的末尾追加num，并更新递增子序列的个数
+                List<int[]> list = len[index];
+                int[] last = list.get(list.size()-1);
+
+                if(last[0] == num)
+                    last[1] += count;
+                else
+                    list.add(new int[]{num, last[1] + count});
+
+            }
+        }
+        // 返回长度为size的最后一个递增子序列的个数
+        return len[size-1].get(len[size-1].size()-1)[1];
+    }
+
+    // 二分查找应该插入的位置
+    public int binarySearchLength(List<int[]>[] len, int right, int target){
+        int left = 0;
+        while(left < right){
+            int mid = left + right >> 1;
+            // 如果当前长度为mid的递增子序列的最大值小于目标值，则继续向右搜索
+            if(len[mid].get(len[mid].size()-1)[0] < target)
+                left = mid + 1;
+            else
+                right = mid;
+        }
+        return left;
+    }
+
+    // 二分查找应该插入的位置
+    public int binarySearchIndex(List<int[]> list,int target){
+
+        int left = 0 , right = list.size() - 1;
+
+        while(left < right){
+            int mid = left + right >> 1;
+            // 如果当前位置的值大于等于目标值，则继续向右搜索
+            if(list.get(mid)[0] >= target)
+                left = mid + 1;
+            else
+                right = mid;
+        }
+        return left;
+    }
+}*/
+
+    /*  2826. 将三个组排序
+        给你一个整数数组 nums 。nums 的每个元素是 1，2 或 3。在每次操作中，你可以删除 nums 中的一个元素。返回使 nums 成为 非递减 顺序所需操作数的 最小值。*/
+    public int minimumOperations(List<Integer> nums) { // 可以取等，只需要非递减  使用状态机可以优化到O(n)的时间复杂度
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int x : nums) {
+            int j = upperBound(g, x);
+            if (j == g.size()) {
+                g.add(x);
+            }else{
+                g.set(j, x);
+            }
+        }
+        return nums.size() - g.size();
+    }
+
+    private int upperBound(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) <= target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+
+    /*  1671. 得到山形数组的最少删除次数
+        我们定义 arr 是 山形数组 当且仅当它满足：
+
+        arr.length >= 3
+        存在某个下标 i （从 0 开始） 满足 0 < i < arr.length - 1 且：
+        arr[0] < arr[1] < ... < arr[i - 1] < arr[i]
+        arr[i] > arr[i + 1] > ... > arr[arr.length - 1]
+        给你整数数组 nums​ ，请你返回将 nums 变成 山形状数组 的​ 最少 删除次数。*/
+    public int minimumMountainRemovals(int[] nums) {
+        int n = nums.length;
+        int[] suffix = new int[n];
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int i = n - 1; i > 0; i--) {
+            int j = lowerBound(g, nums[i]);
+            if (j == g.size()) {
+                g.add(nums[i]);
+            }else{
+                g.set(j, nums[i]);
+            }
+            suffix[i] = j + 1;
+        }
+        int mx = 0;
+        g.clear();
+        for (int i = 0; i < n - 1; i++) {
+            int j = lowerBound(g, nums[i]);
+            if (j == g.size()) {
+                g.add(nums[i]);
+            }else{
+                g.set(j, nums[i]);
+            }
+            int pre = j + 1;
+            if (pre >= 2 && suffix[i] >= 2) {
+                mx = Math.max(mx, pre + suffix[i] - 1);
+            }
+        }
+        return n - mx;
+    }
+/*    private int lowerBound(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }*/
+
+    /*  1964. 找出到每个位置为止最长的有效障碍赛跑路线
+        你打算构建一些障碍赛跑路线。给你一个 下标从 0 开始 的整数数组 obstacles ，数组长度为 n ，其中 obstacles[i] 表示第 i 个障碍的高度。
+        对于每个介于 0 和 n - 1 之间（包含 0 和 n - 1）的下标  i ，在满足下述条件的前提下，请你找出 obstacles 能构成的最长障碍路线的长度：
+        你可以选择下标介于 0 到 i 之间（包含 0 和 i）的任意个障碍。
+        在这条路线中，必须包含第 i 个障碍。
+        你必须按障碍在 obstacles 中的 出现顺序 布置这些障碍。
+        除第一个障碍外，路线中每个障碍的高度都必须和前一个障碍 相同 或者 更高 。
+        返回长度为 n 的答案数组 ans ，其中 ans[i] 是上面所述的下标 i 对应的最长障碍赛跑路线的长度。*/
+    public int[] longestObstacleCourseAtEachPosition(int[] obstacles) {
+        int n = obstacles.length;
+        int[] ans = new int[n];
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int x = obstacles[i];
+            int j = upperBound(g, x);
+            if (j == g.size()) {
+                g.add(x);
+            }else{
+                g.set(j, x);
+            }
+            ans[i] = j + 1;
+        }
+        return ans;
+    }
+/*    private int upperBound(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) <= target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }*/
+
+    /*  1626. 无矛盾的最佳球队
+    假设你是球队的经理。对于即将到来的锦标赛，你想组合一支总体得分最高的球队。球队的得分是球队中所有球员的分数 总和 。
+    然而，球队中的矛盾会限制球员的发挥，所以必须选出一支 没有矛盾 的球队。如果一名年龄较小球员的分数 严格大于 一名年龄较大的球员，则存在矛盾。同龄球员之间不会发生矛盾。
+    给你两个列表 scores 和 ages，其中每组 scores[i] 和 ages[i] 表示第 i 名球员的分数和年龄。请你返回 所有可能的无矛盾球队中得分最高那支的分数 。*/
+    public int bestTeamScore(int[] scores, int[] ages) {
+        int n = scores.length;
+        Integer[] ids = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            ids[i] = i;
+        }
+        Arrays.sort(ids, (i, j) -> scores[i] != scores[j] ? scores[i] - scores[j] : ages[i] - ages[j]); // 按分数排序,如果分数相同，我们就按照年龄从小到大排序，按来年龄排序也行，不过需要对分数做离散化处理。
+        int len = 1000; // 年龄最大为1000,如果再大就离散化
+        BIT bit = new BIT(len); // 树状数组存储满足条件的最大分数前缀和 （区间查询，单点更新）
+        for (int id : ids) {
+            bit.update(ages[id], bit.query(ages[id]) + scores[id]);
+        }
+        return bit.query(len);
+    }
+    class BIT{
+        int n;
+        int[] treeArr;
+        public BIT(int n){
+            this.n = n;
+            treeArr = new int[n + 1];
+        }
+
+        private int lowBit(int x) {
+            return x & -x;
+        }
+
+        private int query(int x) {
+            int res = 0;
+            while (x > 0) {
+                res = Math.max(res, treeArr[x]);
+                x -= lowBit(x);
+            }
+            return res;
+        }
+
+        private void update(int x, int score) {
+            while (x <= n) {
+                treeArr[x] = Math.max(score, treeArr[x]); // 满足年龄要求的区间加分数
+                x += lowBit(x);
+            }
+        }
+    }
+    public int bestTeamScore_DP(int[] scores, int[] ages) { // 动态规划做法
+        int n = scores.length;
+        Integer[] ids = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            ids[i] = i;
+        }
+        Arrays.sort(ids, (i, j) -> scores[i] != scores[j] ? scores[i] - scores[j] : ages[i] - ages[j]); // 先按照分数排序，同分数按照年龄排序
+        int[] dp = new int[n];
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (ages[ids[j]] <= ages[ids[i]]) {
+                    dp[i] = Math.max(dp[i], dp[j]);
+                }
+            }
+            dp[i] += scores[ids[i]];
+            ans = Math.max(dp[i], ans);
+        }
+        return ans;
+    }
+
+    /*  354. 俄罗斯套娃信封问题
+        给你一个二维整数数组 envelopes ，其中 envelopes[i] = [wi, hi] ，表示第 i 个信封的宽度和高度。
+        当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。
+        请计算 最多能有多少个 信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。
+        注意：不允许旋转信封。*/
+    public int maxEnvelopes(int[][] envelopes) { // 这题和1626. 无矛盾的最佳球队一个套路，树状数组秒杀
+        int n = envelopes.length;
+        int maxN = 100005;
+        Arrays.sort(envelopes, (a, b) -> a[0] != b[0] ? a[0] - b[0] : b[1] - a[1]);
+        // 也可以离散化
+        BIT bit = new BIT(maxN);
+        for (int i = 0; i < n; i++) {
+            bit.update(envelopes[i][1],bit.query(envelopes[i][1] - 1)+1); // 这里的envelopes[i][1] - 1，是查找比envelopes[i][1]小的信封，所以要减一
+        }
+        return bit.query(maxN);
+    }
+    public int maxEnvelopes_2(int[][] envelopes) {
+        int n = envelopes.length;
+        Arrays.sort(envelopes, (a, b) -> a[0] != b[0] ? a[0] - b[0] : b[1] - a[1]);
+        int[] height = new int[n];
+        for (int i = 0; i < n; i++) {
+            height[i] = envelopes[i][1];
+        }
+        // 找height的最长递增子序列
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int x : height) {
+            int id = binarySearch(g, x);
+            if (id == g.size()) {
+                g.add(x);
+            }else{
+                g.set(id, x);
+            }
+        }
+        return g.size();
+    }
+
+    private int binarySearch(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }
+
+
+    /*  1691. 堆叠长方体的最大高度
+        给你 n 个长方体 cuboids ，其中第 i 个长方体的长宽高表示为 cuboids[i] = [widthi, lengthi, heighti]（下标从 0 开始）。请你从 cuboids 选出一个 子集 ，并将它们堆叠起来。
+        如果 widthi <= widthj 且 lengthi <= lengthj 且 heighti <= heightj ，你就可以将长方体 i 堆叠在长方体 j 上。你可以通过旋转把长方体的长宽高重新排列，以将它放在另一个长方体上。
+        返回 堆叠长方体 cuboids 可以得到的 最大高度 。*/
+    public int maxHeight(int[][] cuboids) {
+        int n = cuboids.length;
+        for (int[] c : cuboids) {
+            Arrays.sort(c);
+        }
+        Arrays.sort(cuboids, (a, b) -> a[0] + a[1] + a[2] - (b[0] + b[1] + b[2]));
+        int ans = 0;
+        int[] dp = new int[n];
+        for (int i = 0; i < n; i++) {
+            dp[i] = cuboids[i][2];
+            for (int j = 0; j < i; j++) {
+                if (cuboids[j][0] <= cuboids[i][0] && cuboids[j][1] <= cuboids[i][1] && cuboids[j][2] <= cuboids[i][2]) {
+                    dp[i] = Math.max(dp[i], dp[j] + cuboids[i][2]);
+                }
+            }
+            ans = Math.max(ans, dp[i]);
+        }
+        return ans;
+    }
+
+    /*  960. 删列造序 III
+        给定由 n 个小写字母字符串组成的数组 strs ，其中每个字符串长度相等。
+        选取一个删除索引序列，对于 strs 中的每个字符串，删除对应每个索引处的字符。
+        比如，有 strs = ["abcdef","uvwxyz"] ，删除索引序列 {0, 2, 3} ，删除后为 ["bef", "vyz"] 。
+        假设，我们选择了一组删除索引 answer ，那么在执行删除操作之后，最终得到的数组的行中的 每个元素 都是按字典序排列的（即 (strs[0][0] <= strs[0][1] <= ... <= strs[0][strs[0].length - 1]) 和 (strs[1][0] <= strs[1][1] <= ... <= strs[1][strs[1].length - 1]) ，依此类推）。
+        请返回 answer.length 的最小可能值 。*/
+    public int minDeletionSize(String[] strs) {
+        int m = strs.length, n = strs[0].length();
+        int[] dp = new int[n]; // 其中 dp[i] 为以下标 i 结尾的最长公共递增子序列长度
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < n; i++) { // 长度
+            for (int j = 0; j < i; j++) {
+                boolean flag = true;
+                for (int k = 0; k < m && flag; k++) {
+                    if (strs[k].charAt(j) > strs[k].charAt(i)) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        int maxRemain = 0;
+        for (int x : dp) {
+            maxRemain = Math.max(maxRemain, x);
+        }
+        return n - maxRemain;
+    }
+    /*  2407. 最长递增子序列 II
+        给你一个整数数组 nums 和一个整数 k 。
+        找到 nums 中满足以下要求的最长子序列：
+        子序列 严格递增
+        子序列中相邻元素的差值 不超过 k 。
+        请你返回满足上述要求的 最长子序列 的长度。
+        子序列 是从一个数组中删除部分元素后，剩余元素不改变顺序得到的数组。*/
+    /* public int lengthOfLIS(int[] nums, int k) { // 普通动态规划做法超时，不愧是2280的难度分
+        int n = nums.length;
+        int[] dp = new int[n]; // 其中 dp[i] 为以下标 i 结尾的最长公共递增子序列长度
+        Arrays.fill(dp, 1);
+        int ans = 0;
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) { // 这一段可以使用线段树/树状数组优化
+                if (nums[j] < nums[i] && nums[i] - nums[j] <= k) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            ans = Math.max(ans, dp[i]);
+        }
+        return ans;
+    }*/
+    /*import java.util.Arrays;
+
+class Solution { // TODO {模板}  区间查询+区间修改，使用线段树优化dp
+    public int lengthOfLIS(int[] nums, int k) {
+        int mx = Arrays.stream(nums).max().getAsInt();
+        SegmentTree segmentTree = new SegmentTree(nums, mx);
+        for (int x : nums) {
+            if (x == 1) {
+                segmentTree.update(1, 1);
+            }else{
+                int res = 1 + segmentTree.query(Math.max(0, x - k), x - 1); // 查询区间的最大值，这里的tree[]存储的是区间的长度
+                segmentTree.update(x, res); // 单点更新
+            }
+        }
+        return segmentTree.query(0, mx); // 区间查询最大值
+    }
+
+    class SegmentTree {
+        int[] tree; // 存储线段树的数组
+        int[] nums; // 存储原始数组的副本
+        int n;
+
+        public SegmentTree(int[] nums, int n) {
+            this.nums = nums;
+            this.n = n;
+            this.tree = new int[4 * n];
+        }
+
+        // 区间查询
+        public int query(int left, int right) {
+            return queryTree(1, 1, n, left, right);
+        }
+
+        private int queryTree(int node, int start, int end, int left, int right) {
+            if (right < start || left > end) {
+                return 0; // 区间不重叠，返回合适的默认值
+            }
+            if (left <= start && right >= end) {
+                return tree[node]; // 完全包含，返回节点的值
+            }
+            int mid = (start + end) / 2;
+            int leftChild = 2 * node;
+            int rightChild = 2 * node + 1;
+            int res = 0;
+            if (left <= mid) {
+                res = Math.max(res, queryTree(leftChild, start, mid, left, right));
+            }
+            if (right > mid) {
+                res = Math.max(res, queryTree(rightChild, mid + 1, end, left, right));
+            }
+            // 根据实际需求合并左右子树信息
+            return res;
+        }
+
+        // 单点更新
+        public void update(int index, int value) {
+            updateTree(1, 1, n, index, value);
+        }
+
+        private void updateTree(int node, int start, int end, int index, int value) {
+            if (start == end) {
+                tree[node] = value;
+            } else {
+                int mid = (start + end) / 2;
+                int leftChild = 2 * node;
+                int rightChild = 2 * node + 1;
+                // if (index >= start && index <= mid) {
+                if (index <= mid) {
+                    updateTree(leftChild, start, mid, index, value);
+                } else {
+                    updateTree(rightChild, mid + 1, end, index, value);
+                }
+                // 根据实际需求合并左右子树信息
+                tree[node] = Math.max(tree[leftChild], tree[rightChild]);
+            }
+        }
+
+    }
+}*/
+
 
 
 

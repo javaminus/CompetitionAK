@@ -13,6 +13,44 @@ package com.Java_Template.tree_array;
  */
 
 // 推荐模板1
+class BIT {
+    // 最大数组长度
+    private int maxN;
+    // 树状数组存储结构
+    private int[] treeArray;
+
+    // 构造函数，初始化树状数组
+    public BIT(int maxN) {
+        this.maxN = maxN;
+        treeArray = new int[maxN + 1];
+    }
+
+    // 获取x的二进制表示中最低位的1所对应的值
+    public int lowBit(int x) {
+        return x & (-x);
+    }
+
+    // 更新操作，将数组中位置x的元素加dt
+    public void update(int x,int dt) {
+        while (x <= maxN) {
+            treeArray[x]+=dt;
+            x += lowBit(x);
+        }
+    }
+
+    // 查询操作，获取数组前缀和，即位置1到位置x的所有元素的和
+    public int query(int x) {
+        int res = 0;
+        while (x > 0) {
+            res += treeArray[x];
+            x -= lowBit(x);
+        }
+        return res;
+    }
+}
+
+
+// 推荐模板2
 class NumArray {
     private int[] nums;
     private int[] tree;
@@ -54,45 +92,6 @@ class NumArray {
         return prefixSum(right + 1) - prefixSum(left);
     }
 }
-
-
-// 推荐模板2
-class BIT {
-    // 最大数组长度
-    private int maxN;
-    // 树状数组存储结构
-    private int[] treeArray;
-
-    // 构造函数，初始化树状数组
-    public BIT(int maxN) {
-        this.maxN = maxN;
-        treeArray = new int[maxN + 1];
-    }
-
-    // 获取x的二进制表示中最低位的1所对应的值
-    public int lowBit(int x) {
-        return x & (-x);
-    }
-
-    // 更新操作，将数组中位置x的元素加dt
-    public void update(int x,int dt) {
-        while (x <= maxN) {
-            treeArray[x]+=dt;
-            x += lowBit(x);
-        }
-    }
-
-    // 查询操作，获取数组前缀和，即位置1到位置x的所有元素的和
-    public int query(int x) {
-        int res = 0;
-        while (x >= 1) {
-            res += treeArray[x];
-            x -= lowBit(x);
-        }
-        return res;
-    }
-}
-
 
 
 

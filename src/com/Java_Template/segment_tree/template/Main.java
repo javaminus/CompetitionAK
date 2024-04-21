@@ -8,7 +8,7 @@ class SegmentTree {
     public SegmentTree(int[] nums) {
         this.nums = nums;
         this.n = nums.length;
-        // 线段树的大小为原始数组长度的四倍
+        // 线段树的大小为原始数组长度的四倍 , 这只是求前缀和的通用方法，注意定义数组中的值代表的元素
         this.tree = new int[4 * n];
         buildTree(1, 0, n - 1);
     }

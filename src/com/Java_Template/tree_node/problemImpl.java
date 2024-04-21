@@ -802,5 +802,77 @@ public class problemImpl implements problem{
         return root;
     }
 
+    /*  2385. 感染二叉树需要的总时间
+        给你一棵二叉树的根节点 root ，二叉树中节点的值 互不相同 。另给你一个整数 start 。在第 0 分钟，感染 将会从值为 start 的节点开始爆发。
+        每分钟，如果节点满足以下全部条件，就会被感染：
+        节点此前还没有感染。
+        节点与一个已感染节点相邻。
+        返回感染整棵树需要的分钟数。*/
+    private TreeNode startNode;
+    private Map<TreeNode, TreeNode> fa = new HashMap<>();
+    public int amountOfTime(TreeNode root, int start) { // 两次遍历
+        dfs(root, null, start);
+        return maxDepth(startNode, startNode);
+    }
+
+    private void dfs(TreeNode node, TreeNode from, int start) {
+        if (node == null) {
+            return;
+        }
+        fa.put(node, from); // 记录父节点
+        if (node.val == start) {
+            startNode = node; // 找到startNode
+        }
+        dfs(node.left, node, start);
+        dfs(node.right, node, start);
+    }
+
+    private int maxDepth(TreeNode node, TreeNode from) {
+        if (node == null) {
+            return -1; // 注意这里是 -1，因为 start 的深度为 0
+        }
+        int res = -1;
+        if (node.left != from) {
+            res = Math.max(res, maxDepth(node.left, node) + 1);
+        }
+        if (node.right != from) {
+            res = Math.max(res, maxDepth(node.right, node) + 1);
+        }
+        if (fa.get(node) != from) {
+            res = Math.max(res, maxDepth(fa.get(node), node) + 1);
+        }
+        return res;
+    }
+    /*  本题算法如下：
+        递归时，除了返回当前子树的最大链长加一，还需要返回一个布尔值，表示当前子树是否包含 start\textit{start}start。
+        如果当前节点是空节点，返回 0 和 false。
+        设左子树的返回的链长为 lLen，右子树返回的链长为 rLen。
+        如果当前节点值等于 start，初始化答案为 max(lLen,rLen)，即子树 start\textit{start}start 的最大深度。然后返回 1 和 true\texttt{true}true。
+        如果左右子树都不包含 start，返回 max(\textit{lLen},\textit{rLen}) + 1max(lLen,rLen)+1。
+        如果左子树或右子树包含 start，像计算直径那样，用 lLen+rLen 更新答案的最大值。如果左子树包含 start，则返回 lLen 和 true，否则返回 rLen 和 true。这种返回方式可以保证 lLen+rLen 一定是端点为 start 的直径长度。
+        */
+    // private int ans;
+    public int amountOfTime1(TreeNode root, int start) { // 真的强啊！！！
+        dfs1(root, start);
+        return ans;
+    }
+    private int[] dfs1(TreeNode root, int start) { // {链长，是否存在start?1:0}
+        if (root == null) {
+            return new int[]{0, 0};
+        }
+        int[] left = dfs1(root.left, start);
+        int[] right = dfs1(root.right, start);
+        if (root.val == start) {
+            ans = Math.max(left[0], right[0]);
+            return new int[]{1, 1};
+        }
+        if (left[1] == 1 || right[1] == 1) { // 只有在左子树或右子树包含 start 时，才能更新答案
+            ans = Math.max(ans, left[0] + right[0]); // 两条链拼成直径
+            // 保证 start 是直径端点
+            return new int[]{(left[1] == 1 ? left[0] : right[0]) + 1, 1};
+        }
+        return new int[]{Math.max(left[0], right[0]) + 1, 0}; // 还没有找到start
+    }
+
 }
 
