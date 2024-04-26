@@ -2,6 +2,7 @@ package com.Java_Template.dp.linear_dp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -566,7 +567,7 @@ public class probemImpl {
     // 二分贪心
     // g[i]表示长度为i+1的ls的末尾值最小元素 这不算动态规划了，应该算贪心
     public int lengthOfLIS_2(int[] nums) {
-        ArrayList<Integer> g = new ArrayList<>();
+        ArrayList<Integer> g = new ArrayList<>(); // 维护该位置最小值
         for (int x : nums) {
             int j = lowerBound(g, x);
             if (j == g.size()) {
@@ -1189,7 +1190,141 @@ class Solution { // TODO {模板}  区间查询+区间修改，使用线段树�
     }
 }*/
 
+    /*  1187. 使数组严格递增
+        给你两个整数数组 arr1 和 arr2，返回使 arr1 严格递增所需要的最小「操作」数（可能为 0）。
+        每一步「操作」中，你可以分别从 arr1 和 arr2 中各选出一个索引，分别为 i 和 j，0 <= i < arr1.length 和 0 <= j < arr2.length，然后进行赋值运算 arr1[i] = arr2[j]。
+        如果无法让 arr1 严格递增，请返回 -1。*/
+    /*int[] a, b;
+    private HashMap<Integer, Integer>[] memo;
+    public int makeArrayIncreasing(int[] arr1, int[] arr2) {
+        a = arr1;
+        b = arr2;
+        Arrays.sort(b);
+        int n = arr1.length;
+        memo = new HashMap[n];
+        Arrays.setAll(memo, m -> new HashMap<>());
+        int ans = dfs(n - 1, Integer.MAX_VALUE);
+        return ans < Integer.MAX_VALUE / 2 ? ans : -1;
+    }
 
+    private int dfs(int i, int suf) { // 表示后一个元素时suf的情况下，遍历到i,最少的更改次数
+        if (i < 0) {
+            return 0;
+        }
+        if (memo[i].containsKey(suf)) {
+            return memo[i].get(suf);
+        }
+        // 不改
+        int res = a[i] < suf ? dfs(i - 1, a[i]) : Integer.MAX_VALUE / 2;
+        // 修改  在数组b中查找小于suf的最大值
+        int j = binarySearch(b, suf);
+        if (j >= 0) { // 找到了
+            res = Math.min(res, dfs(i - 1, b[j]) + 1);
+        }
+        memo[i].put(suf, res);
+        return res;
+    }
 
+    private int binarySearch(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right;
+    }*/
+
+    /*  368. 最大整除子集
+        给你一个由 无重复 正整数组成的集合 nums ，请你找出并返回其中最大的整除子集 answer ，子集中每一元素对 (answer[i], answer[j]) 都应当满足：
+        answer[i] % answer[j] == 0 ，或
+        answer[j] % answer[i] == 0
+        如果存在多个有效解子集，返回其中任何一个均可。*/
+    public List<Integer> largestDivisibleSubset(int[] nums) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        int[] dp = new int[n];
+        Arrays.fill(dp, 1);
+        int maxVal = 1, maxCnt = 1;
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] % nums[j] == 0) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            if (dp[i] > maxCnt) {
+                maxCnt = dp[i];
+                maxVal = nums[i];
+            }
+        }
+        ArrayList<Integer> ans = new ArrayList<>();
+        if (maxCnt == 1) {
+            ans.add(nums[0]);
+            return ans;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            if (dp[i] == maxCnt && maxVal % nums[i] == 0) {
+                ans.add(nums[i]);
+                maxVal = nums[i];
+                maxCnt--;
+            }
+        }
+        return ans;
+    }
+
+    /*  1713. 得到子序列的最少操作次数
+        给你一个数组 target ，包含若干 互不相同 的整数，以及另一个整数数组 arr ，arr 可能 包含重复元素。
+        每一次操作中，你可以在 arr 的任意位置插入任一整数。比方说，如果 arr = [1,4,1,2] ，那么你可以在中间添加 3 得到 [1,4,3,1,2] 。你可以在数组最开始或最后面添加整数。
+        请你返回 最少 操作次数，使得 target 成为 arr 的一个子序列。
+        一个数组的 子序列 指的是删除原数组的某些元素（可能一个元素都不删除），同时不改变其余元素的相对顺序得到的数组。比方说，[2,7,4] 是 [4,2,3,7,2,1,4] 的子序列（加粗元素），但 [2,4,2] 不是子序列。*/
+    public int minOperations_TTL(int[] target, int[] arr) { // 暴力超时
+        int m = target.length, n = arr.length;
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (target[i] == arr[j]) {
+                    dp[i + 1][j + 1] = dp[i][j] + 1;
+                }else{
+                    dp[i + 1][j + 1] = Math.max(dp[i][j + 1], dp[i + 1][j]);
+                }
+            }
+        }
+        return m - dp[m][n];
+    }
+    // 其实就是按照target的排序规则，在arr中找最长的单调增的子序列
+    public int minOperations(int[] target, int[] arr) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < target.length; i++) {
+            map.put(target[i], i);
+        }
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int x : arr) {
+            Integer idx = map.get(x); // 这里使用Integer包装类就不会报错了
+            if (idx != null) {
+                int j = binarySearch(g, idx);
+                if (j == g.size()) {
+                    g.add(idx);
+                }else{
+                    g.set(j, idx);
+                }
+            }
+        }
+        return target.length - g.size();
+    }
+    public int binarySearch(List<Integer> list,Integer target){
+        int left = 0 , right = list.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (list.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1; // 二分找第一个大于等于x的位置, 将x替换到该位置
+    }
 
 }
