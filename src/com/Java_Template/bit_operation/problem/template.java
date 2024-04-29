@@ -1,4 +1,4 @@
-package com.Java_Template.bit_operation;
+package com.Java_Template.bit_operation.problem;
 
 /**
  * java中n>>1与n>>>1 的区别？

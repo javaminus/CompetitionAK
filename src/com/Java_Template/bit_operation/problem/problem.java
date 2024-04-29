@@ -1,4 +1,4 @@
-package com.Java_Template.bit_operation;
+package com.Java_Template.bit_operation.problem;
 
 /**
  * 算法：位运算相关技巧（也叫bitmasks）

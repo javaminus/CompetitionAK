@@ -1,4 +1,4 @@
-package com.Java_Template.bit_operation;
+package com.Java_Template.bit_operation.problem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
