@@ -661,7 +661,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 class Solution {
-    public int numTeams(int[] rating) { // 树状数组优化
+    public int numTeams(int[] rating) { // 树状数组优化,因为你求前缀比当前数小的个数，比如{0，2，1}，这并不是一个有序的数组
         int n = rating.length;
         int[][] nums = new int[n][2];
         for (int i = 0; i < n; i++) {
@@ -1160,6 +1160,816 @@ class Solution {
         return left;
     }
 
+}
+```
+
+2786\. 访问数组中的位置使分数最大
+--------------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` 和一个正整数 `x` 。
+
+你 **一开始** 在数组的位置 `0` 处，你可以按照下述规则访问数组中的其他位置：
+
+*   如果你当前在位置 `i` ，那么你可以移动到满足 `i < j` 的 **任意** 位置 `j` 。
+*   对于你访问的位置 `i` ，你可以获得分数 `nums[i]` 。
+*   如果你从位置 `i` 移动到位置 `j` 且 `nums[i]` 和 `nums[j]` 的 **奇偶性** 不同，那么你将失去分数 `x` 。
+
+请你返回你能得到的 **最大** 得分之和。
+
+**注意** ，你一开始的分数为 `nums[0]` 。
+
+**示例 1：**
+
+**输入：**nums = \[2,3,6,1,9,2\], x = 5
+**输出：**13
+**解释：**我们可以按顺序访问数组中的位置：0 -> 2 -> 3 -> 4 。
+对应位置的值为 2 ，6 ，1 和 9 。因为 6 和 1 的奇偶性不同，所以下标从 2 -> 3 让你失去 x = 5 分。
+总得分为：2 + 6 + 1 + 9 - 5 = 13 。
+
+**示例 2：**
+
+**输入：**nums = \[2,4,6,8\], x = 3
+**输出：**20
+**解释：**数组中的所有元素奇偶性都一样，所以我们可以将每个元素都访问一次，而且不会失去任何分数。
+总得分为：2 + 4 + 6 + 8 = 20 。
+
+**提示：**
+
+*   `2 <= nums.length <= 105`
+*   `1 <= nums[i], x <= 106`
+
+[https://leetcode.cn/problems/visit-array-positions-to-maximize-score/submissions/528480423/](https://leetcode.cn/problems/visit-array-positions-to-maximize-score/submissions/528480423/)
+
+```java
+class Solution {
+    public long maxScore(int[] nums, int x) {
+        int n = nums.length;
+        long[] odd = new long[n];
+        long[] even = new long[n];
+        if (nums[0] % 2 == 1) {
+            odd[0] = nums[0];
+            even[0] = Integer.MIN_VALUE / 2; // 这个初始化细节
+        }else{
+            even[0] = nums[0];
+            odd[0] = Integer.MIN_VALUE / 2;
+        }
+        for (int i = 1; i < n; i++) {
+            if (nums[i] % 2 == 1) { // 奇数结尾
+                odd[i] = Math.max(odd[i - 1] + nums[i], even[i - 1]+ nums[i] - x);
+                even[i] = even[i - 1];
+            }else{
+                even[i] = Math.max(even[i - 1] + nums[i], odd[i - 1]+ nums[i] - x);
+                odd[i] = odd[i - 1];
+            }
+        }
+        return Math.max(even[n - 1], odd[n - 1]);
+    }
+}
+```
+
+1262\. 可被三整除的最大和
+----------------
+
+给你一个整数数组 `nums`，请你找出并返回能被三整除的元素最大和。
+
+**示例 1：**
+
+**输入：**nums = \[3,6,5,1,8\]
+**输出：**18
+**解释：**选出数字 3, 6, 1 和 8，它们的和是 18（可被 3 整除的最大和）。
+
+**示例 2：**
+
+**输入：**nums = \[4\]
+**输出：**0
+**解释：**4 不能被 3 整除，所以无法选出数字，返回 0。
+
+**示例 3：**
+
+**输入：**nums = \[1,2,3,4,4\]
+**输出：**12
+**解释：**选出数字 1, 3, 4 以及 4，它们的和是 12（可被 3 整除的最大和）。
+
+**提示：**
+
+*   `1 <= nums.length <= 4 * 10^4`
+*   `1 <= nums[i] <= 10^4`
+
+[https://leetcode.cn/problems/greatest-sum-divisible-by-three/description/](https://leetcode.cn/problems/greatest-sum-divisible-by-three/description/)
+
+```java
+import java.util.Arrays;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int maxSumDivThree(int[] nums) { // 优先队列解法
+        PriorityQueue<Integer>[] pq = new PriorityQueue[3];
+        Arrays.setAll(pq, e -> new PriorityQueue<Integer>());
+        int sum = 0;
+        for (int num : nums) {
+            pq[num % 3].add(num);
+            sum += num;
+        }
+        if (sum % 3 == 0) {
+            return sum;
+        } else if (sum % 3 == 1) {
+            int min = Integer.MAX_VALUE / 2;
+            if (!pq[1].isEmpty()) {
+                min = Math.min(min, pq[1].poll());
+            }
+            if (pq[2].size() >= 2) {
+                min = Math.min(min, pq[2].poll() + pq[2].poll());
+            }
+            return sum - min;
+        }else{
+            int min = Integer.MAX_VALUE / 2;
+            if (!pq[2].isEmpty()) {
+                min = Math.min(min, pq[2].poll());
+            }
+            if (pq[1].size() >= 2) {
+                min = Math.min(min, pq[1].poll() + pq[1].poll());
+            }
+            return sum - min;
+        }
+    }
+}
+```
+
+```java
+class Solution {
+    public int maxSumDivThree(int[] nums) { // 递推
+        int n = nums.length;
+        int[][] dp = new int[n + 1][3];
+        dp[0][1] = dp[0][2] = Integer.MIN_VALUE / 2; // 从0开始
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 3; j++) {
+                dp[i + 1][j] = Math.max(dp[i][j], dp[i][(j + nums[i]) % 3] + nums[i]);
+            }
+        }
+        return dp[n][0];
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int maxSumDivThree(int[] nums) { // 记忆化搜索
+        int n = nums.length;
+        int[][] memo = new int[n][3];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(n - 1, 0, nums, memo);
+    }
+
+    private int dfs(int i, int j, int[] nums, int[][] memo) {
+        if (i < 0) {
+            return j == 0 ? 0 : Integer.MIN_VALUE;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        return memo[i][j] = Math.max(dfs(i - 1, j, nums, memo), dfs(i - 1, (j + nums[i]) % 3, nums, memo) + nums[i]);
+    }
+}
+```
+1363\. 形成三的最大倍数
+---------------
+
+给你一个整数数组 `digits`，你可以通过按 **任意顺序** 连接其中某些数字来形成 **3** 的倍数，请你返回所能得到的最大的 3 的倍数。
+
+由于答案可能不在整数数据类型范围内，请以字符串形式返回答案。如果无法得到答案，请返回一个空字符串。返回的结果不应包含不必要的前导零。
+
+**示例 1：**
+
+**输入：**digits = \[8,1,9\]
+**输出：**"981"
+
+**示例 2：**
+
+**输入：**digits = \[8,6,7,1,0\]
+**输出：**"8760"
+
+**示例 3：**
+
+**输入：**digits = \[1\]
+**输出：**""
+
+**示例 4：**
+
+**输入：**digits = \[0,0,0,0,0,0\]
+**输出：**"0"
+
+**提示：**
+
+*   `1 <= digits.length <= 10^4`
+*   `0 <= digits[i] <= 9`
+
+[https://leetcode.cn/problems/largest-multiple-of-three/description/](https://leetcode.cn/problems/largest-multiple-of-three/description/)
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+class Solution {
+    public String largestMultipleOfThree(int[] digits) {
+        Arrays.sort(digits);
+        List<Integer>[] g = new List[3];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        long sum = 0;
+        for (int x : digits) {
+            g[x % 3].add(x);
+            sum += x;
+        }
+        StringBuilder sb = new StringBuilder();
+        String ans;
+        if (sum % 3 == 0) {
+            for (int x : digits) {
+                sb.append(x);
+            }
+            ans =  sb.reverse().toString();
+        } else if (sum % 3 == 1) {
+            if (g[1].size() > 0) {
+                g[1].remove(0);
+            }else{
+                g[2].remove(0);
+                g[2].remove(0);
+            }
+            ArrayList<Integer> temp = new ArrayList<>();
+            for (int j = 0; j < 3; j++) {
+                for (int x : g[j]) {
+                    temp.add(x);
+                }
+            }
+            Collections.sort(temp);
+            for (int x : temp) {
+                sb.append(x);
+            }
+            ans = sb.reverse().toString();
+        } else  {
+            if (g[2].size() > 0) {
+                g[2].remove(0);
+            }else{
+                g[1].remove(0);
+                g[1].remove(0);
+            }
+            ArrayList<Integer> temp = new ArrayList<>();
+            for (int j = 0; j < 3; j++) {
+                for (int x : g[j]) {
+                    temp.add(x);
+                }
+            }
+            Collections.sort(temp);
+            for (int x : temp) {
+                sb.append(x);
+            }
+            ans = sb.reverse().toString();
+        }
+        return ans.length() > 0 && ans.charAt(0) == '0' ? "0" : ans;
+    }
+}
+```
+1911\. 最大子序列交替和
+---------------
+
+一个下标从 **0** 开始的数组的 **交替和** 定义为 **偶数** 下标处元素之 **和** 减去 **奇数** 下标处元素之 **和** 。
+
+*   比方说，数组 `[4,2,5,3]` 的交替和为 `(4 + 5) - (2 + 3) = 4` 。
+
+给你一个数组 `nums` ，请你返回 `nums` 中任意子序列的 **最大交替和** （子序列的下标 **重新** 从 0 开始编号）。
+
+一个数组的 **子序列** 是从原数组中删除一些元素后（也可能一个也不删除）剩余元素不改变顺序组成的数组。比方说，`[2,7,4]` 是 `[4,**2**,3,**7**,2,1,**4**]` 的一个子序列（加粗元素），但是 `[2,4,2]` 不是。
+
+**示例 1：**
+
+**输入：**nums = \[**4**,**2**,**5**,3\]
+**输出：**7
+**解释：**最优子序列为 \[4,2,5\] ，交替和为 (4 + 5) - 2 = 7 。
+
+**示例 2：**
+
+**输入：**nums = \[5,6,7,**8**\]
+**输出：**8
+**解释：**最优子序列为 \[8\] ，交替和为 8 。
+
+**示例 3：**
+
+**输入：**nums = \[**6**,2,**1**,2,4,**5**\]
+**输出：**10
+**解释：**最优子序列为 \[6,1,5\] ，交替和为 (6 + 5) - 1 = 10 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 105`
+
+[https://leetcode.cn/problems/maximum-alternating-subsequence-sum/description/](https://leetcode.cn/problems/maximum-alternating-subsequence-sum/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public long maxAlternatingSum(int[] nums) {
+        int n = nums.length;
+        long[][] memo = new long[n][2];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return Math.max(dfs(n - 1, 1, nums, memo), dfs(n - 1, 0, nums, memo));
+    }
+
+    private long dfs(int i, int j, int[] nums, long[][] memo) { // j==0偶数下标，j==1奇数下标
+        if (i < 0) {
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        long ans = 0;
+        if (j == 0) {
+            ans = Math.max(dfs(i - 1, 0, nums, memo), dfs(i - 1, 1, nums, memo) + nums[i]);
+        } else if (j == 1) {
+            ans = Math.max(dfs(i - 1, 1, nums, memo), dfs(i - 1, 0, nums, memo) - nums[i]);
+        }
+        return memo[i][j] = ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public long maxAlternatingSum(int[] nums) { // 递推
+        int n = nums.length;
+        long[][] dp = new long[n + 1][2]; // dp[i][j]表示在[:i]结尾为奇数/偶数的最大值
+        for (int i = 0; i < n; i++) {
+            dp[i + 1][0] = Math.max(dp[i][0], dp[i][1] + nums[i]);
+            dp[i + 1][1] = Math.max(dp[i][1], dp[i][0] - nums[i]);
+        }
+        return Math.max(dp[n][0], dp[n][1]);
+    }
+}
+```
+
+2771\. 构造最长非递减子数组
+-----------------
+
+给你两个下标从 **0** 开始的整数数组 `nums1` 和 `nums2` ，长度均为 `n` 。
+
+让我们定义另一个下标从 **0** 开始、长度为 `n` 的整数数组，`nums3` 。对于范围 `[0, n - 1]` 的每个下标 `i` ，你可以将 `nums1[i]` 或 `nums2[i]` 的值赋给 `nums3[i]` 。
+
+你的任务是使用最优策略为 `nums3` 赋值，以最大化 `nums3` 中 **最长非递减子数组** 的长度。
+
+以整数形式表示并返回 `nums3` 中 **最长非递减** 子数组的长度。
+
+**注意：子数组** 是数组中的一个连续非空元素序列。
+
+**示例 1：**
+
+**输入：**nums1 = \[2,3,1\], nums2 = \[1,2,1\]
+**输出：**2
+**解释：**构造 nums3 的方法之一是： 
+nums3 = \[nums1\[0\], nums2\[1\], nums2\[2\]\] => \[2,2,1\]
+从下标 0 开始到下标 1 结束，形成了一个长度为 2 的非递减子数组 \[2,2\] 。 
+可以证明 2 是可达到的最大长度。
+
+**示例 2：**
+
+**输入：**nums1 = \[1,3,2,1\], nums2 = \[2,2,3,4\]
+**输出：**4
+**解释：**构造 nums3 的方法之一是： 
+nums3 = \[nums1\[0\], nums2\[1\], nums2\[2\], nums2\[3\]\] => \[1,2,3,4\]
+整个数组形成了一个长度为 4 的非递减子数组，并且是可达到的最大长度。
+
+**示例 3：**
+
+**输入：**nums1 = \[1,1\], nums2 = \[2,2\]
+**输出：**2
+**解释：**构造 nums3 的方法之一是： 
+nums3 = \[nums1\[0\], nums1\[1\]\] => \[1,1\] 
+整个数组形成了一个长度为 2 的非递减子数组，并且是可达到的最大长度。
+
+**提示：**
+
+*   `1 <= nums1.length == nums2.length == n <= 105`
+*   `1 <= nums1[i], nums2[i] <= 109`
+
+[https://leetcode.cn/problems/longest-non-decreasing-subarray-from-two-arrays/description/](https://leetcode.cn/problems/longest-non-decreasing-subarray-from-two-arrays/description/)
+
+```java
+class Solution {
+    public int maxNonDecreasingLength(int[] nums1, int[] nums2) {
+        int n = nums1.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] =dp[0][1] =  1;
+        int ans = 1;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = dp[i][1] = 1;
+            if (nums1[i] >= nums1[i - 1]) {
+                dp[i][0] = Math.max(dp[i][0], dp[i - 1][0] + 1);
+            }
+            if (nums1[i] >= nums2[i - 1]) {
+                dp[i][0] = Math.max(dp[i][0], dp[i - 1][1] + 1);
+            }
+            if (nums2[i] >= nums2[i - 1]) {
+                dp[i][1] = Math.max(dp[i][1], dp[i - 1][1] + 1);
+            }
+            if (nums2[i] >= nums1[i - 1]) {
+                dp[i][1] = Math.max(dp[i][1], dp[i - 1][0] + 1);
+            }
+            ans = Math.max(ans, Math.max(dp[i][0], dp[i][1]));
+        }
+        return ans;
+
+    }
+}
+```
+
+1186\. 删除一次得到子数组最大和
+-------------------
+
+给你一个整数数组，返回它的某个 **非空** 子数组（连续元素）在执行一次可选的删除操作后，所能得到的最大元素总和。换句话说，你可以从原数组中选出一个子数组，并可以决定要不要从中删除一个元素（只能删一次哦），（删除后）子数组中至少应当有一个元素，然后该子数组（剩下）的元素总和是所有子数组之中最大的。
+
+注意，删除一个元素后，子数组 **不能为空**。
+
+**示例 1：**
+
+**输入：**arr = \[1,-2,0,3\]
+**输出：**4
+**解释：**我们可以选出 \[1, -2, 0, 3\]，然后删掉 -2，这样得到 \[1, 0, 3\]，和最大。
+
+**示例 2：**
+
+**输入：**arr = \[1,-2,-2,3\]
+**输出：**3
+**解释：**我们直接选出 \[3\]，这就是最大和。
+
+**示例 3：**
+
+**输入：**arr = \[-1,-1,-1,-1\]
+**输出：**\-1
+**解释：**最后得到的子数组不能为空，所以我们不能选择 \[-1\] 并从中删去 -1 来得到 0。
+     我们应该直接选择 \[-1\]，或者选择 \[-1, -1\] 再从中删去一个 -1。
+
+**提示：**
+
+*   `1 <= arr.length <= 105`
+*   `-104 <= arr[i] <= 104`
+
+[https://leetcode.cn/problems/maximum-subarray-sum-with-one-deletion/description/](https://leetcode.cn/problems/maximum-subarray-sum-with-one-deletion/description/)
+
+```java
+class Solution {
+    public int maximumSum(int[] arr) {
+        int n = arr.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = arr[0];
+        dp[0][1] = 0;
+        int maxX = arr[0], ans = arr[0];
+        for (int i = 1; i < n; i++) {
+            maxX = Math.max(maxX, arr[i]);
+            if (arr[i] >= 0) {
+                dp[i][0] = Math.max(0, dp[i - 1][0]) + arr[i];
+                dp[i][1] = Math.max(0, dp[i - 1][1]) + arr[i];
+            }else{
+                dp[i][0] = Math.max(dp[i - 1][0] + arr[i], 0);
+                dp[i][1] = Math.max(Math.max(dp[i - 1][1] + arr[i], dp[i - 1][0]), 0);
+            }
+            ans = Math.max(ans,Math.max(dp[i][0], dp[i][1]));
+        }
+        return maxX < 0 ? maxX : ans;
+    }
+}
+```
+
+935\. 骑士拨号器
+-----------
+
+象棋骑士有一个**独特的移动方式**，它可以垂直移动两个方格，水平移动一个方格，或者水平移动两个方格，垂直移动一个方格(两者都形成一个 **L** 的形状)。
+
+象棋骑士可能的移动方式如下图所示:
+
+![](https://assets.leetcode.com/uploads/2020/08/18/chess.jpg)
+
+我们有一个象棋骑士和一个电话垫，如下所示，骑士**只能站在一个数字单元格上**(即蓝色单元格)。
+
+![](https://assets.leetcode.com/uploads/2020/08/18/phone.jpg)
+
+给定一个整数 n，返回我们可以拨多少个长度为 n 的不同电话号码。
+
+你可以将骑士放置在**任何数字单元格**上，然后你应该执行 n - 1 次移动来获得长度为 n 的号码。所有的跳跃应该是**有效**的骑士跳跃。
+
+因为答案可能很大，**所以输出答案模** `109 + 7`.
+
+**示例 1：**
+
+**输入：**n = 1
+**输出：**10
+**解释：**我们需要拨一个长度为1的数字，所以把骑士放在10个单元格中的任何一个数字单元格上都能满足条件。
+
+**示例 2：**
+
+**输入：**n = 2
+**输出：**20
+**解释：**我们可以拨打的所有有效号码为\[04, 06, 16, 18, 27, 29, 34, 38, 40, 43, 49, 60, 61, 67, 72, 76, 81, 83, 92, 94\]
+
+**示例 3：**
+
+**输入：**n = 3131
+**输出：**136006598
+**解释：**注意取模
+
+**提示：**
+
+*   `1 <= n <= 5000`
+
+[https://leetcode.cn/problems/knight-dialer/description/](https://leetcode.cn/problems/knight-dialer/description/)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution {
+    private int Mod = (int) 1e9 + 7;
+    HashMap<Integer, int[]> map = new HashMap<>();
+    int[][] memo;
+    public int knightDialer(int n) {
+        map.put(0, new int[]{4, 6});
+        map.put(1, new int[]{6, 8});
+        map.put(2, new int[]{7, 9});
+        map.put(3, new int[]{4, 8});
+        map.put(4, new int[]{0, 3, 9});
+        map.put(6, new int[]{0, 1, 7});
+        map.put(7, new int[]{2, 6});
+        map.put(8, new int[]{1, 3});
+        map.put(9, new int[]{2, 4});
+        memo = new int[10][n + 1];
+        for (int i = 0; i < 10; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        int ans = 0;
+        for (int i = 0; i < 10; i++) {
+            ans = (ans + dfs(i, n - 1)) % Mod;
+        }
+        return ans;
+    }
+
+    private int dfs(int i, int n) {
+        if (n == 0) {
+            return 1;
+        }
+        if (memo[i][n] != -1) {
+            return memo[i][n];
+        }
+        int ans = 0;
+        if (map.containsKey(i)) {
+            for (int x : map.get(i)) {
+                ans = (ans + dfs(x, n - 1)) % Mod;
+            }
+        }
+        return memo[i][n] = ans % Mod;
+    }
+}
+```
+
+2919\. 使数组变美的最小增量运算数
+--------------------
+
+给你一个下标从 **0** 开始、长度为 `n` 的整数数组 `nums` ，和一个整数 `k` 。
+
+你可以执行下述 **递增** 运算 **任意** 次（可以是 **0** 次）：
+
+*   从范围 `[0, n - 1]` 中选择一个下标 `i` ，并将 `nums[i]` 的值加 `1` 。
+
+如果数组中任何长度 **大于或等于 3** 的子数组，其 **最大** 元素都大于或等于 `k` ，则认为数组是一个 **美丽数组** 。
+
+以整数形式返回使数组变为 **美丽数组** 需要执行的 **最小** 递增运算数。
+
+子数组是数组中的一个连续 **非空** 元素序列。
+
+**示例 1：**
+
+**输入：**nums = \[2,3,0,0,2\], k = 4
+**输出：**3
+**解释：**可以执行下述递增运算，使 nums 变为美丽数组：
+选择下标 i = 1 ，并且将 nums\[1\] 的值加 1 -> \[2,4,0,0,2\] 。
+选择下标 i = 4 ，并且将 nums\[4\] 的值加 1 -> \[2,4,0,0,3\] 。
+选择下标 i = 4 ，并且将 nums\[4\] 的值加 1 -> \[2,4,0,0,4\] 。
+长度大于或等于 3 的子数组为 \[2,4,0\], \[4,0,0\], \[0,0,4\], \[2,4,0,0\], \[4,0,0,4\], \[2,4,0,0,4\] 。
+在所有子数组中，最大元素都等于 k = 4 ，所以 nums 现在是美丽数组。
+可以证明无法用少于 3 次递增运算使 nums 变为美丽数组。
+因此，答案为 3 。
+
+**示例 2：**
+
+**输入：**nums = \[0,1,3,3\], k = 5
+**输出：**2
+**解释：**可以执行下述递增运算，使 nums 变为美丽数组：
+选择下标 i = 2 ，并且将 nums\[2\] 的值加 1 -> \[0,1,4,3\] 。
+选择下标 i = 2 ，并且将 nums\[2\] 的值加 1 -> \[0,1,5,3\] 。
+长度大于或等于 3 的子数组为 \[0,1,5\]、\[1,5,3\]、\[0,1,5,3\] 。
+在所有子数组中，最大元素都等于 k = 5 ，所以 nums 现在是美丽数组。
+可以证明无法用少于 2 次递增运算使 nums 变为美丽数组。 
+因此，答案为 2 。
+
+**示例 3：**
+
+**输入：**nums = \[1,1,2\], k = 1
+**输出：**0
+**解释：**在这个示例中，只有一个长度大于或等于 3 的子数组 \[1,1,2\] 。
+其最大元素 2 已经大于 k = 1 ，所以无需执行任何增量运算。
+因此，答案为 0 。
+
+**提示：**
+
+*   `3 <= n == nums.length <= 105`
+*   `0 <= nums[i] <= 109`
+*   `0 <= k <= 109`
+
+[https://leetcode.cn/problems/minimum-increment-operations-to-make-array-beautiful/description/](https://leetcode.cn/problems/minimum-increment-operations-to-make-array-beautiful/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public long minIncrementOperations(int[] nums, int k) {
+        int n = nums.length;
+        long[][] memo = new long[n][3]; // 三个数，必须有一个数增大 ,dp[i][0]表示当前数增大
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(n - 1, 0, memo, nums, k);
+    }
+
+    private long dfs(int i, int j, long[][] memo, int[] nums, int k) {
+        if (i < 0) {
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        // nums[i]增大
+        long ans = dfs(i - 1, 0, memo, nums, k) + Math.max(0, k - nums[i]);
+        // nums[i]不增大
+        if (j < 2) {
+            ans = Math.min(ans, dfs(i - 1, j + 1, memo, nums, k));
+        }
+        return memo[i][j] = ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public long minIncrementOperations(int[] nums, int k) {
+        int n = nums.length;
+        long[][] dp = new long[n + 1][3];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 3; j++) {
+                dp[i + 1][j] = dp[i][0] + Math.max(0, k - nums[i]);
+                if (j < 2) {
+                    dp[i + 1][j] = Math.min(dp[i + 1][j], dp[i][j + 1]);
+                }
+            }
+        }
+        return dp[n][0];
+    }
+}
+```
+
+801\. 使序列递增的最小交换次数
+------------------
+
+我们有两个长度相等且不为空的整型数组 `nums1` 和 `nums2` 。在一次操作中，我们可以交换 `nums1[i]` 和 `nums2[i]`的元素。
+
+*   例如，如果 `nums1 = [1,2,3,8]` ， `nums2 =[5,6,7,4]` ，你可以交换 `i = 3` 处的元素，得到 `nums1 =[1,2,3,4]` 和 `nums2 =[5,6,7,8]` 。
+
+返回 _使 `nums1` 和 `nums2` **严格递增** 所需操作的最小次数_ 。
+
+数组 `arr` **严格递增** 且  `arr[0] < arr[1] < arr[2] < ... < arr[arr.length - 1]` 。
+
+**注意：**
+
+*   用例保证可以实现操作。
+
+**示例 1:**
+
+**输入:** nums1 = \[1,3,5,4\], nums2 = \[1,2,3,7\]
+**输出:** 1
+**解释:** 
+交换 A\[3\] 和 B\[3\] 后，两个数组如下:
+A = \[1, 3, 5, 7\] ， B = \[1, 2, 3, 4\]
+两个数组均为严格递增的。
+
+**示例 2:**
+
+**输入:** nums1 = \[0,3,5,8,9\], nums2 = \[2,1,4,6,9\]
+**输出:** 1
+
+**提示:**
+
+*   `2 <= nums1.length <= 105`
+*   `nums2.length == nums1.length`
+*   `0 <= nums1[i], nums2[i] <= 2 * 105`
+
+[https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/description/](https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/description/)
+
+```java
+class Solution {
+    public int minSwap(int[] nums1, int[] nums2) { // 这题不要写记忆化
+        int n = nums1.length;
+        int[][] dp = new int[n][2];
+        dp[0][1] = 1;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = dp[i][1] = n; // 赋值最大值
+            if (nums1[i] > nums1[i - 1] && nums2[i] > nums2[i - 1]) {
+                // 必须交换
+                dp[i][1] = dp[i - 1][1] + 1;
+                dp[i][0] = dp[i - 1][0];
+            }
+            if (nums2[i - 1] < nums1[i] && nums1[i - 1] < nums2[i]) {
+                dp[i][1] = Math.min(dp[i][1], dp[i - 1][0] + 1);
+                dp[i][0] = Math.min(dp[i][0], dp[i - 1][1]);
+            }
+        }
+        return Math.min(dp[n - 1][0], dp[n - 1][1]);
+    }
+
+}
+```
+
+1955\. 统计特殊子序列的数目
+-----------------
+
+**特殊序列** 是由 **正整数** 个 `0` ，紧接着 **正整数** 个 `1` ，最后 **正整数** 个 `2` 组成的序列。
+
+*   比方说，`[0,1,2]` 和 `[0,0,1,1,1,2]` 是特殊序列。
+*   相反，`[2,1,0]` ，`[1]` 和 `[0,1,2,0]` 就不是特殊序列。
+
+给你一个数组 `nums` （**仅** 包含整数 `0`，`1` 和 `2`），请你返回 **不同特殊子序列的数目** 。由于答案可能很大，请你将它对 `109 + 7` **取余** 后返回。
+
+一个数组的 **子序列** 是从原数组中删除零个或者若干个元素后，剩下元素不改变顺序得到的序列。如果两个子序列的 **下标集合** 不同，那么这两个子序列是 **不同的** 。
+
+**示例 1：**
+
+**输入：**nums = \[0,1,2,2\]
+**输出：**3
+**解释：**特殊子序列为 \[**0**,**1**,**2**,2\]，\[**0**,**1**,2,**2**\] 和 \[**0**,**1**,**2**,**2**\] 。
+
+**示例 2：**
+
+**输入：**nums = \[2,2,0,0\]
+**输出：**0
+**解释：**数组 \[2,2,0,0\] 中没有特殊子序列。
+
+**示例 3：**
+
+**输入：**nums = \[0,1,2,0,1,2\]
+**输出：**7
+**解释：**特殊子序列包括：
+- \[**0**,**1**,**2**,0,1,2\]
+- \[**0**,**1**,2,0,1,**2**\]
+- \[**0**,**1**,**2**,0,1,**2**\]
+- \[**0**,**1**,2,0,**1**,**2**\]
+- \[**0**,1,2,**0**,**1**,**2**\]
+- \[**0**,1,2,0,**1**,**2**\]
+- \[0,1,2,**0**,**1**,**2**\]
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `0 <= nums[i] <= 2`
+
+[https://leetcode.cn/problems/count-number-of-special-subsequences/description/](https://leetcode.cn/problems/count-number-of-special-subsequences/description/)
+
+```java
+class Solution {
+    private int Mod = (int) 1e9 + 7;
+    public int countSpecialSubsequences(int[] nums) {
+        int n = nums.length;
+        long[][] dp = new long[n][3];
+        if (nums[0] == 0) {
+            dp[0][0] = 1;
+        }
+        for (int i = 1; i < n; i++) {
+            if (nums[i] == 0) {
+                dp[i][0] = (2 * dp[i - 1][0] + 1) % Mod;
+                dp[i][1] = dp[i - 1][1];
+                dp[i][2] = dp[i - 1][2];
+            } else if (nums[i] == 1) {
+                dp[i][0] = dp[i - 1][0];
+                dp[i][1] = (dp[i - 1][0] + 2 * dp[i - 1][1]) % Mod;
+                dp[i][2] = dp[i - 1][2];
+            }else{
+                dp[i][0] = dp[i - 1][0];
+                dp[i][1] = dp[i - 1][1];
+                dp[i][2] = (dp[i - 1][1] + 2 * dp[i - 1][2]) % Mod;
+            }
+        }
+        return (int) (dp[n - 1][2] % Mod);
+    }
 }
 ```
 

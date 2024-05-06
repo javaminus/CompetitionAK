@@ -199,7 +199,7 @@ private void dfs(int[][] grid, int sum, int i, int j, int m, int n, int k) {
         当到达 (n - 1, n - 1) 后，你要继续走，直到返回到 (0, 0) ，只能向上或向左走，并且只能穿越有效的格子；
         当你经过一个格子且这个格子包含一个樱桃时，你将摘到樱桃并且这个格子会变成空的（值变为 0 ）；
         如果在 (0, 0) 和 (n - 1, n - 1) 之间不存在一条可经过的路径，则无法摘到任何一个樱桃。*/
-    private static int[][] directions = new int[][]{{0, 0}, {-1, 0}, {0, -1}, {-1, -1}}; // (x1,x2):（下，下），（下，右），（右，下），（右，右）
+    private static int[][] directions = new int[][]{{0, 0}, {-1, 0}, {0, -1}, {-1, -1}}; // (x1,x2):（下，下），（右，下），（下，右），（右，右）
     public int cherryPickup(int[][] grid) {
         int n = grid.length;
         int maxSteps = (n - 1) * 2;
