@@ -1,22 +1,34 @@
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Scanner;
 
 public class Main {
-    public static int minSum(int[] nums) {
-        Arrays.sort(nums); // 对数组进行排序
-        int sum = 0;       // 初始化总和
-        for (int num : nums) {
-            sum += num;     // 计算原始总和
-        }
-        while (nums.length > 1) { // 当数组中至少有两个元素时
-            int maxIndex = nums.length - 1; // 找到最大值的下标
-            sum -= nums[maxIndex];          // 从总和中减去最大值
-            nums = Arrays.copyOf(nums, nums.length - 1); // 移除最大值
-        }
-        return sum; // 返回最终的总和
-    }
-
+    static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
     public static void main(String[] args) {
-        int[] nums = {5, 3, 8, 4}; // 示例数组
-        System.out.println(minSum(nums)); // 输出最小化后的总和
+        int n = sc.nextInt();
+        int[][] grid = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = sc.nextInt();
+            }
+        }
+        int[][] prefixSum = new int[n + 1][n + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                prefixSum[i + 1][j + 1] += prefixSum[i + 1][j] + prefixSum[i][j + 1] - prefixSum[i][j] + grid[i][j];
+            }
+        }
+        int ans = 0;
+        for (int i0 = 0; i0 <= n; i0++) {
+            for (int j0 = 0; j0 <= n; j0++) {
+                for (int i1 = i0 + 1; i1 <= n; i1++) {
+                    for (int j1 = j0 + 1; j1 <= n; j1++) {
+                        ans = Math.max(ans, prefixSum[i1][j1] - prefixSum[i0][j0]);
+                    }
+                }
+            }
+        }
+        System.out.println(ans);
+        sc.close();
     }
 }
