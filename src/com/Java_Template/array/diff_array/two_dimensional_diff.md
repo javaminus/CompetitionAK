@@ -431,3 +431,60 @@ class Solution {
 }
 ```
 
+面试题 17.24. 最大子矩阵(压缩矩阵)
+----------------
+
+给定一个正整数、负整数和 0 组成的 N × M 矩阵，编写代码找出元素总和最大的子矩阵。
+
+返回一个数组 `[r1, c1, r2, c2]`，其中 `r1`, `c1` 分别代表子矩阵左上角的行号和列号，`r2`, `c2` 分别代表右下角的行号和列号。若有多个满足条件的子矩阵，返回任意一个均可。
+
+**注意：**本题相对书上原题稍作改动
+
+**示例：**
+
+**输入：**
+`[    [-1,**0**],    [0,-1] ]`
+**输出：**\[0,1,0,1\]
+**解释：**输入中标粗的元素即为输出所表示的矩阵
+
+**说明：**
+
+*   `1 <= matrix.length, matrix[0].length <= 200`
+
+[https://leetcode.cn/problems/max-submatrix-lcci/description/](https://leetcode.cn/problems/max-submatrix-lcci/description/)
+
+```java
+class Solution {
+    public int[] getMaxMatrix(int[][] matrix){
+        int m = matrix.length, n = matrix[0].length;
+        int[] ans = new int[4];
+        int mx = matrix[0][0]; // 细节初始化，默认ans = {0,0,0,0};
+        for (int i = 0; i < m; i++) { // 上界
+            int[] sums = new int[n]; // 压缩维度
+            for (int j = i; j < m; j++) { // 下界
+                for (int k = 0; k < n; k++) {
+                    sums[k] += matrix[j][k];
+                }
+                // 这里就是求一维数组sums的最大子数组和
+                int temp = 0, left = 0; // 左边界
+                for (int right = 0; right < n; right++) { // 右边界
+                    if (temp < 0) {
+                        temp = 0;
+                        left = right;
+                    }
+                    temp += sums[right]; // 思考为什么放在这个位置，而不是放在上一个if前面
+                    if (temp > mx) {
+                        mx = temp;
+                        ans[0] = i;
+                        ans[1] = left;
+                        ans[2] = j;
+                        ans[3] = right;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+

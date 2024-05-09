@@ -115,7 +115,7 @@ public class Main {
         System.out.println(segmentTree.query(1, 4)); // 输出：25
 
         // 区间更新
-        segmentTree.updateRange(1, 3, 2); // 区间[1,3]增加2
+        segmentTree.updateRange(1, 3, 2); // 区间[1,3]增加2，这里是区间都增加
 
         // 查询更新后的区间和
         System.out.println(segmentTree.query(1, 4)); // 输出：31

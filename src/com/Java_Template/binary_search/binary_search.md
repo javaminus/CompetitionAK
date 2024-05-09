@@ -91,3 +91,114 @@ class Solution {
     }
 }
 ```
+3139\. 使数组中所有元素相等的最小开销
+----------------------
+
+给你一个整数数组 `nums` 和两个整数 `cost1` 和 `cost2` 。你可以执行以下 **任一** 操作 **任意** 次：
+
+*   从 `nums` 中选择下标 `i` 并且将 `nums[i]` **增加** `1` ，开销为 `cost1`。
+*   选择 `nums` 中两个 **不同** 下标 `i` 和 `j` ，并且将 `nums[i]` 和 `nums[j]` 都 **增加** `1` ，开销为 `cost2` 。
+
+你的目标是使数组中所有元素都 **相等** ，请你返回需要的 **最小开销** 之和。
+
+由于答案可能会很大，请你将它对 `109 + 7` **取余** 后返回。
+
+**示例 1：**
+
+**输入：**nums = \[4,1\], cost1 = 5, cost2 = 2
+
+**输出：**15
+
+**解释：**
+
+执行以下操作可以使数组中所有元素相等：
+
+*   将 `nums[1]` 增加 1 ，开销为 5 ，`nums` 变为 `[4,2]` 。
+*   将 `nums[1]` 增加 1 ，开销为 5 ，`nums` 变为 `[4,3]` 。
+*   将 `nums[1]` 增加 1 ，开销为 5 ，`nums` 变为 `[4,4]` 。
+
+总开销为 15 。
+
+**示例 2：**
+
+**输入：**nums = \[2,3,3,3,5\], cost1 = 2, cost2 = 1
+
+**输出：**6
+
+**解释：**
+
+执行以下操作可以使数组中所有元素相等：
+
+*   将 `nums[0]` 和 `nums[1]` 同时增加 1 ，开销为 1 ，`nums` 变为 `[3,4,3,3,5]` 。
+*   将 `nums[0]` 和 `nums[2]` 同时增加 1 ，开销为 1 ，`nums` 变为 `[4,4,4,3,5]` 。
+*   将 `nums[0]` 和 `nums[3]` 同时增加 1 ，开销为 1 ，`nums` 变为 `[5,4,4,4,5]` 。
+*   将 `nums[1]` 和 `nums[2]` 同时增加 1 ，开销为 1 ，`nums` 变为 `[5,5,5,4,5]` 。
+*   将 `nums[3]` 增加 1 ，开销为 2 ，`nums` 变为 `[5,5,5,5,5]` 。
+
+总开销为 6 。
+
+**示例 3：**
+
+**输入：**nums = \[3,5,3\], cost1 = 1, cost2 = 3
+
+**输出：**4
+
+**解释：**
+
+执行以下操作可以使数组中所有元素相等：
+
+*   将 `nums[0]` 增加 1 ，开销为 1 ，`nums` 变为 `[4,5,3]` 。
+*   将 `nums[0]` 增加 1 ，开销为 1 ，`nums` 变为 `[5,5,3]` 。
+*   将 `nums[2]` 增加 1 ，开销为 1 ，`nums` 变为 `[5,5,4]` 。
+*   将 `nums[2]` 增加 1 ，开销为 1 ，`nums` 变为 `[5,5,5]` 。
+
+总开销为 4 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 106`
+*   `1 <= cost1 <= 106`
+*   `1 <= cost2 <= 106`
+
+[https://leetcode.cn/problems/minimum-cost-to-equalize-array/description/](https://leetcode.cn/problems/minimum-cost-to-equalize-array/description/)
+```java
+class Solution {
+    long MOD = (long) 1e9 + 7;
+
+    public int minCostToEqualizeArray(int[] nums, int cost1, int cost2) {
+        int n = nums.length;
+        long s = 0;
+        long mx = Long.MIN_VALUE, mn = Long.MAX_VALUE;
+        for (int x : nums) {
+            s += x;
+            mx = Math.max(mx, x);
+            mn = Math.min(mn, x);
+        }
+        long ans = (mx * n - s) * cost1;
+        if (2 * cost1 <= cost2) {
+            return (int) (ans % MOD);
+        }
+
+        long left = mx - mn;
+        long right = mx * (n - 1) - (s - mn);
+        long t;
+        while (true) {
+            if (left <= right) {
+                long k = left + right;
+                t = k / 2 * cost2 + (k % 2) * cost1;
+            } else {
+                long k = right;
+                t = k * cost2 + (left - right) * cost1;
+            }
+            if (t <= ans) {
+                ans = t;
+            } else {
+                return (int) (ans % MOD);
+            }
+            right += n - 1;
+            left++;
+        }
+    }
+}
+```
