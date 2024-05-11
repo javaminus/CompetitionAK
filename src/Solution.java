@@ -1,76 +1,74 @@
-class MajorityChecker {
-
-    int N = (int) 1e9; // 设定上限为1e9
-    static class Node {
-        Node leftNode, rightNode; // 代表当前节点的左右子节点leftSon,rightSon
-        int val, add; // val表示节点的预订次数，add表示懒惰传播时要加到子节点的值
-    }
-    Node root = new Node(); // 线段树的根节点
-
-    // 更新线段树的方法
-    void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
-        if (left <= leftChild && rightChild <= right) {
-            node.val += delta; // 更新当前节点的值
-            node.add += delta; // 标识当前节点需要懒惰传播的值
-            return;
-        }
-        pushdown(node); // 把当前节点的更新值传播到子节点
-        int mid = leftChild + (rightChild - leftChild) / 2; // 计算中间点，无符号右移一位相当于除以2
-        // 递归向下更新
-        if (left <= mid) update(node.leftNode, leftChild, mid, left, right, delta);
-        if (right > mid) update(node.rightNode, mid + 1, rightChild, left, right, delta);
-        pushup(node); // 更新完成后，维护当前节点的值
+class Solution {
+    int N = (int) 1e5;
+    static class Node{
+        Node leftNode,rightNode;
+        int val, add;
     }
 
-    // 查询线段树的方法
+    Node root = new Node();
+
     int query(Node node, int leftChild, int rightChild, int left, int right) {
-        if (leftChild >= left && rightChild <= right) {
-            return node.val; // 如果当前节点完全覆盖查询区间，直接返回节点值
+        if (left <= leftChild && right >= rightChild) {
+            return node.val;
         }
-        pushdown(node); // 先下推延迟标记
-        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0; // 初始化答案为0
-        // 查询左右子树，并更新答案
-        if (left <= mid) ans = query(node.leftNode, leftChild, mid, left, right);
-        if (right > mid) ans = Math.max(query(node.rightNode, mid + 1, rightChild, left, right), ans);
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0;
+        if (left <= mid) {
+            ans = query(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            ans = Math.max(query(node.rightNode, mid + 1, rightChild, left, right), ans);
+        }
         return ans;
     }
 
-    // 下推延迟更新的方法
+    void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
+        // int len = rightChild - leftChild + 1;
+        if (left <= leftChild && right >= rightChild) {
+            node.val = delta;
+            node.add = delta;
+            return;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        if (left <= mid) {
+            update(node.leftNode, leftChild, mid, left, right, delta);
+        }
+        if (right > mid) {
+            update(node.rightNode, mid + 1, rightChild, left, right, delta);
+        }
+        pushon(node);
+    }
+
     void pushdown(Node node) {
         if (node.leftNode == null) {
-            node.leftNode = new Node(); // 创建左子节点
+            node.leftNode = new Node();
         }
         if (node.rightNode == null) {
-            node.rightNode = new Node(); // 创建右子节点
+            node.rightNode = new Node();
         }
-        // 如果有延迟更新，则更新子节点
-        if (node.add > 0) {
-            // 这里是否可以改成 if (node.add != 0)
-            int add = node.add;
-            node.leftNode.add += add;
-            node.rightNode.add += add;
-            node.leftNode.val += add;
-            node.rightNode.val += add;
-            node.add = 0; // 清除当前节点的延迟更新标记
+        if (node.add == 0) {
+            return;
         }
+        // 相同的点不行，要求严格单调递增
+        int add = node.add;
+        node.leftNode.val = node.rightNode.val = add; // 不要累加
+        node.leftNode.add = node.rightNode.add = add; // 不要累加
+        node.add = 0;
     }
 
-    // 更新当前节点值的方法
-    void pushup(Node node) {
-        node.val = Math.max(node.leftNode.val, node.rightNode.val); // 取最大值更新当前节点
+    void pushon(Node node) {
+        node.val = Math.max(node.leftNode.val, node.rightNode.val);
     }
-
-    public MajorityChecker(int[] arr) {
-
-    }
-
-    public int query(int left, int right, int threshold) {
-
+    public int lengthOfLIS(int[] nums) {
+        // 使用线段树进行单点更新+区间查询，线段树区间存储从0到i的最长递增子序列
+        int ans = 1;
+        for (int num : nums) {
+            int x = num + 10005;
+            int cnt = query(root, 0, N, 0, x - 1) + 1;
+            update(root, 0, N, x, x, cnt);
+            ans = Math.max(ans, cnt);
+        }
+        return ans;
     }
 }
-
-/**
- * Your MajorityChecker object will be instantiated and called as such:
- * MajorityChecker obj = new MajorityChecker(arr);
- * int param_1 = obj.query(left,right,threshold);
- */

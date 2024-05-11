@@ -679,3 +679,152 @@ class Solution {
 }
 ```
 
+300\. 最长递增子序列（四种解法）
+-------------
+
+给你一个整数数组 `nums` ，找到其中最长严格递增子序列的长度。
+
+**子序列** 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，`[3,6,2,7]` 是数组 `[0,3,1,6,2,2,7]` 的
+
+子序列
+
+。
+
+ 
+
+**示例 1：**
+
+**输入：**nums = \[10,9,2,5,3,7,101,18\]
+**输出：**4
+**解释：**最长递增子序列是 \[2,3,7,101\]，因此长度为 4 。
+
+**示例 2：**
+
+**输入：**nums = \[0,1,0,3,2,3\]
+**输出：**4
+
+**示例 3：**
+
+**输入：**nums = \[7,7,7,7,7,7,7\]
+**输出：**1
+
+**提示：**
+
+*   `1 <= nums.length <= 2500`
+*   `-104 <= nums[i] <= 104`
+
+**进阶：**
+
+*   你能将算法的时间复杂度降低到 `O(n log(n))` 吗?
+
+[https://leetcode.cn/problems/longest-increasing-subsequence/](https://leetcode.cn/problems/longest-increasing-subsequence/)
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) { // O(n^2)
+        int n = nums.length;
+        int[] dp = new int[n]; // dfs(i) 表示以 nums[i] 结尾的最长递增子序列（LIS）的长度。
+        int ans = 1;
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            ans = Math.max(ans, dp[i] + 1);
+        }
+        return ans;
+    }
+}
+```
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public int lengthOfLIS(int[] nums) { // 解法二：二分贪心
+        ArrayList<Integer> g = new ArrayList<>();
+        for (int x : nums) {
+            // 找替换的位置
+            int pos = binarySearch(g, x);
+            if (pos == g.size()) {
+                g.add(x);
+            } else {
+                g.set(pos, x);
+            }
+        }
+        return g.size();
+    }
+
+    private int binarySearch(List<Integer> g, int target) {
+        int left = 0, right = g.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (g.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }
+}
+```
+
+```java
+public int lengthOfLIS(int[] nums) { // 解法三：树状数组，维护区间最大长度
+        int n = nums.length;
+        // 离散化
+        int[] temp = nums.clone();
+        Arrays.sort(temp);
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            map.putIfAbsent(temp[i], i + 1);
+        }
+        BIT bit = new BIT(n);
+        for (int i = 0; i < n; i++) {
+            int x = map.get(nums[i]);
+            int len = Math.max(bit.query(x - 1), 0) + 1;
+            bit.update(x, len);
+        }
+        return bit.query(n);
+    }
+
+    class BIT{ // 维护区间的最大长度
+        int n;
+        int[] treeArr; // 存储当前位置的最大长度
+
+        public BIT(int n) {
+            this.n = n;
+            treeArr = new int[n + 1];
+        }
+
+        private int lowBit(int x) {
+            return x & -x;
+        }
+
+        private void update(int x, int len) {
+            while (x <= n) {
+                if (treeArr[x] < len) {
+                    treeArr[x] = len;
+                }
+                x += lowBit(x);
+            }
+        }
+
+        public int query(int x) { // 查找最长度len
+            int res = Integer.MIN_VALUE;
+            while (x > 0) {
+                res = Math.max(res, treeArr[x]);
+                x -= lowBit(x);
+            }
+            return res;
+        }
+    }
+```
+
+```java
+
+```
+

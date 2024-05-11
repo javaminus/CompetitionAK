@@ -2,43 +2,45 @@ package com.nowcoder;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class D {
     static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+    static int[] a = new int[1050];
     public static void main(String[] args) {
-        int n = sc.nextInt();
-        int m = sc.nextInt();
-        int[][] grid = new int[n][m];
+        int n = 1 << sc.nextInt() - 1;
         for (int i = 0; i < n; i++) {
-            String s = sc.next();
-            for (int j = 0; j < m; j++) {
-                char c = s.charAt(j);
-                if (c == '*') {
-                    grid[i][j] = 1;
-                } else {
-                    grid[i][j] = 0;
-                }
-            }
+            a[i] = i;
         }
-        int ans = 0;
-        for (int i = 1; i < n - 1; i++) {
-            for (int j = 1; j < m - 1; j++) {
-                if (grid[i][j] == 1) {
-                    int k = 1, mx = 0;
-                    while (i - k >= 0 && j - k >= 0 && j + k < m) {
-                        if (grid[i - k][j - k] == 1 && grid[i - k][j + k] == 1) {
-                            mx++;
-                        }else{
-                            break;
-                        }
-                        k++;
-                    }
-                    ans = Math.max(ans, mx);
-                }
-            }
-        }
-        System.out.println(ans);
+        dfs(0, n);
+        System.out.println(Arrays.toString(a));
         sc.close();
     }
+
+    static void dfs(int l, int r) {
+        if (l == r) {
+            return;
+        }
+        int mid = l + (r - l) / 2;
+        ArrayList<Integer> ji = new ArrayList<>();
+        ArrayList<Integer> ou = new ArrayList<>();
+        for (int i = 0; i <= r - l; i++) {
+            if (i % 2 == 1) {
+                ji.add(a[i]);
+            }else{
+                ou.add(a[i]);
+            }
+        }
+        for (int i = l; i <= mid; i++) {
+            a[i] = ou.get(i - l);
+        }
+        for (int i = mid + 1; i <= r; i++) {
+            a[i] = ji.get(i - mid - 1);
+        }
+        dfs(l, mid);
+        dfs(mid + 1, r);
+    }
+
 }
