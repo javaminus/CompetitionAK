@@ -745,3 +745,541 @@ class Solution {
 }
 ```
 
+213\. 打家劫舍 II
+-------------
+
+你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 **围成一圈** ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，**如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警** 。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你 **在不触动警报装置的情况下** ，今晚能够偷窃到的最高金额。
+
+**示例 1：**
+
+**输入：**nums = \[2,3,2\]
+**输出：**3
+**解释：**你不能先偷窃 1 号房屋（金额 = 2），然后偷窃 3 号房屋（金额 = 2）, 因为他们是相邻的。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,1\]
+**输出：**4
+**解释：**你可以先偷窃 1 号房屋（金额 = 1），然后偷窃 3 号房屋（金额 = 3）。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+
+**示例 3：**
+
+**输入：**nums = \[1,2,3\]
+**输出：**3
+
+**提示：**
+
+*   `1 <= nums.length <= 100`
+*   `0 <= nums[i] <= 1000`
+
+[https://leetcode.cn/problems/house-robber-ii/](https://leetcode.cn/problems/house-robber-ii/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    int n;
+    int[] nums;
+    int[] memo;
+    public int rob(int[] nums) { // dfs记忆化搜索
+        this.nums = nums;
+        int n = nums.length;
+        if (n == 1) {
+            return nums[0];
+        }
+        if (n == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        memo = new int[n];
+        Arrays.fill(memo, -1);
+        int res = dfs(n - 1, 1);
+        Arrays.fill(memo, -1);
+        return Math.max(res, dfs(n - 2, 0));
+    }
+
+    private int dfs(int i, int start) {
+        if (i < start) {
+            return 0;
+        }
+        if (memo[i] != -1) {
+            return memo[i];
+        }
+        return memo[i] = Math.max(dfs(i - 1, start), dfs(i - 2, start) + nums[i]);
+    }
+}
+
+```
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 1) {
+            return nums[0];
+        }
+        if (n == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        // 偷nums[0]，那么只能偷nums[2]到nums[n - 2]
+        int[] dp1 = new int[n];
+        dp1[2] = nums[2];
+        for (int i = 3; i < n - 1; i++) {
+            dp1[i] = Math.max(dp1[i - 1], dp1[i - 2] + nums[i]);
+        }
+        dp1[n - 2] += nums[0];
+        // 不偷nums[0]，那么就是偷nums[1]到nums[n - 1]
+        int[] dp2 = new int[n];
+        dp2[1] = nums[1];
+        for (int i = 2; i < n; i++) {
+            dp2[i] = Math.max(dp2[i - 1], dp2[i - 2] + nums[i]);
+        }
+        return Math.max(dp1[n - 2], dp2[n - 1]);
+    }
+}
+
+```
+
+2320\. 统计放置房子的方式数
+-----------------
+
+一条街道上共有 `n * 2` 个 **地块** ，街道的两侧各有 `n` 个地块。每一边的地块都按从 `1` 到 `n` 编号。每个地块上都可以放置一所房子。
+
+现要求街道同一侧不能存在两所房子相邻的情况，请你计算并返回放置房屋的方式数目。由于答案可能很大，需要对 `109 + 7` 取余后再返回。
+
+注意，如果一所房子放置在这条街某一侧上的第 `i` 个地块，不影响在另一侧的第 `i` 个地块放置房子。
+
+**示例 1：**
+
+**输入：**n = 1
+**输出：**4
+**解释：**
+可能的放置方式：
+1. 所有地块都不放置房子。
+2. 一所房子放在街道的某一侧。
+3. 一所房子放在街道的另一侧。
+4. 放置两所房子，街道两侧各放置一所。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2022/05/12/arrangements.png)
+
+**输入：**n = 2
+**输出：**9
+**解释：**如上图所示，共有 9 种可能的放置方式。
+
+**提示：**
+
+*   `1 <= n <= 104`
+
+[https://leetcode.cn/problems/count-number-of-ways-to-place-houses/description/](https://leetcode.cn/problems/count-number-of-ways-to-place-houses/description/)
+
+```java
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int countHousePlacements(int n) { // 只看单边
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 2;
+        for (int i = 2; i <= n; i++) {
+            dp[i] = (dp[i - 1] + dp[i - 2]) % Mod;
+        }
+        return (int) ((long) dp[n] * dp[n] % Mod);
+    }
+}
+```
+
+53\. 最大子数组和
+-----------
+
+给你一个整数数组 `nums` ，请你找出一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+
+**子数组**
+
+是数组中的一个连续部分。
+
+**示例 1：**
+
+**输入：**nums = \[-2,1,-3,4,-1,2,1,-5,4\]
+**输出：**6
+**解释：**连续子数组 \[4,-1,2,1\] 的和最大，为 6 。
+
+**示例 2：**
+
+**输入：**nums = \[1\]
+**输出：**1
+
+**示例 3：**
+
+**输入：**nums = \[5,4,-1,7,8\]
+**输出：**23
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `-104 <= nums[i] <= 104`
+
+**进阶：**如果你已经实现复杂度为 `O(n)` 的解法，尝试使用更为精妙的 **分治法** 求解。
+
+[https://leetcode.cn/problems/maximum-subarray/description/](https://leetcode.cn/problems/maximum-subarray/description/)
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        // dp[i] 表示：以 nums[i] 结尾的连续子数组的最大和
+        int n = nums.length;
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            if (dp[i - 1] > 0) {
+                dp[i] = dp[i - 1] + nums[i];
+            }else{
+                dp[i] = nums[i];
+            }
+        }
+        int ans = nums[0];
+        for (int i = 1; i < n; i++) {
+            ans = Math.max(ans, dp[i]);
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int ans = Integer.MIN_VALUE;
+        int preSum = 0;
+        int minPre = 0;
+        for (int num : nums) {
+            preSum += num;
+            ans = Math.max(ans, preSum - minPre);
+            minPre = Math.min(minPre, preSum);
+        }
+        return ans;
+    }
+}
+```
+
+1749\. 任意子数组和的绝对值的最大值
+---------------------
+
+给你一个整数数组 `nums` 。一个子数组 `[numsl, numsl+1, ..., numsr-1, numsr]` 的 **和的绝对值** 为 `abs(numsl + numsl+1 + ... + numsr-1 + numsr)` 。
+
+请你找出 `nums` 中 **和的绝对值** 最大的任意子数组（**可能为空**），并返回该 **最大值** 。
+
+`abs(x)` 定义如下：
+
+*   如果 `x` 是负整数，那么 `abs(x) = -x` 。
+*   如果 `x` 是非负整数，那么 `abs(x) = x` 。
+
+**示例 1：**
+
+**输入：**nums = \[1,-3,2,3,-4\]
+**输出：**5
+**解释：**子数组 \[2,3\] 和的绝对值最大，为 abs(2+3) = abs(5) = 5 。
+
+**示例 2：**
+
+**输入：**nums = \[2,-5,1,-4,3,-2\]
+**输出：**8
+**解释：**子数组 \[-5,1,-4\] 和的绝对值最大，为 abs(-5+1-4) = abs(-8) = 8 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `-104 <= nums[i] <= 104`
+
+[https://leetcode.cn/problems/maximum-absolute-sum-of-any-subarray/](https://leetcode.cn/problems/maximum-absolute-sum-of-any-subarray/)
+
+```java
+class Solution {
+    public int maxAbsoluteSum(int[] nums) {
+        int mn = 0, mx = 0, preSum = 0;
+        for (int num : nums) {
+            preSum += num;
+            if (preSum > mx) {
+                mx = preSum;
+            }
+            if (preSum < mn) {
+                mn = preSum;
+            }
+        }
+        return mx - mn;
+    }
+}
+```
+
+363\. 矩形区域不超过 K 的最大数值和
+----------------------
+
+给你一个 `m x n` 的矩阵 `matrix` 和一个整数 `k` ，找出并返回矩阵内部矩形区域的不超过 `k` 的最大数值和。
+
+题目数据保证总会存在一个数值和不超过 `k` 的矩形区域。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/03/18/sum-grid.jpg)
+
+**输入：**matrix = \[\[1,0,1\],\[0,-2,3\]\], k = 2
+**输出：**2
+**解释：**蓝色边框圈出来的矩形区域 `[[0, 1], [-2, 3]]` 的数值和是 2，且 2 是不超过 k 的最大数字（k = 2）。
+
+**示例 2：**
+
+**输入：**matrix = \[\[2,2,-1\]\], k = 3
+**输出：**3
+
+**提示：**
+
+*   `m == matrix.length`
+*   `n == matrix[i].length`
+*   `1 <= m, n <= 100`
+*   `-100 <= matrix[i][j] <= 100`
+*   `-105 <= k <= 105`
+
+**进阶：**如果行数远大于列数，该如何设计解决方案？
+
+[https://leetcode.cn/problems/max-sum-of-rectangle-no-larger-than-k/description/](https://leetcode.cn/problems/max-sum-of-rectangle-no-larger-than-k/description/)
+
+```java
+class Solution {
+    public int maxSumSubmatrix(int[][] matrix, int k) {
+        int m = matrix.length, n = matrix[0].length;
+        int[][] preSum = new int[m + 1][n + 1];
+        // 二维前缀和
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                preSum[i + 1][j + 1] = preSum[i + 1][j] + preSum[i][j + 1] - preSum[i][j] + matrix[i][j];
+                if (preSum[i + 1][j + 1] == k) {
+                    return k;
+                }
+            }
+        }
+        int ans = Integer.MIN_VALUE;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int x = i; x < m; x++) {
+                    for (int y = j; y < n; y++) {
+                        int area = preSum[x + 1][y + 1] + preSum[i][j] - preSum[i][y + 1] - preSum[x + 1][j];
+                        // int area = sum[x][y] - (i - 1 < 0 ? 0 : sum[i - 1][y]) - (j - 1 < 0 ? 0 : sum[x][j - 1]) + (i - 1 < 0 || j - 1 < 0 ? 0 :sum[i - 1][j - 1]);
+                        // System.out.println(area);
+                        if (area == k) {
+                            return k;
+                        }
+                        if (area < k) {
+                            ans = Math.max(ans, area);
+                        }
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+152\. 乘积最大子数组
+-------------
+
+给你一个整数数组 `nums` ，请你找出数组中乘积最大的非空连续
+
+子数组
+
+（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+
+测试用例的答案是一个 **32-位** 整数。
+
+**示例 1:**
+
+**输入:** nums = \[2,3,-2,4\]
+**输出:** `6`
+**解释:** 子数组 \[2,3\] 有最大乘积 6。
+
+**示例 2:**
+
+**输入:** nums = \[-2,0,-1\]
+**输出:** 0
+**解释:** 结果不能为 2, 因为 \[-2,-1\] 不是子数组。
+
+**提示:**
+
+*   `1 <= nums.length <= 2 * 104`
+*   `-10 <= nums[i] <= 10`
+*   `nums` 的任何前缀或后缀的乘积都 **保证** 是一个 **32-位** 整数
+
+[https://leetcode.cn/problems/maximum-product-subarray/description/](https://leetcode.cn/problems/maximum-product-subarray/description/)
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        /* 标签：动态规划
+            遍历数组时计算当前最大值，不断更新
+            令imax为当前最大值，则当前最大值为 imax = max(imax * nums[i], nums[i])
+            由于存在负数，那么会导致最大的变最小的，最小的变最大的。因此还需要维护当前最小值imin，imin = min(imin * nums[i], nums[i])
+            当负数出现时则imax与imin进行交换再进行下一步计算
+            时间复杂度：O(n) */
+        int ans = Integer.MIN_VALUE, iMax = 1, iMin = 1;
+        for (int num : nums) {
+            if (num < 0) {
+                int temp = iMax;
+                iMax = iMin;
+                iMin = temp;
+            }
+            iMax = Math.max(iMax * num, num);
+            iMin = Math.min(iMin * num, num);
+            ans = Math.max(iMax, ans);
+        }
+        return ans;
+    }
+}
+```
+
+1289\. 下降路径最小和 II
+-----------------
+
+给你一个 `n x n` 整数矩阵 `grid` ，请你返回 **非零偏移下降路径** 数字和的最小值。
+
+**非零偏移下降路径** 定义为：从 `grid` 数组中的每一行选择一个数字，且按顺序选出来的数字中，相邻数字不在原数组的同一列。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/08/10/falling-grid.jpg)
+
+**输入：**grid = \[\[1,2,3\],\[4,5,6\],\[7,8,9\]\]
+**输出：**13
+**解释：**
+所有非零偏移下降路径包括：
+\[1,5,9\], \[1,5,7\], \[1,6,7\], \[1,6,8\],
+\[2,4,8\], \[2,4,9\], \[2,6,7\], \[2,6,8\],
+\[3,4,8\], \[3,4,9\], \[3,5,7\], \[3,5,9\]
+下降路径中数字和最小的是 \[1,5,7\] ，所以答案是 13 。
+
+**示例 2：**
+
+**输入：**grid = \[\[7\]\]
+**输出：**7
+
+**提示：**
+
+*   `n == grid.length == grid[i].length`
+*   `1 <= n <= 200`
+*   `-99 <= grid[i][j] <= 99`
+
+[https://leetcode.cn/problems/minimum-falling-path-sum-ii/](https://leetcode.cn/problems/minimum-falling-path-sum-ii/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minFallingPathSum(int[][] grid) {
+        int n = grid.length;
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE);
+        }
+        for (int i = 0; i < n; i++) {
+            dp[0][i] = grid[0][i];
+        }
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    if (j == k) {
+                        continue;
+                    }
+                    dp[i][j] = Math.min(dp[i][j], dp[i - 1][k] + grid[i][j]);
+                }
+            }
+        }
+        int ans = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            ans = Math.min(ans, dp[n - 1][i]);
+        }
+        return ans;
+    }
+}
+```
+
+1594\. 矩阵的最大非负积
+---------------
+
+给你一个大小为 `m x n` 的矩阵 `grid` 。最初，你位于左上角 `(0, 0)` ，每一步，你可以在矩阵中 **向右** 或 **向下** 移动。
+
+在从左上角 `(0, 0)` 开始到右下角 `(m - 1, n - 1)` 结束的所有路径中，找出具有 **最大非负积** 的路径。路径的积是沿路径访问的单元格中所有整数的乘积。
+
+返回 **最大非负积** 对 **`109 + 7`** **取余** 的结果。如果最大积为 **负数** ，则返回 `-1` 。
+
+**注意，**取余是在得到最大积之后执行的。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/12/23/product1.jpg)
+
+**输入：**grid = \[\[-1,-2,-3\],\[-2,-3,-3\],\[-3,-3,-2\]\]
+**输出：**\-1
+**解释：**从 (0, 0) 到 (2, 2) 的路径中无法得到非负积，所以返回 -1 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/12/23/product2.jpg)
+
+**输入：**grid = \[\[1,-2,1\],\[1,-2,1\],\[3,-4,1\]\]
+**输出：**8
+**解释：**最大非负积对应的路径如图所示 (1 \* 1 \* -2 \* -4 \* 1 = 8)
+
+**示例 3：**
+
+![](https://assets.leetcode.com/uploads/2021/12/23/product3.jpg)
+
+**输入：**grid = \[\[1,3\],\[0,-4\]\]
+**输出：**0
+**解释：**最大非负积对应的路径如图所示 (1 \* 0 \* -4 = 0)
+
+**提示：**
+
+*   `m == grid.length`
+*   `n == grid[i].length`
+*   `1 <= m, n <= 15`
+*   `-4 <= grid[i][j] <= 4`
+
+[https://leetcode.cn/problems/maximum-non-negative-product-in-a-matrix/](https://leetcode.cn/problems/maximum-non-negative-product-in-a-matrix/)
+
+```java
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int maxProductPath(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        long[][] dpMax = new long[m][n];
+        long[][] dpMin = new long[m][n];
+        dpMax[0][0] = grid[0][0];
+        dpMin[0][0] = grid[0][0];
+        for (int i = 1; i < m; i++) {
+            dpMax[i][0] = dpMax[i - 1][0] * grid[i][0];
+            dpMin[i][0] = dpMin[i - 1][0] * grid[i][0];
+        }
+        for (int i = 1; i < n; i++) {
+            dpMax[0][i] = dpMax[0][i - 1] * grid[0][i];
+            dpMin[0][i] = dpMin[0][i - 1] * grid[0][i];
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (grid[i][j] > 0) {
+                    dpMax[i][j] = Math.max(dpMax[i - 1][j], dpMax[i][j - 1]) * grid[i][j];
+                    dpMin[i][j] = Math.min(dpMin[i - 1][j], dpMin[i][j - 1]) * grid[i][j];
+                } else if (grid[i][j] < 0) {
+                    dpMin[i][j] = Math.max(dpMax[i - 1][j], dpMax[i][j - 1]) * grid[i][j];
+                    dpMax[i][j] = Math.min(dpMin[i - 1][j], dpMin[i][j - 1]) * grid[i][j];
+                }else{
+                    dpMin[i][j] = 0;
+                    dpMax[i][j] = 0;
+                }
+            }
+        }
+        return dpMax[m - 1][n - 1] >= 0 ? (int) (dpMax[m - 1][n - 1] % Mod) : -1;
+    }
+}
+```
+

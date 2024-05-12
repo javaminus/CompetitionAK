@@ -1,45 +1,37 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
-public class Main {
-    private static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
-    static int n;
-    static List<Integer> cnt = new ArrayList<>();
-    static boolean[] visited = new boolean[n];
-    static int c = 0;
-    static List<Integer>[] g;
-
+public class Main{
+    static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
     public static void main(String[] args) {
-        n = sc.nextInt();
-        g = new ArrayList[n];
-        Arrays.setAll(g, e -> new ArrayList<>());
-        while (sc.hasNext()) {
-            int x = sc.nextInt(), y = sc.nextInt();
-            g[x].add(y);
-            g[y].add(x);
-        }
+        int n = sc.nextInt();
+        int[] nums = new int[n];
         for (int i = 0; i < n; i++) {
-            c = 0;
-            if (!visited[i]) {
-                dfs(i, -1);
-            }
-            cnt.add(c);
+            nums[i] = sc.nextInt();
         }
-
-
+        Arrays.sort(nums);
+        if (nums.length == 1) {
+            System.out.println(0);
+        } else if ((n & 1) == 0) {
+            long mx = Long.MIN_VALUE, mn = Long.MAX_VALUE;
+            for (int i = 0; i <= n / 2; i++) {
+                int j = n - 1 - i;
+                mx = Math.max(mx, (long) nums[i] * nums[j]);
+                mn = Math.min(mn, (long) nums[i] * nums[j]);
+            }
+            System.out.println(mx - mn);
+        }else{
+            // 为奇数
+            long mx = Long.MIN_VALUE, mn = Long.MAX_VALUE;
+            for (int i = 0; i <= (n - 1) / 2; i++) {
+                int j = n - 2 - i;
+                mx = Math.max(mx, (long) nums[i] * nums[j]);
+                mn = Math.min(mn, (long) nums[i] * nums[j]);
+            }
+            System.out.println(mx - mn);
+        }
     }
 
-    private static void dfs(int x, int fa) {
-        visited[x] = true;
-        c++;
-        for (int y : g[x]) {
-            if (y != fa && !visited[y]) {
-                dfs(y, x);
-            }
-        }
-    }
 }
