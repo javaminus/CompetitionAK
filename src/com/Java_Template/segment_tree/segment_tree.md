@@ -825,6 +825,198 @@ public int lengthOfLIS(int[] nums) { // 解法三：树状数组，维护区间�
 ```
 
 ```java
+class Solution {
+    int N = (int) 1e5;
+    static class Node{
+        Node leftNode,rightNode;
+        int val, add;
+    }
 
+    Node root = new Node();
+
+    int query(Node node, int leftChild, int rightChild, int left, int right) {
+        if (left <= leftChild && right >= rightChild) {
+            return node.val;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0;
+        if (left <= mid) {
+            ans = query(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            ans = Math.max(query(node.rightNode, mid + 1, rightChild, left, right), ans);
+        }
+        return ans;
+    }
+
+    void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
+        // int len = rightChild - leftChild + 1;
+        if (left <= leftChild && right >= rightChild) {
+            node.val = delta;
+            node.add = delta;
+            return;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        if (left <= mid) {
+            update(node.leftNode, leftChild, mid, left, right, delta);
+        }
+        if (right > mid) {
+            update(node.rightNode, mid + 1, rightChild, left, right, delta);
+        }
+        pushon(node);
+    }
+
+    void pushdown(Node node) {
+        if (node.leftNode == null) {
+            node.leftNode = new Node();
+        }
+        if (node.rightNode == null) {
+            node.rightNode = new Node();
+        }
+        if (node.add == 0) {
+            return;
+        }
+        // 相同的点不行，要求严格单调递增
+        int add = node.add;
+        node.leftNode.val = node.rightNode.val = add; // 不要累加
+        node.leftNode.add = node.rightNode.add = add; // 不要累加
+        node.add = 0;
+    }
+
+    void pushon(Node node) {
+        node.val = Math.max(node.leftNode.val, node.rightNode.val);
+    }
+    public int lengthOfLIS(int[] nums) {
+        // 使用线段树进行单点更新+区间查询，线段树区间存储从0到i的最长递增子序列
+        int ans = 1;
+        for (int num : nums) {
+            int x = num + 10005;
+            int cnt = query(root, 0, N, 0, x - 1) + 1; // 查询区间最大值
+            update(root, 0, N, x, x, cnt); // 更新区间最大值，单点更新
+            ans = Math.max(ans, cnt);
+        }
+        return ans;
+    }
+}
+```
+
+2407\. 最长递增子序列 II
+-----------------
+
+给你一个整数数组 `nums` 和一个整数 `k` 。
+
+找到 `nums` 中满足以下要求的最长子序列：
+
+*   子序列 **严格递增**
+*   子序列中相邻元素的差值 **不超过** `k` 。
+
+请你返回满足上述要求的 **最长子序列** 的长度。
+
+**子序列** 是从一个数组中删除部分元素后，剩余元素不改变顺序得到的数组。
+
+**示例 1：**
+
+**输入：**nums = \[4,2,1,4,3,4,5,8,15\], k = 3
+**输出：**5
+**解释：**
+满足要求的最长子序列是 \[1,3,4,5,8\] 。
+子序列长度为 5 ，所以我们返回 5 。
+注意子序列 \[1,3,4,5,8,15\] 不满足要求，因为 15 - 8 = 7 大于 3 。
+
+**示例 2：**
+
+**输入：**nums = \[7,4,5,1,8,12,4,7\], k = 5
+**输出：**4
+**解释：**
+满足要求的最长子序列是 \[4,5,8,12\] 。
+子序列长度为 4 ，所以我们返回 4 。
+
+**示例 3：**
+
+**输入：**nums = \[1,5\], k = 1
+**输出：**1
+**解释：**
+满足要求的最长子序列是 \[1\] 。
+子序列长度为 1 ，所以我们返回 1 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i], k <= 105`
+
+[https://leetcode.cn/problems/longest-increasing-subsequence-ii/description/](https://leetcode.cn/problems/longest-increasing-subsequence-ii/description/)
+
+```java
+class Solution { // 我直接上线段树
+    int N = (int) 1e5 + 10;
+    static class Node{
+        Node leftNode, rightNode;
+        int val, add;
+    }
+
+    Node root = new Node();
+
+    void update(Node node, int leftChild, int rightChild, int left, int right, int x) {
+        if (left <= leftChild && right >= rightChild) {
+            node.val = x;
+            node.add = x;
+            return;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        if (left <= mid) {
+            update(node.leftNode, leftChild, mid, left, right, x);
+        }
+        if (right > mid) {
+            update(node.rightNode, mid + 1, rightChild, left, right, x);
+        }
+        pushup(node);
+    }
+
+    int query(Node node, int leftChild, int rightChild, int left, int right) {
+        if (left <= leftChild && right >= rightChild) {
+            return node.val;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        int ans = 0;
+        if (left <= mid) {
+            ans = query(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            ans = Math.max(ans, query(node.rightNode, mid + 1, rightChild, left, right));
+        }
+        return ans;
+    }
+
+    void pushdown(Node node) {
+        if (node.leftNode == null) {
+            node.leftNode = new Node();
+        }
+        if (node.rightNode == null) {
+            node.rightNode = new Node();
+        }
+        if (node.add == 0) {
+            return;
+        }
+        node.leftNode.val = node.rightNode.val = node.leftNode.add = node.rightNode.add = node.add;
+        node.add = 0;
+    }
+
+    void pushup(Node node) {
+        node.val = Math.max(node.leftNode.val, node.rightNode.val);
+    }
+    public int lengthOfLIS(int[] nums, int k) {
+        // 线段树存储当前位置最长的递增子序列
+        int ans = 1;
+        for (int x : nums) {
+            int cnt = query(root, 0, N, x - k, x - 1) + 1;
+            ans = Math.max(ans, cnt);
+            update(root, 0, N, x, x, cnt);
+        }
+        return ans;
+    }
+}
 ```
 

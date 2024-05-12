@@ -1,74 +1,36 @@
-class Solution {
-    int N = (int) 1e5;
-    static class Node{
-        Node leftNode,rightNode;
-        int val, add;
+import java.util.Arrays;
+
+public class Solution {
+
+    public int findMinDifference(int[] primes) {
+        int n = primes.length;
+        // 如果数组中只有一个素数，或者没有素数，则无法进行操作，极差为0
+        if (n <= 1) return 0;
+
+        // 将素数数组排序
+        Arrays.sort(primes);
+
+        // 只留下最小的和最大的的素数，其余的素数两两配对合并
+        int minPrime = primes[0];
+        int maxPrime = primes[n - 1];
+
+        // maxProduct表示合并操作后的最大合数，初始化为最大素数自身
+        long maxProduct = maxPrime;
+
+        // 从第二小的素数到倒数第二大的素数，进行合并操作
+        for (int i = 1; i < n - 1; i += 2) {
+            long product = (long) primes[i] * primes[i + 1];
+            maxProduct = Math.max(maxProduct, product);
+        }
+
+        // 返回合并操作后的极差
+        return (int) (maxProduct - minPrime);
     }
 
-    Node root = new Node();
-
-    int query(Node node, int leftChild, int rightChild, int left, int right) {
-        if (left <= leftChild && right >= rightChild) {
-            return node.val;
-        }
-        pushdown(node);
-        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0;
-        if (left <= mid) {
-            ans = query(node.leftNode, leftChild, mid, left, right);
-        }
-        if (right > mid) {
-            ans = Math.max(query(node.rightNode, mid + 1, rightChild, left, right), ans);
-        }
-        return ans;
-    }
-
-    void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
-        // int len = rightChild - leftChild + 1;
-        if (left <= leftChild && right >= rightChild) {
-            node.val = delta;
-            node.add = delta;
-            return;
-        }
-        pushdown(node);
-        int mid = leftChild + (rightChild - leftChild) / 2;
-        if (left <= mid) {
-            update(node.leftNode, leftChild, mid, left, right, delta);
-        }
-        if (right > mid) {
-            update(node.rightNode, mid + 1, rightChild, left, right, delta);
-        }
-        pushon(node);
-    }
-
-    void pushdown(Node node) {
-        if (node.leftNode == null) {
-            node.leftNode = new Node();
-        }
-        if (node.rightNode == null) {
-            node.rightNode = new Node();
-        }
-        if (node.add == 0) {
-            return;
-        }
-        // 相同的点不行，要求严格单调递增
-        int add = node.add;
-        node.leftNode.val = node.rightNode.val = add; // 不要累加
-        node.leftNode.add = node.rightNode.add = add; // 不要累加
-        node.add = 0;
-    }
-
-    void pushon(Node node) {
-        node.val = Math.max(node.leftNode.val, node.rightNode.val);
-    }
-    public int lengthOfLIS(int[] nums) {
-        // 使用线段树进行单点更新+区间查询，线段树区间存储从0到i的最长递增子序列
-        int ans = 1;
-        for (int num : nums) {
-            int x = num + 10005;
-            int cnt = query(root, 0, N, 0, x - 1) + 1;
-            update(root, 0, N, x, x, cnt);
-            ans = Math.max(ans, cnt);
-        }
-        return ans;
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        int[] primes = {2, 3, 5, 7}; // 示例素数数组
+        int result = solution.findMinDifference(primes);
+        System.out.println("Minimum Difference: " + result);
     }
 }
