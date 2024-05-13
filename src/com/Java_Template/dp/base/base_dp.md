@@ -998,6 +998,23 @@ class Solution {
 ```java
 class Solution {
     public int maxAbsoluteSum(int[] nums) {
+        int n = nums.length;
+        int[] dpMax = new int[n + 1];
+        int[] dpMin = new int[n + 1];
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            dpMax[i + 1] = Math.max(dpMax[i] + nums[i], nums[i]);
+            dpMin[i + 1] = Math.min(dpMin[i] + nums[i], nums[i]);
+            ans = Math.max(ans, Math.max(dpMax[i + 1], -dpMin[i + 1]));
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public int maxAbsoluteSum(int[] nums) { // 前缀和思想，不好理解，建议用dp思想
         int mn = 0, mx = 0, preSum = 0;
         for (int num : nums) {
             preSum += num;
@@ -1137,6 +1154,28 @@ class Solution {
     }
 }
 ```
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int ans = Integer.MIN_VALUE, mx = 1, mn = 1;
+        for (int x : nums) {
+            if (x > 0) {
+                mx = Math.max(mx * x, x);
+                mn = Math.min(mn * x, x);
+            }else{
+                int t = mx; // 这里需要t在中间做临时存储
+                mx = Math.max(mn * x, x);
+                mn = Math.min(x * t, x);
+            }
+            ans = Math.max(mx, ans);
+        }
+        return ans;
+    }
+}
+```
+
+
 
 1289\. 下降路径最小和 II
 -----------------

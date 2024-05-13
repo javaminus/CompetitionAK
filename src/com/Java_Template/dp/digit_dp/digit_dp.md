@@ -26,6 +26,13 @@
 
 [https://leetcode.cn/problems/numbers-with-repeated-digits/description/](https://leetcode.cn/problems/numbers-with-repeated-digits/description/)
 
+> 递归中：
+>
+> 如果 isNum 为假，说明前面没有填数字，那么当前也可以不填数字。一旦从这里递归下去，isLimit 就可以置为 false 了，这是因为 s[0] 必然是大于 0 的，后面就不受到 n 的约束了。或者说，最高位不填数字，后面无论怎么填都比 n 小。
+> 如果 isNum 为真，那么当前必须填一个数字。枚举填入的数字，根据 isNum 和 isLimit\textit{isLimit}isLimit 来决定填入数字的范围。
+> 递归终点：当 i 等于 s 长度时，如果 isNum 为真，则表示得到了一个合法数字（因为不合法的不会继续递归下去），返回 1，否则返回 0。
+>
+
 ```java
 import java.util.Arrays;
 
@@ -44,25 +51,25 @@ class Solution {
 
     private int dfs(int i, int mask, boolean isLimit, boolean isNum) {
         if (i == s.length) {
-            return isNum ? 1 : 0;
+            return isNum ? 1 : 0; // isNum 为 true 表示得到了一个合法数字
         }
         if (!isLimit && isNum && memo[i][mask] != -1) {
             return memo[i][mask];
         }
         int res = 0;
-        if (!isNum) {
-            res = dfs(i + 1, mask, false, false);
+        if (!isNum) { // 可以跳过当前数位
+            res = dfs(i + 1, mask, false, false); // 这里特判了一些前导0的数字00000000000，但是没有return,所以会继续往下面走的
         }
-        int up = isLimit ? s[i] - '0' : 9;
-        for (int d = isNum ? 0 : 1; d <= up; d++) {
-            if ((mask >> d & 1) == 0) {
+        int up = isLimit ? s[i] - '0' : 9; // 如果前面填的数字都和 n 的一样，那么这一位至多填数字 s[i]（否则就超过 n 啦）
+        for (int d = isNum ? 0 : 1; d <= up; d++) { // 枚举要填入的数字 d,这里的isNum也会判断前导0
+            if ((mask >> d & 1) == 0) { // d 不在 mask 中
                 res += dfs(i + 1, mask | (1 << d), isLimit && d == up, true);
             }
         }
-        if (!isLimit && isNum) {
+        if (!isLimit && isNum){ // isNum一定要为true，这样才是填入了数字 这里可以不写！isLimit
             memo[i][mask] = res;
         }
-        return res;
+        return res; 
     }
 }
 ```
@@ -106,7 +113,7 @@ class Solution {
     char[] s;
     int[][] memo;
     public int count(String num1, String num2, int min_sum, int max_sum) {
-        int ans = cal(num2, min_sum, max_sum) - cal(num1, min_sum, max_sum) + Mod;
+        int ans = (cal(num2, min_sum, max_sum) - cal(num1, min_sum, max_sum) + Mod) % Mod; //栽跟头的地方，这里记得加上Mod
         int t = 0;
         for (char c : num1.toCharArray()) {
             t += c - '0';
@@ -127,7 +134,7 @@ class Solution {
         return dfs(0, 0, minNum, maxNum,true);
     }
 
-    private int dfs(int i, int sum, int minNum, int maxNum,boolean isLimit) {
+    private int dfs(int i, int sum, int minNum, int maxNum,boolean isLimit) { // 这里不用担心前导0，所以去掉了isNum参数
         if (sum > maxNum) {
             return 0;
         }
