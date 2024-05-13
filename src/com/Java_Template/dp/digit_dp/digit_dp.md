@@ -861,4 +861,98 @@ class Solution {
     }
 }
 ```
+2827\. 范围中美丽整数的数目
+-----------------
 
+给你正整数 `low` ，`high` 和 `k` 。
+
+如果一个数满足以下两个条件，那么它是 **美丽的** ：
+
+*   偶数数位的数目与奇数数位的数目相同。
+*   这个整数可以被 `k` 整除。
+
+请你返回范围 `[low, high]` 中美丽整数的数目。
+
+**示例 1：**
+
+**输入：**low = 10, high = 20, k = 3
+**输出：**2
+**解释：**给定范围中有 2 个美丽数字：\[12,18\]
+- 12 是美丽整数，因为它有 1 个奇数数位和 1 个偶数数位，而且可以被 k = 3 整除。
+- 18 是美丽整数，因为它有 1 个奇数数位和 1 个偶数数位，而且可以被 k = 3 整除。
+  以下是一些不是美丽整数的例子：
+- 16 不是美丽整数，因为它不能被 k = 3 整除。
+- 15 不是美丽整数，因为它的奇数数位和偶数数位的数目不相等。
+  给定范围内总共有 2 个美丽整数。
+
+**示例 2：**
+
+**输入：**low = 1, high = 10, k = 1
+**输出：**1
+**解释：**给定范围中有 1 个美丽数字：\[10\]
+- 10 是美丽整数，因为它有 1 个奇数数位和 1 个偶数数位，而且可以被 k = 1 整除。
+  给定范围内总共有 1 个美丽整数。
+
+**示例 3：**
+
+**输入：**low = 5, high = 5, k = 2
+**输出：**0
+**解释：**给定范围中有 0 个美丽数字。
+- 5 不是美丽整数，因为它的奇数数位和偶数数位的数目不相等。
+
+**提示：**
+
+*   `0 < low <= high <= 109`
+*   `0 < k <= 20`
+
+[https://leetcode.cn/problems/number-of-beautiful-integers-in-the-range/description/](https://leetcode.cn/problems/number-of-beautiful-integers-in-the-range/description/)
+
+> ![1715615950594](F:\leetcode\src\com\Java_Template\dp\digit_dp\digit_dp.assets\1715615950594.png)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    char[] s;
+    int[][][] memo;
+    int k;
+    int len;
+    public int numberOfBeautifulIntegers(int low, int high, int k) {
+        this.k = k;
+        return cal(high) - cal(low - 1);
+    }
+
+    private int cal(int n) {
+        s = Integer.toString(n).toCharArray();
+        len = s.length;
+        memo = new int[len][len * 2 + 1][k];
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < len * 2 + 1; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        return dfs(0, len, 0, true, false); // 这里初始化diff为len,防止数组-1溢出
+    }
+
+    private int dfs(int i, int diff, int mod, boolean isLimit, boolean isNum) { // diff 奇数 - 偶数
+        if (i == len) {
+            return isNum && mod == 0 && diff == len ? 1 : 0;
+        }
+        if (isNum && !isLimit && memo[i][diff][mod] != -1) {
+            return memo[i][diff][mod];
+        }
+        int res = 0;
+        if (!isNum) {
+            res = dfs(i + 1, diff, mod, false, false);
+        }
+        int up = isLimit ? s[i] - '0' : 9;
+        for (int j = isNum ? 0 : 1; j <= up; j++) {
+            res += dfs(i + 1, diff + (j % 2 == 1 ? 1 : -1), (mod * 10 + j) % k, isLimit && j == up, true);
+        }
+        if (isNum && !isLimit) {
+            memo[i][diff][mod] = res;
+        }
+        return res;
+    }
+}
+```
