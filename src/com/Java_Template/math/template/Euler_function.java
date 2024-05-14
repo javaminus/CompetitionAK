@@ -1,4 +1,4 @@
-package com.Java_Template.Math.template;
+package com.Java_Template.math.template;
 
 import java.util.Scanner;
   

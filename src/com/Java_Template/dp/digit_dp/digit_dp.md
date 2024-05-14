@@ -956,3 +956,335 @@ class Solution {
     }
 }
 ```
+
+2999\. 统计强大整数的数目
+----------------
+
+给你三个整数 `start` ，`finish` 和 `limit` 。同时给你一个下标从 **0** 开始的字符串 `s` ，表示一个 **正** 整数。
+
+如果一个 **正** 整数 `x` 末尾部分是 `s` （换句话说，`s` 是 `x` 的 **后缀**），且 `x` 中的每个数位至多是 `limit` ，那么我们称 `x` 是 **强大的** 。
+
+请你返回区间 `[start..finish]` 内强大整数的 **总数目** 。
+
+如果一个字符串 `x` 是 `y` 中某个下标开始（**包括** `0` ），到下标为 `y.length - 1` 结束的子字符串，那么我们称 `x` 是 `y` 的一个后缀。比方说，`25` 是 `5125` 的一个后缀，但不是 `512` 的后缀。
+
+**示例 1：**
+
+**输入：**start = 1, finish = 6000, limit = 4, s = "124"
+**输出：**5
+**解释：**区间 \[1..6000\] 内的强大数字为 124 ，1124 ，2124 ，3124 和 4124 。这些整数的各个数位都 <= 4 且 "124" 是它们的后缀。注意 5124 不是强大整数，因为第一个数位 5 大于 4 。
+这个区间内总共只有这 5 个强大整数。
+
+**示例 2：**
+
+**输入：**start = 15, finish = 215, limit = 6, s = "10"
+**输出：**2
+**解释：**区间 \[15..215\] 内的强大整数为 110 和 210 。这些整数的各个数位都 <= 6 且 "10" 是它们的后缀。
+这个区间总共只有这 2 个强大整数。
+
+**示例 3：**
+
+**输入：**start = 1000, finish = 2000, limit = 4, s = "3000"
+**输出：**0
+**解释：**区间 \[1000..2000\] 内的整数都小于 3000 ，所以 "3000" 不可能是这个区间内任何整数的后缀。
+
+**提示：**
+
+*   `1 <= start <= finish <= 1015`
+*   `1 <= limit <= 9`
+*   `1 <= s.length <= floor(log10(finish)) + 1`
+*   `s` 数位中每个数字都小于等于 `limit` 。
+*   `s` 不包含任何前导 0 。
+
+[https://leetcode.cn/problems/count-the-number-of-powerful-integers/](https://leetcode.cn/problems/count-the-number-of-powerful-integers/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    char[] s;
+    String s1;
+    long[] memo;
+    int limit;
+    String t;
+    public long numberOfPowerfulInt(long start, long finish, int limit, String t) { // 全部开Long
+        this.limit = limit;
+        this.t = t;
+        return cal(finish) - cal(start - 1);
+    }
+
+    private long cal(long x) {
+        s = Long.toString(x).toCharArray();
+        s1 = Long.toString(x);
+        if (s.length < t.length() || x < Long.parseLong(t)) {
+            return 0;
+        }
+        memo = new long[s.length];
+        Arrays.fill(memo, -1);
+        return dfs(0, true, false);
+    }
+
+    private long dfs(int i, boolean isLimit, boolean isNum) {
+        if (i == s.length - t.length()) { // 这里的细节比较难
+            long ss = Long.parseLong(s1.substring(i));
+            long tt = Long.parseLong(t);
+            if (ss >= tt) {
+                return 1;
+            }else{
+                if (!isLimit) {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+        if (isNum && !isLimit && memo[i] != -1) {
+            return memo[i];
+        }
+        long res = 0;
+        if (!isNum) {
+            res += dfs(i + 1, false, false);
+        }
+        int up = isLimit ? s[i] - '0' : 9;
+        for (int j = isNum ? 0 : 1; j <= Math.min(limit, up); j++) {
+            res += dfs(i + 1, isLimit && j == up, true);
+        }
+        if (isNum && !isLimit) {
+            memo[i] = res;
+        }
+        return res;
+    }
+}
+```
+
+2801\. 统计范围内的步进数字数目(做差取余一定要加Mod)
+-------------------
+
+给你两个正整数 `low` 和 `high` ，都用字符串表示，请你统计闭区间 `[low, high]` 内的 **步进数字** 数目。
+
+如果一个整数相邻数位之间差的绝对值都 **恰好** 是 `1` ，那么这个数字被称为 **步进数字** 。
+
+请你返回一个整数，表示闭区间 `[low, high]` 之间步进数字的数目。
+
+由于答案可能很大，请你将它对 `109 + 7` **取余** 后返回。
+
+**注意：**步进数字不能有前导 0 。
+
+**示例 1：**
+
+**输入：**low = "1", high = "11"
+**输出：**10
+**解释：**区间 \[1,11\] 内的步进数字为 1 ，2 ，3 ，4 ，5 ，6 ，7 ，8 ，9 和 10 。总共有 10 个步进数字。所以输出为 10 。
+
+**示例 2：**
+
+**输入：**low = "90", high = "101"
+**输出：**2
+**解释：**区间 \[90,101\] 内的步进数字为 98 和 101 。总共有 2 个步进数字。所以输出为 2 。
+
+**提示：**
+
+*   `1 <= int(low) <= int(high) < 10100`
+*   `1 <= low.length, high.length <= 100`
+*   `low` 和 `high` 只包含数字。
+*   `low` 和 `high` 都不含前导 0 。
+
+[https://leetcode.cn/problems/count-stepping-numbers-in-range/description/](https://leetcode.cn/problems/count-stepping-numbers-in-range/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    char[] s;
+    long[][] memo;
+    public int countSteppingNumbers(String low, String high) {
+        int add = 1;
+        for (int i = 1; i < low.length(); i++) {
+            if (Math.abs(low.charAt(i) - low.charAt(i - 1)) != 1) {
+                add = 0;
+                break;
+            }
+        }
+        return (int) ((int) (cal(high) - cal(low) + Mod + add) % Mod); // NOTE 做差取余一定要加MOD
+    }
+
+    private long cal(String x) {
+        s = x.toCharArray();
+        memo = new long[s.length][11];
+        for (int i = 0; i < s.length; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(0, 10, true, false);
+    }
+
+    private long dfs(int i, int pre, boolean isLimit, boolean isNum) {
+        if (i == s.length) {
+            return isNum ? 1 : 0;
+        }
+        if (isNum && !isLimit && memo[i][pre] != -1) {
+            return memo[i][pre];
+        }
+        long res = 0;
+        if (!isNum) {
+            res = (res + dfs(i + 1, 10, false, false)) % Mod;
+        }
+        int up = isLimit ? s[i] - '0' : 9;
+        for (int j = isNum ? 0 : 1; j <= up; j++) {
+            if (pre == 10) {
+                res = (res + dfs(i + 1, j, isLimit && j == up, true)) % Mod;
+            } else if (Math.abs(j - pre) == 1) {
+                res = (res + dfs(i + 1, j, isLimit && j == up, true)) % Mod;
+            }
+        }
+        if (!isLimit) {
+            memo[i][pre] = res % Mod;
+        }
+        return res % Mod;
+    }
+}
+```
+
+1397\. 找到所有好字符串(数位dp+KMP)
+---------------
+
+> 本题来源于一家印度公司的面试题，其难度远高于国内和北美的面试难度。如果你觉得此题无从下手、对下一节的「预备知识」一无所知、或者是看不懂这篇题解，都是很正常的。这道题已经达到了竞赛的难度，即使是非常优秀的竞赛选手，也要花至少 10 分钟的时间写出完整（但不一定可读）的代码。竞赛选手有大量的做题基础，因此在遇到这题时几乎不需要思考的时间，可以直接上手编写代码。而对于普通的面试准备者来说，在 40 分钟内理清思路、写出代码、编写测试并给面试官讲解清楚是几乎不可能的。
+>
+> 作者：力扣官方题解
+> 链接：https://leetcode.cn/problems/find-all-good-strings/solutions/186424/zhao-dao-suo-you-hao-zi-fu-chuan-by-leetcode-solut/
+> 来源：力扣（LeetCode）
+> 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+> Carl_Czerny锐评：这道题难度确实是比较高，在大家积分普遍不高的远古年代难度分都能达到2666，天坑转码人比赛期间过不了很正常，但我之前也确实高估了，这道题的真实定位应该是VeryHard的守门员，而不是2647题和2699题出现之前主站的天花板……
+>
+> 作者：Carl_Czerny
+> 链接：https://leetcode.cn/problems/find-all-good-strings/solutions/2308661/ji-yi-hua-sou-suo-shi-xian-shu-wei-dpbu-g0no3/
+> 来源：力扣（LeetCode）
+> 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+给你两个长度为 `n` 的字符串 `s1` 和 `s2` ，以及一个字符串 `evil` 。请你返回 **好字符串** 的数目。
+
+**好字符串** 的定义为：它的长度为 `n` ，字典序大于等于 `s1` ，字典序小于等于 `s2` ，且不包含 `evil` 为子字符串。
+
+由于答案可能很大，请你返回答案对 10^9 + 7 取余的结果。
+
+**示例 1：**
+
+**输入：**n = 2, s1 = "aa", s2 = "da", evil = "b"
+**输出：**51 
+**解释：**总共有 25 个以 'a' 开头的好字符串："aa"，"ac"，"ad"，...，"az"。还有 25 个以 'c' 开头的好字符串："ca"，"cc"，"cd"，...，"cz"。最后，还有一个以 'd' 开头的好字符串："da"。
+
+**示例 2：**
+
+**输入：**n = 8, s1 = "leetcode", s2 = "leetgoes", evil = "leet"
+**输出：**0 
+**解释：**所有字典序大于等于 s1 且小于等于 s2 的字符串都以 evil 字符串 "leet" 开头。所以没有好字符串。
+
+**示例 3：**
+
+**输入：**n = 2, s1 = "gx", s2 = "gz", evil = "x"
+**输出：**2
+
+**提示：**
+
+*   `s1.length == n`
+*   `s2.length == n`
+*   `s1 <= s2`
+*   `1 <= n <= 500`
+*   `1 <= evil.length <= 50`
+*   所有字符串都只包含小写英文字母。
+
+[https://leetcode.cn/problems/find-all-good-strings/description/](https://leetcode.cn/problems/find-all-good-strings/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    int n;
+    char[] s;
+    String evil;
+    int[][] memo;
+    int[] next;
+    public int findGoodStrings(int n, String s1, String s2, String evil) {
+        this.evil = evil;
+        this.n = n;
+        next = getNext(evil);
+        int add = 1;
+        if (find(s1, evil) != -1) {
+            add = 0;
+        }
+        return (cal(s2) - cal(s1) + Mod + add) % Mod;
+    }
+
+    private int cal(String s) {
+        this.s = s.toCharArray();
+        memo = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(0, 0, true);
+    }
+
+    private int dfs(int i, int j, boolean isLimit) {
+        if (j == evil.length()) { // 表示完全匹配
+            return 0;
+        }
+        if (i == n) {
+            return 1;
+        }
+        if (!isLimit && memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        int res = 0;
+        char up = isLimit ? s[i] : 'z';
+        for (char d = 'a'; d <= up; d++) {
+            int nj = j;
+            while (nj > 0 && d != evil.charAt(nj)) {
+                nj = next[nj - 1];
+            }
+            // 此处要注意，当 nj == 0 的时候，会存在 k != evil.charAt(nj) 的情况
+            // 若直接 nj + 1 进入递归，是认为此时的两个字符一定是匹配上了，实际上可能并没有
+            if (nj == 0 && d != evil.charAt(nj)) {
+                nj = -1;
+            }
+            res = (res + dfs(i + 1, nj + 1, isLimit && d == up)) % Mod;
+        }
+        if (!isLimit) {
+            memo[i][j] = res;
+        }
+        return res;
+    }
+
+    private int[] getNext(String pattern) { // 求next数组
+        int n = pattern.length();
+        int[] next = new int[n];
+        for (int i = 1, j = 0; i < n; i++) {
+            while (j > 0 && pattern.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1];
+            }
+            if (pattern.charAt(i) == pattern.charAt(j)) {
+                j++;
+            }
+            next[i] = j;
+        }
+        return next;
+    }
+
+    private int find(String s, String pattern) { // 返回主串匹配模式串的第一个下标
+        int n = s.length();
+        for (int i = 0, j = 0; i < n; i++) {
+            while (j > 0 && s.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1]; //下一个匹配位为next数组的第j-1位
+            }
+            if (s.charAt(i) == pattern.charAt(j)) {
+                j++; //主串通过i进行加1，模式串通过j加1
+            }
+            if (j == pattern.length()) {
+                return i - j + 1; //返回匹配位置
+            }
+        }
+        return -1;
+    }
+}
+```
+

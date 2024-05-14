@@ -1,4 +1,4 @@
-package com.Java_Template.Math.Big_Integer;
+package com.Java_Template.math.Big_Integer;
 
 /**
  * @author Minus

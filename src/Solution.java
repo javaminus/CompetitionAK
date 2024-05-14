@@ -1,45 +1,52 @@
-import java.util.Arrays;
+import java.util.ArrayList;
 
 class Solution {
-    char[] s;
-    int[][][] memo;
-    int k;
-    int len;
-    public int numberOfBeautifulIntegers(int low, int high, int k) {
-        this.k = k;
-        return cal(high) - cal(low - 1);
-    }
-
-    private int cal(int n) {
-        s = Integer.toString(n).toCharArray();
-        len = s.length;
-        memo = new int[len][len * 2 + 1][k];
-        for (int i = 0; i < len; i++) {
-            for (int j = 0; j < len * 2 + 1; j++) {
-                Arrays.fill(memo[i][j], -1);
+    static int MX = (int) 1e6;
+    static boolean[] pn = new boolean[MX + 1]; // pn[i]==false为素数，pn[i]==true不是素数
+    static ArrayList<Integer> list = new ArrayList<Integer>(); // 预处理质数表
+    static { // 埃氏筛，时间复杂度MX*log(logMX)不算太高
+        pn[0] = pn[1] = true;
+        for (int i = 2; i * i <= MX; i++) {
+            if (!pn[i]) {
+                for (int j = i; j <= MX / i; j++) {
+                    pn[j * i] = true;
+                }
             }
         }
-        return dfs(0, len, 0, true, false);
+        for (int i = 2; i <= MX; i++) {
+            if (!pn[i]) {
+                list.add(i);
+            }
+        }
+    }
+    public boolean primeSubOperation(int[] nums) {
+        int pre = 0; // pre 是上一个减完后的数字
+        for (int num : nums) {
+            if (num <= pre) {
+                return false;
+            }
+            int idx = binarySearch(num - pre);
+            if (idx < 0) {
+                pre = num;
+                continue;
+            }
+            pre = num - list.get(idx);
+        }
+        return true;
     }
 
-    private int dfs(int i, int diff, int mod, boolean isLimit, boolean isNum) { // diff 奇数 - 偶数
-        if (i == len) {
-            return isNum && mod == 0 && diff == len ? 1 : 0;
+    private int binarySearch(int target) {
+        int left = 0, right = list.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (list.get(mid) < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
         }
-        if (isNum && !isLimit && memo[i][diff][mod] != -1) {
-            return memo[i][diff][mod];
-        }
-        int res = 0;
-        if (!isNum) {
-            res = dfs(i + 1, diff, mod, false, false);
-        }
-        int up = isLimit ? s[i] - '0' : 9;
-        for (int j = isNum ? 0 : 1; j <= up; j++) {
-            res += dfs(i + 1, diff + (j % 2 == 1 ? 1 : -1), (mod * 10 + j) % k, isLimit && j == up, true);
-        }
-        if (isNum && !isLimit) {
-            memo[i][diff][mod] = res;
-        }
-        return res;
+        return left - 1;
     }
+
+
 }
