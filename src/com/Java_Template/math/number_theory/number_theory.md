@@ -1,3 +1,5 @@
+# §1.1 判断质数
+
 3115\. 质数的最大距离
 --------------
 
@@ -189,6 +191,8 @@ class Solution {
 }
 ```
 
+# §1.2 预处理质数（筛质数）
+
 2601\. 质数减法运算
 -------------
 
@@ -332,6 +336,804 @@ class Solution {
     }
 
 
+}
+```
+
+# §1.3 质因数分解
+
+2521\. 数组乘积中的不同质因数数目
+--------------------
+
+给你一个正整数数组 `nums` ，对 `nums` 所有元素求积之后，找出并返回乘积中 **不同质因数** 的数目。
+
+**注意：**
+
+*   **质数** 是指大于 `1` 且仅能被 `1` 及自身整除的数字。
+*   如果 `val2 / val1` 是一个整数，则整数 `val1` 是另一个整数 `val2` 的一个因数。
+
+**示例 1：**
+
+**输入：**nums = \[2,4,3,7,10,6\]
+**输出：**4
+**解释：**
+nums 中所有元素的乘积是：2 \* 4 \* 3 \* 7 \* 10 \* 6 = 10080 = 25 \* 32 \* 5 \* 7 。
+共有 4 个不同的质因数，所以返回 4 。
+
+**示例 2：**
+
+**输入：**nums = \[2,4,8,16\]
+**输出：**1
+**解释：**
+nums 中所有元素的乘积是：2 \* 4 \* 8 \* 16 = 1024 = 210 。
+共有 1 个不同的质因数，所以返回 1 。
+
+**提示：**
+
+*   `1 <= nums.length <= 104`
+*   `2 <= nums[i] <= 1000`
+
+[https://leetcode.cn/problems/distinct-prime-factors-of-product-of-array/description/](https://leetcode.cn/problems/distinct-prime-factors-of-product-of-array/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+ 
+class Solution { // 暴力，因为数据范围小，66ms
+    static int MX = (int) 1e3;
+    static boolean[] pn = new boolean[MX + 1];
+    static List<Integer> list = new ArrayList<Integer>();
+    static {
+        pn[0] = pn[1] = true;
+        for (int i = 2; i <= MX; i++) {
+            if (!pn[i]) {
+                list.add(i);
+                for (int j = i; j <= MX / i; j++) {
+                    pn[j * i] = true;
+                }
+            }
+        }
+    }
+    public int distinctPrimeFactors(int[] nums) {
+        HashSet<Integer> cnt = new HashSet<>();
+        for (int num : nums) {
+            if (!pn[num]) {
+                cnt.add(num);
+                continue;
+            }
+            for (int x : list) {
+                if (num % x == 0) {
+                    cnt.add(x);
+                }
+                if (x >= num) {
+                    break;
+                }
+            }
+        }
+        return cnt.size();
+    }
+
+}
+```
+
+> 这题其实根本不用算质数，从2开始计算时，遍历的num对2除完之后，后面所有的非质数4、6、8、10、12...都无法被除完，可以自动跳过，同理遇到3，后面的6、9、12、15...一样也可以被跳过。 
+
+```java
+import java.util.HashSet;
+
+class Solution {
+    public int distinctPrimeFactors(int[] nums) { // 求质因数的模板 10ms
+        HashSet<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            for (int i = 2; i * i <= num; i++) {
+                if (num % i == 0) {
+                    set.add(i);
+                    while (num % i == 0) {
+                        num /= i;
+                    }
+                }
+            }
+            if (num > 1) {
+                set.add(num);
+            }
+        }
+        return set.size();
+    }
+}
+```
+
+2507\. 使用质因数之和替换后可以取到的最小值
+-------------------------
+
+给你一个正整数 `n` 。
+
+请你将 `n` 的值替换为 `n` 的 **质因数** 之和，重复这一过程。
+
+*   注意，如果 `n` 能够被某个质因数多次整除，则在求和时，应当包含这个质因数同样次数。
+
+返回 `n` 可以取到的最小值。
+
+**示例 1：**
+
+**输入：**n = 15
+**输出：**5
+**解释：**最开始，n = 15 。
+15 = 3 \* 5 ，所以 n 替换为 3 + 5 = 8 。
+8 = 2 \* 2 \* 2 ，所以 n 替换为 2 + 2 + 2 = 6 。
+6 = 2 \* 3 ，所以 n 替换为 2 + 3 = 5 。
+5 是 n 可以取到的最小值。
+
+**示例 2：**
+
+**输入：**n = 3
+**输出：**3
+**解释：**最开始，n = 3 。
+3 是 n 可以取到的最小值。
+
+**提示：**
+
+*   `2 <= n <= 105`
+
+[https://leetcode.cn/problems/smallest-value-after-replacing-with-sum-of-prime-factors/description/](https://leetcode.cn/problems/smallest-value-after-replacing-with-sum-of-prime-factors/description/)
+
+```java
+class Solution {
+    public int smallestValue(int n) { // 分解质因子模板
+        while (true) {
+            int x = n, s = 0;
+            for (int i = 2; i * i <= x; i++) {
+                while (x % i == 0) {
+                    s += i;
+                    x /= i;
+                }
+            }
+            if (x > 1) {
+                s += x;
+            }
+            if (s == n) {
+                return s;
+            }
+            n = s;
+        }
+    }
+}
+```
+
+2584\. 分割数组使乘积互质
+----------------
+
+给你一个长度为 `n` 的整数数组 `nums` ，下标从 **0** 开始。
+
+如果在下标 `i` 处 **分割** 数组，其中 `0 <= i <= n - 2` ，使前 `i + 1` 个元素的乘积和剩余元素的乘积互质，则认为该分割 **有效** 。
+
+*   例如，如果 `nums = [2, 3, 3]` ，那么在下标 `i = 0` 处的分割有效，因为 `2` 和 `9` 互质，而在下标 `i = 1` 处的分割无效，因为 `6` 和 `3` 不互质。在下标 `i = 2` 处的分割也无效，因为 `i == n - 1` 。
+
+返回可以有效分割数组的最小下标 `i` ，如果不存在有效分割，则返回 `-1` 。
+
+当且仅当 `gcd(val1, val2) == 1` 成立时，`val1` 和 `val2` 这两个值才是互质的，其中 `gcd(val1, val2)` 表示 `val1` 和 `val2` 的最大公约数。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2022/12/14/second.PNG)
+
+**输入：**nums = \[4,7,8,15,3,5\]
+**输出：**2
+**解释：**上表展示了每个下标 i 处的前 i + 1 个元素的乘积、剩余元素的乘积和它们的最大公约数的值。
+唯一一个有效分割位于下标 2 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2022/12/14/capture.PNG)
+
+**输入：**nums = \[4,7,15,8,3,5\]
+**输出：**\-1
+**解释：**上表展示了每个下标 i 处的前 i + 1 个元素的乘积、剩余元素的乘积和它们的最大公约数的值。
+不存在有效分割。
+
+**提示：**
+
+*   `n == nums.length`
+*   `1 <= n <= 104`
+*   `1 <= nums[i] <= 106`
+
+[https://leetcode.cn/problems/split-the-array-to-make-coprime-products/description/](https://leetcode.cn/problems/split-the-array-to-make-coprime-products/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int findValidSplit(int[] nums) {
+        int n = nums.length;
+        HashMap<Integer, Integer> left = new HashMap<>(); // left[p] 表示质数 p 首次出现的下标
+        int[] right = new int[n]; // right[i] 表示左端点为 i 的区间的右端点的最大值
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            for (int j = 2; j * j <= x; j++) { // 分解质因子模板
+                if (x % j == 0) {
+                    if (left.containsKey(j)) {
+                        right[left.get(j)] = i;
+                    }else{
+                        left.put(j, i);
+                    }
+                    while (x % j == 0) {
+                        x /= j;
+                    }
+                }
+            }
+            if (x > 1) {
+                if (left.containsKey(x)) {
+                    right[left.get(x)] = i;
+                }else{
+                    left.put(x, i);
+                }
+            }
+        }
+        int maxR = 0;
+        for (int l = 0; l < n; l++) { // 左节点
+            if (l > maxR) {
+                return maxR;
+            }
+            maxR = Math.max(maxR, right[l]);
+        }
+        return -1;
+    }
+}
+```
+
+2709\. 最大公约数遍历(并查集+分解质因子模板)
+--------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` ，你可以在一些下标之间遍历。对于两个下标 `i` 和 `j`（`i != j`），当且仅当 `gcd(nums[i], nums[j]) > 1` 时，我们可以在两个下标之间通行，其中 `gcd` 是两个数的 **最大公约数** 。
+
+你需要判断 `nums` 数组中 **任意** 两个满足 `i < j` 的下标 `i` 和 `j` ，是否存在若干次通行可以从 `i` 遍历到 `j` 。
+
+如果任意满足条件的下标对都可以遍历，那么返回 `true` ，否则返回 `false` 。
+
+**示例 1：**
+
+**输入：**nums = \[2,3,6\]
+**输出：**true
+**解释：**这个例子中，总共有 3 个下标对：(0, 1) ，(0, 2) 和 (1, 2) 。
+从下标 0 到下标 1 ，我们可以遍历 0 -> 2 -> 1 ，我们可以从下标 0 到 2 是因为 gcd(nums\[0\], nums\[2\]) = gcd(2, 6) = 2 > 1 ，从下标 2 到 1 是因为 gcd(nums\[2\], nums\[1\]) = gcd(6, 3) = 3 > 1 。
+从下标 0 到下标 2 ，我们可以直接遍历，因为 gcd(nums\[0\], nums\[2\]) = gcd(2, 6) = 2 > 1 。同理，我们也可以从下标 1 到 2 因为 gcd(nums\[1\], nums\[2\]) = gcd(3, 6) = 3 > 1 。
+
+**示例 2：**
+
+**输入：**nums = \[3,9,5\]
+**输出：**false
+**解释：**我们没法从下标 0 到 2 ，所以返回 false 。
+
+**示例 3：**
+
+**输入：**nums = \[4,3,12,8\]
+**输出：**true
+**解释：**总共有 6 个下标对：(0, 1) ，(0, 2) ，(0, 3) ，(1, 2) ，(1, 3) 和 (2, 3) 。所有下标对之间都存在可行的遍历，所以返回 true 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 105`
+
+[https://leetcode.cn/problems/greatest-common-divisor-traversal/description/](https://leetcode.cn/problems/greatest-common-divisor-traversal/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    static int MX = (int) 1e5 + 10;
+    public boolean canTraverseAllPairs(int[] nums) {
+        int n = nums.length;
+        int[] parent = new int[MX];
+        Arrays.setAll(parent, i -> i);
+        for (int num : nums) {
+            int x = num;
+            for (int i = 2; i * i <= num; i++) {
+                if (num % i == 0) {
+                    union(parent, i, x);
+                    union(parent, i, num);
+                    while (num % i == 0) {
+                        num /= i;
+                    }
+                }
+            }
+            if (num > 1) {
+                union(parent, num, x);
+            }
+        }
+        for (int i = 1; i < n; i++) {
+            if (nums[i] == 1 || find(parent, nums[i]) != find(parent, nums[i - 1])) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    public void union(int[] parent, int index1, int index2) {
+        parent[find(parent, index1)] = find(parent, index2);
+    }
+
+    public int find(int[] parent, int index) {
+        if (parent[index] != index) {
+            parent[index] = find(parent, parent[index]);
+        }
+        return parent[index];
+    }
+}
+```
+
+2862\. 完全子集的最大元素和(core函数的应用)
+-----------------
+
+给你一个下标从 **1** 开始、由 `n` 个整数组成的数组。你需要从 `nums` 选择一个 **完全集**，其中每对元素下标的乘积都是一个
+
+完全平方数
+
+，例如选择 `ai` 和 `aj` ，`i * j` 一定是完全平方数。
+
+返回 **完全子集** 所能取到的 **最大元素和** 。
+
+**示例 1：**
+
+**输入：**nums = \[8,7,3,5,7,2,4,9\]
+**输出：**16
+**解释：**我们选择了下标 2 和 8 的元素，并且 2 \* 8 是一个完全平方数。
+
+**示例 2：**
+
+**输入：**nums = \[8,10,3,8,1,13,7,9,4\]
+**输出：**20
+**解释：**我们选择了下标 1，4 和 9 的元素。1 \* 4，1 \* 9，4 \* 9 都是完全平方数。
+
+**提示：**
+
+*   `1 <= n == nums.length <= 104`
+*   `1 <= nums[i] <= 109`
+
+[https://leetcode.cn/problems/maximum-element-sum-of-a-complete-subset-of-indices/description/](https://leetcode.cn/problems/maximum-element-sum-of-a-complete-subset-of-indices/description/)
+
+```java
+import java.util.List;
+
+class Solution {
+    public long maximumSum(List<Integer> nums) {
+        long ans = 0;
+        int n = nums.size();
+        long[] sum = new long[n + 1];
+        for (int i = 0; i < n; i++) {
+            int c = core(i + 1);
+            sum[c] += nums.get(i);
+            ans = Math.max(ans, sum[c]);
+        }
+        return ans;
+    }
+
+    // 定义 core(n) 为 n 除去完全平方因子后的剩余结果。
+    private int core(int n) {
+        int res = 1;
+        for (int i = 2; i * i <= n; i++) {
+            int e = 0;
+            while (n % i == 0) {
+                e ^= 1;
+                n /= i;
+            }
+            if (e == 1) { // 只统计奇数的质因子
+                res *= i;
+            }
+        }
+        if (n > 1) {
+            res *= n;
+        }
+        return res;
+    }
+}
+```
+
+# §1.4 阶乘分解
+
+172\. 阶乘后的零
+-----------
+
+给定一个整数 `n` ，返回 `n!` 结果中尾随零的数量。
+
+提示 `n! = n * (n - 1) * (n - 2) * ... * 3 * 2 * 1`
+
+**示例 1：**
+
+**输入：**n = 3
+**输出：**0
+**解释：**3! = 6 ，不含尾随 0
+
+**示例 2：**
+
+**输入：**n = 5
+**输出：**1
+**解释：**5! = 120 ，有一个尾随 0
+
+**示例 3：**
+
+**输入：**n = 0
+**输出：**0
+
+**提示：**
+
+*   `0 <= n <= 104`
+
+**进阶：**你可以设计并实现对数时间复杂度的算法来解决此问题吗？
+
+[https://leetcode.cn/problems/factorial-trailing-zeroes/solutions/1366037/by-ac\_oier-1y6w/](https://leetcode.cn/problems/factorial-trailing-zeroes/solutions/1366037/by-ac_oier-1y6w/)
+
+```java
+class Solution {
+    public int trailingZeroes(int n) { // 算一下乘法因子里有多少个5就是了
+        int ans = 0;
+        while (n >= 5) {
+            ans += n / 5;
+            n /= 5;
+        }
+        return ans;
+    }
+}
+```
+
+793\. 阶乘函数后 K 个零
+----------------
+
+ `f(x)` 是 `x!` 末尾是 0 的数量。回想一下 `x! = 1 * 2 * 3 * ... * x`，且 `0! = 1` 。
+
+*   例如， `f(3) = 0` ，因为 `3! = 6` 的末尾没有 0 ；而 `f(11) = 2` ，因为 `11!= 39916800` 末端有 2 个 0 。
+
+给定 `k`，找出返回能满足 `f(x) = k` 的非负整数 `x` 的数量。
+
+**示例 1：**
+
+**输入：**k = 0
+**输出：**5
+**解释：**0!, 1!, 2!, 3!, 和 4! 均符合 k = 0 的条件。
+
+**示例 2：**
+
+**输入：**k = 5
+**输出：**0
+**解释：**没有匹配到这样的 x!，符合 k = 5 的条件。
+
+**示例 3:**
+
+**输入:** k = 3
+**输出:** 5
+
+**提示:**
+
+*   `0 <= k <= 109`
+
+[https://leetcode.cn/problems/preimage-size-of-factorial-zeroes-function/description/](https://leetcode.cn/problems/preimage-size-of-factorial-zeroes-function/description/)
+
+```java
+class Solution {
+    public int preimageSizeFZF(int k) {
+        return (int) (help(k + 1) - help(k));
+    }
+
+    private long help(int k) {
+        long left = 0, right = 5L * k;
+        while (left <= right) {
+            long mid = left + (right - left) / 2;
+            if (zeta(mid) < k) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return right + 1;
+    }
+
+    private long zeta(long n) {
+        long ans = 0;
+        while (n >= 5) {
+            n /= 5;
+            ans += n;
+        }
+        return ans;
+    }
+}
+```
+
+# §1.5 因子
+
+2427\. 公因子的数目
+-------------
+
+给你两个正整数 `a` 和 `b` ，返回 `a` 和 `b` 的 **公** 因子的数目。
+
+如果 `x` 可以同时整除 `a` 和 `b` ，则认为 `x` 是 `a` 和 `b` 的一个 **公因子** 。
+
+**示例 1：**
+
+**输入：**a = 12, b = 6
+**输出：**4
+**解释：**12 和 6 的公因子是 1、2、3、6 。
+
+**示例 2：**
+
+**输入：**a = 25, b = 30
+**输出：**2
+**解释：**25 和 30 的公因子是 1、5 。
+
+**提示：**
+
+*   `1 <= a, b <= 1000`
+
+[https://leetcode.cn/problems/number-of-common-factors/submissions/532214510/](https://leetcode.cn/problems/number-of-common-factors/submissions/532214510/)
+
+```java
+class Solution {
+    /*
+     * 枚举因子，挨个判断能否整除 a 和 b。改进方案是枚举 a 和 b 的最大公因数的因子。
+     */
+    public int commonFactors(int a, int b) {
+        int g = gcd(a, b);
+        int ans = 0;
+        for (int i = 1; i * i <= g; i++) {
+            if (g % i == 0) {
+                ans++; // i 是公因子
+                if (i * i < g) {
+                    ans++; // g/i 是公因子
+                }
+            }
+        }
+        return ans;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+1492\. n 的第 k 个因子
+-----------------
+
+给你两个正整数 `n` 和 `k` 。
+
+如果正整数 `i` 满足 `n % i == 0` ，那么我们就说正整数 `i` 是整数 `n` 的因子。
+
+考虑整数 `n` 的所有因子，将它们 **升序排列** 。请你返回第 `k` 个因子。如果 `n` 的因子数少于 `k` ，请你返回 `-1` 。
+
+**示例 1：**
+
+**输入：**n = 12, k = 3
+**输出：**3
+**解释：**因子列表包括 \[1, 2, 3, 4, 6, 12\]，第 3 个因子是 3 。
+
+**示例 2：**
+
+**输入：**n = 7, k = 2
+**输出：**7
+**解释：**因子列表包括 \[1, 7\] ，第 2 个因子是 7 。
+
+**示例 3：**
+
+**输入：**n = 4, k = 4
+**输出：**\-1
+**解释：**因子列表包括 \[1, 2, 4\] ，只有 3 个因子，所以我们应该返回 -1 。
+
+**提示：**
+
+*   `1 <= k <= n <= 1000`
+
+**进阶：**
+
+你可以设计时间复杂度小于 O(n) 的算法来解决此问题吗？
+
+[https://leetcode.cn/problems/the-kth-factor-of-n/description/](https://leetcode.cn/problems/the-kth-factor-of-n/description/)
+
+```java
+class Solution {
+    public int kthFactor(int n, int k){ // o(n)
+        int ans = -1, i = 1;
+        while (k > 0 && i <= n) {
+            if (n % i == 0) {
+                k--;
+                ans = i;
+            }
+            i++;
+        }
+        return k == 0 ? ans : -1;
+    }
+}
+```
+
+```java
+class Solution {
+    public int kthFactor(int n, int k) { // o(n^(1/2))
+        int factor = 1, count = 0;
+        while (factor * factor < n) {
+            if (n % factor == 0) {
+                count++;
+                if (count == k) {
+                    return factor;
+                }
+            }
+            factor++;
+        }
+        int total = count * 2;
+        if (factor * factor == n) {
+            total++;
+        }
+        factor = 1;
+        count = 0;
+        while (factor * factor <= n) {
+            if (n % factor == 0) {
+                count++;
+                if (count == total - k + 1) {
+                    return n / factor;
+                }
+            }
+            factor++;
+        }
+        return -1;
+    }
+}
+```
+
+1390\. 四因数
+----------
+
+给你一个整数数组 `nums`，请你返回该数组中恰有四个因数的这些整数的各因数之和。如果数组中不存在满足题意的整数，则返回 `0` 。
+
+**示例 1：**
+
+**输入：**nums = \[21,4,7\]
+**输出：**32
+**解释：**
+21 有 4 个因数：1, 3, 7, 21
+4 有 3 个因数：1, 2, 4
+7 有 2 个因数：1, 7
+答案仅为 21 的所有因数的和。
+
+**示例 2:**
+
+**输入:** nums = \[21,21\]
+**输出:** 64
+
+**示例 3:**
+
+**输入:** nums = \[1,2,3,4,5\]
+**输出:** 0
+
+**提示：**
+
+*   `1 <= nums.length <= 104`
+*   `1 <= nums[i] <= 105`
+
+[https://leetcode.cn/problems/four-divisors/](https://leetcode.cn/problems/four-divisors/)
+
+```java
+class Solution {
+    public int sumFourDivisors(int[] nums) {
+        int ans = 0;
+        for (int num : nums) {
+            int cnt = 0, sum = 0;
+            for (int i = 1; i * i <= num; i++) { // 这里不能省掉 i*i == num, 我一直以为完全平方数不行，但是你看625，由1，625，25，5组成！！！
+                if (num % i == 0) {
+                    cnt++;
+                    sum += i;
+                    if (i * i != num) {
+                        cnt++;
+                        sum += num / i;
+                    }
+                }
+            }
+            if (cnt == 4) {
+                ans += sum;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+1362\. 最接近的因数
+-------------
+
+给你一个整数 `num`，请你找出同时满足下面全部要求的两个整数：
+
+*   两数乘积等于  `num + 1` 或 `num + 2`
+*   以绝对差进行度量，两数大小最接近
+
+你可以按任意顺序返回这两个整数。
+
+**示例 1：**
+
+**输入：**num = 8
+**输出：**\[3,3\]
+**解释：**对于 num + 1 = 9，最接近的两个因数是 3 & 3；对于 num + 2 = 10, 最接近的两个因数是 2 & 5，因此返回 3 & 3 。
+
+**示例 2：**
+
+**输入：**num = 123
+**输出：**\[5,25\]
+
+**示例 3：**
+
+**输入：**num = 999
+**输出：**\[40,25\]
+
+**提示：**
+
+*   `1 <= num <= 10^9`
+
+[https://leetcode.cn/problems/closest-divisors/submissions/532230155/](https://leetcode.cn/problems/closest-divisors/submissions/532230155/)
+
+```java
+class Solution {
+    public int[] closestDivisors(int num) {
+        int[] ans = new int[2];
+        int diff = Integer.MAX_VALUE;
+        for (int i = 1; i * i <= num + 2; i++) {
+            if ((num + 1) % i == 0) {
+                if (diff > Math.abs((num + 1) / i - i)) {
+                    ans = new int[]{(num + 1) / i, i};
+                    diff = Math.abs((num + 1) / i - i);
+                }
+            }
+            if ((num + 2) % i == 0) {
+                if (diff > Math.abs((num + 2) / i - i)) {
+                    ans = new int[]{(num + 2) / i, i};
+                    diff = Math.abs((num + 2) / i - i);
+                }
+            }
+        }
+        return ans;
+    }
+
+}
+```
+
+829\. 连续整数求和
+------------
+
+给定一个正整数 `n`，返回 _连续正整数满足所有数字之和为 `n` 的组数_ 。 
+
+**示****例 1:**
+
+**输入:** n = 5
+**输出:** 2
+**解释:** 5 = 2 + 3，共有两组连续整数(\[5\],\[2,3\])求和后为 5。
+
+**示例 2:**
+
+**输入:** n = 9
+**输出:** 3
+**解释:** 9 = 4 + 5 = 2 + 3 + 4
+
+**示例 3:**
+
+**输入:** n = 15
+**输出:** 4
+**解释:** 15 = 8 + 7 = 4 + 5 + 6 = 1 + 2 + 3 + 4 + 5
+
+**提示:**
+
+*   `1 <= n <= 109`​​​​​​​
+
+[https://leetcode.cn/problems/consecutive-numbers-sum/description/](https://leetcode.cn/problems/consecutive-numbers-sum/description/)
+
+```java
+class Solution {
+    public int consecutiveNumbersSum(int n) {
+        int ans = 0;
+        n *= 2;
+        for (int i = 1; i * i < n; i++) {
+            if (n % i != 0) {
+                continue;
+            }
+            if ((n / i - (i - 1)) % 2 == 0) {
+                ans++;
+            }
+        }
+        return ans;
+    }
 }
 ```
 
