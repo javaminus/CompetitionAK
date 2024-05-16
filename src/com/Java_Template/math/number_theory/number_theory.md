@@ -1363,7 +1363,7 @@ class Solution {
 
 [https://leetcode.cn/problems/count-array-pairs-divisible-by-k/description/](https://leetcode.cn/problems/count-array-pairs-divisible-by-k/description/)
 
-![1715845899199](F:\leetcode\src\com\Java_Template\math\number_theory\number_theory.assets\1715845899199.png)
+![1715854096139](assets/1715854096139-1715858746726.png)
 
 ```java
 import java.util.ArrayList;
@@ -1650,7 +1650,9 @@ class Solution {
 
 [https://leetcode.cn/problems/mirror-reflection/solutions/2076565/by-stormsunshine-wja9/](https://leetcode.cn/problems/mirror-reflection/solutions/2076565/by-stormsunshine-wja9/)
 
-![1715851031392](F:\leetcode\src\com\Java_Template\math\number_theory\number_theory.assets\1715851031392.png)
+![1715851031392](assets/1715851031392.png)
+
+![1715851054945](assets/1715851054945.png)
 
 ```java
 class Solution {
@@ -1757,7 +1759,7 @@ class Solution {
 
 [https://leetcode.cn/problems/check-if-point-is-reachable/solutions/2073036/wen-ti-zhuan-huan-gcdju-ti-gou-zao-fang-0plx0/](https://leetcode.cn/problems/check-if-point-is-reachable/solutions/2073036/wen-ti-zhuan-huan-gcdju-ti-gou-zao-fang-0plx0/)
 
-![1715854096139](F:\leetcode\src\com\Java_Template\math\number_theory\number_theory.assets\1715854096139.png)
+![1715854096139](assets/1715854096139.png)
 
 ```java
 class Solution {
