@@ -1774,7 +1774,7 @@ class Solution {
 }
 ```
 
-2607\. 使子数组元素和相等(好好学)
+2607. 使子数组元素和相等(中位数贪心+裴蜀定理) 神！！！
 ----------------
 
 给你一个下标从 **0** 开始的整数数组 `arr` 和一个整数 `k` 。数组 `arr` 是一个循环数组。换句话说，数组中的最后一个元素的下一个元素是数组中的第一个元素，数组中第一个元素的前一个元素是数组中的最后一个元素。
@@ -1816,6 +1816,12 @@ class Solution {
 
 [https://leetcode.cn/problems/make-k-subarray-sums-equal/description/](https://leetcode.cn/problems/make-k-subarray-sums-equal/description/)
 
+![1715862267528](assets/1715862267528.png)
+
+![1715862287006](assets/1715862287006.png)
+
+![1715862301515](assets/1715862301515.png)
+
 ```java
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1840,6 +1846,708 @@ class Solution {
     }
 
     private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+149\. 直线上最多的点数
+--------------
+
+给你一个数组 `points` ，其中 `points[i] = [xi, yi]` 表示 **X-Y** 平面上的一个点。求最多有多少个点在同一条直线上。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/02/25/plane1.jpg)
+
+**输入：**points = \[\[1,1\],\[2,2\],\[3,3\]\]
+**输出：**3
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/02/25/plane2.jpg)
+
+**输入：**points = \[\[1,1\],\[3,2\],\[5,3\],\[4,1\],\[2,3\],\[1,4\]\]
+**输出：**4
+
+**提示：**
+
+*   `1 <= points.length <= 300`
+*   `points[i].length == 2`
+*   `-104 <= xi, yi <= 104`
+*   `points` 中的所有点 **互不相同**
+
+[https://leetcode.cn/problems/max-points-on-a-line/description/](https://leetcode.cn/problems/max-points-on-a-line/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int maxPoints(int[][] points) {
+        int ans = 1;
+        int n = points.length;
+        for (int i = 0; i < n; i++) {
+            HashMap<String, Integer> cnt = new HashMap<>();
+            int mx = 0;
+            for (int j = i + 1; j < n; j++) {
+                int x1 = points[i][0], y1 = points[i][1], x2 = points[j][0], y2 = points[j][1];
+                int a = x1 - x2, b = y1 - y2;
+                int g = gcd(a, b);
+                String key = (b / g) + "_" + (a / g);
+                cnt.put(key, cnt.getOrDefault(key, 0) + 1);
+                mx = Math.max(mx, cnt.get(key));
+            }
+            ans = Math.max(ans, mx + 1); // 记得加1
+        }
+        return ans;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+# §1.7 GCD 性质（随着数组中数的增多，数组的最大公因数gcd只会变小或者保持不变，不会变大。 ）
+
+2447\. 最大公因数等于 K 的子数组数目(模板)
+-----------------------
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你统计并返回 `nums` 的子数组中元素的最大公因数等于 `k` 的子数组数目。
+
+**子数组** 是数组中一个连续的非空序列。
+
+**数组的最大公因数** 是能整除数组中所有元素的最大整数。
+
+**示例 1：**
+
+**输入：**nums = \[9,3,1,2,6,3\], k = 3
+**输出：**4
+**解释：**nums 的子数组中，以 3 作为最大公因数的子数组如下：
+- \[9,**_3_**,1,2,6,3\]
+- \[9,3,1,2,6,_**3**_\]
+- \[**_9,3_**,1,2,6,3\]
+- \[9,3,1,2,_**6,3**_\]
+
+**示例 2：**
+
+**输入：**nums = \[4\], k = 7
+**输出：**0
+**解释：**不存在以 7 作为最大公因数的子数组。
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `1 <= nums[i], k <= 109`
+
+[https://leetcode.cn/problems/number-of-subarrays-with-gcd-equal-to-k/description/](https://leetcode.cn/problems/number-of-subarrays-with-gcd-equal-to-k/description/)
+
+```java
+class Solution {
+    public int subarrayGCD(int[] nums, int k) { // 暴力
+        int ans = 0;
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            int g = 0;
+            for (int j = i; j < n; j++) {
+                g = gcd(g, nums[j]);
+                if (g == k) {
+                    ans++;
+                }
+                if (g < k) {
+                    break;
+                }
+            }
+        }
+        return ans;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+```java
+import java.util.*;
+
+class Solution {
+    public int subarrayGCD(int[] nums, int k) {
+        // 这个题思想非常重要，以i - 1结尾的子数组，那么最后一个元素就是nums[i - 1],这个nums[i - 1]必须是 %k==0 不然就没有用！！！
+        // 先写一个hash表版本
+        int ans = 0;
+        HashMap<Integer, Integer> prevCnts = new HashMap<>(); // 存储nums[i - 1]的 <特定下标结尾的最大公因子，出现次数>
+        prevCnts.put(0, 1);
+        for (int num : nums) {
+            HashMap<Integer, Integer> curCnts = new HashMap<>();
+            curCnts.put(0, 1);
+            if (num % k == 0) {
+                Set<Map.Entry<Integer, Integer>> entries = prevCnts.entrySet();
+                for (Map.Entry<Integer, Integer> entry : entries) {
+                    int prevDivisor = entry.getKey(), prevCnt = entry.getValue();
+                    int curDivisor = gcd(num, prevDivisor);
+                    curCnts.put(curDivisor, curCnts.getOrDefault(curDivisor, 0) + prevCnt);
+                }
+                ans += curCnts.getOrDefault(k, 0);
+            }
+            prevCnts = curCnts;
+        }
+        return ans;
+    }
+    public int gcd(int a, int b){
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+> **下面深度剖析一个模板，同时也是位运算中 *或运算* 的究极大杀器！！！**
+
+```java
+import java.util.*;
+
+class Solution {
+    public int subarrayGCD(int[] nums, int k) {
+        // 这个题思想非常重要，以i - 1结尾的子数组，那么最后一个元素就是nums[i - 1],这个nums[i - 1]必须是 %k==0 不然就没有用！！！
+        // 模板
+        int ans = 0;
+        int n = nums.length;
+        ArrayList<int[]> records = new ArrayList<>();// //[gcd, 相同gcd区间的右端点]
+        int index0 = -1;
+        for (int i = 0; i < n; i++) {
+            int num = nums[i];
+            if (num % k != 0) {
+                index0 = i;
+                records = new ArrayList<>();
+            }else{ // num%k==0
+                records.add(new int[]{num, i});
+                // 原地去重
+                int j = 0;
+                for (int[] rec : records) {
+                    rec[0] = gcd(rec[0], num);
+                    if (records.get(j)[0] != rec[0]) {
+                        records.set(++j, rec);
+                    }else{
+                        //相同gcd 更新右端点
+                        records.set(j, rec);
+                    }
+                }
+                records.subList(j + 1, records.size()).clear();
+                int[] first = records.get(0); // 这是最长的那个子数组，也就是从[index0,i],中间还有[index0+1,i]、[index0+2,i]、[index0+3,i]、[index0+4,i]、[index0+5,i]
+                if (first[0] == k) {
+                    ans += first[1] - index0;
+                }
+            }
+        }
+        return ans;
+    }
+    public int gcd(int a, int b){
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+## 2654\. 使数组所有元素变成 1 的最少操作次数
+
+给你一个下标从 **0** 开始的 **正** 整数数组 `nums` 。你可以对数组执行以下操作 **任意** 次：
+
+- 选择一个满足 `0 <= i < n - 1` 的下标 `i` ，将 `nums[i]` 或者 `nums[i+1]` 两者之一替换成它们的最大公约数。
+
+请你返回使数组 `nums` 中所有元素都等于 `1` 的 **最少** 操作次数。如果无法让数组全部变成 `1` ，请你返回 `-1` 。
+
+两个正整数的最大公约数指的是能整除这两个数的最大正整数。
+
+**示例 1：**
+
+**输入：**nums = \[2,6,3,4\]
+**输出：**4
+**解释：**我们可以执行以下操作：
+
+- 选择下标 i = 2 ，将 nums\[2\] 替换为 gcd(3,4) = 1 ，得到 nums = \[2,6,1,4\] 。
+- 选择下标 i = 1 ，将 nums\[1\] 替换为 gcd(6,1) = 1 ，得到 nums = \[2,1,1,4\] 。
+- 选择下标 i = 0 ，将 nums\[0\] 替换为 gcd(2,1) = 1 ，得到 nums = \[1,1,1,4\] 。
+- 选择下标 i = 2 ，将 nums\[3\] 替换为 gcd(1,4) = 1 ，得到 nums = \[1,1,1,1\] 。
+
+**示例 2：**
+
+**输入：**nums = \[2,10,6,14\]
+**输出：**\-1
+**解释：**无法将所有元素都变成 1 。
+
+**提示：**
+
+- `2 <= nums.length <= 50`
+- `1 <= nums[i] <= 106`
+
+[https://leetcode.cn/problems/minimum-number-of-operations-to-make-all-array-elements-equal-to-1/](https://leetcode.cn/problems/minimum-number-of-operations-to-make-all-array-elements-equal-to-1/)
+
+```java
+class Solution { // 暴力
+    public int minOperations(int[] nums) { // 就是找长度最短的互质数子数组
+        int n = nums.length;
+        int len = n + 1;
+        int cnt1 = 0;
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == 1) {
+                cnt1++;
+            }
+        }
+        if (cnt1 != 0) {
+            return n - cnt1;
+        }
+        for (int i = 0; i < n; i++) {
+            int g = 0;
+            for (int j = i; j < n; j++) {
+                g = gcd(nums[j], g);
+                if (g == 1) {
+                    len = Math.min(len, j - i + 1);
+                    break;
+                }
+            }
+        }
+        return len == n + 1 ? -1 : len + n - 2;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+```java
+// 如果数据范围加到1e5, 那么上面的方法就不行了
+import java.util.ArrayList;
+
+class Solution {
+    public int minOperations(int[] nums) { // 就是找长度最短的互质数子数组
+        int n = nums.length;
+        int len = n + 1;
+        int cnt1 = 0;
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == 1) {
+                cnt1++;
+            }
+        }
+        if (cnt1 != 0) {
+            return n - cnt1;
+        }
+        // 从这里开始修改
+        ArrayList<int[]> records = new ArrayList<>(); // records.get(i) = {gcd, 相同gcd闭区间的右端点}
+        for (int i = 0; i < n; i++) {
+            records.add(new int[]{nums[i], i});
+            // 原地去重，因为相同的 GCD 都相邻在一起
+            int j = 0;
+            for (int[] rec : records) {
+                rec[0] = gcd(rec[0], nums[i]);
+                if (records.get(j)[0] != rec[0]) {
+                    records.set(++j, rec);
+                }else{
+                    records.set(j, rec);
+                }
+            }
+            records.subList(j + 1, records.size()).clear();
+            if (records.get(0)[0] == 1) {
+                len = Math.min(len, i - records.get(0)[1]);
+            }
+        }
+        return len == n + 1 ? -1 : n + len - 1;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+1819\. 序列中不同最大公约数的数目(2540)
+--------------------
+
+给你一个由正整数组成的数组 `nums` 。
+
+数字序列的 **最大公约数** 定义为序列中所有整数的共有约数中的最大整数。
+
+*   例如，序列 `[4,6,16]` 的最大公约数是 `2` 。
+
+数组的一个 **子序列** 本质是一个序列，可以通过删除数组中的某些元素（或者不删除）得到。
+
+*   例如，`[2,5,10]` 是 `[1,2,1,**2**,4,1,**5**,**10**]` 的一个子序列。
+
+计算并返回 `nums` 的所有 **非空** 子序列中 **不同** 最大公约数的 **数目** 。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2021/04/03/image-1.png)
+
+**输入：**nums = \[6,10,3\]
+**输出：**5
+**解释：**上图显示了所有的非空子序列与各自的最大公约数。
+不同的最大公约数为 6 、10 、3 、2 和 1 。
+
+**示例 2：**
+
+**输入：**nums = \[5,15,40,5,6\]
+**输出：**7
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 2 * 105`
+
+[https://leetcode.cn/problems/number-of-different-subsequences-gcds/](https://leetcode.cn/problems/number-of-different-subsequences-gcds/)
+
+![1715933975050](assets/1715933975050.png)
+
+```java
+class Solution {
+    public int countDifferentSubsequenceGCDs(int[] nums) {
+        int ans = 0, mx = 0;
+        for (int num : nums) {
+            mx = Math.max(num, mx);
+        }
+        boolean[] has = new boolean[mx + 1];
+        for (int num : nums) {
+            has[num] = true;
+        }
+        for (int i = 1; i <= mx; i++) {
+            int g = 0;
+            for (int j = i; j <= mx; j += i) {
+                if (has[j]) {
+                    g = gcd(g, j);
+                }
+            }
+            if (g == i) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+# §1.9 最小公倍数（LCM）（最小公倍数不会变小 ）
+
+2413\. 最小偶倍数
+------------
+
+给你一个正整数 `n` ，返回 `2` 和 `n` 的最小公倍数（正整数）。
+
+**示例 1：**
+
+**输入：**n = 5
+**输出：**10
+**解释：**5 和 2 的最小公倍数是 10 。
+
+**示例 2：**
+
+**输入：**n = 6
+**输出：**6
+**解释：**6 和 2 的最小公倍数是 6 。注意数字会是它自身的倍数。
+
+**提示：**
+
+*   `1 <= n <= 150`
+
+[https://leetcode.cn/problems/smallest-even-multiple/description/](https://leetcode.cn/problems/smallest-even-multiple/description/)
+
+```java
+class Solution {
+    public int smallestEvenMultiple(int n) {
+        return n * 2 / gcd(n, 2);
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+2470\. 最小公倍数为 K 的子数组数目（模板）
+----------------------
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你统计并返回 `nums` 的 **子数组** 中满足 _元素最小公倍数为 `k`_ 的子数组数目。
+
+**子数组** 是数组中一个连续非空的元素序列。
+
+**数组的最小公倍数** 是可被所有数组元素整除的最小正整数。
+
+**示例 1 ：**
+
+**输入：**nums = \[3,6,2,7,1\], k = 6
+**输出：**4
+**解释：**以 6 为最小公倍数的子数组是：
+- \[_**3**_,_**6**_,2,7,1\]
+- \[_**3**_,_**6**_,_**2**_,7,1\]
+- \[3,_**6**_,2,7,1\]
+- \[3,_**6**_,_**2**_,7,1\]
+
+**示例 2 ：**
+
+**输入：**nums = \[3\], k = 2
+**输出：**0
+**解释：**不存在以 2 为最小公倍数的子数组。
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `1 <= nums[i], k <= 1000`
+
+[https://leetcode.cn/problems/number-of-subarrays-with-lcm-equal-to-k/](https://leetcode.cn/problems/number-of-subarrays-with-lcm-equal-to-k/)
+
+```java
+class Solution {
+    public int subarrayLCM(int[] nums, int k) { // 暴力
+        int n = nums.length, ans = 0;
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            for (int j = i; j < n; j++) {
+                x = lcm(x, nums[j]);
+                if (x == k) ans++;
+                else if (x > k) break;
+            }
+        }
+        return ans;
+    }
+
+    public int gcd(int b, int a) {
+        return a != 0 ? gcd(a, b % a) : b;
+    }
+
+    public int lcm(int a, int b) {
+        return a * b / gcd(a, b);
+    }
+}
+```
+
+```java
+import java.util.ArrayList;
+
+class Solution {
+    public int subarrayLCM(int[] nums, int k) { // 模板
+        int ans = 0;
+        int n = nums.length, index0 = -1;
+        ArrayList<int[]> records = new ArrayList<>(); // {LCM，相同 LCM 区间的右端点} ,利用lcm不会减少的特点
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            if (k % x != 0) { // 保证后续求的 LCM 都是 k 的因子
+                records = new ArrayList<>();
+                index0 = i;
+            }else{
+                records.add(new int[]{x, i});
+                // 原地去重
+                int j = 0;
+                for (int[] rec : records) {
+                    rec[0] = lcm(rec[0], x);
+                    if (records.get(j)[0] != rec[0]) {
+                        records.set(++j, rec);
+                    }else{
+                        records.set(j, rec);
+                    }
+                }
+                records.subList(j + 1, records.size()).clear();
+                if (records.get(0)[0] == k) {
+                    ans += records.get(0)[1] - index0;
+                }
+            }
+        }
+        return ans;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    private int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+}
+```
+
+2197\. 替换数组中的非互质数
+-----------------
+
+给你一个整数数组 `nums` 。请你对数组执行下述操作：
+
+1.  从 `nums` 中找出 **任意** 两个 **相邻** 的 **非互质** 数。
+2.  如果不存在这样的数，**终止** 这一过程。
+3.  否则，删除这两个数，并 **替换** 为它们的 **最小公倍数**（Least Common Multiple，LCM）。
+4.  只要还能找出两个相邻的非互质数就继续 **重复** 这一过程。
+
+返回修改后得到的 **最终** 数组。可以证明的是，以 **任意** 顺序替换相邻的非互质数都可以得到相同的结果。
+
+生成的测试用例可以保证最终数组中的值 **小于或者等于** `108` 。
+
+两个数字 `x` 和 `y` 满足 **非互质数** 的条件是：`GCD(x, y) > 1` ，其中 `GCD(x, y)` 是 `x` 和 `y` 的 **最大公约数** 。
+
+**示例 1 ：**
+
+**输入：**nums = \[6,4,3,2,7,6,2\]
+**输出：**\[12,7,6\]
+**解释：**
+- (6, 4) 是一组非互质数，且 LCM(6, 4) = 12 。得到 nums = \[_**12**_,3,2,7,6,2\] 。
+- (12, 3) 是一组非互质数，且 LCM(12, 3) = 12 。得到 nums = \[_**12**_,2,7,6,2\] 。
+- (12, 2) 是一组非互质数，且 LCM(12, 2) = 12 。得到 nums = \[_**12**_,7,6,2\] 。
+- (6, 2) 是一组非互质数，且 LCM(6, 2) = 6 。得到 nums = \[12,7,_**6**_\] 。
+  现在，nums 中不存在相邻的非互质数。
+  因此，修改后得到的最终数组是 \[12,7,6\] 。
+  注意，存在其他方法可以获得相同的最终数组。
+
+**示例 2 ：**
+
+**输入：**nums = \[2,2,1,1,3,3,3\]
+**输出：**\[2,1,1,3\]
+**解释：**
+- (3, 3) 是一组非互质数，且 LCM(3, 3) = 3 。得到 nums = \[2,2,1,1,_**3**_,3\] 。
+- (3, 3) 是一组非互质数，且 LCM(3, 3) = 3 。得到 nums = \[2,2,1,1,_**3**_\] 。
+- (2, 2) 是一组非互质数，且 LCM(2, 2) = 2 。得到 nums = \[_**2**_,1,1,3\] 。
+  现在，nums 中不存在相邻的非互质数。 
+  因此，修改后得到的最终数组是 \[2,1,1,3\] 。 
+  注意，存在其他方法可以获得相同的最终数组。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 105`
+*   生成的测试用例可以保证最终数组中的值 **小于或者等于** `108` 。
+
+[https://leetcode.cn/problems/replace-non-coprime-numbers-in-array/description/](https://leetcode.cn/problems/replace-non-coprime-numbers-in-array/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<Integer> replaceNonCoprimes(int[] nums) {
+        ArrayList<Integer> s = new ArrayList<Integer>();
+        for (int num : nums) {
+            s.add(num);
+            while (s.size() > 1) {
+                int x = s.get(s.size() - 1);
+                int y = s.get(s.size() - 2);
+                int g = gcd(x, y);
+                if (g == 1) break;
+                s.remove(s.size() - 1);
+                s.set(s.size() - 1, x / g * y);
+            }
+        }
+        return s;
+    }
+
+    int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+# §1.10 互质
+
+1766\. 互质树
+----------
+
+给你一个 `n` 个节点的树（也就是一个无环连通无向图），节点编号从 `0` 到 `n - 1` ，且恰好有 `n - 1` 条边，每个节点有一个值。树的 **根节点** 为 0 号点。
+
+给你一个整数数组 `nums` 和一个二维数组 `edges` 来表示这棵树。`nums[i]` 表示第 `i` 个点的值，`edges[j] = [uj, vj]` 表示节点 `uj` 和节点 `vj` 在树中有一条边。
+
+当 `gcd(x, y) == 1` ，我们称两个数 `x` 和 `y` 是 **互质的** ，其中 `gcd(x, y)` 是 `x` 和 `y` 的 **最大公约数** 。
+
+从节点 `i` 到 **根** 最短路径上的点都是节点 `i` 的祖先节点。一个节点 **不是** 它自己的祖先节点。
+
+请你返回一个大小为 `n` 的数组 `ans` ，其中 `ans[i]`是离节点 `i` 最近的祖先节点且满足 `nums[i]` 和 `nums[ans[i]]` 是 **互质的** ，如果不存在这样的祖先节点，`ans[i]` 为 `-1` 。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2021/02/20/untitled-diagram.png)**
+
+**输入：**nums = \[2,3,3,2\], edges = \[\[0,1\],\[1,2\],\[1,3\]\]
+**输出：**\[-1,0,0,1\]
+**解释：**上图中，每个节点的值在括号中表示。
+- 节点 0 没有互质祖先。
+- 节点 1 只有一个祖先节点 0 。它们的值是互质的（gcd(2,3) == 1）。
+- 节点 2 有两个祖先节点，分别是节点 1 和节点 0 。节点 1 的值与它的值不是互质的（gcd(3,3) == 3）但节点 0 的值是互质的(gcd(2,3) == 1)，所以节点 0 是最近的符合要求的祖先节点。
+- 节点 3 有两个祖先节点，分别是节点 1 和节点 0 。它与节点 1 互质（gcd(3,2) == 1），所以节点 1 是离它最近的符合要求的祖先节点。
+
+**示例 2：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2021/02/20/untitled-diagram1.png)
+
+**输入：**nums = \[5,6,10,2,3,6,15\], edges = \[\[0,1\],\[0,2\],\[1,3\],\[1,4\],\[2,5\],\[2,6\]\]
+**输出：**\[-1,0,-1,0,0,0,-1\]
+
+**提示：**
+
+*   `nums.length == n`
+*   `1 <= nums[i] <= 50`
+*   `1 <= n <= 105`
+*   `edges.length == n - 1`
+*   `edges[j].length == 2`
+*   `0 <= uj, vj < n`
+*   `uj != vj`
+
+[https://leetcode.cn/problems/tree-of-coprimes/description/](https://leetcode.cn/problems/tree-of-coprimes/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    private static final int MX = 51;
+    private static int[][] coprime = new int[MX][MX];
+    static {
+        for (int i = 1; i < MX; i++) {
+            int k = 0;
+            for (int j = 1; j < MX; j++) {
+                if (gcd(i, j) == 1) {
+                    coprime[i][k++] = j;
+                }
+            }
+        }
+    }
+    public int[] getCoprimes(int[] nums, int[][] edges) {
+        int n = nums.length;
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        int[] depths = new int[MX]; // 值i的最大depth
+        int[] nodeIds = new int[MX]; // 值i对应的节点编号
+        int[] ans = new int[n];
+        Arrays.fill(ans, -1);
+        dfs(0, -1, 1, g, nums, ans, depths, nodeIds);
+        return ans;
+    }
+
+    private void dfs(int x, int fa, int depth, List<Integer>[] g, int[] nums, int[] ans, int[] depths, int[] nodeIds) {
+        int val = nums[x];
+        int maxDepth = 0;
+        for (int p : coprime[val]) {
+            if (p == 0) {
+                break;
+            }
+            if (depths[p] > maxDepth) {
+                maxDepth = depths[p];
+                ans[x] = nodeIds[p];
+            }
+        }
+        int tempDepth = depths[val];
+        int tempNodeIds = nodeIds[val];
+        depths[val] = depth;
+        nodeIds[val] = x;
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x, depth + 1, g, nums, ans, depths, nodeIds);
+            }
+        }
+        depths[val] = tempDepth;
+        nodeIds[val] = tempNodeIds;
+    }
+
+    private static int gcd(int a, int b) {
         return b == 0 ? a : gcd(b, a % b);
     }
 }
