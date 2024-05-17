@@ -2553,3 +2553,226 @@ class Solution {
 }
 ```
 
+# §1.11 同余
+
+> 取模运算的结果符号与被除数的符号相关。Java遵循的规则是：如果被除数和除数都为整数，则取模运算的结果符号与被除数相同。 
+
+2453\. 摧毁一系列目标
+--------------
+
+给你一个下标从 **0** 开始的数组 `nums` ，它包含若干正整数，表示数轴上你需要摧毁的目标所在的位置。同时给你一个整数 `space` 。
+
+你有一台机器可以摧毁目标。给机器 **输入** `nums[i]` ，这台机器会摧毁所有位置在 `nums[i] + c * space` 的目标，其中 `c` 是任意非负整数。你想摧毁 `nums` 中 **尽可能多** 的目标。
+
+请你返回在摧毁数目最多的前提下，`nums[i]` 的 **最小值** 。
+
+**示例 1：**
+
+**输入：**nums = \[3,7,8,1,1,5\], space = 2
+**输出：**1
+**解释：**如果我们输入 nums\[3\] ，我们可以摧毁位于 1,3,5,7,9,... 这些位置的目标。
+这种情况下， 我们总共可以摧毁 5 个目标（除了 nums\[2\]）。
+没有办法摧毁多于 5 个目标，所以我们返回 nums\[3\] 。
+
+**示例 2：**
+
+**输入：**nums = \[1,3,5,2,4,6\], space = 2
+**输出：**1
+**解释：**输入 nums\[0\] 或者 nums\[3\] 都会摧毁 3 个目标。
+没有办法摧毁多于 3 个目标。
+由于 nums\[0\] 是最小的可以摧毁 3 个目标的整数，所以我们返回 1 。
+
+**示例 3：**
+
+**输入：**nums = \[6,2,5\], space = 100
+**输出：**2
+**解释：**无论我们输入哪个数字，都只能摧毁 1 个目标。输入的最小整数是 nums\[1\] 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 109`
+*   `1 <= space <= 109`
+
+[https://leetcode.cn/problems/destroy-sequential-targets/description/](https://leetcode.cn/problems/destroy-sequential-targets/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int destroyTargets(int[] nums, int space) {
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        int mx = 0;
+        int ans = nums.length;
+        for (int num : nums) {
+            cnt.merge(num % space, 1, Integer::sum);
+        }
+        for (int num : nums) {
+            if (mx < cnt.get(num % space)) {
+                mx = cnt.get(num % space);
+                ans = num;
+            }
+            else if (mx == cnt.get(num % space)) {
+                mx = cnt.get(num % space);
+                ans = Math.min(ans, num);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+2598\. 执行操作后的最大 MEX
+-------------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` 和一个整数 `value` 。
+
+在一步操作中，你可以对 `nums` 中的任一元素加上或减去 `value` 。
+
+*   例如，如果 `nums = [1,2,3]` 且 `value = 2` ，你可以选择 `nums[0]` 减去 `value` ，得到 `nums = [-1,2,3]` 。
+
+数组的 MEX (minimum excluded) 是指其中数组中缺失的最小非负整数。
+
+*   例如，`[-1,2,3]` 的 MEX 是 `0` ，而 `[1,0,3]` 的 MEX 是 `2` 。
+
+返回在执行上述操作 **任意次** 后，`nums` 的最大 MEX _。_
+
+**示例 1：**
+
+**输入：**nums = \[1,-10,7,13,6,8\], value = 5
+**输出：**4
+**解释：**执行下述操作可以得到这一结果：
+- nums\[1\] 加上 value 两次，nums = \[1,_**0**_,7,13,6,8\]
+- nums\[2\] 减去 value 一次，nums = \[1,0,_**2**_,13,6,8\]
+- nums\[3\] 减去 value 两次，nums = \[1,0,2,_**3**_,6,8\]
+  nums 的 MEX 是 4 。可以证明 4 是可以取到的最大 MEX 。
+
+**示例 2：**
+
+**输入：**nums = \[1,-10,7,13,6,8\], value = 7
+**输出：**2
+**解释：**执行下述操作可以得到这一结果：
+- nums\[2\] 减去 value 一次，nums = \[1,-10,_**0**_,13,6,8\]
+  nums 的 MEX 是 2 。可以证明 2 是可以取到的最大 MEX 。
+
+**提示：**
+
+*   `1 <= nums.length, value <= 105`
+*   `-109 <= nums[i] <= 109`
+
+[https://leetcode.cn/problems/smallest-missing-non-negative-integer-after-operations/](https://leetcode.cn/problems/smallest-missing-non-negative-integer-after-operations/)
+
+```java
+import java.util.HashSet;
+
+class Solution {
+    public int findSmallestInteger(int[] nums, int value) { // 这个居然卡我超时！！！
+        HashSet<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            int v = (num % value + value) % value; // 保证取余为正数
+            while (set.contains(v)) {
+                v += value;
+            }
+            set.add(v);
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (!set.contains(i)) {
+                return i;
+            }
+        }
+        return nums.length;
+    }
+}
+```
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int findSmallestInteger(int[] nums, int value) {
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        for (int num : nums) {
+            int v = (num % value + value) % value;
+            cnt.merge(v, 1, Integer::sum);
+        }
+        int mex = 0;
+        while (cnt.merge(mex % value, -1, Integer::sum) >= 0) { // cnt.merge()返回合并后的value
+            mex++;
+        }
+        return mex;
+    }
+}
+```
+
+1590\. 使数组和能被 P 整除
+------------------
+
+给你一个正整数数组 `nums`，请你移除 **最短** 子数组（可以为 **空**），使得剩余元素的 **和** 能被 `p` 整除。 **不允许** 将整个数组都移除。
+
+请你返回你需要移除的最短子数组的长度，如果无法满足题目要求，返回 `-1` 。
+
+**子数组** 定义为原数组中连续的一组元素。
+
+**示例 1：**
+
+**输入：**nums = \[3,1,4,2\], p = 6
+**输出：**1
+**解释：**nums 中元素和为 10，不能被 p 整除。我们可以移除子数组 \[4\] ，剩余元素的和为 6 。
+
+**示例 2：**
+
+**输入：**nums = \[6,3,5,2\], p = 9
+**输出：**2
+**解释：**我们无法移除任何一个元素使得和被 9 整除，最优方案是移除子数组 \[5,2\] ，剩余元素为 \[6,3\]，和为 9 。
+
+**示例 3：**
+
+**输入：**nums = \[1,2,3\], p = 3
+**输出：**0
+**解释：**和恰好为 6 ，已经能被 3 整除了。所以我们不需要移除任何元素。
+
+**示例  4：**
+
+**输入：**nums = \[1,2,3\], p = 7
+**输出：**\-1
+**解释：**没有任何方案使得移除子数组后剩余元素的和被 7 整除。
+
+**示例 5：**
+
+**输入：**nums = \[1000000000,1000000000,1000000000\], p = 3
+**输出：**0
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 109`
+*   `1 <= p <= 109`
+
+[https://leetcode.cn/problems/make-sum-divisible-by-p/description/](https://leetcode.cn/problems/make-sum-divisible-by-p/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int minSubarray(int[] nums, int p) {
+        int n = nums.length, ans = n;
+        int[] prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = (prefixSum[i] + nums[i]) % p;
+        }
+        int x = prefixSum[n];
+        if (x == 0) {
+            return 0;
+        }
+        HashMap<Integer, Integer> last = new HashMap<>();
+        for (int i = 0; i <= n; i++) {
+            last.put(prefixSum[i], i);
+            // 如果不存在，-n 可以保证 i-j >= n
+            int j = last.getOrDefault((prefixSum[i] - x + p) % p, -n);
+            ans = Math.min(ans, i - j);
+        }
+        return ans < n ? ans : -1;
+    }
+}
+```
+

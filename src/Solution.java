@@ -1,24 +1,23 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 class Solution {
-    public List<Integer> replaceNonCoprimes(int[] nums) {
-        ArrayList<Integer> s = new ArrayList<Integer>();
-        for (int num : nums) {
-            s.add(num);
-            while (s.size() > 1) {
-                int x = s.get(s.size() - 1);
-                int y = s.get(s.size() - 2);
-                int g = gcd(x, y);
-                if (g == 1) break;
-                s.remove(s.size() - 1);
-                s.set(s.size() - 1, x / g * y);
-            }
+    public int minSubarray(int[] nums, int p) {
+        int n = nums.length, ans = n;
+        int[] prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = (prefixSum[i] + nums[i]) % p;
         }
-        return s;
-    }
-
-    int gcd(int a, int b) {
-        return b == 0 ? a : gcd(b, a % b);
+        int x = prefixSum[n];
+        if (x == 0) {
+            return 0;
+        }
+        HashMap<Integer, Integer> last = new HashMap<>();
+        for (int i = 0; i <= n; i++) {
+            last.put(prefixSum[i], i);
+            // 如果不存在，-n 可以保证 i-j >= n
+            int j = last.getOrDefault((prefixSum[i] - x + p) % p, -n);
+            ans = Math.min(ans, i - j);
+        }
+        return ans < n ? ans : -1;
     }
 }
