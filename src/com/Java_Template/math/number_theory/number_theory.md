@@ -2331,7 +2331,7 @@ class Solution {
         ArrayList<int[]> records = new ArrayList<>(); // {LCM，相同 LCM 区间的右端点} ,利用lcm不会减少的特点
         for (int i = 0; i < n; i++) {
             int x = nums[i];
-            if (k % x != 0) { // 保证后续求的 LCM 都是 k 的因子
+            if (k % x != 0) { // 注意这里与gcd的区别：保证后续求的 LCM 都是 k 的因子
                 records = new ArrayList<>();
                 index0 = i;
             }else{
@@ -2555,6 +2555,8 @@ class Solution {
 
 # §1.11 同余
 
+> ![1716013072594](assets/1716013072594.png)
+
 > 取模运算的结果符号与被除数的符号相关。Java遵循的规则是：如果被除数和除数都为整数，则取模运算的结果符号与被除数相同。 
 
 2453\. 摧毁一系列目标
@@ -2704,7 +2706,7 @@ class Solution {
 }
 ```
 
-1590\. 使数组和能被 P 整除
+1590. 使数组和能被 P 整除（同余经典模板题）
 ------------------
 
 给你一个正整数数组 `nums`，请你移除 **最短** 子数组（可以为 **空**），使得剩余元素的 **和** 能被 `p` 整除。 **不允许** 将整个数组都移除。
@@ -2772,6 +2774,222 @@ class Solution {
             ans = Math.min(ans, i - j);
         }
         return ans < n ? ans : -1;
+    }
+}
+```
+
+# §1.12 其它
+
+> ![1716013253159](assets/1716013253159.png)
+>
+> ![1716013361439](assets/1716013361439.png)
+
+326\. 3 的幂
+----------
+
+给定一个整数，写一个函数来判断它是否是 3 的幂次方。如果是，返回 `true` ；否则，返回 `false` 。
+
+整数 `n` 是 3 的幂次方需满足：存在整数 `x` 使得 `n == 3x`
+
+**示例 1：**
+
+**输入：**n = 27
+**输出：**true
+
+**示例 2：**
+
+**输入：**n = 0
+**输出：**false
+
+**示例 3：**
+
+**输入：**n = 9
+**输出：**true
+
+**示例 4：**
+
+**输入：**n = 45
+**输出：**false
+
+**提示：**
+
+*   `-231 <= n <= 231 - 1`
+
+**进阶：**你能不使用循环或者递归来完成本题吗？
+
+[https://leetcode.cn/problems/power-of-three/description/](https://leetcode.cn/problems/power-of-three/description/)
+
+```java
+class Solution {
+    public boolean isPowerOfThree(int n) {
+        while (n % 3 == 0 && n > 0) {
+            n /= 3;
+        }
+        return n == 1;
+    }
+}
+```
+
+633\. 平方数之和
+-----------
+
+给定一个非负整数 `c` ，你要判断是否存在两个整数 `a` 和 `b`，使得 `a2 + b2 = c` 。
+
+**示例 1：**
+
+**输入：**c = 5
+**输出：**true
+**解释：**1 \* 1 + 2 \* 2 = 5
+
+**示例 2：**
+
+**输入：**c = 3
+**输出：**false
+
+**提示：**
+
+*   `0 <= c <= 231 - 1`
+
+[https://leetcode.cn/problems/sum-of-square-numbers/solutions/748322/gong-shui-san-xie-yi-ti-san-jie-mei-ju-s-7qi5/](https://leetcode.cn/problems/sum-of-square-numbers/solutions/748322/gong-shui-san-xie-yi-ti-san-jie-mei-ju-s-7qi5/)
+
+> **费马平方和 : 奇质数能表示为两个平方数之和的充分必要条件是该质数被 4 除余 1 。** 
+
+```java
+class Solution {
+    public boolean judgeSquareSum(int c) { // 暴力
+        int mx = (int) Math.sqrt(c);
+        for (int a = 0; a <= mx; a++) {
+            int b = (int) Math.sqrt(c - a * a);
+            if (a * a + b * b == c) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+1015\. 可被 K 整除的最小整数
+-------------------
+
+给定正整数 `k` ，你需要找出可以被 `k` 整除的、仅包含数字 `**1**` 的最 **小** 正整数 `n` 的长度。
+
+返回 `n` 的长度。如果不存在这样的 `n` ，就返回-1。
+
+**注意：** `n` 可能不符合 64 位带符号整数。
+
+**示例 1：**
+
+**输入：**k = 1
+**输出：**1
+**解释：**最小的答案是 n = 1，其长度为 1。
+
+**示例 2：**
+
+**输入：**k = 2
+**输出：**\-1
+**解释：**不存在可被 2 整除的正整数 n 。
+
+**示例 3：**
+
+**输入：**k = 3
+**输出：**3
+**解释：**最小的答案是 n = 111，其长度为 3。
+
+**提示：**
+
+*   `1 <= k <= 105`
+
+[https://leetcode.cn/problems/smallest-integer-divisible-by-k/solutions/2263780/san-chong-suan-fa-you-hua-pythonjavacgo-tk4cj/](https://leetcode.cn/problems/smallest-integer-divisible-by-k/solutions/2263780/san-chong-suan-fa-you-hua-pythonjavacgo-tk4cj/)
+
+```java
+class Solution {
+    public int smallestRepunitDivByK(int k) { // 暴力
+        int p = 0;
+        for (int i = 1; i <= k; i++) { // 这里你怎么知道边界是i<=k?见下一种写法
+            p = (p * 10 + 1) % k;
+            if (p == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+```
+
+```java
+import java.util.HashSet;
+
+class Solution {
+    public int smallestRepunitDivByK(int k) {
+        HashSet<Integer> set = new HashSet<>();
+        int x = 1 % k;
+        while (x > 0 && set.add(x)) { // 避免进入循环
+            x = (x * 10 + 1) % k;
+        }
+        return x > 0 ? -1 : set.size() + 1;
+    }
+}
+```
+
+```java
+class Solution {
+    public int smallestRepunitDivByK(int k) { // 优化
+        if (k % 2 == 0 || k % 5 == 0)
+            return -1;
+        int x = 1 % k;
+        for (int i = 1; ; i++) { // 一定有解
+            if (x == 0)
+                return i;
+            x = (x * 10 + 1) % k;
+        }
+    }
+}
+```
+
+> ![1716013605498](assets/1716013605498.png)
+>
+> ![1716013770334](assets/1716013770334.png)
+
+```java
+class Solution {
+    public int smallestRepunitDivByK(int k) { // 了解即可
+        if (k % 2 == 0 || k % 5 == 0)
+            return -1;
+        int m = phi(k * 9);
+        // 从小到大枚举不超过 sqrt(m) 的因子
+        int i = 1;
+        for (; i * i <= m; i++)
+            if (m % i == 0 && pow(10, i, k * 9) == 1)
+                return i;
+        // 从小到大枚举不低于 sqrt(m) 的因子
+        for (i--; ; i--)
+            if (m % i == 0 && pow(10, m / i, k * 9) == 1)
+                return m / i;
+    }
+
+    // 计算欧拉函数（n 以内的与 n 互质的数的个数）
+    private int phi(int n) {
+        int res = n;
+        for (int i = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                res = res / i * (i - 1);
+                while (n % i == 0) n /= i;
+            }
+        }
+        if (n > 1)
+            res = res / n * (n - 1);
+        return res;
+    }
+
+    // 快速幂，返回 pow(x, n) % mod
+    private long pow(long x, int n, long mod) {
+        long res = 1;
+        for (; n > 0; n /= 2) {
+            if (n % 2 > 0) res = res * x % mod;
+            x = x * x % mod;
+        }
+        return res;
     }
 }
 ```
