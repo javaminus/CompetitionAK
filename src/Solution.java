@@ -1,19 +1,26 @@
+import java.util.Arrays;
+
 class Solution {
-    public int getWinner(int[] arr, int k) {
-        int mx = arr[0];
-        int cnt = 0, x = arr[0];
-        for (int i = 1; i < arr.length; i++) {
-            mx = Math.max(mx, arr[i]);
-            if (x > arr[i]) {
-                cnt++;
-            }else{
-                x = arr[i];
-                cnt = 1;
-            }
-            if (cnt == k) {
-                return x;
-            }
+    int[][] memo;
+    public int countVowelStrings(int n) {
+        memo = new int[n + 1][5];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(memo[i], -1);
         }
-        return mx;
+        return dfs(0, 0, n);
+    }
+
+    private int dfs(int i, int j, int n) {
+        if (i == n) {
+            return 1;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        int res = 0;
+        for (int k = j; k <= 4; k++) {
+            res += dfs(i + 1, k, n);
+        }
+        return memo[i][j] = res;
     }
 }
