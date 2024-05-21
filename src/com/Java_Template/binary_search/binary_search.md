@@ -202,3 +202,76 @@ class Solution {
     }
 }
 ```
+1802\. 有界数组中指定下标处的最大值
+---------------------
+
+给你三个正整数 `n`、`index` 和 `maxSum` 。你需要构造一个同时满足下述所有条件的数组 `nums`（下标 **从 0 开始** 计数）：
+
+*   `nums.length == n`
+*   `nums[i]` 是 **正整数** ，其中 `0 <= i < n`
+*   `abs(nums[i] - nums[i+1]) <= 1` ，其中 `0 <= i < n-1`
+*   `nums` 中所有元素之和不超过 `maxSum`
+*   `nums[index]` 的值被 **最大化**
+
+返回你所构造的数组中的 `nums[index]` 。
+
+注意：`abs(x)` 等于 `x` 的前提是 `x >= 0` ；否则，`abs(x)` 等于 `-x` 。
+
+**示例 1：**
+
+**输入：**n = 4, index = 2,  maxSum = 6
+**输出：**2
+**解释：**数组 \[1,1,**2**,1\] 和 \[1,2,**2**,1\] 满足所有条件。不存在其他在指定下标处具有更大值的有效数组。
+
+**示例 2：**
+
+**输入：**n = 6, index = 1,  maxSum = 10
+**输出：**3
+
+**提示：**
+
+*   `1 <= n <= maxSum <= 109`
+*   `0 <= index < n`
+
+[https://leetcode.cn/problems/maximum-value-at-a-given-index-in-a-bounded-array/](https://leetcode.cn/problems/maximum-value-at-a-given-index-in-a-bounded-array/)
+
+```java
+class Solution {
+    public int maxValue(int n, int index, int maxSum) {
+        //确定nums[index]的边界,左侧边界最小正整数1,右侧边界是maxSum;
+        int left = 1, right = maxSum;
+        //二分查找
+        while(left <= right){
+            int mid = left + (right - left) / 2;
+            if(check(mid,n,index,maxSum)){
+                left = mid + 1;
+            }else{
+                right = mid - 1 ;
+            }
+
+        }
+        return left - 1;
+    }
+    //通过左侧求和+mid+右侧求和<=maxSum作为判断条件
+    public boolean check(int mid,int n,int index,int maxSum){
+        int leftNums = index;
+        int rightNums = n-1-index;
+        return cal(mid,leftNums)+cal(mid,rightNums)+mid<=maxSum;
+    }
+
+    public long cal(int mid,int length){
+        //仅分析左侧情况
+        //mid左侧的最大值为mid-1,如果length刚好等于mid-1,则1....mid-1求和为(mid-1)*mid/2;
+        //如果length<mid-1,那么根据贪心,左侧应该是(mid-length)....mid-1求和为(small+mid-1)*length/2;
+        //如果length>mid-1,那么根据贪心,在左侧补全1即可,左侧应该是1,1,....,1,2,3,...mid-1求和为(mid-1)*mid/2+(length-(mid-1))
+        if(length < mid-1){
+            int small = mid-length;
+            return (long)(small+mid-1)*length/2;
+        }else{
+            int ones = length-(mid-1);
+            return (long)(mid-1)*mid/2+ones;
+        }
+    }
+}
+```
+

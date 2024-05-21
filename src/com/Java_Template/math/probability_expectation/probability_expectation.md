@@ -144,9 +144,27 @@ class Solution {
 
 [https://leetcode.cn/problems/new-21-game/description/](https://leetcode.cn/problems/new-21-game/description/)
 
-```java
+![1716270843205](assets/1716270843205.png)
 
+```java
+class Solution {
+    public double new21Game(int n, int k, int maxPts) {
+        double[] dp = new double[k+ maxPts];
+        double sum = 0;
+        for (int i = k; i < k + maxPts; i++) {
+            dp[i] = i <= n ? 1 : 0;
+            sum += dp[i];
+        }
+        for (int i = k - 1; i >= 0; i--) {
+            dp[i] = sum / maxPts;
+            sum = sum - dp[i + maxPts] + dp[i];
+        }
+        return dp[0];
+    }
+}
 ```
+
+
 
 1467\. 两个盒子中球的颜色数相同的概率
 ----------------------
@@ -195,119 +213,110 @@ class Solution {
 [https://leetcode.cn/problems/probability-of-a-two-boxes-having-the-same-number-of-distinct-balls/description/](https://leetcode.cn/problems/probability-of-a-two-boxes-having-the-same-number-of-distinct-balls/description/)
 
 ```java
+class Solution {
+    private static int MX = 49;
+    int n;
+    double ans = 0;
+    private static long[][] c = new long[MX][MX]; // 这里记得开long
+    static {
+        for (int i = 0; i < MX; i++) {
+            c[i][i] = c[i][0] = 1;
+            for (int j = 1; j < i; j++) {
+                c[i][j] = c[i - 1][j] + c[i - 1][j - 1];
+            }
+        }
+    }
+    public double getProbability(int[] balls) { // 回溯（暴力写法）
+        n = balls.length;
+        int[] firstBox = new int[n];
+        int[] secondBox = new int[n];
+        System.arraycopy(balls, 0, firstBox, 0, n);
+        backtrack(firstBox, secondBox, 0);
+        return ans;
+    }
 
+    private void backtrack(int[] firstBox, int[] secondBox, int index) { 
+        if (index == n) { // 到达最后一类球
+            int firstSum = 0, secondSum = 0;
+            int firstColors = 0, secondColors = 0;
+            for (int i = 0; i < n; i++) {
+                if (firstBox[i] > 0) {
+                    firstSum += firstBox[i];
+                    firstColors++;
+                }
+                if (secondBox[i] > 0) {
+                    secondSum += secondBox[i];
+                    secondColors++;
+                }
+            }
+            if (firstSum == secondSum && firstColors == secondColors) {
+                double probability = 1;
+                for (int i = 0; i < n; i++) {
+                    probability *= c[firstBox[i] + secondBox[i]][firstBox[i]];
+                }
+                probability /= c[firstSum + secondSum][firstSum];
+                ans += probability;
+            }
+        }else{
+            int firstCur = firstBox[index], secondCur = secondBox[index];
+            for (int i = 0; i <= firstCur; i++) { // 开始表示第i种颜色的球全在第一个盒子中
+                firstBox[index] = firstCur - i; // 拿出i个，然后放入第二个盒子
+                secondBox[index] = secondCur + i;
+                backtrack(firstBox, secondBox, index + 1);
+            }
+            firstBox[index] = firstCur;
+            secondBox[index] = secondCur; // 恢复现场
+        }
+    }
+}
 ```
-
-808\. 分汤
---------
-
-有 **A 和 B 两种类型** 的汤。一开始每种类型的汤有 `n` 毫升。有四种分配操作：
-
-1.  提供 `100ml` 的 **汤A** 和 `0ml` 的 **汤B** 。
-2.  提供 `75ml` 的 **汤A** 和 `25ml` 的 **汤B** 。
-3.  提供 `50ml` 的 **汤A** 和 `50ml` 的 **汤B** 。
-4.  提供 `25ml` 的 **汤A** 和 `75ml` 的 **汤B** 。
-
-当我们把汤分配给某人之后，汤就没有了。每个回合，我们将从四种概率同为 `0.25` 的操作中进行分配选择。如果汤的剩余量不足以完成某次操作，我们将尽可能分配。当两种类型的汤都分配完时，停止操作。
-
-**注意** 不存在先分配 `100` ml **汤B** 的操作。
-
-需要返回的值： **汤A** 先分配完的概率 +  **汤A和汤B** 同时分配完的概率 / 2。返回值在正确答案 `10-5` 的范围内将被认为是正确的。
-
-**示例 1:**
-
-**输入:** n = 50
-**输出:** 0.62500
-**解释:**如果我们选择前两个操作**，**A 首先将变为空。
-对于第三个操作，A 和 B 会同时变为空。
-对于第四个操作，B 首先将变为空。
-所以 A 变为空的总概率加上 A 和 B 同时变为空的概率的一半是 0.25 \*(1 + 1 + 0.5 + 0)= 0.625。
-
-**示例 2:**
-
-**输入:** n = 100
-**输出:** 0.71875
-
-**提示:**
-
-*   `0 <= n <= 109`​​​​​​​
-
-[https://leetcode.cn/problems/soup-servings/description/](https://leetcode.cn/problems/soup-servings/description/)
 
 ```java
+import java.util.Arrays;
 
+class Solution {
+    private static int MX = 49;
+    private static long[][] c = new long[MX][MX];
+    static {
+        for (int i = 0; i < MX; i++) {
+            c[i][0] = c[i][i] = 1;
+            for (int j = 1; j < i; j++) {
+                c[i][j] = c[i - 1][j - 1] + c[i - 1][j];
+            }
+        }
+    }
+
+    Long[][][][] dp;
+    int[] balls;
+    public double getProbability(int[] balls) {
+        this.balls = balls;
+        int s = Arrays.stream(balls).sum();
+        long sum = c[s][s / 2];
+        dp = new Long[balls.length][s / 2 + 1][balls.length + 1][balls.length + 1];
+        Long ans = dfs(0, s / 2, 0, balls.length);
+        return ans / (double) sum;
+    }
+
+    /**
+     *
+     * @param start 当前种类的下标
+     * @param s     两个盒子中球的数量差
+     * @param cnt0  盒子1的种类
+     * @param cnt1  盒子2的种类
+     * @return long 方案数
+     */
+    private long dfs(int start, int s, int cnt0, int cnt1) {
+        if (start >= balls.length) {
+            return s == 0 && cnt0 == cnt1 ? 1 : 0;
+        }
+        if (dp[start][s][cnt0][cnt1] != null) {
+            return dp[start][s][cnt0][cnt1];
+        }
+        long ans = 0;
+        for (int i = 0; i <= Math.min(balls[start], s); i++) {
+            ans += c[balls[start]][i] * dfs(start + 1, s - i, cnt0 + (i == 0 ? 0 : 1), cnt1 - (i == balls[start] ? 1 : 0));
+        }
+        return dp[start][s][cnt0][cnt1] = ans;
+    }
+}
 ```
-
-
-
-LCR 185. 统计结果概率
----------------
-
-你选择掷出 `num` 个色子，请返回所有点数总和的概率。
-
-你需要用一个浮点数数组返回答案，其中第 `i` 个元素代表这 `num` 个骰子所能掷出的点数集合中第 `i` 小的那个的概率。
-
-**示例 1：**
-
-**输入：**num = 3
-**输出：**\[0.00463,0.01389,0.02778,0.04630,0.06944,0.09722,0.11574,0.12500,0.12500,0.11574,0.09722,0.06944,0.04630,0.02778,0.01389,0.00463\]
-
-**示例 2：**
-
-**输入：**num = 5
-**输出:**\[0.00013,0.00064,0.00193,0.00450,0.00900,0.01620,0.02636,0.03922,0.05401,0.06944,0.08372,0.09452,0.10031,0.10031,0.09452,0.08372,0.06944,0.05401,0.03922,0.02636,0.01620,0.00900,0.00450,0.00193,0.00064,0.00013\]
-
-**提示：**
-
-*   `1 <= num <= 11`
-
-[https://leetcode.cn/problems/nge-tou-zi-de-dian-shu-lcof/description/](https://leetcode.cn/problems/nge-tou-zi-de-dian-shu-lcof/description/)
-
-```java
-
-```
-
-
-
-LCP 11. 期望个数统计
---------------
-
-某互联网公司一年一度的春招开始了，一共有 `n` 名面试者入选。每名面试者都会提交一份简历，公司会根据提供的简历资料产生一个预估的能力值，数值越大代表越有可能通过面试。
-
-小 A 和小 B 负责审核面试者，他们均有所有面试者的简历，并且将各自根据面试者能力值从大到小的顺序浏览。由于简历事先被打乱过，能力值相同的简历的出现顺序是从它们的全排列中**等可能**地取一个。现在给定 `n` 名面试者的能力值 `scores`，设 `X` 代表小 A 和小 B 的浏览顺序中出现在同一位置的简历数，求 `X` 的期望。
-
-提示：离散的非负随机变量的期望计算公式为 ![1](https://pic.leetcode.cn/1694957445-AweiqF-svg.svg)。在本题中，由于 `X` 的取值为 0 到 `n` 之间，期望计算公式可以是 ![2](https://pic.leetcode.cn/1694957449-DuBtfQ-svg1.svg)。
-
-**示例 1：**
-
-> 输入：`scores = [1,2,3]`
->
-> 输出：`3`
->
-> 解释：由于面试者能力值互不相同，小 A 和小 B 的浏览顺序一定是相同的。`X`的期望是 3 。
-
-**示例 2：**
-
-> 输入：`scores = [1,1]`
->
-> 输出：`1`
->
-> 解释：设两位面试者的编号为 0, 1。由于他们的能力值都是 1，小 A 和小 B 的浏览顺序都为从全排列 `[[0,1],[1,0]]` 中等可能地取一个。如果小 A 和小 B 的浏览顺序都是 `[0,1]` 或者 `[1,0]` ，那么出现在同一位置的简历数为 2 ，否则是 0 。所以 `X` 的期望是 (2+0+2+0) \* 1/4 = 1
-
-**示例 3：**
-
-> 输入：`scores = [1,1,2]`
->
-> 输出：`2`
-
-**限制：**
-
-*   `1 <= scores.length <= 10^5`
-*   `0 <= scores[i] <= 10^6`
-
-[https://leetcode.cn/problems/qi-wang-ge-shu-tong-ji/description/](https://leetcode.cn/problems/qi-wang-ge-shu-tong-ji/description/)
-
-```java
-
-```
-
