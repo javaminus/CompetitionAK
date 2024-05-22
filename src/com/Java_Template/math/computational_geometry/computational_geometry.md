@@ -440,7 +440,7 @@ class Solution {
 
 ```
 
-# §5.3 矩形、多边形
+# §5.3 矩形、多边形(对角线是一个不错的入手点)
 
 836\. 矩形重叠
 ----------
@@ -592,6 +592,289 @@ class Solution {
         int x = a[0] - b[0];
         int y = a[1] - b[1];
         return x * x + y * y;
+    }
+}
+```
+
+939\. 最小面积矩形
+------------
+
+给定在 xy 平面上的一组点，确定由这些点组成的矩形的最小面积，其中矩形的边平行于 x 轴和 y 轴。
+
+如果没有任何矩形，就返回 0。
+
+**示例 1：**
+
+**输入：**\[\[1,1\],\[1,3\],\[3,1\],\[3,3\],\[2,2\]\]
+**输出：**4
+
+**示例 2：**
+
+**输入：**\[\[1,1\],\[1,3\],\[3,1\],\[3,3\],\[4,1\],\[4,3\]\]
+**输出：**2
+
+**提示：**
+
+1.  `1 <= points.length <= 500`
+2.  `0 <= points[i][0] <= 40000`
+3.  `0 <= points[i][1] <= 40000`
+4.  所有的点都是不同的。
+
+[https://leetcode.cn/problems/minimum-area-rectangle/solutions/15996/zui-xiao-mian-ji-ju-xing-by-leetcode/](https://leetcode.cn/problems/minimum-area-rectangle/solutions/15996/zui-xiao-mian-ji-ju-xing-by-leetcode/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int minAreaRect(int[][] points) {
+        // 方法一，扫描线，按列扫描
+        Arrays.sort(points, (a, b) -> a[0] - b[0]);
+        TreeMap<Integer, List<Integer>> map = new TreeMap<>(); // <这是对应的x轴的下标，当前x对应的列的值>
+        for (int[] point : points) {
+            int x = point[0], y = point[1];
+            map.computeIfAbsent(x, e -> new ArrayList<Integer>()).add(y);
+        }
+        int ans = Integer.MAX_VALUE;
+        HashMap<Integer, Integer> lastX = new HashMap<>();
+        for (int x : map.keySet()) {
+            List<Integer> list = map.get(x);
+            Collections.sort(list);
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = i + 1; j < list.size(); j++) {
+                    int y1 = list.get(i), y2 = list.get(j);
+                    int code = y1 * 40001 + y2;
+                    if (lastX.containsKey(code)) {
+                        ans = Math.min(ans, (y2 - y1) * (x - lastX.get(code)));
+                    }
+                    lastX.put(code, x);
+                }
+            }
+        }
+        return ans == Integer.MAX_VALUE ? 0 : ans;
+    }
+}
+```
+
+```java
+import java.util.*;
+
+class Solution {
+    public int minAreaRect(int[][] points) {
+        // 方法二，找对角
+        HashSet<Integer> set = new HashSet<>();
+        for (int[] point : points) {
+            set.add(point[0] * 40001 + point[1]);
+        }
+        int ans = Integer.MAX_VALUE;
+        int n = points.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (points[i][0] != points[j][0] && points[i][1] != points[j][1]) {
+                    if (set.contains(points[i][0] * 40001 + points[j][1]) && set.contains(points[j][0] * 40001 + points[i][1])) {
+                        ans = Math.min(ans, Math.abs(points[i][0] - points[j][0]) * Math.abs(points[i][1] - points[j][1]));
+                    }
+                }
+            }
+        }
+        return ans == Integer.MAX_VALUE ? 0 : ans;
+    }
+}
+```
+
+963\. 最小面积矩形 II
+---------------
+
+给定在 xy 平面上的一组点，确定由这些点组成的任何矩形的最小面积，其中矩形的边**不一定平行于** x 轴和 y 轴。
+
+如果没有任何矩形，就返回 0。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/22/1a.png)**
+
+**输入：**\[\[1,2\],\[2,1\],\[1,0\],\[0,1\]\]
+**输出：**2.00000
+**解释：**最小面积的矩形出现在 \[1,2\],\[2,1\],\[1,0\],\[0,1\] 处，面积为 2。
+
+**示例 2：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/23/2.png)
+
+**输入：**\[\[0,1\],\[2,1\],\[1,1\],\[1,0\],\[2,0\]\]
+**输出：**1.00000
+**解释：**最小面积的矩形出现在 \[1,0\],\[1,1\],\[2,1\],\[2,0\] 处，面积为 1。
+
+**示例 3：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/23/3.png)
+
+**输入：**\[\[0,3\],\[1,2\],\[3,1\],\[1,3\],\[2,1\]\]
+**输出：**0
+**解释：**没法从这些点中组成任何矩形。
+
+**示例 4：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/21/4c.png)**
+
+**输入：**\[\[3,1\],\[1,1\],\[0,1\],\[2,1\],\[3,3\],\[3,2\],\[0,2\],\[2,3\]\]
+**输出：**2.00000
+**解释：**最小面积的矩形出现在 \[2,1\],\[2,3\],\[3,3\],\[3,1\] 处，面积为 2。
+
+**提示：**
+
+1.  `1 <= points.length <= 50`
+2.  `0 <= points[i][0] <= 40000`
+3.  `0 <= points[i][1] <= 40000`
+4.  所有的点都是不同的。
+5.  与真实值误差不超过 `10^-5` 的答案将视为正确结果。
+
+[https://leetcode.cn/problems/minimum-area-rectangle-ii/description/](https://leetcode.cn/problems/minimum-area-rectangle-ii/description/)
+
+>  注意到形成一个矩形的充分必要条件是两条对角线的中点相同且端点到中点距离也相同。 
+
+![1716364215706](assets/1716364215706.png)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    private static final double inf = 1e10;
+    private Map<Long, Double> hash;
+    private double ans;
+
+    // https://leetcode.cn/problems/minimum-area-rectangle-ii/solutions/707666/c-on2-0ms-100-by-hqztrue-9ij7/
+    public double minAreaFreeRect(int[][] points) {
+        int n = points.length;
+        ans = inf;
+        hash = new HashMap<>();
+        Arrays.sort(points, (o1, o2) -> {
+            if (o1[0] == o2[0]) {
+                return Integer.compare(o1[1], o2[1]);
+            }
+            return Integer.compare(o1[0], o2[0]);
+        });
+
+        for (int i = 0; i < n; i++) {
+            int x1 = points[i][0], y1 = points[i][1];
+            for (int j = i + 1; j < n; j++) {
+                int x2 = points[j][0], y2 = points[j][1];
+                if (y2 > y1) {
+                    // 边长、斜率以及垂线在 y 轴上的截距
+                    double l = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+                    double t = (double) (x2 - x1) / (y2 - y1);
+                    double d = x1 * t + y1;
+
+                    insert(h1(l, t, d), l * Math.sqrt(x1 * x1 + (y1 - d) * (y1 - d)));
+                }
+            }
+        }
+        return ans == inf ? 0 : ans;
+    }
+
+    // 实数哈希，一般题目要求实数误差不超过 1e-5，这里放大 1e5 应该也可以
+    private long h1(double l, double t, double d) {
+        return (long) ((l * 3.14159 + t * 1.2345 + d) * 1e5);
+    }
+
+    private void insert(long x, double y) {
+        if (hash.containsKey(x)) {
+            ans = Math.min(ans, y - hash.get(x));
+        }
+        hash.put(x, y);
+    }
+}
+```
+
+#  §5.4 凸包
+
+587\. 安装栅栏
+----------
+
+给定一个数组 `trees`，其中 `trees[i] = [xi, yi]` 表示树在花园中的位置。
+
+你被要求用最短长度的绳子把整个花园围起来，因为绳子很贵。只有把 **所有的树都围起来**，花园才围得很好。
+
+返回_恰好位于围栏周边的树木的坐标_。
+
+**示例 1:**
+
+![](https://assets.leetcode.com/uploads/2021/04/24/erect2-plane.jpg)
+
+**输入:** points = \[\[1,1\],\[2,2\],\[2,0\],\[2,4\],\[3,3\],\[4,2\]\]
+**输出:** \[\[1,1\],\[2,0\],\[3,3\],\[2,4\],\[4,2\]\]
+
+**示例 2:**
+
+![](https://assets.leetcode.com/uploads/2021/04/24/erect1-plane.jpg)
+
+**输入:** points = \[\[1,2\],\[2,2\],\[4,2\]\]
+**输出:** \[\[4,2\],\[2,2\],\[1,2\]\]
+
+**注意:**
+
+*   `1 <= points.length <= 3000`
+*   `points[i].length == 2`
+*   `0 <= xi, yi <= 100`
+*   所有给定的点都是 **唯一** 的。
+
+
+[https://leetcode.cn/problems/erect-the-fence/description/](https://leetcode.cn/problems/erect-the-fence/description/)
+
+> 官方的Andrew算法写的非常好：https://leetcode.cn/problems/erect-the-fence/
+
+```java
+class Solution {
+    public int[][] outerTrees(int[][] trees) {
+        int n = trees.length;
+        if (n < 4) {
+            return trees;
+        }
+        /* 按照 x 大小进行排序，如果 x 相同，则按照 y 的大小进行排序 */
+        Arrays.sort(trees, (a, b) -> {
+            if (a[0] == b[0]) {
+                return a[1] - b[1];
+            }
+            return a[0] - b[0];
+        });
+        List<Integer> hull = new ArrayList<Integer>();
+        boolean[] used = new boolean[n];
+        /* hull[0] 需要入栈两次，不进行标记 */
+        hull.add(0);
+        /* 求出凸包的下半部分 */
+        for (int i = 1; i < n; i++) {
+            while (hull.size() > 1 && cross(trees[hull.get(hull.size() - 2)], trees[hull.get(hull.size() - 1)], trees[i]) < 0) {
+                used[hull.get(hull.size() - 1)] = false;
+                hull.remove(hull.size() - 1);
+            }
+            used[i] = true;
+            hull.add(i);
+        }
+        int m = hull.size();
+        /* 求出凸包的上半部分 */
+        for (int i = n - 2; i >= 0; i--) {
+            if (!used[i]) {
+                while (hull.size() > m && cross(trees[hull.get(hull.size() - 2)], trees[hull.get(hull.size() - 1)], trees[i]) < 0) {
+                    used[hull.get(hull.size() - 1)] = false;
+                    hull.remove(hull.size() - 1);
+                }
+                used[i] = true;
+                hull.add(i);
+            }
+        }
+        /* hull[0] 同时参与凸包的上半部分检测，因此需去掉重复的 hull[0] */
+        hull.remove(hull.size() - 1);
+        int size = hull.size();
+        int[][] res = new int[size][2];
+        for (int i = 0; i < size; i++) {
+            res[i] = trees[hull.get(i)];
+        }
+        return res;
+    }
+
+    public int cross(int[] p, int[] q, int[] r) {
+        return (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
     }
 }
 ```
