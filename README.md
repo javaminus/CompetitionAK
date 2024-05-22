@@ -16,6 +16,7 @@
 - **long**:
   - 范围为 -2^63 到 2^63 - 1，可以表示为 -9 * 10^18 到 9 * 10^18。
 - ![1713108404643](F:\leetcode\README.assets\1713108404643.png)
+- ![1716388225535](assets/1716388225535.png)
 - ![img.png](img.png)
 - ![img_3.png](img_3.png)
 - ![img_1.png](img_1.png)
