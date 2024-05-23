@@ -858,7 +858,7 @@ public class ParallelogramArea { // 如何求平行四边形的面积
 
 ```
 
-# E 小红的平行四边形
+## E 小红的平行四边形
 
 平行四边形ABCD面积 = 向量AB × 向量AC
 
@@ -871,6 +871,12 @@ public class ParallelogramArea { // 如何求平行四边形的面积
 (2) 两边长度相等
 
 (满足这两个条件, 另外两边一定是平行的)
+
+```java
+// 保留n位小数
+```
+
+
 
 ```java
 import java.io.*; 
