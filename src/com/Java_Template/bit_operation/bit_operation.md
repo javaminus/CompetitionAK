@@ -1,3 +1,5 @@
+> # 位运算经典技巧：由于每个比特位互不相干，所以拆分成每个比特位分别计算。 
+
 100282\. 数组最后一个元素的最小值
 ---------------------
 
@@ -577,7 +579,7 @@ class Solution {
 
 ```
 
-3108\. 带权图里旅途的最小代价
+3108\. 带权图里旅途的最小代价(两种做法：dfs+并查集)
 ------------------
 
 给你一个 `n` 个节点的带权无向图，节点编号为 `0` 到 `n - 1` 。
@@ -676,6 +678,61 @@ class Solution {
     }
 }
 ```
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+class Solution {
+	public int[] minimumCost(int n, int[][] edges, int[][] query) {
+
+		int[] parent = new int[n];
+		Arrays.setAll(parent, i -> i);
+		for (int[] e : edges) {
+			int x = e[0], y = e[1], z = e[2];
+			union(parent, x, y);
+		}
+		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+		for (int[] e : edges) {
+			int u = e[0], w = e[2];
+			int root = find(parent, u);
+			map.put(root, map.getOrDefault(root, w) & w);
+		}
+		int m = query.length;
+		int[] ans = new int[m];
+		for (int i = 0; i < m; i++) {
+
+			int from = query[i][0],to = query[i][1];
+			if(from ==to) {
+				ans[i] = 0;
+			}else {
+				if(find(parent,from)==find(parent,to)) {
+					ans[i] = map.get(find(parent,from));
+				}else {
+					ans[i] = -1;
+				}
+			}
+			
+		}
+		return ans;
+	}
+
+	private void union(int[] parent, int index1, int index2) {
+		parent[find(parent, index1)] = find(parent, index2);
+	}
+
+	private int find(int[] parent, int index) {
+		if (parent[index] != index) {
+			parent[index] = find(parent, parent[index]);
+		}
+		return parent[index];
+	}
+}
+```
+
+
 
 898\. 子数组按位或操作
 --------------
@@ -957,4 +1014,1105 @@ class Solution {
     }
 }
 ```
+
+2527\. 查询数组异或美丽值
+----------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` 。
+
+三个下标 `i` ，`j` 和 `k` 的 **有效值** 定义为 `((nums[i] | nums[j]) & nums[k])` 。
+
+一个数组的 **异或美丽值** 是数组中所有满足 `0 <= i, j, k < n`  **的三元组** `(i, j, k)` 的 **有效值** 的异或结果。
+
+请你返回 `nums` 的异或美丽值。
+
+**注意：**
+
+*   `val1 | val2` 是 `val1` 和 `val2` 的按位或。
+*   `val1 & val2` 是 `val1` 和 `val2` 的按位与。
+
+**示例 1：**
+
+**输入：**nums = \[1,4\]
+**输出：**5
+**解释：**
+三元组和它们对应的有效值如下：
+- (0,0,0) 有效值为 ((1 | 1) & 1) = 1
+- (0,0,1) 有效值为 ((1 | 1) & 4) = 0
+- (0,1,0) 有效值为 ((1 | 4) & 1) = 1
+- (0,1,1) 有效值为 ((1 | 4) & 4) = 4
+- (1,0,0) 有效值为 ((4 | 1) & 1) = 1
+- (1,0,1) 有效值为 ((4 | 1) & 4) = 4
+- (1,1,0) 有效值为 ((4 | 4) & 1) = 0
+- (1,1,1) 有效值为 ((4 | 4) & 4) = 4 
+  数组的异或美丽值为所有有效值的按位异或 1 ^ 0 ^ 1 ^ 4 ^ 1 ^ 4 ^ 0 ^ 4 = 5 。
+
+**示例 2：**
+
+**输入：**nums = \[15,45,20,2,34,35,5,44,32,30\]
+**输出：**34
+`**解释：**数组的异或美丽值为 34 。`
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 109`
+
+[https://leetcode.cn/problems/find-xor-beauty-of-array/solutions/2050235/chai-wei-hua-jian-cheng-yi-ge-piao-liang-pun6/](https://leetcode.cn/problems/find-xor-beauty-of-array/solutions/2050235/chai-wei-hua-jian-cheng-yi-ge-piao-liang-pun6/)
+
+![1716533504102](assets/1716533504102.png)
+
+> 如果是求和：题解中已经把 1 的个数算出来了，各个比特位上的 1 的个数乘上对应的 2^i 再相加即可。 
+
+```java
+class Solution {
+	public int xorBeauty(int[] nums) {
+		int ans = 0;
+		for (int x : nums) {
+			ans ^= x;
+		}
+		return ans;
+	}
+}
+```
+
+2317\. 操作后的最大异或和
+----------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` 。一次操作中，选择 **任意** 非负整数 `x` 和一个下标 `i` ，**更新** `nums[i]` 为 `nums[i] AND (nums[i] XOR x)` 。
+
+注意，`AND` 是逐位与运算，`XOR` 是逐位异或运算。
+
+请你执行 **任意次** 更新操作，并返回 `nums` 中所有元素 **最大** 逐位异或和。
+
+**示例 1：**
+
+**输入：**nums = \[3,2,4,6\]
+**输出：**7
+**解释：**选择 x = 4 和 i = 3 进行操作，num\[3\] = 6 AND (6 XOR 4) = 6 AND 2 = 2 。
+现在，nums = \[3, 2, 4, 2\] 且所有元素逐位异或得到 3 XOR 2 XOR 4 XOR 2 = 7 。
+可知 7 是能得到的最大逐位异或和。
+注意，其他操作可能也能得到逐位异或和 7 。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,9,2\]
+**输出：**11
+**解释：**执行 0 次操作。
+所有元素的逐位异或和为 1 XOR 2 XOR 3 XOR 9 XOR 2 = 11 。
+可知 11 是能得到的最大逐位异或和。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `0 <= nums[i] <= 108`
+
+[https://leetcode.cn/problems/maximum-xor-after-operations/description/](https://leetcode.cn/problems/maximum-xor-after-operations/description/)
+
+```java
+class Solution {
+	public int maximumXOR(int[] nums) {
+		int ans = 0;
+		for (int x : nums) {
+			ans |= x;
+		}
+		return ans;
+	}
+}
+```
+
+2564\. 子字符串异或查询
+---------------
+
+给你一个 **二进制字符串** `s` 和一个整数数组 `queries` ，其中 `queries[i] = [firsti, secondi]` 。
+
+对于第 `i` 个查询，找到 `s` 的 **最短子字符串** ，它对应的 **十进制**值 `val` 与 `firsti` **按位异或** 得到 `secondi` ，换言之，`val ^ firsti == secondi` 。
+
+第 `i` 个查询的答案是子字符串 `[lefti, righti]` 的两个端点（下标从 **0** 开始），如果不存在这样的子字符串，则答案为 `[-1, -1]` 。如果有多个答案，请你选择 `lefti` 最小的一个。
+
+请你返回一个数组 `ans` ，其中 `ans[i] = [lefti, righti]` 是第 `i` 个查询的答案。
+
+**子字符串** 是一个字符串中一段连续非空的字符序列。
+
+**示例 1：**
+
+**输入：**s = "101101", queries = \[\[0,5\],\[1,2\]\]
+**输出：**\[\[0,2\],\[2,3\]\]
+**解释：**第一个查询，端点为 `[0,2]` 的子字符串为 **"101"** ，对应十进制数字 **`5 ，且`** **`5 ^ 0 = 5`** ，所以第一个查询的答案为 `[0,2]。第二个查询中，`端点为 `[2,3] 的子字符串为` **"11" ，对应十进制数字** **3** ，且 **3 `^ 1 = 2`** `。所以第二个查询的答案为` `[2,3]` 。
+
+**示例 2：**
+
+**输入：**s = "0101", queries = \[\[12,8\]\]
+**输出：**\[\[-1,-1\]\]
+**解释：**这个例子中，没有符合查询的答案，所以返回 `[-1,-1] 。`
+
+**示例 3：**
+
+**输入：**s = "1", queries = \[\[4,5\]\]
+**输出：**\[\[0,0\]\]
+**解释：**这个例子中，端点为 `[0,0]` 的子字符串对应的十进制值为 **`1`** `，且` **`1 ^ 4 = 5`** `。所以答案为` `[0,0] 。`
+
+**提示：**
+
+*   `1 <= s.length <= 104`
+*   `s[i]` 要么是 `'0'` ，要么是 `'1'` 。
+*   `1 <= queries.length <= 105`
+*   `0 <= firsti, secondi <= 109`
+
+[https://leetcode.cn/problems/substring-xor-queries/description/](https://leetcode.cn/problems/substring-xor-queries/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+	public int[][] substringXorQueries(String S, int[][] queries) {
+		HashMap<Integer, int[]> map = new HashMap();
+		int i = S.indexOf("0"); // 这行代码的意思是在字符串 S 中查找字符 "0" 第一次出现的位置。如果字符串 S 中不存在字符 "0"，则 i 的值将为 -1。
+		if (i >= 0) {
+			map.put(0, new int[] { i, i }); // 这样下面就可以直接跳过 '0' 了，效率更高
+		}
+		char[] s = S.toCharArray();
+		for (int l = 0, n = s.length; l < n; l++) {
+			if (s[l] == '0')
+				continue;
+			for (int r = l, x = 0; r < Math.min(l + 30, n); r++) {
+
+				x = x << 1 | (s[r] & 1);
+				map.putIfAbsent(x, new int[] { l, r });
+			}
+		}
+		int[][] ans = new int[queries.length][2];
+		for (int j = 0; j < queries.length; j++) {
+			ans[j] = map.getOrDefault(queries[j][0] ^ queries[j][1], new int[] { -1, -1 });
+		}
+		return ans;
+	}
+}
+```
+
+1734\. 解码异或后的排列
+---------------
+
+给你一个整数数组 `perm` ，它是前 `n` 个正整数的排列，且 `n` 是个 **奇数** 。
+
+它被加密成另一个长度为 `n - 1` 的整数数组 `encoded` ，满足 `encoded[i] = perm[i] XOR perm[i + 1]` 。比方说，如果 `perm = [1,3,2]` ，那么 `encoded = [2,1]` 。
+
+给你 `encoded` 数组，请你返回原始数组 `perm` 。题目保证答案存在且唯一。
+
+**示例 1：**
+
+**输入：**encoded = \[3,1\]
+**输出：**\[1,2,3\]
+**解释：**如果 perm = \[1,2,3\] ，那么 encoded = \[1 XOR 2,2 XOR 3\] = \[3,1\]
+
+**示例 2：**
+
+**输入：**encoded = \[6,5,4,6\]
+**输出：**\[2,4,1,5,3\]
+
+**提示：**
+
+*   `3 <= n < 105`
+*   `n` 是奇数。
+*   `encoded.length == n - 1`
+
+[https://leetcode.cn/problems/decode-xored-permutation/](https://leetcode.cn/problems/decode-xored-permutation/)
+
+```java
+class Solution {
+	public int[] decode(int[] encoded) {
+		int n = encoded.length + 1;
+		int[] ans = new int[n];
+		int a = 0;
+		// 求得除了 ans[n - 1] 的所有异或结果
+		for (int i = 0; i < n - 1; i += 2) {
+			a ^= encoded[i];
+		}
+		// 求得 ans 的所有异或结果
+		int b = 0;
+		for (int i = 1; i <= n; i++) {
+			b ^= i;
+		}
+		ans[n - 1] = a ^ b;
+		for (int i = n - 2; i >= 0; i--) {
+			ans[i] = encoded[i] ^ ans[i + 1];
+		}
+		return ans;
+	}
+}
+```
+
+2857\. 统计距离为 k 的点对(异或板子题)
+------------------
+
+给你一个 **二维** 整数数组 `coordinates` 和一个整数 `k` ，其中 `coordinates[i] = [xi, yi]` 是第 `i` 个点在二维平面里的坐标。
+
+我们定义两个点 `(x1, y1)` 和 `(x2, y2)` 的 **距离** 为 `(x1 XOR x2) + (y1 XOR y2)` ，`XOR` 指的是按位异或运算。
+
+请你返回满足 `i < j` 且点 `i` 和点 `j`之间距离为 `k` 的点对数目。
+
+**示例 1：**
+
+**输入：**coordinates = \[\[1,2\],\[4,2\],\[1,3\],\[5,2\]\], k = 5
+**输出：**2
+**解释：**以下点对距离为 k ：
+- (0, 1)：(1 XOR 4) + (2 XOR 2) = 5 。
+- (2, 3)：(1 XOR 5) + (3 XOR 2) = 5 。
+
+**示例 2：**
+
+**输入：**coordinates = \[\[1,3\],\[1,3\],\[1,3\],\[1,3\],\[1,3\]\], k = 0
+**输出：**10
+**解释：**任何两个点之间的距离都为 0 ，所以总共有 10 组点对。
+
+**提示：**
+
+*   `2 <= coordinates.length <= 50000`
+*   `0 <= xi, yi <= 106`
+*   `0 <= k <= 100`
+
+[https://leetcode.cn/problems/count-pairs-of-points-with-distance-k/description/](https://leetcode.cn/problems/count-pairs-of-points-with-distance-k/description/)
+
+![1716541919209](assets/1716541919209.png)
+
+```java
+import java.util.*;
+
+class Solution {
+	public int countPairs(List<List<Integer>> coordinates, int k) {
+		int ans = 0;
+		HashMap<Long, Integer> cnt = new HashMap<Long, Integer>();
+		for (List<Integer> list : coordinates) {
+			int x = list.get(0), y = list.get(1);
+			for (int i = 0; i <= k; i++) {
+				ans += cnt.getOrDefault((x ^ i) * 2000000L + (y ^ (k - i)), 0);
+			}
+			cnt.merge(x * 2000000L + y, 1, Integer::sum);
+		}
+		return ans;
+	}
+}
+```
+
+# §6.4 0-1 字典树（异或字典树）
+
+421\. 数组中两个数的最大异或值（板子）
+------------------
+
+给你一个整数数组 `nums` ，返回 `nums[i] XOR nums[j]` 的最大运算结果，其中 `0 ≤ i ≤ j < n` 。
+
+**示例 1：**
+
+**输入：**nums = \[3,10,5,25,2,8\]
+**输出：**28
+**解释：**最大运算结果是 5 XOR 25 = 28.
+
+**示例 2：**
+
+**输入：**nums = \[14,70,53,83,49,91,36,80,92,51,66,70\]
+**输出：**127
+
+**提示：**
+
+*   `1 <= nums.length <= 2 * 105`
+*   `0 <= nums[i] <= 231 - 1`
+
+[https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/description/](https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+	public int findMaximumXOR(int[] nums) {
+		int mx = Arrays.stream(nums).max().getAsInt();
+		int highBit = 31 - Integer.numberOfLeadingZeros(mx); // 返回无符号整型i的最高非零位前面的n个0的个数，包括符号位。如果i小于0则返回0，等于0则返回32。例：10的二进制为：0000
+																// 0000 0000 0000 0000 0000 0000 1010
+																// java的int长度为32位，那么这个方法返回的就是28。
+		int ans = 0, mask = 0;
+		Set<Integer> seen = new HashSet<Integer>();
+		for (int i = highBit; i >= 0; i--) {
+			seen.clear();
+			mask |= 1 << i;
+			int newAns = ans | (1 << i); // 比特位可以是1 吗?
+			for (int x : nums) {
+				x &= mask; // 低于 i 的比特位置为 0
+				if (seen.contains(newAns ^ x)) {
+					ans = newAns;// 这个比特位可以是1
+					break;
+				}
+				seen.add(x);
+			}
+		}
+		return ans;
+	}
+}
+```
+
+```java
+class TrieNode {
+    public TrieNode[] children;
+    
+    public TrieNode() {
+        children = new TrieNode[2];
+    }
+}
+
+class Solution {
+    public int findMaximumXOR(int[] nums) {
+        if (nums.length == 1) return 0;
+        
+        TrieNode root = new TrieNode();
+        TrieNode cur;
+        
+        for (int num : nums) {
+            cur = root;
+            for (int i=30; i>=0; i--) {
+                int bit = (num >> i) & 1;
+                if (cur.children[bit] == null) {
+                    cur.children[bit] = new TrieNode();
+                }
+                
+                cur = cur.children[bit];
+            }
+        }
+        
+        int res = -1, tmp;
+        for (int num : nums) {
+            cur = root;
+            tmp = 0;
+            
+            for (int i=30; i>=0; i--) {
+                int bit = (num >> i) & 1;
+                if (cur.children[bit ^ 1] == null) {
+                    cur = cur.children[bit];
+                } else {
+                    cur = cur.children[bit ^ 1];
+                    tmp += (1 << i);
+                }
+                
+                res = Math.max(res, tmp);
+            }
+        }
+        
+        return res;
+    }
+}
+```
+
+2935\. 找出强数对的最大异或值 II(板子)
+---------------------
+
+给你一个下标从 **0** 开始的整数数组 `nums` 。如果一对整数 `x` 和 `y` 满足以下条件，则称其为 **强数对** ：
+
+*   `|x - y| <= min(x, y)`
+
+你需要从 `nums` 中选出两个整数，且满足：这两个整数可以形成一个强数对，并且它们的按位异或（`XOR`）值是在该数组所有强数对中的 **最大值** 。
+
+返回数组 `nums` 所有可能的强数对中的 **最大** 异或值。
+
+**注意**，你可以选择同一个整数两次来形成一个强数对。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,3,4,5\]
+**输出：**7
+**解释：**数组 `nums` 中有 11 个强数对：(1, 1), (1, 2), (2, 2), (2, 3), (2, 4), (3, 3), (3, 4), (3, 5), (4, 4), (4, 5) 和 (5, 5) 。
+这些强数对中的最大异或值是 3 XOR 4 = 7 。
+
+**示例 2：**
+
+**输入：**nums = \[10,100\]
+**输出：**0
+**解释：**数组 `nums` 中有 2 个强数对：(10, 10) 和 (100, 100) 。
+这些强数对中的最大异或值是 10 XOR 10 = 0 ，数对 (100, 100) 的异或值也是 100 XOR 100 = 0 。
+
+**示例 3：**
+
+**输入：**nums = \[500,520,2500,3000\]
+**输出：**1020
+**解释：**数组 `nums` 中有 6 个强数对：(500, 500), (500, 520), (520, 520), (2500, 2500), (2500, 3000) 和 (3000, 3000) 。
+这些强数对中的最大异或值是 500 XOR 520 = 1020 ；另一个异或值非零的数对是 (5, 6) ，其异或值是 2500 XOR 3000 = 636 。
+
+**提示：**
+
+*   `1 <= nums.length <= 5 * 104`
+*   `1 <= nums[i] <= 220 - 1`
+
+[https://leetcode.cn/problems/maximum-strong-pair-xor-ii/description/](https://leetcode.cn/problems/maximum-strong-pair-xor-ii/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+	public int maximumStrongPairXor(int[] nums) {
+		Arrays.sort(nums);
+		int highBit = 31 - Integer.numberOfLeadingZeros(nums[nums.length - 1]);
+		HashMap<Integer, Integer> map = new HashMap(); // 这里需要使用map记录上一次选的哪个数。<maskY，Y>
+		int ans = 0, mask = 0;
+		for (int i = highBit; i >= 0; i--) {
+			map.clear();
+			mask |= (1 << i);
+			int newAns = ans | (1 << i);
+			for (int y : nums) {
+				// x &= mask;
+				int maskY = mask & y;
+				if (map.containsKey(newAns ^ maskY) && map.get(newAns ^ maskY) * 2 >= y) {
+					ans = newAns;
+					break;
+				}
+				map.put(maskY, y);
+			}
+		}
+		return ans;
+	}
+}
+```
+
+1707\. 与数组中元素的最大异或值
+-------------------
+
+给你一个由非负整数组成的数组 `nums` 。另有一个查询数组 `queries` ，其中 `queries[i] = [xi, mi]` 。
+
+第 `i` 个查询的答案是 `xi` 和任何 `nums` 数组中不超过 `mi` 的元素按位异或（`XOR`）得到的最大值。换句话说，答案是 `max(nums[j] XOR xi)` ，其中所有 `j` 均满足 `nums[j] <= mi` 。如果 `nums` 中的所有元素都大于 `mi`，最终答案就是 `-1` 。
+
+返回一个整数数组 `answer` 作为查询的答案，其中 `answer.length == queries.length` 且 `answer[i]` 是第 `i` 个查询的答案。
+
+**示例 1：**
+
+**输入：**nums = \[0,1,2,3,4\], queries = \[\[3,1\],\[1,3\],\[5,6\]\]
+**输出：**\[3,3,7\]
+**解释：**
+1) 0 和 1 是仅有的两个不超过 1 的整数。0 XOR 3 = 3 而 1 XOR 3 = 2 。二者中的更大值是 3 。
+2) 1 XOR 2 = 3.
+3) 5 XOR 2 = 7.
+
+**示例 2：**
+
+**输入：**nums = \[5,2,4,6,6,3\], queries = \[\[12,4\],\[8,1\],\[6,3\]\]
+**输出：**\[15,-1,5\]
+
+**提示：**
+
+*   `1 <= nums.length, queries.length <= 105`
+*   `queries[i].length == 2`
+*   `0 <= nums[j], xi, mi <= 109`
+
+[https://leetcode.cn/problems/maximum-xor-with-an-element-from-array/description/](https://leetcode.cn/problems/maximum-xor-with-an-element-from-array/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+	public int[] maximizeXor(int[] nums, int[][] queries) { // 离线查询
+		Arrays.sort(nums);
+		int n = queries.length;
+		int[][] newQueries = new int[n][3];
+		for (int i = 0; i < n; i++) {
+			newQueries[i][0] = queries[i][0];
+			newQueries[i][1] = queries[i][1];
+			newQueries[i][2] = i;
+		}
+		Arrays.sort(newQueries, (a, b) -> a[1] - b[1]);
+		int[] ans = new int[n];
+		Trie root = new Trie();
+		int idx = 0;
+		for (int[] q : newQueries) {
+			int x = q[0], m = q[1], qId = q[2];
+			while (idx < nums.length && nums[idx] <= m) {
+				root.insert(nums[idx]);
+				idx++;
+			}
+			if(idx==0) {
+				ans[qId] = -1;
+			}else {
+				ans[qId] = root.getMaxXor(x);
+			}
+		}
+		return ans;
+	}
+
+	class Trie {
+		static final int L = 30;
+		private Trie[] children;
+
+		public Trie() {
+			children = new Trie[2];
+		}
+
+		public void insert(int val) {
+			Trie node = this;
+			for (int i = L - 1; i >= 0; i--) {
+				int bit = (val >> i) & 1;
+				if (node.children[bit] == null) {
+					node.children[bit] = new Trie();
+				}
+				node = node.children[bit];
+			}
+		}
+
+		public int getMaxXor(int val) {
+			int ans = 0;
+			Trie node = this;
+			for (int i = L - 1; i >= 0; i--) {
+				int bit = (val >> i) & 1;
+				if (node.children[bit ^ 1] != null) {
+					ans |= 1 << i;
+					bit ^= 1;
+				}
+				node = node.children[bit];
+			}
+			return ans;
+		}
+	}
+}
+```
+
+```java
+// 在线查询
+class Solution {
+    public int[] maximizeXor(int[] nums, int[][] queries) {
+        Trie trie = new Trie();
+        for (int val : nums) {
+            trie.insert(val);
+        }
+        int numQ = queries.length;
+        int[] ans = new int[numQ];
+        for (int i = 0; i < numQ; ++i) {
+            ans[i] = trie.getMaxXorWithLimit(queries[i][0], queries[i][1]);
+        }
+        return ans;
+    }
+}
+
+class Trie {
+    static final int L = 30;
+    Trie[] children = new Trie[2];
+    int min = Integer.MAX_VALUE;
+
+    public void insert(int val) {
+        Trie node = this;
+        node.min = Math.min(node.min, val);
+        for (int i = L - 1; i >= 0; --i) {
+            int bit = (val >> i) & 1;
+            if (node.children[bit] == null) {
+                node.children[bit] = new Trie();
+            }
+            node = node.children[bit];
+            node.min = Math.min(node.min, val);
+        }
+    }
+
+    public int getMaxXorWithLimit(int val, int limit) {
+        Trie node = this;
+        if (node.min > limit) {
+            return -1;
+        }
+        int ans = 0;
+        for (int i = L - 1; i >= 0; --i) {
+            int bit = (val >> i) & 1;
+            if (node.children[bit ^ 1] != null && node.children[bit ^ 1].min <= limit) {
+                ans |= 1 << i;
+                bit ^= 1;
+            }
+            node = node.children[bit];
+        }
+        return ans;
+    }
+}
+
+```
+
+1803\. 统计异或值在范围内的数对有多少
+----------------------
+
+给你一个整数数组 `nums` （下标 **从 0 开始** 计数）以及两个整数：`low` 和 `high` ，请返回 **漂亮数对** 的数目。
+
+**漂亮数对** 是一个形如 `(i, j)` 的数对，其中 `0 <= i < j < nums.length` 且 `low <= (nums[i] XOR nums[j]) <= high` 。
+
+**示例 1：**
+
+**输入：**nums = \[1,4,2,7\], low = 2, high = 6
+**输出：**6
+**解释：**所有漂亮数对 (i, j) 列出如下：
+    - (0, 1): nums\[0\] XOR nums\[1\] = 5 
+    - (0, 2): nums\[0\] XOR nums\[2\] = 3
+    - (0, 3): nums\[0\] XOR nums\[3\] = 6
+    - (1, 2): nums\[1\] XOR nums\[2\] = 6
+    - (1, 3): nums\[1\] XOR nums\[3\] = 3
+    - (2, 3): nums\[2\] XOR nums\[3\] = 5
+
+**示例 2：**
+
+**输入：**nums = \[9,8,4,2,1\], low = 5, high = 14
+**输出：**8
+**解释：**所有漂亮数对 (i, j) 列出如下：
+​​​​​    - (0, 2): nums\[0\] XOR nums\[2\] = 13
+    - (0, 3): nums\[0\] XOR nums\[3\] = 11
+    - (0, 4): nums\[0\] XOR nums\[4\] = 8
+    - (1, 2): nums\[1\] XOR nums\[2\] = 12
+    - (1, 3): nums\[1\] XOR nums\[3\] = 10
+    - (1, 4): nums\[1\] XOR nums\[4\] = 9
+    - (2, 3): nums\[2\] XOR nums\[3\] = 6
+    - (2, 4): nums\[2\] XOR nums\[4\] = 5
+
+**提示：**
+
+*   `1 <= nums.length <= 2 * 104`
+*   `1 <= nums[i] <= 2 * 104`
+*   `1 <= low <= high <= 2 * 104`
+
+[https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/](https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/)
+
+```java
+class Solution {
+    public int countPairs(int[] nums, int low, int high) {
+        int ans = 0;
+        HashMap<Integer, Integer> cnt = new HashMap<Integer, Integer>();
+        for (int x : nums) cnt.put(x, cnt.getOrDefault(x, 0) + 1);
+        for (++high; high > 0; high >>= 1, low >>= 1) {
+            var nxt = new HashMap<Integer, Integer>();
+            for (var e : cnt.entrySet()) {
+                int x = e.getKey(), c = e.getValue();
+                if ((high & 1) == 1) ans += c * cnt.getOrDefault(x ^ (high - 1), 0);
+                if ((low & 1) == 1)  ans -= c * cnt.getOrDefault(x ^ (low - 1), 0);
+                nxt.put(x >> 1, nxt.getOrDefault(x >> 1, 0) + c);
+            }
+            cnt = nxt;
+        }
+        return ans / 2;
+    }
+}
+```
+
+```java
+class Solution {
+
+    public int countPairs(int[] nums, int low, int high) {
+        Trie root = new Trie();
+        int ans = 0;
+        for (int x : nums) {
+            ans += root.search(x, high + 1) - root.search(x, low);
+            root.insert(x);
+        }
+        return ans;
+    }
+}
+
+class Trie {
+    private Trie[] children = new Trie[2];
+    private int count, HIGH_BIT = 14;
+
+    public void insert(int x) {
+        Trie cur = this;
+        for (int i = HIGH_BIT; i >= 0; --i) {
+            int index = x >> i & 1;
+            if (cur.children[index] == null) 
+                 cur.children[index] = new Trie();            
+            cur= cur.children[index];
+            ++cur.count;
+        }
+    }
+
+    public int search(int x, int limit) {
+        Trie cur = this;
+        int result = 0;
+        for (int i = HIGH_BIT; i >= 0 && cur != null; --i) {
+            int index = x >> i & 1;
+            if ((limit >> i & 1) == 1) {
+                if (cur.children[index] != null) 
+                    result += cur.children[index].count;
+                
+                cur = cur.children[index ^ 1];
+            } else 
+                cur = cur.children[index];      
+        }
+        return result;
+    }
+}
+```
+
+1938\. 查询最大基因差
+--------------
+
+给你一棵 `n` 个节点的有根树，节点编号从 `0` 到 `n - 1` 。每个节点的编号表示这个节点的 **独一无二的基因值** （也就是说节点 `x` 的基因值为 `x`）。两个基因值的 **基因差** 是两者的 **异或和** 。给你整数数组 `parents` ，其中 `parents[i]` 是节点 `i` 的父节点。如果节点 `x` 是树的 **根** ，那么 `parents[x] == -1` 。
+
+给你查询数组 `queries` ，其中 `queries[i] = [nodei, vali]` 。对于查询 `i` ，请你找到 `vali` 和 `pi` 的 **最大基因差** ，其中 `pi` 是节点 `nodei` 到根之间的任意节点（包含 `nodei` 和根节点）。更正式的，你想要最大化 `vali XOR pi` 。
+
+请你返回数组 `ans` ，其中 `ans[i]` 是第 `i` 个查询的答案。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/06/29/c1.png)
+
+**输入：**parents = \[-1,0,1,1\], queries = \[\[0,2\],\[3,2\],\[2,5\]\]
+**输出：**\[2,3,7\]
+**解释：**查询数组处理如下：
+- \[0,2\]：最大基因差的对应节点为 0 ，基因差为 2 XOR 0 = 2 。
+- \[3,2\]：最大基因差的对应节点为 1 ，基因差为 2 XOR 1 = 3 。
+- \[2,5\]：最大基因差的对应节点为 2 ，基因差为 5 XOR 2 = 7 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/06/29/c2.png)
+
+**输入：**parents = \[3,7,-1,2,0,7,0,2\], queries = \[\[4,6\],\[1,15\],\[0,5\]\]
+**输出：**\[6,14,7\]
+**解释：**查询数组处理如下：
+- \[4,6\]：最大基因差的对应节点为 0 ，基因差为 6 XOR 0 = 6 。
+- \[1,15\]：最大基因差的对应节点为 1 ，基因差为 15 XOR 1 = 14 。
+- \[0,5\]：最大基因差的对应节点为 2 ，基因差为 5 XOR 2 = 7 。
+
+**提示：**
+
+*   `2 <= parents.length <= 105`
+*   对于每个 **不是** 根节点的 `i` ，有 `0 <= parents[i] <= parents.length - 1` 。
+*   `parents[root] == -1`
+*   `1 <= queries.length <= 3 * 104`
+*   `0 <= nodei <= parents.length - 1`
+*   `0 <= vali <= 2 * 105`
+
+[https://leetcode.cn/problems/maximum-genetic-difference-query/description/](https://leetcode.cn/problems/maximum-genetic-difference-query/description/)
+
+```java
+class Solution {
+    static class Trie {
+        Trie[] next;
+        int cnt;
+
+        Trie() {
+            next = new Trie[2];
+            cnt = 0;
+        }
+
+        void insert(int x) {
+            Trie temp = this;
+            for (int i = 17; i >= 0; i--) {
+                int bit = (x >> i) & 1;
+                if (temp.next[bit] == null) {
+                    temp.next[bit] = new Trie();
+                }
+                temp = temp.next[bit];
+                temp.cnt++;
+            }
+        }
+
+        void remove(int x) {
+            Trie temp = this;
+            for (int i = 17; i >= 0; i--) {
+                int bit = (x >> i) & 1;
+                temp = temp.next[bit];
+                temp.cnt--;
+            }
+        }
+
+        int get(int x) {
+            Trie temp = this;
+            int res = 0;
+            for (int i = 17; i >= 0; i--) {
+                int bit = (x >> i) & 1, rev = bit ^ 1;
+                if (temp.next[rev] != null) {
+                    if (temp.next[rev].cnt > 0) {
+                        res |= (rev << i);
+                        temp = temp.next[rev];
+                    } else {
+                        res |= (bit << i);
+                        temp = temp.next[bit];
+                    }
+                } else {
+                    if (temp.next[bit].cnt > 0) {
+                        res |= (bit << i);
+                        temp = temp.next[bit];
+                    } else {
+                        res |= (rev << i);
+                        temp = temp.next[rev];
+                    }
+                }
+            }
+            return res ^ x;
+        }
+    }
+
+    public int[] maxGeneticDifference(int[] parents, int[][] queries) {
+        int n = parents.length;
+        tree = new ArrayList[n];
+
+        for (int i = 0; i < n; i++) {
+            tree[i] = new ArrayList<>();
+        }
+
+        int root = -1;
+        for (int i = 0; i < n; i++) {
+            if (parents[i] == -1) {
+                root = i;
+            } else {
+                tree[parents[i]].add(i);
+            }
+        }
+
+        int m = queries.length;
+        q = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            q[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < m; i++) {
+            q[queries[i][0]].add(new int[]{ i, queries[i][1] });
+        }
+
+        ans = new int[m];
+        trie = new Trie();
+        dfs(root);
+
+        return ans;
+    }
+
+    List<Integer>[] tree;
+    List<int[]>[] q;
+    int[] ans;
+    Trie trie;
+
+    private void dfs(int fa) {
+        trie.insert(fa);
+        for (var p : q[fa]) {
+            int idx = p[0], x = p[1];
+            ans[idx] = trie.get(x);
+        }
+        for (int kid : tree[fa]) {
+            dfs(kid);
+        }
+        trie.remove(fa);
+    }
+}
+```
+
+2939\. 最大异或乘积
+-------------
+
+给你三个整数 `a` ，`b` 和 `n` ，请你返回 `(a XOR x) * (b XOR x)` 的 **最大值** 且 `x` 需要满足 `0 <= x < 2n`。
+
+由于答案可能会很大，返回它对 `109 + 7` **取余** 后的结果。
+
+**注意**，`XOR` 是按位异或操作。
+
+**示例 1：**
+
+**输入：**a = 12, b = 5, n = 4
+**输出：**98
+**解释：**当 x = 2 时，(a XOR x) = 14 且 (b XOR x) = 7 。所以，(a XOR x) \* (b XOR x) = 98 。
+98 是所有满足 0 <= x < 2n 中 (a XOR x) \* (b XOR x) 的最大值。
+
+**示例 2：**
+
+**输入：**a = 6, b = 7 , n = 5
+**输出：**930
+**解释：**当 x = 25 时，(a XOR x) = 31 且 (b XOR x) = 30 。所以，(a XOR x) \* (b XOR x) = 930 。
+930 是所有满足 0 <= x < 2n 中 (a XOR x) \* (b XOR x) 的最大值。
+
+**示例 3：**
+
+**输入：**a = 1, b = 6, n = 3
+**输出：**12
+**解释：** 当 x = 5 时，(a XOR x) = 4 且 (b XOR x) = 3 。所以，(a XOR x) \* (b XOR x) = 12 。
+12 是所有满足 0 <= x < 2n 中 (a XOR x) \* (b XOR x) 的最大值。
+
+**提示：**
+
+*   `0 <= a, b < 250`
+*   `0 <= n <= 50`
+
+[https://leetcode.cn/problems/maximum-xor-product/description/](https://leetcode.cn/problems/maximum-xor-product/description/)
+
+```java
+class Solution {
+	private static long Mod = (long) 1e9 + 7;
+
+	public int maximumXorProduct(long a, long b, int n) {
+		long p = (a >> n) << n, q = (b >> n) << n; // 把输入数据大于等于第 n 位的部分先截出来，它们不受异或操作的影响
+		for (int i = n - 1; i >= 0; i--) {
+			// 看 a 和 b 第 i 位是否相同
+			long x = (a >> i) & 1;
+			long y = (b >> i) & 1;
+			if (x == y) { // 相同则两者都可以获得一个 1
+				p |= 1L << i;
+				q |= 1L << i;
+			} else if (p < q) { // 不同则谁小谁获得 1
+				p |= 1L << i;
+			} else {
+				q |= 1L << i;
+			}
+		}
+		p %= Mod;
+		q %= Mod;
+		return (int) (p * q % Mod);
+	}
+}
+```
+
+2354\. 优质数对的数目(恒等式)
+--------------
+
+给你一个下标从 **0** 开始的正整数数组 `nums` 和一个正整数 `k` 。
+
+如果满足下述条件，则数对 `(num1, num2)` 是 **优质数对** ：
+
+*   `num1` 和 `num2` **都** 在数组 `nums` 中存在。
+*   `num1 OR num2` 和 `num1 AND num2` 的二进制表示中值为 **1** 的位数之和大于等于 `k` ，其中 `OR` 是按位 **或** 操作，而 `AND` 是按位 **与** 操作。
+
+返回 **不同** 优质数对的数目。
+
+如果 `a != c` 或者 `b != d` ，则认为 `(a, b)` 和 `(c, d)` 是不同的两个数对。例如，`(1, 2)` 和 `(2, 1)` 不同。
+
+**注意：**如果 `num1` 在数组中至少出现 **一次** ，则满足 `num1 == num2` 的数对 `(num1, num2)` 也可以是优质数对。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,3,1\], k = 3
+**输出：**5
+**解释：**有如下几个优质数对：
+- (3, 3)：(3 AND 3) 和 (3 OR 3) 的二进制表示都等于 (11) 。值为 1 的位数和等于 2 + 2 = 4 ，大于等于 k = 3 。
+- (2, 3) 和 (3, 2)： (2 AND 3) 的二进制表示等于 (10) ，(2 OR 3) 的二进制表示等于 (11) 。值为 1 的位数和等于 1 + 2 = 3 。
+- (1, 3) 和 (3, 1)： (1 AND 3) 的二进制表示等于 (01) ，(1 OR 3) 的二进制表示等于 (11) 。值为 1 的位数和等于 1 + 2 = 3 。
+  所以优质数对的数目是 5 。
+
+**示例 2：**
+
+**输入：**nums = \[5,1,1\], k = 10
+**输出：**0
+**解释：**该数组中不存在优质数对。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `1 <= nums[i] <= 109`
+*   `1 <= k <= 60`
+
+[https://leetcode.cn/problems/number-of-excellent-pairs/description/](https://leetcode.cn/problems/number-of-excellent-pairs/description/)
+
+```java
+import java.util.HashMap;
+import java.util.HashSet;
+
+class Solution {
+    public long countExcellentPairs(int[] nums, int k) {
+        int[] cnt = new int[33];
+        long ans = 0;
+        HashSet<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            if (set.add(num)) {
+                cnt[Integer.bitCount(num)]++;
+            }
+        }
+
+        for (int i = 0; i < 33; i++) {
+            for (int j = 0; j < 33; j++) {
+                if (i + j >= k) {
+                    ans += (long) cnt[i] * cnt[j];
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+1835\. 所有数对按位与结果的异或和(恒等式)
+--------------------
+
+列表的 **异或和**（**XOR sum**）指对所有元素进行按位 `XOR` 运算的结果。如果列表中仅有一个元素，那么其 **异或和** 就等于该元素。
+
+*   例如，`[1,2,3,4]` 的 **异或和** 等于 `1 XOR 2 XOR 3 XOR 4 = 4` ，而 `[3]` 的 **异或和** 等于 `3` 。
+
+给你两个下标 **从 0 开始** 计数的数组 `arr1` 和 `arr2` ，两数组均由非负整数组成。
+
+根据每个 `(i, j)` 数对，构造一个由 `arr1[i] AND arr2[j]`（按位 `AND` 运算）结果组成的列表。其中 `0 <= i < arr1.length` 且 `0 <= j < arr2.length` 。
+
+返回上述列表的 **异或和** 。
+
+**示例 1：**
+
+**输入：**arr1 = \[1,2,3\], arr2 = \[6,5\]
+**输出：**0
+**解释：**列表 = \[1 AND 6, 1 AND 5, 2 AND 6, 2 AND 5, 3 AND 6, 3 AND 5\] = \[0,1,2,0,2,1\] ，
+异或和 = 0 XOR 1 XOR 2 XOR 0 XOR 2 XOR 1 = 0 。
+
+**示例 2：**
+
+**输入：**arr1 = \[12\], arr2 = \[4\]
+**输出：**4
+**解释：**列表 = \[12 AND 4\] = \[4\] ，异或和 = 4 。
+
+**提示：**
+
+*   `1 <= arr1.length, arr2.length <= 105`
+*   `0 <= arr1[i], arr2[j] <= 109`
+
+[https://leetcode.cn/problems/find-xor-sum-of-all-pairs-bitwise-and/solutions/2241670/javashi-yong-yi-huo-he-yu-cao-zuo-de-hun-yz7d/](https://leetcode.cn/problems/find-xor-sum-of-all-pairs-bitwise-and/solutions/2241670/javashi-yong-yi-huo-he-yu-cao-zuo-de-hun-yz7d/)
+
+> (a&b)^(a&c) == a&(b^c) 
+
+```java
+class Solution {
+	public int getXORSum(int[] arr1, int[] arr2) {
+		int a = 0, b = 0;
+		for (int x : arr1) {
+			a ^= x;
+		}
+		for (int x : arr2) {
+			b ^= x;
+		}
+		return a & b;
+	}
+}
+```
+
+2425\. 所有数对的异或和
+---------------
+
+给你两个下标从 **0** 开始的数组 `nums1` 和 `nums2` ，两个数组都只包含非负整数。请你求出另外一个数组 `nums3` ，包含 `nums1` 和 `nums2` 中 **所有数对** 的异或和（`nums1` 中每个整数都跟 `nums2` 中每个整数 **恰好** 匹配一次）。
+
+请你返回 `nums3` 中所有整数的 **异或和** 。
+
+**示例 1：**
+
+**输入：**nums1 = \[2,1,3\], nums2 = \[10,2,5,0\]
+**输出：**13
+**解释：**
+一个可能的 nums3 数组是 \[8,0,7,2,11,3,4,1,9,1,6,3\] 。
+所有这些数字的异或和是 13 ，所以我们返回 13 。
+
+**示例 2：**
+
+**输入：**nums1 = \[1,2\], nums2 = \[3,4\]
+**输出：**0
+**解释：**
+所有数对异或和的结果分别为 nums1\[0\] ^ nums2\[0\] ，nums1\[0\] ^ nums2\[1\] ，nums1\[1\] ^ nums2\[0\] 和 nums1\[1\] ^ nums2\[1\] 。
+所以，一个可能的 nums3 数组是 \[2,5,1,6\] 。
+2 ^ 5 ^ 1 ^ 6 = 0 ，所以我们返回 0 。
+
+**提示：**
+
+*   `1 <= nums1.length, nums2.length <= 105`
+*   `0 <= nums1[i], nums2[j] <= 109`
+
+[https://leetcode.cn/problems/bitwise-xor-of-all-pairings/submissions/496795390/](https://leetcode.cn/problems/bitwise-xor-of-all-pairings/submissions/496795390/)
+
+```java
+class Solution {
+    // 公式一：a^a=0，也就是说任何一个数和它本身异或的结果是0
+    // 公式二：a^0=a，也即使是任何一个数和0异或的结果是它本身
+    public int xorAllNums(int[] nums1, int[] nums2) {
+        int a = 0, b = 0, m = nums1.length, n = nums2.length;
+        for(int x:nums1) a ^= x;
+        for(int x:nums2) b ^= x;
+        if (m % 2 == 0) {
+            b = 0;
+        }
+        if (n % 2 == 0) {
+            a = 0;
+        }
+        return a ^ b;
+    }
+}
+```
+
+
 
