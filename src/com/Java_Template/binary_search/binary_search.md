@@ -57,7 +57,7 @@ import java.util.HashMap;
 class Solution {
     public int medianOfUniquenessArray(int[] nums) {
         int n = nums.length;
-        long k = ((long) (n + 1) * n / 2 + 1) / 2;
+        long k = ((long) (n + 1) * n / 2 + 1) / 2; // 这里是第k个元素，不是下标
         int left = 0, right = n - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
