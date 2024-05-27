@@ -61,8 +61,6 @@ class Solution {
 }
 ```
 
-
-
 ```java
 class Solution {
     public int[][] rangeAddQueries(int n, int[][] queries) { // 二维差分模板
@@ -172,7 +170,7 @@ class Solution {
 }
 ```
 
-2132\. 用邮票贴满网格图
+2132\. 用邮票贴满网格图（二维差分与二维前缀和）
 ---------------
 
 给你一个 `m x n` 的二进制矩阵 `grid` ，每个格子要么为 `0` （空）要么为 `1` （被占据）。
@@ -216,6 +214,9 @@ class Solution {
 [https://leetcode.cn/problems/stamping-the-grid/solutions/1199642/wu-nao-zuo-fa-er-wei-qian-zhui-he-er-wei-zwiu/](https://leetcode.cn/problems/stamping-the-grid/solutions/1199642/wu-nao-zuo-fa-er-wei-qian-zhui-he-er-wei-zwiu/)
 
 ```java
+// 1.由于邮票可以互相重叠，贪心地想，能放邮票就放邮票。
+// 2.遍历所有能放邮票的位置去放邮票。注意邮票不能覆盖被占据的格子，也不能出界。
+// 3.放邮票的同时，记录每个空格子被多少张邮票覆盖。如果存在一个空格子没被邮票覆盖，则返回 false，否则返回 true
 import java.util.Arrays;
 
 class Solution {

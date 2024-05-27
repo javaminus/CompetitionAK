@@ -54,3 +54,450 @@ class Solution {
     }
 }
 ```
+2808\. 使循环数组所有元素相等的最少秒数
+-----------------------
+
+给你一个下标从 **0** 开始长度为 `n` 的数组 `nums` 。
+
+每一秒，你可以对数组执行以下操作：
+
+*   对于范围在 `[0, n - 1]` 内的每一个下标 `i` ，将 `nums[i]` 替换成 `nums[i]` ，`nums[(i - 1 + n) % n]` 或者 `nums[(i + 1) % n]` 三者之一。
+
+**注意**，所有元素会被同时替换。
+
+请你返回将数组 `nums` 中所有元素变成相等元素所需要的 **最少** 秒数。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,1,2\]
+**输出：**1
+**解释：**我们可以在 1 秒内将数组变成相等元素：
+- 第 1 秒，将每个位置的元素分别变为 \[nums\[3\],nums\[1\],nums\[3\],nums\[3\]\] 。变化后，nums = \[2,2,2,2\] 。
+  1 秒是将数组变成相等元素所需要的最少秒数。
+
+**示例 2：**
+
+**输入：**nums = \[2,1,3,3,2\]
+**输出：**2
+**解释：**我们可以在 2 秒内将数组变成相等元素：
+- 第 1 秒，将每个位置的元素分别变为 \[nums\[0\],nums\[2\],nums\[2\],nums\[2\],nums\[3\]\] 。变化后，nums = \[2,3,3,3,3\] 。
+- 第 2 秒，将每个位置的元素分别变为 \[nums\[1\],nums\[1\],nums\[2\],nums\[3\],nums\[4\]\] 。变化后，nums = \[3,3,3,3,3\] 。
+  2 秒是将数组变成相等元素所需要的最少秒数。
+
+**示例 3：**
+
+**输入：**nums = \[5,5,5,5\]
+**输出：**0
+**解释：**不需要执行任何操作，因为一开始数组中的元素已经全部相等。
+
+**提示：**
+
+*   `1 <= n == nums.length <= 105`
+*   `1 <= nums[i] <= 109`
+
+[https://leetcode.cn/problems/minimum-seconds-to-equalize-a-circular-array/description/](https://leetcode.cn/problems/minimum-seconds-to-equalize-a-circular-array/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+	// 扩散元素
+    public int minimumSeconds(List<Integer> nums) { // 最终所有元素一定变成了一个在 nums 中的数。枚举这个数。
+        int n = nums.size(), ans = n;
+        HashMap<Integer, List<Integer>> map = new HashMap<>(); // < num, {相同num对应的下标集合} >
+        for (int i = 0; i < n; i++) {
+            map.computeIfAbsent(nums.get(i), k -> new ArrayList<>()).add(i);
+        }
+        for (List<Integer> list : map.values()) {
+            int mx = n - list.get(list.size() - 1) + list.get(0); // 计算两边的长度： _________(包含当前遍历的key)__________
+            for (int i = 1; i < list.size(); i++) {
+                mx = Math.max(mx, list.get(i) - list.get(i - 1)); // 计算中间位置，其实就是求最大“间隔”
+            }
+            ans = Math.min(ans, mx);
+        }
+        return ans / 2;  // 时间复杂度：O(n)，其中 n 为 nums 的长度。 空间复杂度：O(n)
+    }
+}
+```
+
+2952\. 需要添加的硬币的最小数量
+-------------------
+
+给你一个下标从 **0** 开始的整数数组 `coins`，表示可用的硬币的面值，以及一个整数 `target` 。
+
+如果存在某个 `coins` 的子序列总和为 `x`，那么整数 `x` 就是一个 **可取得的金额** 。
+
+返回需要添加到数组中的 **任意面值** 硬币的 **最小数量** ，使范围 `[1, target]` 内的每个整数都属于 **可取得的金额** 。
+
+数组的 **子序列** 是通过删除原始数组的一些（**可能不删除**）元素而形成的新的 **非空** 数组，删除过程不会改变剩余元素的相对位置。
+
+**示例 1：**
+
+**输入：**coins = \[1,4,10\], target = 19
+**输出：**2
+**解释：**需要添加面值为 2 和 8 的硬币各一枚，得到硬币数组 \[1,2,4,8,10\] 。
+可以证明从 1 到 19 的所有整数都可由数组中的硬币组合得到，且需要添加到数组中的硬币数目最小为 2 。
+
+**示例 2：**
+
+**输入：**coins = \[1,4,10,5,7,19\], target = 19
+**输出：**1
+**解释：**只需要添加一枚面值为 2 的硬币，得到硬币数组 \[1,2,4,5,7,10,19\] 。
+可以证明从 1 到 19 的所有整数都可由数组中的硬币组合得到，且需要添加到数组中的硬币数目最小为 1 。
+
+**示例 3：**
+
+**输入：**coins = \[1,1,1\], target = 20
+**输出：**3
+**解释：**
+需要添加面值为 4 、8 和 16 的硬币各一枚，得到硬币数组 \[1,1,1,4,8,16\] 。 
+可以证明从 1 到 20 的所有整数都可由数组中的硬币组合得到，且需要添加到数组中的硬币数目最小为 3 。
+
+**提示：**
+
+*   `1 <= target <= 105`
+*   `1 <= coins.length <= 105`
+*   `1 <= coins[i] <= target`
+
+[https://leetcode.cn/problems/minimum-number-of-coins-to-be-added/solutions/2551707/yong-gui-na-fa-si-kao-pythonjavacgo-by-e-8etj/](https://leetcode.cn/problems/minimum-number-of-coins-to-be-added/solutions/2551707/yong-gui-na-fa-si-kao-pythonjavacgo-by-e-8etj/)
+
+![1716806136066](assets/1716806136066.png)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+	public int minimumAddedCoins(int[] coins, int target) {
+		Arrays.sort(coins);
+		int n = coins.length;
+         long s = 1;
+		int ans = 0, i = 0;
+		while (s <= target) {
+			if (i < n && s >= coins[i]) {
+				s += coins[i++];
+			} else {
+				ans++;
+				s += s;
+			}
+		}
+		return ans;
+	}
+}
+```
+
+330\. 按要求补齐数组
+-------------
+
+给定一个已排序的正整数数组 `nums` _，_和一个正整数 `n` _。_从 `[1, n]` 区间内选取任意个数字补充到 nums 中，使得 `[1, n]` 区间内的任何数字都可以用 nums 中某几个数字的和来表示。
+
+请返回 _满足上述要求的最少需要补充的数字个数_ 。
+
+**示例 1:**
+
+**输入:** nums = `[1,3]`, n = `6`
+**输出:** 1 
+**解释:**
+根据 nums 里现有的组合 `[1], [3], [1,3]`，可以得出 `1, 3, 4`。
+现在如果我们将 `2` 添加到 nums 中， 组合变为: `[1], [2], [3], [1,3], [2,3], [1,2,3]`。
+其和可以表示数字 `1, 2, 3, 4, 5, 6`，能够覆盖 `[1, 6]` 区间里所有的数。
+所以我们最少需要添加一个数字。
+
+**示例 2:**
+
+**输入:** nums = `[1,5,10]`, n = `20`
+**输出:** 2
+**解释:** 我们需要添加 `[2,4]`。
+
+**示例 3:**
+
+**输入:** nums = `[1,2,2]`, n = `5`
+**输出:** 0
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `1 <= nums[i] <= 104`
+*   `nums` 按 **升序排列**
+*   `1 <= n <= 231 - 1`
+
+[https://leetcode.cn/problems/patching-array/description/](https://leetcode.cn/problems/patching-array/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+	public int minPatches(int[] nums, int n) {
+		Arrays.sort(nums);
+		long s = 1; // 服了，这里开int直接超时？懂了，s直接变负数了
+		int ans = 0, i = 0;
+		while (s <= n) {
+			if (i < nums.length && s >= nums[i]) {
+				s += nums[i++];
+			} else {
+				ans++;
+				s += s;
+			}
+		}
+		return ans;
+	}
+}
+```
+
+1798\. 你能构造出连续值的最大数目
+--------------------
+
+给你一个长度为 `n` 的整数数组 `coins` ，它代表你拥有的 `n` 个硬币。第 `i` 个硬币的值为 `coins[i]` 。如果你从这些硬币中选出一部分硬币，它们的和为 `x` ，那么称，你可以 **构造** 出 `x` 。
+
+请返回从 `0` 开始（**包括** `0` ），你最多能 **构造** 出多少个连续整数。
+
+你可能有多个相同值的硬币。
+
+**示例 1：**
+
+**输入：**coins = \[1,3\]
+**输出：**2
+**解释：**你可以得到以下这些值：
+- 0：什么都不取 \[\]
+- 1：取 \[1\]
+  从 0 开始，你可以构造出 2 个连续整数。
+
+**示例 2：**
+
+**输入：**coins = \[1,1,1,4\]
+**输出：**8
+**解释：**你可以得到以下这些值：
+- 0：什么都不取 \[\]
+- 1：取 \[1\]
+- 2：取 \[1,1\]
+- 3：取 \[1,1,1\]
+- 4：取 \[4\]
+- 5：取 \[4,1\]
+- 6：取 \[4,1,1\]
+- 7：取 \[4,1,1,1\]
+  从 0 开始，你可以构造出 8 个连续整数。
+
+**示例 3：**
+
+**输入：**nums = \[1,4,10,3,1\]
+**输出：**20
+
+**提示：**
+
+*   `coins.length == n`
+*   `1 <= n <= 4 * 104`
+*   `1 <= coins[i] <= 4 * 104`
+
+[https://leetcode.cn/problems/maximum-number-of-consecutive-values-you-can-make/description/](https://leetcode.cn/problems/maximum-number-of-consecutive-values-you-can-make/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+	public int getMaximumConsecutive(int[] coins) {
+		Arrays.sort(coins);
+		int s = 1, i = 0;
+		while (true) {
+			if (i < coins.length && s >= coins[i]) {
+				s += coins[i++];
+			} else {
+				break;
+			}
+		}
+		return s;
+	}
+}
+```
+
+![1716808982787](assets/1716808982787.png)
+
+```java
+// 其实主要就一个压缩矩阵
+package com.Java_Template.array.basic;
+
+import java.io.*;
+import java.math.BigInteger;
+ 
+/*
+原题连接：https://www.dotcpp.com/oj/problem3161.html
+题目描述:
+给定一个 n × m （n 行 m 列）的矩阵。
+设一个矩阵的价值为其所有数中的最大值和最小值的乘积。
+求给定矩阵的所有大小为 a × b （a 行 b 列）的子矩阵的价值的和。
+答案可能很大，你只需要输出答案对 998244353 取模后的结果。
+ 
+输入格式:
+输入的第一行包含四个整数分别表示 n, m, a, b ，相邻整数之间使用一个空格分隔。
+接下来 n 行每行包含 m 个整数，相邻整数之间使用一个空格分隔，表示矩阵中的每个数 Ai, j 。
+输出格式
+输出一行包含一个整数表示答案。
+ 
+样例输入:
+2 3 1 2
+1 2 3
+4 5 6
+ 
+样例输出:
+58
+ 
+提示
+1×2+2×3+4×5+5×6 = 58 。
+*/
+public class ChildrenMatrix {
+    static BigInteger N = new BigInteger("998244353");
+    static int n, m, a, b;
+    static int matrix[][];
+    static int colMaxMatrix[][];
+    static int colMinMatrix[][]; // 每个值为 一行b列 矩阵中的最小值
+     
+    static int rowNum;
+    static int colNum;
+ 
+    static int childMaxMatrix[][]; // 每个值为 一个 a行b列矩阵中的最大值
+    static int childMinMatrix[][]; // 每个值为 一个 a行b列矩阵中的最小值
+ 
+    static BigInteger sum = new BigInteger("0");
+    static int max;
+    static int min;
+ 
+    // 输入流
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    // 分割输入流
+    static StreamTokenizer st = new StreamTokenizer(br);
+    // 输出流
+    static PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
+ 
+    static int nextInt() throws Exception {
+        st.nextToken(); // 开始遍历输入流中的数据, 默认标记中 数据为0与null, 以" "或者"\n"为分隔符查找到下一个标记, 然后返回之前的数值
+        // nval:
+        // 如果当前标记是一个数值，则nval属性将存储该数值的值。如果当前标记不是一个数值，或者如果没有下一个标记可用，则nval将被设置为Double.NaN。
+        // sval:
+        // 如果当前标记是一个字符串，则sval属性将存储该字符串的值。如果当前标记不是一个字符串，或者如果当前标记不是一个普通标记，则sval将为null。
+        return (int) st.nval;
+    }
+ 
+    public static void main(String[] args) throws Exception {
+        // 1. 接收尺寸输入
+        n = nextInt();
+        m = nextInt();
+        a = nextInt();
+        b = nextInt();
+ 
+        // 2. 接收矩阵数据输入
+        matrix = new int[n][m];
+        InputMatrix();
+ 
+        // 3. 核心: 
+        GetColMatrix();
+        GetChildMatrix();
+        GetSum();
+         
+        pw.println(sum.mod(N));
+        pw.flush(); // 刷新输出流，确保内容被输出到控制台
+    }
+ 
+    private static void InputMatrix() throws Exception {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                matrix[i][j] = nextInt();
+            }
+        }
+ 
+    }
+ 
+    // 先求每行b列, 得到对应的最大最小
+    // 例如: n = m = 5, a = b = 3
+    /*
+        3 5 1 6 1
+        1 2 4 7 6
+        9 4 8 4 6
+        1 3 7 1 3
+        4 5 8 9 2
+    */
+     
+    // 第一行为: 3 5 1 6 1. 滑块宽度为3
+    // 3 5 1 中最大为5, 最小为1
+    // colMaxMatrix[1][0]: 5
+    // 滑块移动: 5 1 6, 最大为6
+    // colMaxMatrix[1][1]: 6
+    // 滑块移动: 1 6 1, 最大为6
+    // colMaxMatrix[1][2]: 6
+    // 滑块无法移动, colMaxMatrix 第一行结束
+     
+    // 换句话说, colMaxMatrix 每一行与 原 Matrix 一一对应, 列为 每b列的浓缩
+    private static void GetColMatrix() {
+        // 初始化最大与最小矩阵
+        colMaxMatrix = new int[n][m];
+        colMinMatrix = new int[n][m];
+         
+        // 由于是压缩列数, 因此行的数量没有发生改变
+        for (int i = 0; i < n; ++i) {
+            int col = 0; //  
+            for (int j = 0; j + b - 1 < m; ++j) {
+                // 每个滑块的最大值与最小值的默认都是第一个
+                max = matrix[i][j];
+                min = matrix[i][j];
+                 
+                // 在滑块内寻找最大与最小值
+                for (int z = j; z < j + b; ++z) {
+                    if (max < matrix[i][z]) {
+                        max = matrix[i][z];
+                    }
+                    if (min > matrix[i][z]) {
+                        min = matrix[i][z];
+                    }
+                }
+ 
+                // 填入最大值与最小值
+                colMaxMatrix[i][col] = max;
+                colMinMatrix[i][col] = min;
+                col++;     
+            }
+            colNum = col; // 确定新矩阵的有效列数
+        }
+    }
+ 
+    // 再结合行数, 方法与之前相同, 只是压缩的方向变为了行, 而不是列, 以此得到的矩阵的对应值 就是 每个a*b矩阵的最大值
+    // 例如: 得到的新矩阵: childMaxMatrix[0][0]对应值: 原矩阵中的 MaxMatrix[0-(a-1)][0-(b-1)]中的最大值
+    private static void GetChildMatrix() {
+        childMaxMatrix = new int[n][m];
+        childMinMatrix = new int[n][m];
+        // 这次是结合 行数, 因此是从列数开始遍历
+        for (int j = 0; j < colNum; ++j) {
+            int row = 0;
+            for (int i = 0; i + a - 1 < n; ++i) {
+                // 填入最大值与最小值记得回归默认值
+                max = colMaxMatrix[i][j];
+                min = colMinMatrix[i][j];
+                for(int z = i; z < i+a; ++z) {
+                    if (max < colMaxMatrix[z][j]) {
+                        max = colMaxMatrix[z][j];
+                    }
+                    if (min > colMinMatrix[z][j]) {
+                        min = colMinMatrix[z][j];
+                    }
+                }
+                 
+                // 填入最大值与最小值
+                childMaxMatrix[row][j] = max;
+                childMinMatrix[row][j] = min;
+                row++;
+            }
+            rowNum = row;
+        }
+    }
+ 
+    // 最大与最小一一对应相乘, 相乘最开始越阈了, 使用 BigInteger解决问题
+    private static void GetSum() {
+        for(int i = 0; i< rowNum; ++i)
+        {
+            for(int j = 0; j<colNum; ++j)
+            {
+                BigInteger num1 = new BigInteger(String.valueOf(childMaxMatrix[i][j]));
+                BigInteger num2 = new BigInteger(String.valueOf(childMinMatrix[i][j]));
+                sum = sum.add(num1.multiply(num2));  
+            }
+        }
+    }
+}
+```
+

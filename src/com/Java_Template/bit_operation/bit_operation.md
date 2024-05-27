@@ -509,7 +509,7 @@ class Solution {
 }
 ```
 
-2411\. 按位或最大的最小子数组长度
+2411\. 按位或最大的最小子数组长度（模板）
 --------------------
 
 给你一个长度为 `n` 下标从 **0** 开始的数组 `nums` ，数组中所有数字均为非负整数。对于 `0` 到 `n - 1` 之间的每一个下标 `i` ，你需要找出 `nums` 中一个 **最小** 非空子数组，它的起始位置为 `i` （包含这个位置），同时有 **最大** 的 **按位或****运算值** 。
@@ -553,25 +553,25 @@ class Solution {
 [https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/](https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/)
 
 ```java
+import java.util.*;
+
 class Solution {
-       public int[] smallestSubarrays(int[] nums) {
-        List<int[]> ors = new ArrayList<>();
+    public int[] smallestSubarrays(int[] nums) {
         int n = nums.length;
         int[] ans = new int[n];
-        for (int i = n - 1; i >= 0; i--) {
+        List<int[]> ors = new ArrayList<int[]>(); // 按位或的值 + 对应子数组的右端点的最小值
+        for (int i = n - 1; i >= 0; --i) { // 倒叙太牛了
             ors.add(new int[]{0, i});
             int k = 0;
             for (int[] or : ors) {
                 or[0] |= nums[i];
-                // 值不变，选取更小的下标
-                if (or[0] == ors.get(k)[0]) {
-                    ors.get(k)[1] = or[1];
-                } else {    // 值发生改变，更新
-                    ors.set(++k, or);
-                }
+                if (ors.get(k)[0] == or[0])
+                    ors.get(k)[1] = or[1]; // 合并相同值，下标取最小的
+                else ors.set(++k, or);
             }
-            ors = ors.subList(0, k + 1);
-            ans[i] = ors.get(0)[1];
+            ors.subList(k + 1, ors.size()).clear();
+            // 本题只用到了 ors[0]，如果题目改成任意给定数值，可以在 ors 中查找
+            ans[i] = ors.get(0)[1] - i + 1;
         }
         return ans;
     }
@@ -734,7 +734,7 @@ class Solution {
 
 
 
-898\. 子数组按位或操作
+898\. 子数组按位或操作（模板）
 --------------
 
 我们有一个非负整数数组 `arr` 。
@@ -846,7 +846,7 @@ class Solution {
         ArrayList<int[]> ands = new ArrayList<>();
         int ans = Integer.MAX_VALUE;
         for (int i = n - 1; i >= 0; i--) {
-            ands.add(new int[]{nums[i], i});
+            ands.add(new int[]{nums[i], i}); // 如果是Or运算这里初始化为{0，i}
             int k = 0;
             for (int[] and : ands) {
                 and[0] &= nums[i];
@@ -1117,6 +1117,76 @@ class Solution {
 			ans |= x;
 		}
 		return ans;
+	}
+}
+```
+
+1738\. 找出第 K 大的异或坐标值
+--------------------
+
+给你一个二维矩阵 `matrix` 和一个整数 `k` ，矩阵大小为 `m x n` 由非负整数组成。
+
+矩阵中坐标 `(a, b)` 的 **值** 可由对所有满足 `0 <= i <= a < m` 且 `0 <= j <= b < n` 的元素 `matrix[i][j]`（**下标从 0 开始计数**）执行异或运算得到。
+
+请你找出 `matrix` 的所有坐标中第 `k` 大的值（**`k` 的值从 1 开始计数**）。
+
+**示例 1：**
+
+**输入：**matrix = \[\[5,2\],\[1,6\]\], k = 1
+**输出：**7
+**解释：**坐标 (0,1) 的值是 5 XOR 2 = 7 ，为最大的值。
+
+**示例 2：**
+
+**输入：**matrix = \[\[5,2\],\[1,6\]\], k = 2
+**输出：**5
+**解释：**坐标 (0,0) 的值是 5 = 5 ，为第 2 大的值。
+
+**示例 3：**
+
+**输入：**matrix = \[\[5,2\],\[1,6\]\], k = 3
+**输出：**4
+**解释：**坐标 (1,0) 的值是 5 XOR 1 = 4 ，为第 3 大的值。
+
+**示例 4：**
+
+**输入：**matrix = \[\[5,2\],\[1,6\]\], k = 4
+**输出：**0
+**解释：**坐标 (1,1) 的值是 5 XOR 2 XOR 1 XOR 6 = 0 ，为第 4 大的值。
+
+**提示：**
+
+*   `m == matrix.length`
+*   `n == matrix[i].length`
+*   `1 <= m, n <= 1000`
+*   `0 <= matrix[i][j] <= 106`
+*   `1 <= k <= m * n`
+
+[https://leetcode.cn/problems/find-kth-largest-xor-coordinate-value/description/](https://leetcode.cn/problems/find-kth-largest-xor-coordinate-value/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+	public int kthLargestValue(int[][] matrix, int k) {
+		int m = matrix.length, n = matrix[0].length;
+		int[][] prefixSum = new int[m + 1][n + 1];
+		PriorityQueue<Integer> pq = new PriorityQueue<>(k, (a, b) -> a - b);
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				prefixSum[i + 1][j + 1] = prefixSum[i + 1][j] ^ prefixSum[i][j + 1] ^ prefixSum[i][j] ^ matrix[i][j];
+				if (pq.size() < k) {
+					pq.offer(prefixSum[i + 1][j + 1]);
+				} else {
+					if (prefixSum[i + 1][j + 1] > pq.peek()) {
+						pq.poll();
+						pq.offer(prefixSum[i + 1][j + 1]);
+					}
+				}
+
+			}
+		}
+		return pq.peek();
 	}
 }
 ```

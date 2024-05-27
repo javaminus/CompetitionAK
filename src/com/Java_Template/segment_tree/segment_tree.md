@@ -1020,3 +1020,320 @@ class Solution { // 我直接上线段树
 }
 ```
 
+100306\. 不包含相邻元素的子序列的最大和
+------------------------
+
+给你一个整数数组 `nums` 和一个二维数组 `queries`，其中 `queries[i] = [posi, xi]`。
+
+对于每个查询 `i`，首先将 `nums[posi]` 设置为 `xi`，然后计算查询 `i` 的答案，该答案为 `nums` 中 **不包含相邻元素** 的子序列的 **最大** 和。
+
+返回所有查询的答案之和。
+
+由于最终答案可能非常大，返回其对 `109 + 7` **取余** 的结果。
+
+**子序列** 是指从另一个数组中删除一些或不删除元素而不改变剩余元素顺序得到的数组。
+
+**示例 1：**
+
+**输入：**nums = \[3,5,9\], queries = \[\[1,-2\],\[0,-3\]\]
+
+**输出：**21
+
+**解释：**  
+执行第 1 个查询后，`nums = [3,-2,9]`，不包含相邻元素的子序列的最大和为 `3 + 9 = 12`。  
+执行第 2 个查询后，`nums = [-3,-2,9]`，不包含相邻元素的子序列的最大和为 9 。
+
+**示例 2：**
+
+**输入：**nums = \[0,-1\], queries = \[\[0,-5\]\]
+
+**输出：**0
+
+**解释：**  
+执行第 1 个查询后，`nums = [-5,-1]`，不包含相邻元素的子序列的最大和为 0（选择空子序列）。
+
+**提示：**
+
+*   `1 <= nums.length <= 5 * 104`
+*   `-105 <= nums[i] <= 105`
+*   `1 <= queries.length <= 5 * 104`
+*   `queries[i] == [posi, xi]`
+*   `0 <= posi <= nums.length - 1`
+*   `-105 <= xi <= 105`
+
+[https://leetcode.cn/problems/maximum-sum-of-subsequence-with-non-adjacent-elements/description/](https://leetcode.cn/problems/maximum-sum-of-subsequence-with-non-adjacent-elements/description/)
+
+```java
+class Solution {
+	public int maximumSumSubsequence(int[] nums, int[][] queries) { // 暴力打家劫舍，12785
+ms，这绝对被rejudge，还是要用线段树维护状态才行。
+		int Mod = (int) 1e9 + 7;
+		int ans = 0, n = nums.length;
+		for (int[] q : queries) {
+			int[] dp = new int[n + 1];
+			int pos = q[0], x = q[1];
+			nums[pos] = x;
+			dp[0] = Math.max(0, nums[0]);
+			if (n > 1) {
+				dp[1] = Math.max(0, Math.max(dp[0], nums[1]));
+			}
+			for (int i = 2; i < n; i++) {
+				dp[i] = Math.max(dp[i], Math.max(dp[i - 1], dp[i - 2] + nums[i]));
+			}
+			ans += dp[n - 1];
+			ans %= Mod;
+		}
+		return ans;
+	}
+}
+```
+
+3165\. 不包含相邻元素的子序列的最大和
+----------------------
+
+给你一个整数数组 `nums` 和一个二维数组 `queries`，其中 `queries[i] = [posi, xi]`。
+
+对于每个查询 `i`，首先将 `nums[posi]` 设置为 `xi`，然后计算查询 `i` 的答案，该答案为 `nums` 中 **不包含相邻元素** 的子序列的 **最大** 和。
+
+返回所有查询的答案之和。
+
+由于最终答案可能非常大，返回其对 `109 + 7` **取余** 的结果。
+
+**子序列** 是指从另一个数组中删除一些或不删除元素而不改变剩余元素顺序得到的数组。
+
+**示例 1：**
+
+**输入：**nums = \[3,5,9\], queries = \[\[1,-2\],\[0,-3\]\]
+
+**输出：**21
+
+**解释：**  
+执行第 1 个查询后，`nums = [3,-2,9]`，不包含相邻元素的子序列的最大和为 `3 + 9 = 12`。  
+执行第 2 个查询后，`nums = [-3,-2,9]`，不包含相邻元素的子序列的最大和为 9 。
+
+**示例 2：**
+
+**输入：**nums = \[0,-1\], queries = \[\[0,-5\]\]
+
+**输出：**0
+
+**解释：**  
+执行第 1 个查询后，`nums = [-5,-1]`，不包含相邻元素的子序列的最大和为 0（选择空子序列）。
+
+**提示：**
+
+*   `1 <= nums.length <= 5 * 104`
+*   `-105 <= nums[i] <= 105`
+*   `1 <= queries.length <= 5 * 104`
+*   `queries[i] == [posi, xi]`
+*   `0 <= posi <= nums.length - 1`
+*   `-105 <= xi <= 105`
+
+[https://leetcode.cn/problems/maximum-sum-of-subsequence-with-non-adjacent-elements/description/](https://leetcode.cn/problems/maximum-sum-of-subsequence-with-non-adjacent-elements/description/)
+
+```java
+class Solution {
+	public int maximumSumSubsequence(int[] nums, int[][] queries) {
+		int n = nums.length;
+		Node node = new Node();
+		for (int i = 0; i < n; i++) {
+			update(node, 0, n - 1, i, i, nums[i]);
+		}
+		int mod = (int) (1e9) + 7;
+		long ret = 0;
+		for (int[] q : queries) {
+			update(node, 0, n - 1, q[0], q[0], q[1]);
+			ret = (ret + node.val[1][1]) % mod;
+		}
+		return (int) ret;
+	}
+
+	class Node {
+		Node left, right;
+		long[][] val = new long[2][2];
+
+//		public Node() {
+//			val = new long[2][2];
+//		}
+
+	}
+
+	public void pushDown(Node node) {
+		if (node.left == null)
+			node.left = new Node();
+		if (node.right == null)
+			node.right = new Node();
+	}
+
+	public void pushUp(Node node) {
+		long[][] left = node.left.val;
+		long[][] right = node.right.val;
+		node.val[0][0] = Math.max(left[0][0] + right[1][0], left[0][1] + right[0][0]);
+		node.val[0][1] = Math.max(left[0][1] + right[0][1], left[0][0] + right[1][1]);
+		node.val[1][0] = Math.max(left[1][0] + right[1][0], left[1][1] + right[0][0]);
+		node.val[1][1] = Math.max(left[1][0] + right[1][1], left[1][1] + right[0][1]);
+	}
+
+	public void update(Node node, int sl, int sr, int left, int right, int value) {
+		if (left <= sl && right >= sr) {
+			node.val[1][1] = Math.max(value, 0);
+			return;
+		}
+		int mid = sl + sr >> 1;
+		pushDown(node);
+		if (mid >= left)
+			update(node.left, sl, mid, left, right, value);
+		if (right > mid)
+			update(node.right, mid + 1, sr, left, right, value);
+		pushUp(node);
+	}
+
+	public long[][] query(Node node, int sl, int sr, int l, int r) {
+		if (sl > sr || sl > r || sr < l)
+			return new long[2][2];
+		if (sl >= l && sr <= r)
+			return node.val;
+		int mid = sl + sr >> 1;
+		pushDown(node);
+		long[][] left = query(node.left, sl, mid, l, r);
+		long[][] right = query(node.right, mid + 1, sr, l, r);
+		long[][] ret = new long[2][2];
+		ret[0][0] = Math.max(left[0][0] + right[1][0], left[0][1] + right[0][0]);
+		ret[0][1] = Math.max(left[0][1] + right[0][1], left[0][0] + right[1][1]);
+		ret[1][0] = Math.max(left[1][0] + right[1][0], left[1][1] + right[0][0]);
+		ret[1][1] = Math.max(left[1][0] + right[1][1], left[1][1] + right[0][1]);
+		return ret;
+	}
+}
+```
+
+3161\. 物块放置查询(不会)
+-------------
+
+有一条无限长的数轴，原点在 0 处，沿着 x 轴 **正** 方向无限延伸。
+
+给你一个二维数组 `queries` ，它包含两种操作：
+
+1.  操作类型 1 ：`queries[i] = [1, x]` 。在距离原点 `x` 处建一个障碍物。数据保证当操作执行的时候，位置 `x` 处 **没有** 任何障碍物。
+2.  操作类型 2 ：`queries[i] = [2, x, sz]` 。判断在数轴范围 `[0, x]` 内是否可以放置一个长度为 `sz` 的物块，这个物块需要 **完全** 放置在范围 `[0, x]` 内。如果物块与任何障碍物有重合，那么这个物块 **不能** 被放置，但物块可以与障碍物刚好接触。注意，你只是进行查询，并 **不是** 真的放置这个物块。每个查询都是相互独立的。
+
+请你返回一个 boolean 数组`results` ，如果第 `i` 个操作类型 2 的操作你可以放置物块，那么 `results[i]` 为 `true` ，否则为 `false` 。
+
+**示例 1：**
+
+**输入：**queries = \[\[1,2\],\[2,3,3\],\[2,3,1\],\[2,2,2\]\]
+
+**输出：**\[false,true,true\]
+
+**解释：**
+
+**![](https://assets.leetcode.com/uploads/2024/04/22/example0block.png)**
+
+查询 0 ，在 `x = 2` 处放置一个障碍物。在 `x = 3` 之前任何大小不超过 2 的物块都可以被放置。
+
+**示例 2：**
+
+**输入：**queries = \[\[1,7\],\[2,7,6\],\[1,2\],\[2,7,5\],\[2,7,6\]\]
+
+**输出：**\[true,true,false\]
+
+**解释：**
+
+**![](https://assets.leetcode.com/uploads/2024/04/22/example1block.png)**
+
+*   查询 0 在 `x = 7` 处放置一个障碍物。在 `x = 7` 之前任何大小不超过 7 的物块都可以被放置。
+*   查询 2 在 `x = 2` 处放置一个障碍物。现在，在 `x = 7` 之前任何大小不超过 5 的物块可以被放置，`x = 2` 之前任何大小不超过 2 的物块可以被放置。
+
+**提示：**
+
+*   `1 <= queries.length <= 15 * 104`
+*   `2 <= queries[i].length <= 3`
+*   `1 <= queries[i][0] <= 2`
+*   `1 <= x, sz <= min(5 * 104, 3 * queries.length)`
+*   输入保证操作 1 中，`x` 处不会有障碍物。
+*   输入保证至少有一个操作类型 2 。
+
+[https://leetcode.cn/problems/block-placement-queries/solutions/2790332/bu-zhi-dao-suan-bu-suan-xian-duan-shu-de-w50c/](https://leetcode.cn/problems/block-placement-queries/solutions/2790332/bu-zhi-dao-suan-bu-suan-xian-duan-shu-de-w50c/)
+
+```java
+class Solution {
+    public List<Boolean> getResults(int[][] queries) {
+        int N = 50000;
+        Node node = new Node(N);
+        List<Boolean> ret = new ArrayList<>();
+        //记录两次2操作所有障碍物
+        List<Integer> tmp = new ArrayList<>();
+        for (int[] q : queries) {
+            if (q[0] == 1) {
+                tmp.add(q[1]);
+            } else {
+                // 线段树正常是中间值去开子节点的，这里用了障碍物，避免顺序的case将线段树退化成链表，这里先shuffle下；
+                Collections.shuffle(tmp);
+                for(int num:tmp){
+                    update(node,0,N,num);
+                }
+                tmp.clear();
+                // 最大区间长度大于物体长度
+                ret.add(query(node, 0, N, q[1]) >= q[2]);
+            }
+        }
+        return ret;
+    }
+
+    class Node {
+        //mid=0 没有障碍物，否则mid=barrier
+        int mid;
+        Node left, right;
+        //最大区间长度
+        int val;
+
+        public Node(int val) {
+            this.val = val;
+        }
+
+    }
+
+    public void pushUp(Node node) {
+        node.val = Math.max(node.left.val, node.right.val);
+    }
+
+    public void update(Node node, int sl, int sr, int barrier) {
+        // 不在区间，直接跳过
+        if (barrier <= sl && barrier >= sr) {
+            return;
+        }
+        // 区间没有障碍物，先开子节点
+        if (node.mid == 0) {
+            node.left = new Node(barrier - sl);
+            node.right = new Node(sr - barrier);
+            node.mid = barrier;
+            
+        } else {
+            //区间存在障碍物，左右节点更新
+            if (node.mid > barrier) update(node.left, sl, node.mid, barrier);
+            if (barrier > node.mid) update(node.right, node.mid, sr, barrier);
+        }
+        // 更新当前节点
+        pushUp(node);
+
+    }
+
+    public int query(Node node, int sl, int sr, int r) {
+        // 查询区间完全覆盖该节点
+        if (r >= sr) {
+            return node.val;
+        }
+        // 区间内没有障碍物，直接返回区间左边界 到 r长度
+        if (node.mid == 0) {
+            return r - sl;
+        } else {
+            // 左右边界分别计算 求最大值
+            int ans = 0;
+            ans = Math.max(query(node.left, sl, node.mid, r), ans);
+            if (node.mid < r) ans = Math.max(query(node.right, node.mid, sr, r), ans);
+            return ans;
+        }
+    }
+}
+```
+

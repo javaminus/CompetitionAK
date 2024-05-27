@@ -3,9 +3,7 @@
 
 给你一个整数数组 `nums` 。数组 `nums` 的 **唯一性数组** 是一个按元素从小到大排序的数组，包含了 `nums` 的所有
 
-非空子数组中
-
-不同元素的个数。
+非空子数组中不同元素的个数。
 
 换句话说，这是由所有 `0 <= i <= j < nums.length` 的 `distinct(nums[i..j])` 组成的递增数组。
 
@@ -51,15 +49,20 @@
 *   `1 <= nums[i] <= 105`
 
 [https://leetcode.cn/problems/find-the-median-of-the-uniqueness-array/description/](https://leetcode.cn/problems/find-the-median-of-the-uniqueness-array/description/)
+
+![1716788892414](assets/1716788892414.png)
+
+![1716791265710](assets/1716791265710.png)
+
 ```java
 import java.util.HashMap;
 
 class Solution {
     public int medianOfUniquenessArray(int[] nums) {
         int n = nums.length;
-        long k = ((long) (n + 1) * n / 2 + 1) / 2;
+        long k = ((long) (n + 1) * n / 2 + 1) / 2; 
         int left = 0, right = n - 1;
-        while (left <= right) {
+        while (left <= right) { // 二分子数组中不同元素的个数，子数组不同元素个数与子数组个数成正比。
             int mid = left + (right - left) / 2;
             if (check(nums, mid, k)) {
                 right = mid - 1;
@@ -71,6 +74,7 @@ class Solution {
     }
 
     private boolean check(int[] nums, int upper, long target) { // 子数组的不同个数最多为upper的数组个数cnt，与中位数比较
+        // 因为子数组的长度与数组内不同元素个数成正比，可以二分
         long cnt = 0;
         HashMap<Integer, Integer> map = new HashMap<>();
         int left = 0;
@@ -82,7 +86,7 @@ class Solution {
                     map.remove(out);
                 }
             }
-            cnt += right - left + 1;
+            cnt += right - left + 1; // 子数组个数累加式，公式要记住！
             if (cnt >= target) {
                 return true;
             }
@@ -162,10 +166,42 @@ class Solution {
 *   `1 <= cost2 <= 106`
 
 [https://leetcode.cn/problems/minimum-cost-to-equalize-array/description/](https://leetcode.cn/problems/minimum-cost-to-equalize-array/description/)
-```java
-class Solution {
-    long MOD = (long) 1e9 + 7;
 
+```java
+class Solution { // 两种方法：一、枚举值域。学会方法一就行了。
+	public int minCostToEqualizeArray(int[] nums, int cost1, int cost2) {
+		long mod = (long) (1e9 + 7);
+		int n = nums.length, maxv = nums[0], minv = nums[0];
+		long sum = 0;
+		for (int x : nums) {
+			minv = Math.min(minv, x);
+			maxv = Math.max(maxv, x);
+			sum += x;
+		}
+
+		long s = 1L * maxv * n - sum;
+		if (2 * cost1 <= cost2)
+			return (int) (s * cost1 % mod);
+
+		long res = Long.MAX_VALUE;
+		for (int x = maxv; x <= maxv * 2; x++) { // 鸽巢原理
+			int d = x - minv;
+			long t = 0;
+			if (d < s - d) // 也可以取等
+				t = s / 2 * cost2 + s % 2 * cost1;
+			else
+				t = (s - d) * cost2 + (d - (s - d)) * cost1;
+			res = Math.min(res, t);
+			s += n;
+		}
+		return (int) (res % mod);
+	}
+}
+```
+
+```java
+class Solution { // 二分斜率
+    long MOD = (long) 1e9 + 7;
     public int minCostToEqualizeArray(int[] nums, int cost1, int cost2) {
         int n = nums.length;
         long s = 0;
@@ -175,7 +211,7 @@ class Solution {
             mx = Math.max(mx, x);
             mn = Math.min(mn, x);
         }
-        long ans = (mx * n - s) * cost1;
+        long ans = (mx * n - s) * cost1; // 全部变成mx
         if (2 * cost1 <= cost2) {
             return (int) (ans % MOD);
         }
