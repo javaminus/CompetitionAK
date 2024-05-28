@@ -146,16 +146,6 @@ public class problemImpl implements problem {
         return ans;
     }
 
-
-
-
-
-
-
-
-
-
-
     public void union(int[] parent, int index1, int index2) {
         parent[find(parent, index1)] = find(parent, index2);
     }
