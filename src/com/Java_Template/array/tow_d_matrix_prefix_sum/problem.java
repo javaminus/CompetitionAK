@@ -13,7 +13,7 @@ public interface problem {
     // 1277. 统计全为 1 的正方形子矩阵
     public int countSquares(int[][] matrix);
 
-    // 最大正方形
+    // 221. 最大正方形
     public int maximalSquare(char[][] matrix);
 
     // 1504. 统计全 1 子矩形
