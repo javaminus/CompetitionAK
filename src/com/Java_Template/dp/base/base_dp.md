@@ -533,7 +533,7 @@ class Solution {
             int[] cnt = new int[26];
             int mxFreq = 0;
             int cntN = 0;
-            for (int j = i - 1; j >= 0; j--) { // i - j就是长度
+            for (int j = i - 1; j >= 0; j--) { // i - j就是长度，这里的倒序就很厉害
                 int k = s.charAt(j) - 'a';
                 cnt[k]++;
                 if (cnt[k] == 1) {
@@ -719,7 +719,7 @@ class Solution {
     private static int Mod = (int) 1e9 + 7, MX = (int) 1e5 + 1;
     static int[] f = new int[MX];
     static int[] g = new int[MX];
-    static {
+    static { // 我们可以将末尾的 1 个、2 个或 3 个字符单独视作一个字母。
         f[0] = g[0] = 1;
         f[1] = g[1] = 1;
         f[2] = g[2] = 2;
@@ -1064,7 +1064,7 @@ class Solution {
 
 ```java
 class Solution {
-    public int maxSumSubmatrix(int[][] matrix, int k) {
+    public int maxSumSubmatrix(int[][] matrix, int k) { // O(m*m*n*n)
         int m = matrix.length, n = matrix[0].length;
         int[][] preSum = new int[m + 1][n + 1];
         // 二维前缀和
@@ -1098,6 +1098,87 @@ class Solution {
     }
 }
 ```
+
+- **K lowerKey(K key)**：返回严格小于给定键的最大键；如果没有这样的键，则返回 `null`。
+- **K floorKey(K key)**：返回小于或等于给定键的最大键；如果没有这样的键，则返回 `null`。
+- **K ceilingKey(K key)**：返回大于或等于给定键的最小键；如果没有这样的键，则返回 `null`。
+- **K higherKey(K key)**：返回严格大于给定键的最小键；如果没有这样的键，则返回 `null`。
+
+```java
+class Solution {
+    public int maxSumSubmatrix(int[][] mat, int k) { // O(m^2 ∗ nlogn)
+        int m = mat.length, n = mat[0].length;
+
+        // 预处理前缀和
+        int[][] sum = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + mat[i - 1][j - 1];
+            }
+        }
+
+        int ans = Integer.MIN_VALUE;
+        // 遍历子矩阵的上边界
+        for (int top = 1; top <= m; top++) {
+            // 遍历子矩阵的下边界
+            for (int bot = top; bot <= m; bot++) {
+                // 使用「有序集合」维护所有遍历到的右边界
+                TreeSet<Integer> ts = new TreeSet<>();
+                ts.add(0);
+                // 遍历子矩阵的右边界
+                for (int r = 1; r <= n; r++) {
+                    // 通过前缀和计算 right
+                    int right = sum[bot][r] - sum[top - 1][r];
+                    // 通过二分找 left
+                    Integer left = ts.ceiling(right - k);
+                    if (left != null) {
+                        int cur = right - left;
+                        ans = Math.max(ans, cur);
+                    }
+                    // 将遍历过的 right 加到有序集合
+                    ts.add(right);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public int maxSumSubmatrix(int[][] mat, int k) { // 最大化二分收益，也就是调换压缩的行列
+        int m = mat.length, n = mat[0].length;
+        int[][] sum = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + mat[i - 1][j - 1];
+            }
+        }
+        // 固定的是否为右边界
+        boolean isRight = n > m;
+        int ans = Integer.MIN_VALUE;
+        for (int i = 1; i <= (isRight ? m : n); i++) {
+            for (int j = i; j <= (isRight ? m : n); j++) {
+                TreeSet<Integer> ts = new TreeSet<>();
+                ts.add(0);
+                for (int fixed = 1; fixed <= (isRight ? n : m); fixed++) {
+                    int a = isRight ? sum[j][fixed] - sum[i - 1][fixed] : sum[fixed][j] - sum[fixed][i - 1];
+                    Integer b = ts.ceiling(a - k);
+                    if (b != null) {
+                        int cur = a - b;
+                        ans = Math.max(ans, cur);
+                    }
+                    ts.add(a);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
 
 152\. 乘积最大子数组
 -------------

@@ -1,21 +1,12 @@
 3130\. 找出所有稳定的二进制数组 II
 ----------------------
 
-给你 3 个正整数 `zero` ，`one` 和 `limit` 。
-
-一个
-
-二进制数组
-
-`arr` 如果满足以下条件，那么我们称它是 **稳定的** ：
+给你 3 个正整数 `zero` ，`one` 和 `limit` 。一个二进制数组 `arr` 如果满足以下条件，那么我们称它是 **稳定的** ：
 
 *   0 在 `arr` 中出现次数 **恰好** 为 `zero` 。
 *   1 在 `arr` 中出现次数 **恰好** 为 `one` 。
-*   `arr` 中每个长度超过 `limit` 的
+*   `arr` 中每个长度超过 `limit` 的子数组都 **同时** 包含 0 和 1 。
 
-    子数组
-
-    都 **同时** 包含 0 和 1 。
 
 请你返回 **稳定** 二进制数组的 _总_ 数目。
 
@@ -182,6 +173,49 @@ class Solution {
 *   `wordDict` 中的所有字符串 **互不相同**
 
 [https://leetcode.cn/problems/word-break/description/](https://leetcode.cn/problems/word-break/description/)
+
+```java
+import java.util.List;
+
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        for (int i = 0; i < n; i++) {
+            for (String str : wordDict) {
+                if (i + 1 >= str.length()) {
+                    if (str.equals(s.substring(i - str.length() + 1, i + 1))) {
+                        dp[i + 1] = dp[i + 1] | dp[i + 1 - str.length()];
+                    }
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```java
+class Solution {
+    // 7ms
+    public boolean wordBreak(String s, List<String> wordDict) {
+        boolean[] dp = new boolean[s.length() + 1];
+        dp[0] = true;
+        Set<String> set = new HashSet<>(wordDict);
+        for (int r = 1; r < s.length() + 1; r++) {
+            for (int l = 0; l < r; l++) {
+                if (dp[l] == true && set.contains(s.substring(l, r))) {
+                    dp[r] = true;
+                }
+            }
+        }
+        return dp[s.length()];
+    }
+}
+```
+
+
 
 3117\. 划分数组得到最小的值之和
 -------------------

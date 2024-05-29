@@ -1,3 +1,44 @@
+
+
+`TreeMap` 是 Java 中的一种基于红黑树（Red-Black Tree）的实现，它是 `NavigableMap` 的实现类，按照键的自然顺序（或根据提供的 `Comparator` 按排序顺序）对键进行排序。`TreeMap` 提供了良好的性能，尤其适合需要保持排序顺序的场景。以下是 `TreeMap` 的 API 介绍：
+
+### 构造方法
+- **TreeMap()**：创建一个空的树映射，使用键的自然顺序进行排序。
+- **TreeMap(Comparator<? super K> comparator)**：创建一个空的树映射，使用指定的比较器来排序键。
+- **TreeMap(Map<? extends K, ? extends V> m)**：创建一个包含指定映射中所有映射关系的新树映射，使用键的自然顺序进行排序。
+- **TreeMap(SortedMap<K, ? extends V> m)**：创建一个包含指定有序映射中所有映射关系的新树映射，使用相同的顺序。
+
+### 常用方法
+- **V put(K key, V value)**：将指定的值与此映射中的指定键相关联。
+- **void putAll(Map<? extends K, ? extends V> map)**：将指定映射中的所有映射关系复制到此映射中。
+- **V get(Object key)**：返回指定键所映射的值，如果此映射不包含该键的映射关系，则返回 `null`。
+- **V remove(Object key)**：如果存在，则从映射中移除指定键的映射关系。
+- **void clear()**：从映射中移除所有映射关系。
+- **boolean containsKey(Object key)**：如果此映射包含指定键的映射关系，则返回 `true`。
+- **boolean containsValue(Object value)**：如果此映射将一个或多个键映射到指定值，则返回 `true`。
+- **int size()**：返回映射中的键值对数量。
+- **boolean isEmpty()**：如果此映射不包含键值对，则返回 `true`。
+- **Set<K> keySet()**：返回此映射中包含的键的有序 `Set` 视图。
+- **Collection<V> values()**：返回此映射中包含的值的集合视图。
+- **Set<Map.Entry<K, V>> entrySet()**：返回此映射中包含的映射关系的有序 `Set` 视图。
+- **K firstKey()**：返回此映射的第一个（最低）键。
+- **K lastKey()**：返回此映射的最后一个（最高）键。
+- **Map.Entry<K, V> firstEntry()**：返回此映射的第一个（键最低）键值对，没有则返回 `null`。
+- **Map.Entry<K, V> lastEntry()**：返回此映射的最后一个（键最高）键值对，没有则返回 `null`。
+- **Map.Entry<K, V> pollFirstEntry()**：移除并返回此映射的第一个（键最低）键值对，没有则返回 `null`。
+- **Map.Entry<K, V> pollLastEntry()**：移除并返回此映射的最后一个（键最高）键值对，没有则返回 `null`。
+- **K lowerKey(K key)**：返回严格小于给定键的最大键；如果没有这样的键，则返回 `null`。
+- **K floorKey(K key)**：返回小于或等于给定键的最大键；如果没有这样的键，则返回 `null`。
+- **K ceilingKey(K key)**：返回大于或等于给定键的最小键；如果没有这样的键，则返回 `null`。
+- **K higherKey(K key)**：返回严格大于给定键的最小键；如果没有这样的键，则返回 `null`。
+- **Map.Entry<K, V> lowerEntry(K key)**：返回严格小于给定键的最大键值对，如果没有这样的键值对，则返回 `null`。
+- **Map.Entry<K, V> floorEntry(K key)**：返回小于或等于给定键的最大键值对，如果没有这样的键值对，则返回 `null`。
+- **Map.Entry<K, V> ceilingEntry(K key)**：返回大于或等于给定键的最小键值对，如果没有这样的键值对，则返回 `null`。
+- **Map.Entry<K, V> higherEntry(K key)**：返回严格大于给定键的最小键值对，如果没有这样的键值对，则返回 `null`。
+- **NavigableSet<K> navigableKeySet()**：返回一个包含此映射中所有键的 `NavigableSet` 视图。
+- **NavigableMap<K, V> descendingMap()**：返回此映射中包含的映射关系的逆序视图。
+- **NavigableSet<K> descendingKeySet()**：返回包含此映射中所有键的逆序 `NavigableSet` 视图。
+
 2462\. 雇佣 K 位工人的总代价
 -------------------
 

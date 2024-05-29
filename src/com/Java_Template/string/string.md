@@ -143,3 +143,71 @@ class Solution {
     }
 }
 ```
+2982\. 找出出现至少三次的最长特殊子字符串 II
+---------------------------
+
+给你一个仅由小写英文字母组成的字符串 `s` 。
+
+如果一个字符串仅由单一字符组成，那么它被称为 **特殊** 字符串。例如，字符串 `"abc"` 不是特殊字符串，而字符串 `"ddd"`、`"zz"` 和 `"f"` 是特殊字符串。
+
+返回在 `s` 中出现 **至少三次** 的 **最长特殊子字符串** 的长度，如果不存在出现至少三次的特殊子字符串，则返回 `-1` 。
+
+**子字符串** 是字符串中的一个连续 **非空** 字符序列。
+
+**示例 1：**
+
+**输入：**s = "aaaa"
+**输出：**2
+**解释：**出现三次的最长特殊子字符串是 "aa" ：子字符串 "_**aa**_aa"、"a_**aa**_a" 和 "aa_**aa**_"。
+可以证明最大长度是 2 。
+
+**示例 2：**
+
+**输入：**s = "abcdef"
+**输出：**\-1
+**解释：**不存在出现至少三次的特殊子字符串。因此返回 -1 。
+
+**示例 3：**
+
+**输入：**s = "abcaba"
+**输出：**1
+**解释：**出现三次的最长特殊子字符串是 "a" ：子字符串 "_**a**_bcaba"、"abc_**a**_ba" 和 "abcab_**a**_"。
+可以证明最大长度是 1 。
+
+**提示：**
+
+*   `3 <= s.length <= 5 * 105`
+*   `s` 仅由小写英文字母组成。
+
+[https://leetcode.cn/problems/find-longest-special-substring-that-occurs-thrice-ii/description/](https://leetcode.cn/problems/find-longest-special-substring-that-occurs-thrice-ii/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+	public int maximumLength(String S) {
+		PriorityQueue<Integer>[] pqList = new PriorityQueue[26];
+		Arrays.setAll(pqList, e -> new PriorityQueue<Integer>((a, b) -> b - a));
+		char[] s = S.toCharArray();
+		int n = s.length;
+		for (int i = 0; i < n; i++) {
+			int i0 = i;
+			while (i + 1 < n && s[i] == s[i + 1]) {
+				i++;
+			}
+			pqList[s[i0] - 'a'].offer(i - i0 + 1);
+		}
+		int ans = 0;
+		for (int i = 0; i < 26; i++) {
+			PriorityQueue<Integer> pq = pqList[i];
+			pq.offer(0);
+			pq.offer(0);
+			pq.offer(0);
+			int a = pq.poll(), b = pq.poll(), c = pq.poll();
+			ans = Math.max(ans, Math.max(c, Math.max(a - 2, Math.min(a - 1, b))));
+		}
+		return ans == 0 ? -1 : ans;
+	}
+}
+```
+

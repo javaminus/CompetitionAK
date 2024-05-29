@@ -121,7 +121,6 @@ class Solution {
 class Solution {    
 	private int[][] directions = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     private Set<String> ans;
-    @Override
     public List<String> findWords(char[][] board, String[] words) {
         Trie root = new Trie();
         for (String word : words) {

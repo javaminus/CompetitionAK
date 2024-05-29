@@ -1242,7 +1242,7 @@ class Solution {
             while (nj > 0 && d != evil.charAt(nj)) {
                 nj = next[nj - 1];
             }
-            // 此处要注意，当 nj == 0 的时候，会存在 k != evil.charAt(nj) 的情况
+            // 此处要注意，当 nj == 0 的时候，会存在 d != evil.charAt(nj) 的情况
             // 若直接 nj + 1 进入递归，是认为此时的两个字符一定是匹配上了，实际上可能并没有
             if (nj == 0 && d != evil.charAt(nj)) {
                 nj = -1;
