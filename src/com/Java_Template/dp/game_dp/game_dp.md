@@ -537,8 +537,10 @@ class Solution {
 }
 ```
 
-464\. 我能赢吗
+464\. 我能赢吗（模板）
 ----------
+
+> 这道题目官标难度不合理，从知识点角度看，状态压缩DP在LC平台属于较高级的技巧，从思维角度看，一旦受到292题的影响，就有可能长时间陷入错误的思路。但这是一道非常经典的博弈题目，吃透这道题就能体会“必胜态”“必败态”的含义，广大天坑转码刷题者还是要尽量掌握的~ 
 
 在 "100 game" 这个游戏中，两名玩家轮流选择从 `1` 到 `10` 的任意整数，累计整数和，先使得累计整数和 **达到或超过**  100 的玩家，即为胜者。
 
@@ -617,7 +619,7 @@ class Solution {
 import java.util.HashMap;
 import java.util.Map;
 
-class Solution {
+class Solution { // 状态压缩，如果maxChoosableInteger比较大，只能用字符串存储了？或则用map?
     Map<Integer, Boolean> memo = new HashMap<Integer, Boolean>();
     public boolean canIWin(int maxChoosableInteger, int desiredTotal) {
         // 等差数列求和公式
@@ -632,13 +634,13 @@ class Solution {
             return memo.get(usedNumbers);
         }
         boolean res = false;
-        for (int i = 0; i < maxChoosableInteger; i++) {
+        for (int i = 1; i <= maxChoosableInteger; i++) {
             if ((usedNumbers >> i & 1) == 0) { // 表示没有被用
-                if (i + 1 + currentTotal >= desiredTotal) {
+                if (i + currentTotal >= desiredTotal) {
                     res = true;
                     break;
                 }
-                if (!dfs(usedNumbers | (1 << i), currentTotal + i + 1, maxChoosableInteger, desiredTotal)) {
+                if (!dfs(usedNumbers | (1 << i), currentTotal + i, maxChoosableInteger, desiredTotal)) {
                     res = true;
                     break;
                 }

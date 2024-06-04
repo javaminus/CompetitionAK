@@ -55,7 +55,7 @@ public class problemImpl implements problem {
     HashSet<Long> set;
     int cnt0;
     int ans1;
-    public int rootCount(int[][] edges, int[][] guesses, int k) {
+    public int rootCount(int[][] edges, int[][] guesses, int k) { // 换根dp
         this.k = k;
         g = new List[edges.length + 1];
         Arrays.setAll(g, e -> new ArrayList<>());
@@ -131,7 +131,7 @@ public class problemImpl implements problem {
     int maxLength = 0;
     public int longestZigZag1(TreeNode root) {
         dfs1372(root);
-        return maxLength;
+        return maxLength - 1;
     }
     private int[] dfs1372(TreeNode root) {
         if (root == null) {

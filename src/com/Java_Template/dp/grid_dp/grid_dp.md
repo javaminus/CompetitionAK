@@ -851,14 +851,14 @@ class Solution {
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
-class Solution {
+class Solution { // 只能广度优先
     public int shortestPath(int[][] grid, int k) {
         int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         int m = grid.length, n = grid[0].length;
         if (m + n - 3 <= k) {
             return m + n - 2;
         }
-        int[][][] dp = new int[m][n][k + 1];
+        int[][][] dp = new int[m][n][k + 1]; // 其中 m 和 n 分别是矩阵的行数和列数，k 是最多可以消除的障碍物个数。
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 Arrays.fill(dp[i][j], Integer.MAX_VALUE); // 步数
@@ -1060,8 +1060,10 @@ public int minimumOperations(int[][] grid) {
         }
         return memo[i][j] = res;
     }
+```
 
-    public int minimumOperations_DP(int[][] grid) {
+```java
+public int minimumOperations_DP(int[][] grid) {
         int m = grid.length, n = grid[0].length;
         int[][] cnt = new int[n][10];
         for (int j = 0; j < n; j++) {
