@@ -501,3 +501,91 @@ public class ChildrenMatrix {
 }
 ```
 
+## [E. Permutation of Rows and Columns ](https://codeforces.com/contest/1980/problem/E)
+
+您已获得一个大小为 $$$n$$$ 的矩阵 $$$a$$$ ，由 $$$m$$$ 组成，其中包含从 $$$1$$$ 到 $$$n \cdot m$$$ 的整数排列。
+
+$$$n$$$ 整数的排列是一个数组，其中包含从 $$$1$$$ 到 $$$n$$$ 的所有数字，且只包含一次。例如，数组 $$$[1]$$$ 、 $$$[2, 1, 3]$$$ 、 $$$[5, 4, 3, 2, 1]$$$ 是排列，而数组 $$$[1, 1]$$$ 、 $$$[100]$$$ 、 $$$[1, 2, 4, 5]$$$ 不是。
+
+如果矩阵的所有元素都写出后，结果数组是排列，则该矩阵包含排列。矩阵 $$$[[1, 2], [3, 4]]$$$ 、 $$$[[1]]$$$ 、 $$$[[1, 5, 3], [2, 6, 4]]$$$ 包含排列，而矩阵 $$$[[2]]$$$ 、 $$$[[1, 1], [2, 2]]$$$ 、 $$$[[1, 2], [100, 200]]$$$ 不包含。
+
+您可以在一次操作中执行以下两个操作之一：
+
+- 选择列 $$$c$$$ 和 $$$d$$$ ( $$$1 \le c, d \le m$$$ 、 $$$c \ne d$$$ ) 并交换这些列；
+- 选择行 $$$c$$$ 和 $$$d$$$ ( $$$1 \le c, d \le n$$$ 、 $$$c \ne d$$$ ) 并交换这些行。
+
+您可以执行任意数量的操作。
+
+您将获得原始矩阵 $$$a$$$ 和矩阵 $$$b$$$ 。您的任务是确定是否可以使用给定的操作将矩阵 $$$a$$$ 转换为矩阵 $$$b$$$ 。
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+public class Main {
+    private static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+    public static void main(String[] args) {
+        int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+        }
+    }
+    private static void solve() { // 只需要还原第一行和第一列，最后和b数组比较
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        int[][] ar = new int[n][m];
+        int[][] br = new int[n][m];
+        int[] row = new int[n * m];
+        int[] col = new int[n * m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                ar[i][j] = sc.nextInt();
+                ar[i][j]--;
+                row[ar[i][j]] = i;
+                col[ar[i][j]] = j;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                br[i][j] = sc.nextInt();
+                br[i][j]--;
+            }
+        }
+        // 还原第一列，取每一行的第一个数字
+        for (int i = 0; i < n; i++) {
+            int r = row[br[i][0]]; // r是br[i][0]在ar中的行号
+            // 交换ar中的第i行与第r行
+            int[] temp = ar[i];
+            ar[i] = ar[r];
+            ar[r] = temp;
+
+            // row发生了变化
+            for (int j = 0; j < m; j++) {
+                row[ar[i][j]] = i;
+                row[ar[r][j]] = r;
+            }
+        }
+
+        // 还原列
+        for (int j = 0; j < m; j++) {
+            int c = col[br[0][j]];
+            for (int i = 0; i < n; i++) {
+                int temp = ar[i][j];
+                ar[i][j] = ar[i][c];
+                ar[i][c] = temp;
+                col[ar[i][j]] = j;
+                col[ar[i][c]] = c;
+            }
+        }
+
+        if (Arrays.deepEquals(ar, br)) {
+            System.out.println("YES");
+        }else{
+            System.out.println("NO");
+        }
+    }
+
+}
+```
+

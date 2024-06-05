@@ -1,37 +1,44 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 class Solution {
-    public int[] countPairsOfConnectableServers(int[][] edges, int signalSpeed) {
-        int n = edges.length + 1;
-        List<int[]>[] g = new List[n];
-        Arrays.setAll(g, e -> new ArrayList<>());
+    List<Integer>[] g;
+    int[] dist;
+    public int findShortestCycle(int n, int[][] edges) {
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
         for (int[] edge : edges) {
-            int x = edge[0], y = edge[1], z = edge[2];
-            g[x].add(new int[]{y, z});
-            g[y].add(new int[]{x, z});
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
         }
-        int[] ans = new int[n]; // 这个图没有环，所以不用visited数组，这其实就是一棵树
+        dist = new int[n];
+        int ans = Integer.MAX_VALUE;
         for (int i = 0; i < n; i++) {
-            int sum = 0;
-            for (int[] e : g[i]) {
-                int cnt = dfs(e[0], i, g, e[1], signalSpeed);
-                ans[i] += cnt * sum;
-                sum += cnt;
+            ans = Math.min(ans, bfs(i));
+        }
+        return ans == Integer.MAX_VALUE ? -1 : ans;
+    }
+
+    private int bfs(int start) {
+        int ans = Integer.MAX_VALUE;
+        Arrays.fill(dist, -1);
+        dist[start] = 0;
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{start, -1});
+        while (!queue.isEmpty()) {
+            int[] poll = queue.poll();
+            int x = poll[0], fa = poll[1];
+            for (int y : g[x]) {
+                if (dist[y] < 0) { // 第一次遇到
+                    dist[y] = dist[x] + 1;
+                    queue.offer(new int[]{y, x});
+                } else if (y != fa) { // 第二次遇到
+                    ans = Math.min(ans, dist[x] + dist[y] + 1);
+                }
             }
         }
         return ans;
     }
 
-    private int dfs(int x, int fa, List<int[]>[] g, int sum, int signalSpeed) {
-        int res = sum % signalSpeed == 0 ? 1 : 0;
-        for (int[] y : g[x]) {
-            if (y[0] != fa) {
-                res += dfs(y[0], x, g, sum + y[1], signalSpeed);
-            }
-        }
-        return res;
-    }
 
 }

@@ -223,3 +223,159 @@ class Solution {
 }
 ```
 
+## 802.找到最终的安全状态(三色标记法，找图中没有环的结点) 
+
+---------------
+
+有一个有 `n` 个节点的有向图，节点按 `0` 到 `n - 1` 编号。图由一个 **索引从 0 开始** 的 2D 整数数组 `graph`表示， `graph[i]`是与节点 `i` 相邻的节点的整数数组，这意味着从节点 `i` 到 `graph[i]`中的每个节点都有一条边。
+
+如果一个节点没有连出的有向边，则该节点是 **终端节点** 。如果从该节点开始的所有可能路径都通向 **终端节点** ，则该节点为 **安全节点** 。
+
+返回一个由图中所有 **安全节点** 组成的数组作为答案。答案数组中的元素应当按 **升序** 排列。
+
+**示例 1：**
+
+![Illustration of graph](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/03/17/picture1.png)
+
+**输入：**graph = \[\[1,2\],\[2,3\],\[5\],\[0\],\[5\],\[\],\[\]\]
+**输出：**\[2,4,5,6\]
+**解释：**示意图如上。
+节点 5 和节点 6 是终端节点，因为它们都没有出边。
+从节点 2、4、5 和 6 开始的所有路径都指向节点 5 或 6 。
+
+**示例 2：**
+
+**输入：**graph = \[\[1,2,3,4\],\[1,2\],\[3,4\],\[0,4\],\[\]\]
+**输出：**\[4\]
+**解释:**
+只有节点 4 是终端节点，从节点 4 开始的所有路径都通向节点 4 。
+
+**提示：**
+
+*   `n == graph.length`
+*   `1 <= n <= 104`
+*   `0 <= graph[i].length <= n`
+*   `0 <= graph[i][j] <= n - 1`
+*   `graph[i]` 按严格递增顺序排列。
+*   图中可能包含自环。
+*   图中边的数目在范围 `[1, 4 * 104]` 内。
+
+[https://leetcode.cn/problems/find-eventual-safe-states/description/](https://leetcode.cn/problems/find-eventual-safe-states/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<Integer> eventualSafeNodes(int[][] graph) { // 就是找没有环的点
+        int n = graph.length;
+        List<Integer> ans = new ArrayList<>();
+        int[] color = new int[n];
+        for (int i = 0; i < n; i++) {
+            if (dfs(i, graph, color)) {
+                ans.add(i);
+            }
+        }
+        return ans;
+    }
+
+    private boolean dfs(int x, int[][] graph, int[] color) {
+        if (color[x] > 0) {
+            return color[x] == 2;
+        }
+        color[x] = 1;
+        for (int y : graph[x]) {
+            if (!dfs(y, graph, color)) {
+                return false;
+            }
+        }
+        color[x] = 2;
+        return true;
+    }
+}
+```
+
+2608\. 图中的最短环(找最短环模板)
+-------------
+
+现有一个含 `n` 个顶点的 **双向** 图，每个顶点按从 `0` 到 `n - 1` 标记。图中的边由二维整数数组 `edges` 表示，其中 `edges[i] = [ui, vi]` 表示顶点 `ui` 和 `vi` 之间存在一条边。每对顶点最多通过一条边连接，并且不存在与自身相连的顶点。
+
+返回图中 **最短** 环的长度。如果不存在环，则返回 `-1` 。
+
+**环** 是指以同一节点开始和结束，并且路径中的每条边仅使用一次。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2023/01/04/cropped.png)
+
+**输入：**n = 7, edges = \[\[0,1\],\[1,2\],\[2,0\],\[3,4\],\[4,5\],\[5,6\],\[6,3\]\]
+**输出：**3
+**解释：**长度最小的循环是：0 -> 1 -> 2 -> 0 
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2023/01/04/croppedagin.png)
+
+**输入：**n = 4, edges = \[\[0,1\],\[0,2\]\]
+**输出：**\-1
+**解释：**图中不存在循环
+
+**提示：**
+
+*   `2 <= n <= 1000`
+*   `1 <= edges.length <= 1000`
+*   `edges[i].length == 2`
+*   `0 <= ui, vi < n`
+*   `ui != vi`
+*   不存在重复的边
+
+[https://leetcode.cn/problems/shortest-cycle-in-a-graph/description/](https://leetcode.cn/problems/shortest-cycle-in-a-graph/description/)
+
+![b101_t4_cut.png](assets/1680363054-UnoCDM-b101_t4_cut.png) 
+
+```java
+import java.util.*;
+
+class Solution {
+    List<Integer>[] g;
+    int[] dist;
+    public int findShortestCycle(int n, int[][] edges) {
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        dist = new int[n];
+        int ans = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            ans = Math.min(ans, bfs(i));
+        }
+        return ans == Integer.MAX_VALUE ? -1 : ans;
+    }
+
+    private int bfs(int start) {
+        int ans = Integer.MAX_VALUE;
+        Arrays.fill(dist, -1);
+        dist[start] = 0;
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{start, -1});
+        while (!queue.isEmpty()) {
+            int[] poll = queue.poll();
+            int x = poll[0], fa = poll[1];
+            for (int y : g[x]) {
+                if (dist[y] < 0) { // 第一次遇到
+                    dist[y] = dist[x] + 1;
+                    queue.offer(new int[]{y, x});
+                } else if (y != fa) { // 第二次遇到
+                    ans = Math.min(ans, dist[x] + dist[y] + 1);
+                }
+            }
+        }
+        return ans;
+    }
+
+}
+```
+
