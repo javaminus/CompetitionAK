@@ -1,3 +1,5 @@
+> 如果一个图是连通且无环，那么拓扑排序后的序列长度一定等于这个图的大小，当一个图有环，那么就一定有节点无法被遍历，因为总是存在点的入度永远大于0.
+
 310\. 最小高度树
 -----------
 
@@ -229,6 +231,225 @@ class Solution {
             Collections.sort(res.get(i));
         }
         return res;
+    }
+}
+```
+
+1203\. 项目管理（分组拓扑排序）
+-----------
+
+有 `n` 个项目，每个项目或者不属于任何小组，或者属于 `m` 个小组之一。`group[i]` 表示第 `i` 个项目所属的小组，如果第 `i` 个项目不属于任何小组，则 `group[i]` 等于 `-1`。项目和小组都是从零开始编号的。可能存在小组不负责任何项目，即没有任何项目属于这个小组。
+
+请你帮忙按要求安排这些项目的进度，并返回排序后的项目列表：
+
+*   同一小组的项目，排序后在列表中彼此相邻。
+*   项目之间存在一定的依赖关系，我们用一个列表 `beforeItems` 来表示，其中 `beforeItems[i]` 表示在进行第 `i` 个项目前（位于第 `i` 个项目左侧）应该完成的所有项目。
+
+如果存在多个解决方案，只需要返回其中任意一个即可。如果没有合适的解决方案，就请返回一个 **空列表** 。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/09/22/1359_ex1.png)**
+
+**输入：**n = 8, m = 2, group = \[-1,-1,1,0,0,1,0,-1\], beforeItems = \[\[\],\[6\],\[5\],\[6\],\[3,6\],\[\],\[\],\[\]\]
+**输出：**\[6,3,4,1,5,2,0,7\]
+
+**示例 2：**
+
+**输入：**n = 8, m = 2, group = \[-1,-1,1,0,0,1,0,-1\], beforeItems = \[\[\],\[6\],\[5\],\[6\],\[3\],\[\],\[4\],\[\]\]
+**输出：**\[\]
+**解释：**与示例 1 大致相同，但是在排序后的列表中，4 必须放在 6 的前面。
+
+**提示：**
+
+*   `1 <= m <= n <= 3 * 104`
+*   `group.length == beforeItems.length == n`
+*   `-1 <= group[i] <= m - 1`
+*   `0 <= beforeItems[i].length <= n - 1`
+*   `0 <= beforeItems[i][j] <= n - 1`
+*   `i != beforeItems[i][j]`
+*   `beforeItems[i]` 不含重复元素
+
+[https://leetcode.cn/problems/sort-items-by-groups-respecting-dependencies/description/](https://leetcode.cn/problems/sort-items-by-groups-respecting-dependencies/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int[] sortItems(int n, int m, int[] group, List<List<Integer>> beforeItems) {
+        for (int i = 0; i < n; i++) {
+            if (group[i] < 0) {
+                group[i] = m++;
+            }
+        }
+        List<Integer>[] groupItem = new List[m]; // m 个组，存储组中的节点，存储组和节点的关系
+        Arrays.setAll(groupItem, e -> new ArrayList<Integer>());
+        int[] groupIndegree = new int[m]; // 存储组的入度
+        int[] itemIndegree = new int[n]; // 存储节点的入度
+        List<Integer>[] groupNextArr = new List[m]; // 存储下一个组，存储组与组的关系
+        Arrays.setAll(groupNextArr, e -> new ArrayList<Integer>());
+        List<Integer>[] itemNextArr = new List[n]; // 存储下一个节点，存储节点与节点的关系
+        Arrays.setAll(itemNextArr, e -> new ArrayList<Integer>());
+        for (int i = 0; i < n; i++) {
+            int curGroup = group[i]; // 当前组号
+            groupItem[curGroup].add(i);
+            for (int j : beforeItems.get(i)) { // 遍历组内的前辈
+                int preGroup = group[j];
+                if (preGroup == curGroup) { // 如果组号相同
+                    itemIndegree[i]++;
+                    itemNextArr[j].add(i);
+                }else{
+                    groupIndegree[curGroup]++;
+                    groupNextArr[preGroup].add(curGroup);
+                }
+            }
+        }
+        List<Integer> groupList = new ArrayList<Integer>(); // 组号集合
+        for (int i = 0; i < m; i++) {
+            groupList.add(i);
+        }
+        int[] groupOrder = topSort(groupIndegree, groupNextArr, groupList);
+        if (groupOrder.length != groupList.size()) {
+            return new int[0];
+        }
+        int[] itemOrder = new int[n];
+        int itemIndex = 0;
+        for (int i = 0; i < m; i++) {
+            List<Integer> items = groupItem[groupOrder[i]]; // 当前组内的所有节点
+            int[] groupItemOrder = topSort(itemIndegree, itemNextArr, items);
+            int currCount = groupItemOrder.length;
+            if (currCount != items.size()) {
+                return new int[0];
+            }
+            System.arraycopy(groupItemOrder, 0, itemOrder, itemIndex, currCount);
+            itemIndex += currCount;
+        }
+        return itemOrder;
+    }
+
+    /**
+     * @param indegrees 节点的入度
+     * @param g 邻接表
+     * @param nums 需要排序的节点集合
+     * @return int[] 返回拓扑排序的节点顺序
+     */
+    private int[] topSort(int[] indegrees, List<Integer>[] g,List<Integer> nums) {
+        int n = nums.size();
+        int[] ans = new int[n];
+        Queue<Integer> queue = new LinkedList<>();
+        for (int num : nums) {
+            if (indegrees[num] == 0) {
+                queue.offer(num);
+            }
+        }
+        int index = 0;
+        while (!queue.isEmpty()) {
+            int poll = queue.poll();
+            ans[index++] = poll;
+            for (int y : g[poll]) {
+                indegrees[y]--;
+                if (indegrees[y] == 0) {
+                    queue.offer(y);
+                }
+            }
+        }
+        return index == n ? ans : new int[0];
+    }
+}
+```
+
+2603\. 收集树中金币
+-------------
+
+给你一个 `n` 个节点的无向无根树，节点编号从 `0` 到 `n - 1` 。给你整数 `n` 和一个长度为 `n - 1` 的二维整数数组 `edges` ，其中 `edges[i] = [ai, bi]` 表示树中节点 `ai` 和 `bi` 之间有一条边。再给你一个长度为 `n` 的数组 `coins` ，其中 `coins[i]` 可能为 `0` 也可能为 `1` ，`1` 表示节点 `i` 处有一个金币。
+
+一开始，你需要选择树中任意一个节点出发。你可以执行下述操作任意次：
+
+*   收集距离当前节点距离为 `2` 以内的所有金币，或者
+*   移动到树中一个相邻节点。
+
+你需要收集树中所有的金币，并且回到出发节点，请你返回最少经过的边数。
+
+如果你多次经过一条边，每一次经过都会给答案加一。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2023/03/01/graph-2.png)
+
+**输入：**coins = \[1,0,0,0,0,1\], edges = \[\[0,1\],\[1,2\],\[2,3\],\[3,4\],\[4,5\]\]
+**输出：**2
+**解释：**从节点 2 出发，收集节点 0 处的金币，移动到节点 3 ，收集节点 5 处的金币，然后移动回节点 2 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2023/03/02/graph-4.png)
+
+**输入：**coins = \[0,0,0,1,1,0,0,1\], edges = \[\[0,1\],\[0,2\],\[1,3\],\[1,4\],\[2,5\],\[5,6\],\[5,7\]\]
+**输出：**2
+**解释：**从节点 0 出发，收集节点 4 和 3 处的金币，移动到节点 2 处，收集节点 7 处的金币，移动回节点 0 。
+
+**提示：**
+
+*   `n == coins.length`
+*   `1 <= n <= 3 * 104`
+*   `0 <= coins[i] <= 1`
+*   `edges.length == n - 1`
+*   `edges[i].length == 2`
+*   `0 <= ai, bi < n`
+*   `ai != bi`
+*   `edges` 表示一棵合法的树。
+
+[https://leetcode.cn/problems/collect-coins-in-a-tree/solutions/2191371/tuo-bu-pai-xu-ji-lu-ru-dui-shi-jian-pyth-6uli/](https://leetcode.cn/problems/collect-coins-in-a-tree/solutions/2191371/tuo-bu-pai-xu-ji-lu-ru-dui-shi-jian-pyth-6uli/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int collectTheCoins(int[] coins, int[][] edges) {
+        int n = coins.length;
+        List<Integer> g[] = new ArrayList[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        int[] deg = new int[n];
+        for (int[] e : edges) {
+            int x = e[0], y = e[1];
+            g[x].add(y);
+            g[y].add(x); // 建图
+            deg[x]++;
+            deg[y]++; // 统计每个节点的度数（邻居个数）
+        }
+
+        int leftEdges = n - 1; // 剩余边数
+        // 拓扑排序，去掉没有金币的子树
+        Queue<Integer> q = new ArrayDeque<Integer>();
+        for (int i = 0; i < n; i++) {
+            if (deg[i] == 1 && coins[i] == 0) { // 没有金币的叶子
+                q.add(i);
+            }
+        }
+        while (!q.isEmpty()) {
+            leftEdges--; // 删除节点到其父节点的边
+            for (int y : g[q.poll()]) {
+                if (--deg[y] == 1 && coins[y] == 0) { // 没有金币的叶子
+                    q.add(y);
+                }
+            }
+        }
+
+        // 再次拓扑排序
+        for (int i = 0; i < n; i++) {
+            if (deg[i] == 1 && coins[i] == 1) { // 有金币的叶子（判断 coins[i] 是避免把没有金币的叶子也算进来）
+                q.add(i);
+            }
+        }
+        leftEdges -= q.size(); // 删除所有叶子（到其父节点的边）
+        for (int x : q) { // 遍历所有叶子
+            for (int y : g[x]) {
+                if (--deg[y] == 1) { // y 现在是叶子了
+                    leftEdges--; // 删除 y（到其父节点的边）
+                }
+            }
+        }
+        return Math.max(leftEdges * 2, 0);
     }
 }
 ```
