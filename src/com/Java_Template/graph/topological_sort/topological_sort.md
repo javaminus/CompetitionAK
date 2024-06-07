@@ -453,7 +453,7 @@ class Solution {
     }
 }
 ```
-2050\. 并行课程 III
+2050\. 并行课程 III（拓扑dp）
 ---------------
 
 给你一个整数 `n` ，表示有 `n` 节课，课程编号从 `1` 到 `n` 。同时给你一个二维整数数组 `relations` ，其中 `relations[j] = [prevCoursej, nextCoursej]` ，表示课程 `prevCoursej` 必须在课程 `nextCoursej` **之前** 完成（先修课的关系）。同时给你一个下标从 **0** 开始的整数数组 `time` ，其中 `time[i]` 表示完成第 `(i+1)` 门课程需要花费的 **月份** 数。
@@ -540,3 +540,203 @@ class Solution {
     }
 }
 ```
+
+1857\. 有向图中最大颜色值（拓扑dp）
+----------------
+
+给你一个 **有向图** ，它含有 `n` 个节点和 `m` 条边。节点编号从 `0` 到 `n - 1` 。
+
+给你一个字符串 `colors` ，其中 `colors[i]` 是小写英文字母，表示图中第 `i` 个节点的 **颜色** （下标从 **0** 开始）。同时给你一个二维数组 `edges` ，其中 `edges[j] = [aj, bj]` 表示从节点 `aj` 到节点 `bj` 有一条 **有向边** 。
+
+图中一条有效 **路径** 是一个点序列 `x1 -> x2 -> x3 -> ... -> xk` ，对于所有 `1 <= i < k` ，从 `xi` 到 `xi+1` 在图中有一条有向边。路径的 **颜色值** 是路径中 **出现次数最多** 颜色的节点数目。
+
+请你返回给定图中有效路径里面的 **最大颜色值** **。**如果图中含有环，请返回 `-1` 。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/04/21/leet1.png)
+
+**输入：**colors = "abaca", edges = \[\[0,1\],\[0,2\],\[2,3\],\[3,4\]\]
+**输出：**3
+**解释：**路径 0 -> 2 -> 3 -> 4 含有 3 个颜色为 `"a" 的节点（上图中的红色节点）。`
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/04/21/leet2.png)
+
+**输入：**colors = "a", edges = \[\[0,0\]\]
+**输出：**\-1
+**解释：**从 0 到 0 有一个环。
+
+**提示：**
+
+*   `n == colors.length`
+*   `m == edges.length`
+*   `1 <= n <= 105`
+*   `0 <= m <= 105`
+*   `colors` 只含有小写英文字母。
+*   `0 <= aj, bj < n`
+
+[https://leetcode.cn/problems/largest-color-value-in-a-directed-graph/description/](https://leetcode.cn/problems/largest-color-value-in-a-directed-graph/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int largestPathValue(String colors, int[][] edges) {
+        int n = colors.length();
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        int[] indegree = new int[n];
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            indegree[y]++;
+            g[x].add(y);
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+                list.add(i);
+            }
+        }
+        int size = 0, ans = 0;
+        int[][] dp = new int[n][26]; // dp[i][j]表示以i结尾的字符为j的最大颜色值
+        while (!queue.isEmpty()) {
+            int x = queue.poll();
+            dp[x][colors.charAt(x) - 'a']++;
+            ans = Math.max(dp[x][colors.charAt(x) - 'a'], ans);
+            size++;
+            for (int y : g[x]) {
+                for (int i = 0; i < 26; i++) {
+                    dp[y][i] = Math.max(dp[y][i], dp[x][i]);
+                }
+                if (--indegree[y] == 0) {
+                    queue.offer(y);
+                }
+            }
+        }
+        if (size != n) { // 判断图是否有环
+            return -1;
+        }
+        return ans;
+    }
+
+}
+```
+
+2127\. 参加会议的最多员工数
+-----------------
+
+一个公司准备组织一场会议，邀请名单上有 `n` 位员工。公司准备了一张 **圆形** 的桌子，可以坐下 **任意数目** 的员工。
+
+员工编号为 `0` 到 `n - 1` 。每位员工都有一位 **喜欢** 的员工，每位员工 **当且仅当** 他被安排在喜欢员工的旁边，他才会参加会议。每位员工喜欢的员工 **不会** 是他自己。
+
+给你一个下标从 **0** 开始的整数数组 `favorite` ，其中 `favorite[i]` 表示第 `i` 位员工喜欢的员工。请你返回参加会议的 **最多员工数目** 。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/12/14/ex1.png)
+
+**输入：**favorite = \[2,2,1,2\]
+**输出：**3
+**解释：**
+上图展示了公司邀请员工 0，1 和 2 参加会议以及他们在圆桌上的座位。
+没办法邀请所有员工参与会议，因为员工 2 没办法同时坐在 0，1 和 3 员工的旁边。
+注意，公司也可以邀请员工 1，2 和 3 参加会议。
+所以最多参加会议的员工数目为 3 。
+
+**示例 2：**
+
+**输入：**favorite = \[1,2,0\]
+**输出：**3
+**解释：**
+每个员工都至少是另一个员工喜欢的员工。所以公司邀请他们所有人参加会议的前提是所有人都参加了会议。
+座位安排同图 1 所示：
+- 员工 0 坐在员工 2 和 1 之间。
+- 员工 1 坐在员工 0 和 2 之间。
+- 员工 2 坐在员工 1 和 0 之间。
+  参与会议的最多员工数目为 3 。
+
+**示例 3：**
+
+![](https://assets.leetcode.com/uploads/2021/12/14/ex2.png)
+
+**输入：**favorite = \[3,0,1,4,1\]
+**输出：**4
+**解释：**
+上图展示了公司可以邀请员工 0，1，3 和 4 参加会议以及他们在圆桌上的座位。
+员工 2 无法参加，因为他喜欢的员工 1 旁边的座位已经被占领了。
+所以公司只能不邀请员工 2 。
+参加会议的最多员工数目为 4 。
+
+**提示：**
+
+*   `n == favorite.length`
+*   `2 <= n <= 105`
+*   `0 <= favorite[i] <= n - 1`
+*   `favorite[i] != i`
+
+[https://leetcode.cn/problems/maximum-employees-to-be-invited-to-a-meeting/description/](https://leetcode.cn/problems/maximum-employees-to-be-invited-to-a-meeting/description/)
+
+> 两种情况：1、找最大的环。2、如果有长度为2的环，找连接这个环最长的链。
+
+```java
+import java.util.*;
+
+class Solution {
+    public int maximumInvitations(int[] favorite) {
+        int n = favorite.length;
+        int[] indegree = new int[n];
+        for (int f : favorite) {
+            indegree[f]++;
+        }
+        List<Integer>[] rg = new List[n];
+        Arrays.setAll(rg, e -> new ArrayList<Integer>());
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        while (!queue.isEmpty()) { // 剪断枝节
+            int x = queue.poll();
+            int y = favorite[x];
+            rg[y].add(x);
+            if (--indegree[y] == 0) {
+                queue.offer(y);
+            }
+        }
+        int maxRingSize = 0, sumChainSize = 0;
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) {
+                continue;
+            }
+            // 遍历基环上的点
+            indegree[i] = 0; // 将基环上的点的入度标记为 0，避免重复访问
+            int ringSize = 1; // 基环长度
+            for (int x = favorite[i]; x != i; x = favorite[x]) {
+                indegree[x] = 0;
+                ringSize++;
+            }
+            if (ringSize == 2) {
+                // 累加两条最长链的长度
+                sumChainSize += dfs(i, rg) + dfs(favorite[i], rg);
+            }else{
+                maxRingSize = Math.max(maxRingSize, ringSize);
+            }
+        }
+        return Math.max(maxRingSize, sumChainSize);
+    }
+
+    private int dfs(int x, List<Integer>[] g) {
+        int res = 1;
+        for (int y : g[x]) {
+            res = Math.max(res, dfs(y, g) + 1);
+        }
+        return res;
+    }
+}
+```
+
