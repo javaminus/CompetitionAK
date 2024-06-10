@@ -1,53 +1,42 @@
-import java.util.*;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 class Solution {
-    public int maximumInvitations(int[] favorite) {
-        int n = favorite.length;
-        int[] indegree = new int[n];
-        for (int x : favorite) {
-            indegree[x]++;
+    public int maxTotalReward(int[] rewardValues) {
+        // `Arrays.stream(rewardValues).distinct().sorted().toArray()` 是Java中的一段代码，它的意思是：
+        //
+        //1. `Arrays.stream(rewardValues)`：将数组 `rewardValues` 转换为一个流（Stream）。
+        //2. `.distinct()`：从流中去除重复的元素。
+        //3. `.sorted()`：对流中的元素进行排序。
+        //4. `.toArray()`：将流转换回数组。
+        //
+        //所以，这段代码的作用是对数组 `rewardValues` 进行去重和排序操作，并将结果存储在一个新的数组中。
+        int mx = 0;
+        for (int x : rewardValues) {
+            mx = Math.max(mx, x);
         }
-        Queue<Integer> queue = new LinkedList<>();
-        List<Integer>[] rg = new List[n];
-        Arrays.setAll(rg, e -> new ArrayList<>());
-        for (int i = 0; i < n; i++) {
-            if (indegree[i] == 0) {
-                queue.offer(i);
+        Set<Integer> set = new HashSet<>();
+        for (int x : rewardValues) {
+            if (x == mx - 1) {
+                return mx * 2 - 1;
             }
-        }
-        while (!queue.isEmpty()) {
-            int x = queue.poll();
-            int y = favorite[x];
-            rg[y].add(x);
-            if (--indegree[y] == 0) {
-                queue.offer(y);
-            }
-        }
-        int maxRingSize = 0, sumChainSize = 0;
-        for (int i = 0; i < n; i++) {
-            if (indegree[i] == 0) {
+            if (set.contains(x)) {
                 continue;
             }
-            indegree[i] = 0;
-            int ringSize = 1;
-            for (int x = favorite[i]; x != i; x = favorite[x]) {
-                indegree[x] = 0;
-                ringSize++;
+            if (set.contains(mx - 1 - x)) {
+                return mx * 2 - 1;
             }
-            if (ringSize == 2) {
-                sumChainSize += dfs(i, rg) + dfs(favorite[i], rg);
-            }else{
-                maxRingSize = Math.max(maxRingSize, ringSize);
-            }
+            set.add(x);
         }
-        return Math.max(maxRingSize, sumChainSize);
-    }
-
-    private int dfs(int x, List<Integer>[] g) { // 求从x点出发最长的链
-        int res = 1;
-        for (int y : g[x]) {
-            res = Math.max(res, dfs(y, g) + 1);
+        int[] nums = Arrays.stream(rewardValues).distinct().sorted().toArray();
+        BigInteger f = BigInteger.ONE;
+        for (int x : nums) {
+            // 条件 x <= j < x*2 ， f |= (f & ((1 << v) - 1)) << v
+            BigInteger mask = BigInteger.ONE.shiftLeft(x).subtract(BigInteger.ONE);
+            f = f.or(f.and(mask).shiftLeft(x));
         }
-        return res;
+        return f.bitLength() - 1;
     }
 }
