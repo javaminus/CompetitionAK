@@ -1,4 +1,4 @@
-package com.Java_Template.median_greed;
+package com.Java_Template.greed.median_greed;
 
 /**
  * 中位数贪心

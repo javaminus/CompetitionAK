@@ -1,33 +1,26 @@
-import java.util.HashMap;
+import java.util.*;
 
 class Solution {
-    public int maximumLength(int[] nums, int k) { // 最多允许k个不同的相邻元素的子序列
-        // 首先我们考虑到最多是k个不同相邻元素组成的子序列
-        // 所以我们可以用hash表的key存储每个元素，然后value = new int[k+1]存储以元素key结尾的，至多包含 j 个不同相邻元素的子序列的最大长度
-        // 使用一个records存储答案，new int[k+1][3]
-        HashMap<Integer, int[]> fs = new HashMap<>();
-        int[][] records = new int[k + 1][3];
-        for (int x : nums) {
-            int[] f = fs.computeIfAbsent(x, i -> new int[k + 1]);
-            for (int j = k; j >= 0; j--) {
-                f[j]++;
-                if (j > 0) {
-                    int mx = records[j - 1][0], mx2 = records[j - 1][1], num = records[j - 1][2];
-                    f[j] = Math.max(f[j], (x == num ? mx2 : mx) + 1);
+    public long findMaximumElegance(int[][] items, int k) {
+        // 把利润从大到小排序
+        Arrays.sort(items, (a, b) -> b[0] - a[0]);
+        long ans = 0;
+        long totalProfit = 0;
+        Set<Integer> vis = new HashSet<>();
+        Deque<Integer> duplicate = new ArrayDeque<>(); // 重复类别的利润
+        for (int i = 0; i < items.length; i++) {
+            int profit = items[i][0];
+            int category = items[i][1];
+            if (i < k) {
+                totalProfit += profit; // 累加前 k 个项目的利润
+                if (!vis.add(category)) { // 重复类别
+                    duplicate.offerFirst(profit);
                 }
-                int v = f[j];
-                int[] p = records[j];
-                if (v > p[0]) {
-                    if (x != p[2]) {
-                        p[2] = x;
-                        p[1] = p[0];
-                    }
-                    p[0] = v;
-                }else if (x != p[2] && v > p[1]) {
-                    p[1] = v;
-                }
-            }
+            } else if (!duplicate.isEmpty() && vis.add(category)) { // 之前没有的类别
+                totalProfit += profit - duplicate.pollFirst(); // 选一个重复类别中的最小利润替换
+            } // else：比前面的利润小，而且类别还重复了，选它只会让 totalProfit 变小，vis.size() 不变，优雅度不会变大
+            ans = Math.max(ans, totalProfit + (long) vis.size() * vis.size()); // 注意 1e5*1e5 会溢出
         }
-        return records[k][0];
+        return ans;
     }
 }
