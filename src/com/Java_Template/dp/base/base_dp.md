@@ -1403,3 +1403,77 @@ class Solution {
 }
 ```
 
+3177\. 求出最长好子序列 II(子序列优化dp,思想非常重要)
+------------------
+
+给你一个整数数组 `nums` 和一个 **非负** 整数 `k` 。如果一个整数序列 `seq` 满足在范围下标范围 `[0, seq.length - 2]` 中存在 **不超过** `k` 个下标 `i` 满足 `seq[i] != seq[i + 1]` ，那么我们称这个整数序列为 **好** 序列。
+
+请你返回 `nums` 中 **好**
+
+子序列
+
+ 的最长长度
+
+**示例 1：**
+
+**输入：**nums = \[1,2,1,1,3\], k = 2
+
+**输出：**4
+
+**解释：**
+
+最长好子序列为 `[_**1**_,_**2**_,**_1_**,_**1**_,3]` 。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,4,5,1\], k = 0
+
+**输出：**2
+
+**解释：**
+
+最长好子序列为 `[**_1_**,2,3,4,5,**_1_**]` 。
+
+**提示：**
+
+*   `1 <= nums.length <= 5 * 103`
+*   `1 <= nums[i] <= 109`
+*   `0 <= k <= min(50, nums.length)`
+
+[https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/)
+
+```java
+// 超级难，这个题必须优化dp才能过
+class Solution {
+    public int maximumLength(int[] nums, int k) { // 最多允许k个不同的相邻元素的子序列
+		// 首先我们考虑到最多是k个不同相邻元素组成的子序列
+        // 所以我们可以用hash表的key存储每个元素，然后value = new int[k+1]存储以元素key结尾的，至多包含 j 个不同相邻元素的子序列的最大长度
+        // 使用一个records存储答案，new int[k+1][3]
+       HashMap<Integer, int[]> fs = new HashMap<>(); // <k,v> 以k结尾的int[]
+        int[][] records = new int[k + 1][3];
+        for (int x : nums) {
+            int[] f = fs.computeIfAbsent(x, i -> new int[k + 1]); // f表示至多包含 j 个不同相邻元素的子序列的最大长度
+            for (int i = k; i >= 0; i--) { // i就是枚举 包含i个不同相邻元素的子序列
+                f[i]++; // 选，且和子序列的前一个数一样，或者作为子序列的第一个数：f[x][j] 增加 1。
+                if (i > 0) { // 挑选不同的，和f[i]比较
+                    int mx = records[i - 1][0], mx2 = records[i - 1][1], num = records[i - 1][2];
+                    f[i] = Math.max(f[i], (x == num ? mx2 : mx) + 1);
+                }
+                int v = f[i];
+                int[] p = records[i];
+                if (v > p[0]) {
+                    if (x != p[2]) {
+                        p[2] = x;
+                        p[1] = p[0];
+                    }
+                    p[0] = v;
+                } else if (x != p[2] && v > p[1]) {
+                    p[1] = v;
+                }
+            }
+        }
+        return records[k][0];
+    }
+}
+```
+

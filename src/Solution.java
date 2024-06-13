@@ -1,42 +1,33 @@
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 
 class Solution {
-    public int maxTotalReward(int[] rewardValues) {
-        // `Arrays.stream(rewardValues).distinct().sorted().toArray()` 是Java中的一段代码，它的意思是：
-        //
-        //1. `Arrays.stream(rewardValues)`：将数组 `rewardValues` 转换为一个流（Stream）。
-        //2. `.distinct()`：从流中去除重复的元素。
-        //3. `.sorted()`：对流中的元素进行排序。
-        //4. `.toArray()`：将流转换回数组。
-        //
-        //所以，这段代码的作用是对数组 `rewardValues` 进行去重和排序操作，并将结果存储在一个新的数组中。
-        int mx = 0;
-        for (int x : rewardValues) {
-            mx = Math.max(mx, x);
-        }
-        Set<Integer> set = new HashSet<>();
-        for (int x : rewardValues) {
-            if (x == mx - 1) {
-                return mx * 2 - 1;
-            }
-            if (set.contains(x)) {
-                continue;
-            }
-            if (set.contains(mx - 1 - x)) {
-                return mx * 2 - 1;
-            }
-            set.add(x);
-        }
-        int[] nums = Arrays.stream(rewardValues).distinct().sorted().toArray();
-        BigInteger f = BigInteger.ONE;
+    public int maximumLength(int[] nums, int k) { // 最多允许k个不同的相邻元素的子序列
+        // 首先我们考虑到最多是k个不同相邻元素组成的子序列
+        // 所以我们可以用hash表的key存储每个元素，然后value = new int[k+1]存储以元素key结尾的，至多包含 j 个不同相邻元素的子序列的最大长度
+        // 使用一个records存储答案，new int[k+1][3]
+        HashMap<Integer, int[]> fs = new HashMap<>();
+        int[][] records = new int[k + 1][3];
         for (int x : nums) {
-            // 条件 x <= j < x*2 ， f |= (f & ((1 << v) - 1)) << v
-            BigInteger mask = BigInteger.ONE.shiftLeft(x).subtract(BigInteger.ONE);
-            f = f.or(f.and(mask).shiftLeft(x));
+            int[] f = fs.computeIfAbsent(x, i -> new int[k + 1]);
+            for (int j = k; j >= 0; j--) {
+                f[j]++;
+                if (j > 0) {
+                    int mx = records[j - 1][0], mx2 = records[j - 1][1], num = records[j - 1][2];
+                    f[j] = Math.max(f[j], (x == num ? mx2 : mx) + 1);
+                }
+                int v = f[j];
+                int[] p = records[j];
+                if (v > p[0]) {
+                    if (x != p[2]) {
+                        p[2] = x;
+                        p[1] = p[0];
+                    }
+                    p[0] = v;
+                }else if (x != p[2] && v > p[1]) {
+                    p[1] = v;
+                }
+            }
         }
-        return f.bitLength() - 1;
+        return records[k][0];
     }
 }
