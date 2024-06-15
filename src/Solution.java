@@ -1,26 +1,33 @@
-import java.util.*;
+import java.util.Arrays;
+import java.util.PriorityQueue;
 
 class Solution {
-    public long findMaximumElegance(int[][] items, int k) {
-        // 把利润从大到小排序
-        Arrays.sort(items, (a, b) -> b[0] - a[0]);
-        long ans = 0;
-        long totalProfit = 0;
-        Set<Integer> vis = new HashSet<>();
-        Deque<Integer> duplicate = new ArrayDeque<>(); // 重复类别的利润
-        for (int i = 0; i < items.length; i++) {
-            int profit = items[i][0];
-            int category = items[i][1];
-            if (i < k) {
-                totalProfit += profit; // 累加前 k 个项目的利润
-                if (!vis.add(category)) { // 重复类别
-                    duplicate.offerFirst(profit);
-                }
-            } else if (!duplicate.isEmpty() && vis.add(category)) { // 之前没有的类别
-                totalProfit += profit - duplicate.pollFirst(); // 选一个重复类别中的最小利润替换
-            } // else：比前面的利润小，而且类别还重复了，选它只会让 totalProfit 变小，vis.size() 不变，优雅度不会变大
-            ans = Math.max(ans, totalProfit + (long) vis.size() * vis.size()); // 注意 1e5*1e5 会溢出
+    private static int[][] dirs = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    public int minCost(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] cost = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(cost[i], Integer.MAX_VALUE);
         }
-        return ans;
+        cost[0][0] = 0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+        pq.offer(new int[]{0, 0, 0});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int row = poll[0], col = poll[1], c = poll[2];
+            if (cost[row][col] < c) {
+                continue;
+            }
+            for (int i = 0; i < 4; i++) {
+                int[] dir = dirs[i];
+                int newRow = row + dir[0], newCol = col + dir[1];
+                int newC = c + (grid[row][col] == i + 1 ? 0 : 1);
+                if (newRow >= 0 && newCol >= 0 && newRow < m && newCol < n && newC < cost[newRow][newCol]) {
+                    cost[newRow][newCol] = newC;
+                    pq.offer(new int[]{newRow, newCol, newC});
+                }
+            }
+        }
+        return cost[m - 1][n - 1];
     }
 }

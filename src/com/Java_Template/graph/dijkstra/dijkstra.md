@@ -376,3 +376,207 @@ class State{
 }
 ```
 
+1631\. 最小体力消耗路径
+---------------
+
+你准备参加一场远足活动。给你一个二维 `rows x columns` 的地图 `heights` ，其中 `heights[row][col]` 表示格子 `(row, col)` 的高度。一开始你在最左上角的格子 `(0, 0)` ，且你希望去最右下角的格子 `(rows-1, columns-1)` （注意下标从 **0** 开始编号）。你每次可以往 **上**，**下**，**左**，**右** 四个方向之一移动，你想要找到耗费 **体力** 最小的一条路径。
+
+一条路径耗费的 **体力值** 是路径上相邻格子之间 **高度差绝对值** 的 **最大值** 决定的。
+
+请你返回从左上角走到右下角的最小 **体力消耗值** 。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/10/25/ex1.png)
+
+**输入：**heights = \[\[1,2,2\],\[3,8,2\],\[5,3,5\]\]
+**输出：**2
+**解释：**路径 \[1,3,5,3,5\] 连续格子的差值绝对值最大为 2 。
+这条路径比路径 \[1,2,2,2,5\] 更优，因为另一条路径差值最大值为 3 。
+
+**示例 2：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/10/25/ex2.png)
+
+**输入：**heights = \[\[1,2,3\],\[3,8,4\],\[5,3,5\]\]
+**输出：**1
+**解释：**路径 \[1,2,3,4,5\] 的相邻格子差值绝对值最大为 1 ，比路径 \[1,3,5,3,5\] 更优。
+
+**示例 3：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/10/25/ex3.png)
+
+**输入：**heights = \[\[1,2,1,1,1\],\[1,2,1,2,1\],\[1,2,1,2,1\],\[1,2,1,2,1\],\[1,1,1,2,1\]\]
+**输出：**0
+**解释：**上图所示路径不需要消耗任何体力。
+
+**提示：**
+
+*   `rows == heights.length`
+*   `columns == heights[i].length`
+*   `1 <= rows, columns <= 100`
+*   `1 <= heights[i][j] <= 106`
+
+[https://leetcode.cn/problems/path-with-minimum-effort/description/](https://leetcode.cn/problems/path-with-minimum-effort/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+
+class Solution {
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        solution.minimumEffortPath(new int[][]{{4, 3, 4, 10, 5, 5, 9, 2}, {10, 8, 2, 10, 9, 7, 5, 6}, {5, 8, 10, 10, 10, 7, 4, 2}, {5, 1, 3, 1, 1, 3, 1, 9}, {6, 4, 10, 6, 10, 9, 4, 6}});
+    }
+    
+    public int minimumEffortPath(int[][] heights) {
+        int m = heights.length, n = heights[0].length;
+        List<int[]>[] g = new List[m * n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < m; i++) { // 建图
+            for (int j = 0; j < n; j++) {
+                if (j + 1 < n) {
+                    g[n * i + j].add(new int[]{n * i + j + 1, Math.abs(heights[i][j] - heights[i][j + 1])});
+                }
+                if (j > 0) {
+                    g[n * i + j].add(new int[]{n * i + j - 1, Math.abs(heights[i][j] - heights[i][j - 1])});
+                }
+                if (i + 1 < m) {
+                    g[n * i + j].add(new int[]{n * (i + 1) + j, Math.abs(heights[i][j] - heights[i + 1][j])});
+                }
+                if (i > 0) {
+                    g[n * i + j].add(new int[]{n * (i - 1) + j, Math.abs(heights[i][j] - heights[i - 1][j])});
+                }
+            }
+        }
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        int[] dist = new int[m * n];
+        Arrays.fill(dist, Integer.MAX_VALUE / 2);
+        dist[0] = 0;
+        pq.offer(new int[]{0, 0});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int x = poll[0], d = poll[1];
+            if (dist[x] < d) {
+                continue;
+            }
+            for (int[] e : g[x]) {
+                int y = e[0], d1 = Math.max(dist[x], e[1]);
+                if (dist[y] >  d1) {
+                    dist[y] = d1;
+                    pq.offer(new int[]{y, d1});
+                }
+            }
+        }
+        // for (int i = 0; i < m * n; i++) {
+        //     System.out.println(i + ":" + dist[i]);
+        // }
+        return dist[m * n - 1];
+    }
+    // [[4,3,4,10,5,5,9,2],
+    // [10,8,2,10,9,7,5,6],
+    // [5,8,10,10,10,7,4,2],
+    // [5,1,3,1,1,3,1,9],
+    // [6,4,10,6,10,9,4,6]]
+}
+```
+
+1368\. 使网格图至少有一条有效路径的最小代价
+-------------------------
+
+给你一个 m x n 的网格图 `grid` 。 `grid` 中每个格子都有一个数字，对应着从该格子出发下一步走的方向。 `grid[i][j]` 中的数字可能为以下几种情况：
+
+*   **1** ，下一步往右走，也就是你会从 `grid[i][j]` 走到 `grid[i][j + 1]`
+*   **2** ，下一步往左走，也就是你会从 `grid[i][j]` 走到 `grid[i][j - 1]`
+*   **3** ，下一步往下走，也就是你会从 `grid[i][j]` 走到 `grid[i + 1][j]`
+*   **4** ，下一步往上走，也就是你会从 `grid[i][j]` 走到 `grid[i - 1][j]`
+
+注意网格图中可能会有 **无效数字** ，因为它们可能指向 `grid` 以外的区域。
+
+一开始，你会从最左上角的格子 `(0,0)` 出发。我们定义一条 **有效路径** 为从格子 `(0,0)` 出发，每一步都顺着数字对应方向走，最终在最右下角的格子 `(m - 1, n - 1)` 结束的路径。有效路径 **不需要是最短路径** 。
+
+你可以花费 `cost = 1` 的代价修改一个格子中的数字，但每个格子中的数字 **只能修改一次** 。
+
+请你返回让网格图至少有一条有效路径的最小代价。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/29/grid1.png)
+
+**输入：**grid = \[\[1,1,1,1\],\[2,2,2,2\],\[1,1,1,1\],\[2,2,2,2\]\]
+**输出：**3
+**解释：**你将从点 (0, 0) 出发。
+到达 (3, 3) 的路径为： (0, 0) --> (0, 1) --> (0, 2) --> (0, 3) 花费代价 cost = 1 使方向向下 --> (1, 3) --> (1, 2) --> (1, 1) --> (1, 0) 花费代价 cost = 1 使方向向下 --> (2, 0) --> (2, 1) --> (2, 2) --> (2, 3) 花费代价 cost = 1 使方向向下 --> (3, 3)
+总花费为 cost = 3.
+
+**示例 2：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/29/grid2.png)
+
+**输入：**grid = \[\[1,1,3\],\[3,2,2\],\[1,1,4\]\]
+**输出：**0
+**解释：**不修改任何数字你就可以从 (0, 0) 到达 (2, 2) 。
+
+**示例 3：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/29/grid3.png)
+
+**输入：**grid = \[\[1,2\],\[4,3\]\]
+**输出：**1
+
+**示例 4：**
+
+**输入：**grid = \[\[2,2,2\],\[2,2,2\]\]
+**输出：**3
+
+**示例 5：**
+
+**输入：**grid = \[\[4\]\]
+**输出：**0
+
+**提示：**
+
+*   `m == grid.length`
+*   `n == grid[i].length`
+*   `1 <= m, n <= 100`
+
+[https://leetcode.cn/problems/minimum-cost-to-make-at-least-one-valid-path-in-a-grid/description/](https://leetcode.cn/problems/minimum-cost-to-make-at-least-one-valid-path-in-a-grid/description/)
+
+```java
+import java.util.Arrays;
+import java.util.PriorityQueue;
+
+class Solution {
+    private static int[][] dirs = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    public int minCost(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] cost = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(cost[i], Integer.MAX_VALUE);
+        }
+        cost[0][0] = 0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+        pq.offer(new int[]{0, 0, 0});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int row = poll[0], col = poll[1], c = poll[2];
+            if (cost[row][col] < c) {
+                continue;
+            }
+            for (int i = 0; i < 4; i++) {
+                int[] dir = dirs[i];
+                int newRow = row + dir[0], newCol = col + dir[1];
+                int newC = c + (grid[row][col] == i + 1 ? 0 : 1);
+                if (newRow >= 0 && newCol >= 0 && newRow < m && newCol < n && newC < cost[newRow][newCol]) {
+                    cost[newRow][newCol] = newC;
+                    pq.offer(new int[]{newRow, newCol, newC});
+                }
+            }
+        }
+        return cost[m - 1][n - 1];
+    }
+}
+```
+
