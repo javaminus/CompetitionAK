@@ -1,3 +1,4 @@
+/*
 package com.Java_Template.date;
 
 import java.text.SimpleDateFormat;
@@ -5,10 +6,12 @@ import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 
+*/
 /**
  * @author Minus
  * @date 2024/4/10 10:09
- */
+ *//*
+
 public class template {
 
 }
@@ -43,7 +46,8 @@ class Main1{
     }
 }
 class 日期转星期 {
-    /**
+    */
+/**
      SimpleDateFormat函数语法：
 
      G 年代标志符
@@ -82,7 +86,8 @@ class 日期转星期 {
      s: 秒，1-2位
      ss: 秒，2位
      S: 毫秒
-     */
+     *//*
+
     public String dayOfTheWeek(int day, int month, int year) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, day);
@@ -105,3 +110,4 @@ class 日期转星期 {
         return weeks[idx];
     }
 }
+*/

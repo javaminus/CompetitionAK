@@ -1,51 +1,33 @@
-// 1:无需package
-// 2: 类名必须Main, 不可修改
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
-
+import java.util.HashSet;
 public class Main {
-    static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
-    private static int Mod = 998244353;
-
     public static void main(String[] args) {
-        int N = sc.nextInt();
-        int Q = sc.nextInt();
-        int[] nums = new int[N];
-        HashMap<Integer, Integer> cnt = new HashMap<>();
-        for (int i = 0; i < N; i++) {
-            nums[i] = sc.nextInt();
-            cnt.put(nums[i], cnt.getOrDefault(nums[i], 0) + 1);
-        }
-        Arrays.sort(nums);
-        int minDiss = -1;
-        for (int i = 0; i <= nums[N - 1] + 1; i++) {
-            if (!cnt.containsKey(i)) {
-                minDiss = i;
-                break;
-            }
-        }
-        long[] predixSum = new long[minDiss + 1];
-        predixSum[0] = 1;
-        for (int i = 0; i < minDiss; i++) {
-            predixSum[i + 1] = predixSum[i] * cnt.get(i) * (cnt.get(i) + 1) / 2 % Mod;
-        }
-        while (Q-- > 0) {
-            int q = sc.nextInt();
-            if (q > minDiss) {
-                System.out.println(0);
-            } else {
-                int i = 0;
-                for (; i < N; i++) {
-                    if (nums[i] > q) {
-                        break;
-                    }
+        for (int i = 12345; i <= 98765; i++) {
+            for (int j = 1234; j <= 9876; j++) {
+                if (judge(i, j) && i - j == 33333) {
+                    System.out.println(i + " " + j);
                 }
-                System.out.println(predixSum[q] * (long) Math.pow(2, N - i) % Mod);
             }
         }
+        System.out.println(-1);
     }
+
+    private static boolean judge(int x, int y) {
+        HashSet<Integer> set = new HashSet<>();
+        while (x > 0) {
+            if (set.contains(x % 10)) {
+                return false;
+            }
+            set.add(x % 10);
+            x /= 10;
+        }
+        while (y > 0) {
+            if (set.contains(y % 10)) {
+                return false;
+            }
+            set.add(y % 10);
+            y /= 10;
+        }
+        return !set.contains(0);
+    }
+
 }

@@ -1394,3 +1394,162 @@ class Solution {
 
 ```
 
+100317\. 数组中的峰值（单点更新，不需要更新add值）
+---------------
+
+数组 `arr` 中 **大于** 前面和后面相邻元素的元素被称为 **峰值** 元素。
+
+给你一个整数数组 `nums` 和一个二维整数数组 `queries` 。
+
+你需要处理以下两种类型的操作：
+
+*   `queries[i] = [1, li, ri]` ，求出子数组 `nums[li..ri]` 中 **峰值** 元素的数目。
+*   `queries[i] = [2, indexi, vali]` ，将 `nums[indexi]` 变为 `vali` 。
+
+请你返回一个数组 `answer` ，它依次包含每一个第一种操作的答案。
+
+**注意：**
+
+*   子数组中 **第一个** 和 **最后一个** 元素都 **不是** 峰值元素。
+
+**示例 1：**
+
+**输入：**nums = \[3,1,4,2,5\], queries = \[\[2,3,4\],\[1,0,4\]\]
+
+**输出：**\[0\]
+
+**解释：**
+
+第一个操作：我们将 `nums[3]` 变为 4 ，`nums` 变为 `[3,1,4,4,5]` 。
+
+第二个操作：`[3,1,4,4,5]` 中峰值元素的数目为 0 。
+
+**示例 2：**
+
+**输入：**nums = \[4,1,4,2,1,5\], queries = \[\[2,2,4\],\[1,0,2\],\[1,0,4\]\]
+
+**输出：**\[0,1\]
+
+**解释：**
+
+第一个操作：`nums[2]` 变为 4 ，它已经是 4 了，所以保持不变。
+
+第二个操作：`[4,1,4]` 中峰值元素的数目为 0 。
+
+第三个操作：第二个 4 是 `[4,1,4,2,1]` 中的峰值元素。
+
+**提示：**
+
+*   `3 <= nums.length <= 105`
+*   `1 <= nums[i] <= 105`
+*   `1 <= queries.length <= 105`
+*   `queries[i][0] == 1` 或者 `queries[i][0] == 2`
+*   对于所有的 `i` ，都有：
+    *   `queries[i][0] == 1` ：`0 <= queries[i][1] <= queries[i][2] <= nums.length - 1`
+    *   `queries[i][0] == 2` ：`0 <= queries[i][1] <= nums.length - 1`, `1 <= queries[i][2] <= 105`
+
+[https://leetcode.cn/problems/peaks-in-array/description/](https://leetcode.cn/problems/peaks-in-array/description/)
+
+```java
+
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    int N = (int) 1e5 + 1;
+    int[] nums;
+
+    class Node {
+        Node leftNode, rightNode;
+        int val;
+    }
+
+    Node root = new Node();
+
+    int query(Node node, int leftChild, int rightChild, int left, int right) {
+        if (left <= leftChild && right >= rightChild) {
+            return node.val;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0;
+        if (left <= mid) {
+            ans =  query(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            ans += query(node.rightNode, mid + 1, rightChild, left, right);
+        }
+        return ans;
+    }
+
+    public void update(int index, int val) {
+        nums[index] = val;
+        update(root, 0, N, index, index);
+        if (index > 0) {
+            update(root, 0, N, index - 1, index - 1);
+        }
+        if (index < nums.length - 1) {
+            update(root, 0, N, index + 1, index + 1);
+        }
+    }
+
+    void update(Node node, int leftChild, int rightChild, int left, int right) {
+        if (left <= leftChild && right >= rightChild) {
+            node.val = isPeak(left) ? 1 : 0;
+            return;
+        }
+        pushdown(node);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        if (left <= mid) {
+            update(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            update(node.rightNode, mid + 1, rightChild, left, right);
+        }
+        pushup(node);
+    }
+
+    void pushdown(Node node) {
+        if (node.leftNode == null) {
+            node.leftNode = new Node();
+        }
+        if (node.rightNode == null) {
+            node.rightNode = new Node();
+        }
+    }
+
+    void pushup(Node node) {
+        node.val = node.leftNode.val + node.rightNode.val;
+    }
+
+    private boolean isPeak(int index) {
+        if (index <= 0 || index >= nums.length - 1) {
+            return false;
+        }
+        return nums[index] > nums[index - 1] && nums[index] > nums[index + 1];
+    }
+
+    public List<Integer> countOfPeaks(int[] nums, int[][] queries) {
+        this.nums = nums;
+        // 建树
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            update(i, nums[i]);
+        }
+        List<Integer> result = new ArrayList<>();
+        for (int[] query : queries) {
+            if (query[0] == 1) {
+                int li = query[1] + 1; // 陷阱1，记得加一减一
+                int ri = query[2] - 1;
+                result.add(query(root, 0, N, li, ri));
+            } else if (query[0] == 2) {
+                int index = query[1]; 
+                int val = query[2];
+                update(index, val);  // 陷阱2，记得更新左右点
+            }
+        }
+        return result;
+    }
+
+}
+```
+

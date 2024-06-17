@@ -1,33 +1,25 @@
 import java.util.Arrays;
-import java.util.PriorityQueue;
 
 class Solution {
-    private static int[][] dirs = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-    public int minCost(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        int[][] cost = new int[m][n];
-        for (int i = 0; i < m; i++) {
-            Arrays.fill(cost[i], Integer.MAX_VALUE);
+    public int minCost(int maxTime, int[][] edges, int[] passingFees) {
+        int n = passingFees.length;
+        int[][] dp = new int[maxTime + 1][n];
+        for (int i = 0; i < dp.length; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
         }
-        cost[0][0] = 0;
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
-        pq.offer(new int[]{0, 0, 0});
-        while (!pq.isEmpty()) {
-            int[] poll = pq.poll();
-            int row = poll[0], col = poll[1], c = poll[2];
-            if (cost[row][col] < c) {
-                continue;
-            }
-            for (int i = 0; i < 4; i++) {
-                int[] dir = dirs[i];
-                int newRow = row + dir[0], newCol = col + dir[1];
-                int newC = c + (grid[row][col] == i + 1 ? 0 : 1);
-                if (newRow >= 0 && newCol >= 0 && newRow < m && newCol < n && newC < cost[newRow][newCol]) {
-                    cost[newRow][newCol] = newC;
-                    pq.offer(new int[]{newRow, newCol, newC});
+        dp[0][0] = passingFees[0]; //初始化  对动态规划的状态定义dp[i][j] i是花费的时间 j是所到达的城市
+        int ans = Integer.MAX_VALUE / 2;
+        for (int i = 1; i <= maxTime; i++) {
+            for (int j = 0; j < edges.length; j++) {
+                int[] edge = edges[j];
+                int x = edge[0], y = edge[1], time = edge[2];
+                if (time <= i) {
+                    dp[i][y] = Math.min(dp[i][y], dp[i - time][x] + passingFees[y]);
+                    dp[i][x] = Math.min(dp[i][x], dp[i - time][y] + passingFees[x]);
                 }
             }
+            ans = Math.min(ans, dp[i][n - 1]);
         }
-        return cost[m - 1][n - 1];
+        return ans == Integer.MAX_VALUE / 2 ? -1 : ans;
     }
 }
