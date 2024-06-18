@@ -818,3 +818,148 @@ class Pair {
 }
 ```
 
+2577\. 在网格图中访问一个格子的最少时间
+-----------------------
+
+给你一个 `m x n` 的矩阵 `grid` ，每个元素都为 **非负** 整数，其中 `grid[row][col]` 表示可以访问格子 `(row, col)` 的 **最早** 时间。也就是说当你访问格子 `(row, col)` 时，最少已经经过的时间为 `grid[row][col]` 。
+
+你从 **最左上角** 出发，出发时刻为 `0` ，你必须一直移动到上下左右相邻四个格子中的 **任意** 一个格子（即不能停留在格子上）。每次移动都需要花费 1 单位时间。
+
+请你返回 **最早** 到达右下角格子的时间，如果你无法到达右下角的格子，请你返回 `-1` 。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2023/02/14/yetgriddrawio-8.png)
+
+**输入：**grid = \[\[0,1,3,2\],\[5,1,2,5\],\[4,3,8,6\]\]
+**输出：**7
+**解释：**一条可行的路径为：
+- 时刻 t = 0 ，我们在格子 (0,0) 。
+- 时刻 t = 1 ，我们移动到格子 (0,1) ，可以移动的原因是 grid\[0\]\[1\] <= 1 。
+- 时刻 t = 2 ，我们移动到格子 (1,1) ，可以移动的原因是 grid\[1\]\[1\] <= 2 。
+- 时刻 t = 3 ，我们移动到格子 (1,2) ，可以移动的原因是 grid\[1\]\[2\] <= 3 。
+- 时刻 t = 4 ，我们移动到格子 (1,1) ，可以移动的原因是 grid\[1\]\[1\] <= 4 。
+- 时刻 t = 5 ，我们移动到格子 (1,2) ，可以移动的原因是 grid\[1\]\[2\] <= 5 。
+- 时刻 t = 6 ，我们移动到格子 (1,3) ，可以移动的原因是 grid\[1\]\[3\] <= 6 。
+- 时刻 t = 7 ，我们移动到格子 (2,3) ，可以移动的原因是 grid\[2\]\[3\] <= 7 。
+  最终到达时刻为 7 。这是最早可以到达的时间。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2023/02/14/yetgriddrawio-9.png)
+
+**输入：**grid = \[\[0,2,4\],\[3,2,1\],\[1,0,4\]\]
+**输出：**\-1
+**解释：**没法从左上角按题目规定走到右下角。
+
+**提示：**
+
+*   `m == grid.length`
+*   `n == grid[i].length`
+*   `2 <= m, n <= 1000`
+*   `4 <= m * n <= 105`
+*   `0 <= grid[i][j] <= 105`
+*   `grid[0][0] == 0`
+
+[https://leetcode.cn/problems/minimum-time-to-visit-a-cell-in-a-grid/description/](https://leetcode.cn/problems/minimum-time-to-visit-a-cell-in-a-grid/description/)
+
+```java
+import java.util.Arrays;
+import java.util.PriorityQueue;
+
+class Solution {
+    private static int[][] dirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    public int minimumTime(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        if (grid[0][1] > 1 && grid[1][0] > 1) { // 无法「等待」
+            return -1;
+        }
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]); // {d,i,j}
+        int[][] dist = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(dist[i], Integer.MAX_VALUE / 2);
+        }
+        dist[0][0] = 0;
+        pq.offer(new int[]{0, 0, 0});
+        while (true) { // 可以等待，就一定可以到达终点
+            int[] poll = pq.poll();
+            int d = poll[0], i = poll[1], j = poll[2];
+            if (dist[i][j] < d) {
+                continue;
+            }
+            if (i == m - 1 && j == n - 1) { // 找到终点，此时 d 一定是最短路
+                return dist[i][j];
+            }
+            for (int[] dir : dirs) { // 枚举周围四个格子
+                int newI = i + dir[0], newJ = j + dir[1];
+                if (newI >= 0 && newI < m && newJ >= 0 && newJ < n) {
+                    int newD = Math.max(d + 1, grid[newI][newJ]);
+                    newD += (newD - newI - newJ) % 2; // nd 必须和 x+y 同奇偶, 注意：(nd - x - y) % 2就是1或者0
+                    if (newD < dist[newI][newJ]) {
+                        dist[newI][newJ] = newD; // 更新最短路
+                        pq.offer(new int[]{newD, newI, newJ});
+                    }
+                }
+
+            }
+        }
+    }
+}
+```
+
+2699\. 修改图中的边权
+--------------
+
+给你一个 `n` 个节点的 **无向带权连通** 图，节点编号为 `0` 到 `n - 1` ，再给你一个整数数组 `edges` ，其中 `edges[i] = [ai, bi, wi]` 表示节点 `ai` 和 `bi` 之间有一条边权为 `wi` 的边。
+
+部分边的边权为 `-1`（`wi = -1`），其他边的边权都为 **正** 数（`wi > 0`）。
+
+你需要将所有边权为 `-1` 的边都修改为范围 `[1, 2 * 109]` 中的 **正整数** ，使得从节点 `source` 到节点 `destination` 的 **最短距离** 为整数 `target` 。如果有 **多种** 修改方案可以使 `source` 和 `destination` 之间的最短距离等于 `target` ，你可以返回任意一种方案。
+
+如果存在使 `source` 到 `destination` 最短距离为 `target` 的方案，请你按任意顺序返回包含所有边的数组（包括未修改边权的边）。如果不存在这样的方案，请你返回一个 **空数组** 。
+
+**注意：**你不能修改一开始边权为正数的边。
+
+**示例 1：**
+
+**![](https://assets.leetcode.com/uploads/2023/04/18/graph.png)**
+
+**输入：**n = 5, edges = \[\[4,1,-1\],\[2,0,-1\],\[0,3,-1\],\[4,3,-1\]\], source = 0, destination = 1, target = 5
+**输出：**\[\[4,1,1\],\[2,0,1\],\[0,3,3\],\[4,3,1\]\]
+**解释：**上图展示了一个满足题意的修改方案，从 0 到 1 的最短距离为 5 。
+
+**示例 2：**
+
+**![](https://assets.leetcode.com/uploads/2023/04/18/graph-2.png)**
+
+**输入：**n = 3, edges = \[\[0,1,-1\],\[0,2,5\]\], source = 0, destination = 2, target = 6
+**输出：**\[\]
+**解释：**上图是一开始的图。没有办法通过修改边权为 -1 的边，使得 0 到 2 的最短距离等于 6 ，所以返回一个空数组。
+
+**示例 3：**
+
+**![](https://assets.leetcode.com/uploads/2023/04/19/graph-3.png)**
+
+**输入：**n = 4, edges = \[\[1,0,4\],\[1,2,3\],\[2,3,5\],\[0,3,-1\]\], source = 0, destination = 2, target = 6
+**输出：**\[\[1,0,4\],\[1,2,3\],\[2,3,5\],\[0,3,1\]\]
+**解释：**上图展示了一个满足题意的修改方案，从 0 到 2 的最短距离为 6 。
+
+**提示：**
+
+*   `1 <= n <= 100`
+*   `1 <= edges.length <= n * (n - 1) / 2`
+*   `edges[i].length == 3`
+*   `0 <= ai, bi < n`
+*   `wi = -1` 或者 `1 <= wi <= 107`
+*   `ai != bi`
+*   `0 <= source, destination < n`
+*   `source != destination`
+*   `1 <= target <= 109`
+*   输入的图是连通图，且没有自环和重边。
+
+[https://leetcode.cn/problems/modify-graph-edge-weights/description/](https://leetcode.cn/problems/modify-graph-edge-weights/description/)
+
+```java
+
+```
+
