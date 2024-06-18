@@ -1,3 +1,5 @@
+> 思考：如何获取dijkstra的路径？
+
 2092\. 找出知晓秘密的所有专家
 ------------------
 
@@ -495,3 +497,324 @@ class Solution {
 
 }
 ```
+
+1284\. 转化为全零矩阵的最少反转次数(位运算+bfs)
+---------------------
+
+给你一个 `m x n` 的二进制矩阵 `mat`。每一步，你可以选择一个单元格并将它反转（反转表示 `0` 变 `1` ，`1` 变 `0` ）。如果存在和它相邻的单元格，那么这些相邻的单元格也会被反转。相邻的两个单元格共享同一条边。
+
+请你返回将矩阵 `mat` 转化为全零矩阵的_最少反转次数_，如果无法转化为全零矩阵，请返回 `-1` 。
+
+**二进制矩阵** 的每一个格子要么是 `0` 要么是 `1` 。
+
+**全零矩阵** 是所有格子都为 `0` 的矩阵。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/12/13/matrix.png)
+
+**输入：**mat = \[\[0,0\],\[0,1\]\]
+**输出：**3
+**解释：**一个可能的解是反转 (1, 0)，然后 (0, 1) ，最后是 (1, 1) 。
+
+**示例 2：**
+
+**输入：**mat = \[\[0\]\]
+**输出：**0
+**解释：**给出的矩阵是全零矩阵，所以你不需要改变它。
+
+**示例 3：**
+
+**输入：**mat = \[\[1,0,0\],\[1,0,0\]\]
+**输出：**\-1
+**解释：**该矩阵无法转变成全零矩阵
+
+**提示：**
+
+*   `m == mat.length`
+*   `n == mat[0].length`
+*   `1 <= m <= 3`
+*   `1 <= n <= 3`
+*   `mat[i][j]` 是 0 或 1 。
+
+[https://leetcode.cn/problems/minimum-number-of-flips-to-convert-binary-matrix-to-zero-matrix/description/](https://leetcode.cn/problems/minimum-number-of-flips-to-convert-binary-matrix-to-zero-matrix/description/)
+
+```java
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Solution {
+    static final int TARGET = 0;
+    static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    int m, n;
+    public int minFlips(int[][] mat) {
+        m = mat.length;
+        n = mat[0].length;
+        int startState = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                startState += mat[i][j] << getIndex(i, j);
+            }
+        }
+        HashSet<Integer> visited = new HashSet<>();
+        visited.add(startState);
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(startState);
+        int flips = -1;
+        while (!queue.isEmpty()) {
+            flips++;
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                int state = queue.poll();
+                if (startState == TARGET) {
+                    return flips;
+                }
+                for (int j = 0; j < m; j++) {
+                    for (int k = 0; k < n; k++) {
+                        int adjacentState = getAdjacentState(state, j, k);
+                        if (visited.add(adjacentState)) {
+                            queue.offer(adjacentState);
+                        }
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    public int getAdjacentState(int state, int row, int col) {
+        state ^= 1 << getIndex(row, col);
+        for (int[] dir : dirs) {
+            int newRow = row + dir[0], newCol = col + dir[1];
+            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n) {
+                state ^= 1 << getIndex(newRow, newCol);
+            }
+        }
+        return state;
+    }
+
+    public int getIndex(int row, int col) {
+        return row * n + col;
+    }
+}
+```
+
+882\. 细分图中的可到达节点
+----------------
+
+给你一个无向图（**原始图**），图中有 `n` 个节点，编号从 `0` 到 `n - 1` 。你决定将图中的每条边 **细分** 为一条节点链，每条边之间的新节点数各不相同。
+
+图用由边组成的二维数组 `edges` 表示，其中 `edges[i] = [ui, vi, cnti]` 表示原始图中节点 `ui` 和 `vi` 之间存在一条边，`cnti` 是将边 **细分** 后的新节点总数。注意，`cnti == 0` 表示边不可细分。
+
+要 **细分** 边 `[ui, vi]` ，需要将其替换为 `(cnti + 1)` 条新边，和 `cnti` 个新节点。新节点为 `x1`, `x2`, ..., `xcnti` ，新边为 `[ui, x1]`, `[x1, x2]`, `[x2, x3]`, ..., `[xcnti-1, xcnti]`, `[xcnti, vi]` 。
+
+现在得到一个 **新的细分图** ，请你计算从节点 `0` 出发，可以到达多少个节点？如果节点间距离是 `maxMoves` 或更少，则视为 **可以到达** 。
+
+给你原始图和 `maxMoves` ，返回 _新的细分图中从节点 `0` 出发_ **_可到达的节点数_** 。
+
+**示例 1：**
+
+![](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/08/01/origfinal.png)
+
+**输入：**edges = \[\[0,1,10\],\[0,2,1\],\[1,2,2\]\], maxMoves = 6, n = 3
+**输出：**13
+**解释：**边的细分情况如上图所示。
+可以到达的节点已经用黄色标注出来。
+
+**示例 2：**
+
+**输入：**edges = \[\[0,1,4\],\[1,2,6\],\[0,2,8\],\[1,3,1\]\], maxMoves = 10, n = 4
+**输出：**23
+
+**示例 3：**
+
+**输入：**edges = \[\[1,2,4\],\[1,4,5\],\[1,3,1\],\[2,3,4\],\[3,4,5\]\], maxMoves = 17, n = 5
+**输出：**1
+**解释：**节点 0 与图的其余部分没有连通，所以只有节点 0 可以到达。
+
+**提示：**
+
+*   `0 <= edges.length <= min(n * (n - 1) / 2, 104)`
+*   `edges[i].length == 3`
+*   `0 <= ui < vi < n`
+*   图中 **不存在平行边**
+*   `0 <= cnti <= 104`
+*   `0 <= maxMoves <= 109`
+*   `1 <= n <= 3000`
+
+[https://leetcode.cn/problems/reachable-nodes-in-subdivided-graph/description/](https://leetcode.cn/problems/reachable-nodes-in-subdivided-graph/description/)
+
+![lc882-3.png](assets/1712301565-JfITbH-lc882-3.png) 
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int reachableNodes(int[][] edges, int maxMoves, int n) {
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], cnt = edge[2];
+            g[x].add(new int[]{y, cnt + 1});
+            g[y].add(new int[]{x, cnt + 1});
+        }
+        int[] dist = new int[n];
+        Arrays.fill(dist, Integer.MAX_VALUE / 2);
+        // dijkstra
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        pq.offer(new int[]{0, 0});
+        dist[0] = 0;
+        while (!pq.isEmpty()) {
+            int[] p = pq.poll();
+            int x = p[0], d = p[1];
+            if (dist[x] < d) {
+                continue;
+            }
+            for (int[] y : g[x]) {
+                int yi = y[0];
+                int newDist = d + y[1];
+                if (newDist < dist[yi]) {
+                    dist[yi] = newDist;
+                    pq.offer(new int[]{yi, dist[yi]});
+                }
+            }
+        }
+        int ans = 0;
+        for (int d : dist) {
+            if (d <= maxMoves) {
+                ans++;
+            }
+        }
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], cnt = edge[2];
+            int a = Math.max(maxMoves - dist[x], 0);
+            int b = Math.max(maxMoves - dist[y], 0);
+            ans += Math.min(cnt, a + b);
+        }
+        return ans;
+    }
+}
+```
+
+2203\. 得到要求路径的最小带权子图
+--------------------
+
+给你一个整数 `n` ，它表示一个 **带权有向** 图的节点数，节点编号为 `0` 到 `n - 1` 。
+
+同时给你一个二维整数数组 `edges` ，其中 `edges[i] = [fromi, toi, weighti]` ，表示从 `fromi` 到 `toi` 有一条边权为 `weighti` 的 **有向** 边。
+
+最后，给你三个 **互不相同** 的整数 `src1` ，`src2` 和 `dest` ，表示图中三个不同的点。
+
+请你从图中选出一个 **边权和最小** 的子图，使得从 `src1` 和 `src2` 出发，在这个子图中，都 **可以** 到达 `dest` 。如果这样的子图不存在，请返回 `-1` 。
+
+**子图** 中的点和边都应该属于原图的一部分。子图的边权和定义为它所包含的所有边的权值之和。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2022/02/17/example1drawio.png)
+
+**输入：**n = 6, edges = \[\[0,2,2\],\[0,5,6\],\[1,0,3\],\[1,4,5\],\[2,1,1\],\[2,3,3\],\[2,3,4\],\[3,4,2\],\[4,5,1\]\], src1 = 0, src2 = 1, dest = 5
+**输出：**9
+**解释：**
+上图为输入的图。
+蓝色边为最优子图之一。
+注意，子图 \[\[1,0,3\],\[0,5,6\]\] 也能得到最优解，但无法在满足所有限制的前提下，得到更优解。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2022/02/17/example2-1drawio.png)
+
+**输入：**n = 3, edges = \[\[0,1,1\],\[2,1,1\]\], src1 = 0, src2 = 1, dest = 2
+**输出：**\-1
+**解释：**
+上图为输入的图。
+可以看到，不存在从节点 1 到节点 2 的路径，所以不存在任何子图满足所有限制。
+
+**提示：**
+
+*   `3 <= n <= 105`
+*   `0 <= edges.length <= 105`
+*   `edges[i].length == 3`
+*   `0 <= fromi, toi, src1, src2, dest <= n - 1`
+*   `fromi != toi`
+*   `src1` ，`src2` 和 `dest` 两两不同。
+*   `1 <= weight[i] <= 105`
+
+[https://leetcode.cn/problems/minimum-weighted-subgraph-with-the-required-paths/description/](https://leetcode.cn/problems/minimum-weighted-subgraph-with-the-required-paths/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public long minimumWeight(int n, int[][] edges, int src1, int src2, int dest) {
+        List<int[]>[] posPath = new List[n];// 正向建图
+        List<int[]>[] negPath = new List[n];// 反向建图
+        for (int i = 0; i < n; i++) {
+            posPath[i] = new ArrayList<>();
+            negPath[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < edges.length; i++) {
+            posPath[edges[i][0]].add(new int[] { edges[i][1], edges[i][2] });
+            negPath[edges[i][1]].add(new int[] { edges[i][0], edges[i][2] });
+        }
+        long d1[] = new long[n];// s1到各个点的最短距离
+        long d2[] = new long[n];// s2到各个点的最短距离
+        long d3[] = new long[n];// dest到各个点的最短距离
+        Arrays.fill(d1, (long) 1e10 + 5);
+        Arrays.fill(d2, (long) 1e10 + 5);
+        Arrays.fill(d3, (long) 1e10 + 5);
+        d1[src1] = 0;
+        d2[src2] = 0;
+        d3[dest] = 0;
+        findShortestPath(posPath, d1, src1);
+        findShortestPath(posPath, d2, src2);
+        if (d1[dest] > 1e10 || d2[dest] > 1e10) {
+            return -1;
+        }
+        findShortestPath(negPath, d3, dest);
+        long ans = (long) 1e10;
+        for (int i = 0; i < n; i++) {
+            if (d3[i] > 1e10 || d2[i] > 1e10 || d1[i] > 1e10) {
+                continue;
+            }
+            ans = Math.min(ans, d1[i] + d2[i] + d3[i]);
+        }
+        return ans;
+    }
+
+    public void findShortestPath(List<int[]>[] path, long d[], int start) {
+        Queue<Pair> q = new PriorityQueue<>((a, b) -> a.d < b.d ? -1 : 1);
+        q.add(new Pair(start, 0));
+        while (q.size() > 0) {
+            Pair a = q.poll();
+            if (a.d > d[a.p]) {
+                continue;
+            } // 关键，不超时就靠这个了
+            List<int[]> list = path[a.p];
+            for (int i = 0; i < list.size(); i++) {
+                int b[] = list.get(i);
+                long distance = d[a.p] + b[1];
+                if (distance < d[b[0]]) {
+                    d[b[0]] = distance;
+                    q.add(new Pair(b[0], distance));
+                }
+            }
+        }
+    }
+}
+
+class Pair {
+    int p;
+    long d;
+
+    public Pair(int p, long d) {
+        this.p = p;
+        this.d = d;
+    }
+}
+```
+

@@ -357,7 +357,7 @@
         LocalTime time1 = now1.toLocalTime();
         LocalDate now2 = LocalDate.now();
         LocalDateTime date2 = now2.atStartOfDay();
-        String format = now1.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:ss:mm"));
+        String format = now1.format(DateTimeFormatter.ofPattern("yyyy-Pair-dd HH:ss:mm"));
         Long newSecond = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli();
         log.info("LocalDateTime转LocalDate：" + date1);
         log.info("LocalDateTime转LocalTime：" + time1);
@@ -376,7 +376,7 @@
     @Test
     public void demo19() {
         String date = "2019-01-01 01:12:12";
-        LocalDateTime parseDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:ss:mm"));
+        LocalDateTime parseDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-Pair-dd HH:ss:mm"));
         Duration betweenDate = Duration.between(parseDate, LocalDateTime.now());
         long days = betweenDate.toDays();
         long hours = betweenDate.toHours();
