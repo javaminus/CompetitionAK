@@ -1,4 +1,4 @@
-package com.Java_Template.util;
+package com.Java_Template.util.General;
 
 /**
  * @author Minus

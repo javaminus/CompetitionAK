@@ -1,38 +1,53 @@
 class Solution {
-    public int countCompleteSubstrings(String word, int k) {
-        int n = word.length();
-        int ans = 0;
-        for (int i = 0; i < n;) { // 没有i++
-            int i0 = i;
-            for (i++; i < n && Math.abs(word.charAt(i) - word.charAt(i - 1)) <= 2; i++);
-            ans += f(word.substring(i0, i), k);
+    private int nodeId, size;
+    public int minMalwareSpread(int[][] graph, int[] initial) {
+        int n = graph.length;
+        boolean[] visited = new boolean[n];
+        boolean[] isInitial = new boolean[n];
+        int mn = Integer.MAX_VALUE;
+        for (int x : initial) {
+            isInitial[x] = true;
+            mn = Math.min(mn, x);
         }
-        return ans;
-    }
-
-    private int f(String S, int k) {
-        char[] s = S.toCharArray();
-        int res = 0;
-        for (int m = 1; m <= 26 && m * k <= s.length; m++) {
-            int[] cnt = new int[26];
-            for (int right = 0; right < s.length; right++) {
-                cnt[s[right] - 'a']++;
-                int left = right + 1 - k * m;
-                if (left >= 0) {
-                    boolean flag = true;
-                    for (int i = 0; i < 26; i++) {
-                        if (cnt[i] > 0 && cnt[i] != k) {
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        res++;
-                    }
-                    cnt[s[left] - 'a']--;
-                }
+        int[] cnt = new int[n];
+        for (int i = 0; i < n; i++) {
+            if (visited[i] || isInitial[i]) {
+                continue;
+            }
+            nodeId = -1;
+            size = 0;
+            dfs(i, graph, visited, isInitial);
+            if (nodeId >= 0) {
+                cnt[nodeId] += size;
             }
         }
-        return res;
+
+        int maxCnt = 0;
+        int minNodeId = -1;
+        for (int i = 0; i < n; i++) {
+            if (cnt[i] > maxCnt) {
+                maxCnt = cnt[i];
+                minNodeId = i;
+            }
+        }
+        return minNodeId < 0 ? mn : minNodeId;
+    }
+
+    private void dfs(int x, int[][] graph, boolean[] visited, boolean[] isInitial) {
+        visited[x] = true;
+        size++;
+        for (int y = 0; y < graph.length; y++) {
+            if (graph[x][y] == 0) {
+                continue;
+            }
+            if (isInitial[y]) {
+                if (nodeId != -2 && nodeId != y) {
+                    nodeId = nodeId == -1 ? y : -2;
+                }
+            } else if (!visited[y]) {
+                dfs(y, graph, visited, isInitial);
+            }
+
+        }
     }
 }

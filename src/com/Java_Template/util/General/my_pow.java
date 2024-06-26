@@ -1,4 +1,4 @@
-package com.Java_Template.util;
+package com.Java_Template.util.General;
 
 /**
  * 快速幂 时间 O(logn),空间 O(1)

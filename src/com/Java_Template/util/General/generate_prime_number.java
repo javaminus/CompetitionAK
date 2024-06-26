@@ -1,4 +1,4 @@
-package com.Java_Template.util;
+package com.Java_Template.util.General;
 
 /**
  * 埃氏筛法 求n以内的所有素数

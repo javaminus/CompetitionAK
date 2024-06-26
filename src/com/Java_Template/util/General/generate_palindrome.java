@@ -1,4 +1,4 @@
-package com.Java_Template.util;
+package com.Java_Template.util.General;
 
 /**
  * 严格按顺序从小到大生成回文数（不用字符串转换）
