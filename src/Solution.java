@@ -1,53 +1,33 @@
-class Solution {
-    private int nodeId, size;
-    public int minMalwareSpread(int[][] graph, int[] initial) {
-        int n = graph.length;
-        boolean[] visited = new boolean[n];
-        boolean[] isInitial = new boolean[n];
-        int mn = Integer.MAX_VALUE;
-        for (int x : initial) {
-            isInitial[x] = true;
-            mn = Math.min(mn, x);
-        }
-        int[] cnt = new int[n];
-        for (int i = 0; i < n; i++) {
-            if (visited[i] || isInitial[i]) {
-                continue;
-            }
-            nodeId = -1;
-            size = 0;
-            dfs(i, graph, visited, isInitial);
-            if (nodeId >= 0) {
-                cnt[nodeId] += size;
-            }
-        }
+import java.util.Arrays;
 
-        int maxCnt = 0;
-        int minNodeId = -1;
+class Solution {
+    int n;
+    int[][] memo;
+    int[] cost, time;
+    public int paintWalls(int[] cost, int[] time) {
+        n = cost.length;
+        this.cost = cost;
+        this.time = time;
+        memo = new int[n][n * 2 + 1];
         for (int i = 0; i < n; i++) {
-            if (cnt[i] > maxCnt) {
-                maxCnt = cnt[i];
-                minNodeId = i;
-            }
+            Arrays.fill(memo[i], -1);
         }
-        return minNodeId < 0 ? mn : minNodeId;
+        return dfs(0, 0);
     }
 
-    private void dfs(int x, int[][] graph, boolean[] visited, boolean[] isInitial) {
-        visited[x] = true;
-        size++;
-        for (int y = 0; y < graph.length; y++) {
-            if (graph[x][y] == 0) {
-                continue;
-            }
-            if (isInitial[y]) {
-                if (nodeId != -2 && nodeId != y) {
-                    nodeId = nodeId == -1 ? y : -2;
-                }
-            } else if (!visited[y]) {
-                dfs(y, graph, visited, isInitial);
-            }
-
+    private int dfs(int i, int j) { // 表示刷到第i堵墙，付费时间 - 免费时间 = j
+        if (j > n - i) { // 剩余的墙都可以免费刷
+            return 0;
         }
+        if (i >= n) {
+            return Integer.MAX_VALUE / 2;
+        }
+        int k = j + n; // 加上偏移量，防止出现负数，只有在memo里面才需要使用k
+        if (memo[i][k] != -1) {
+            return memo[i][k];
+        }
+        int res = dfs(i + 1, j + time[i]) + cost[i];
+        res = Math.min(res, dfs(i + 1, j - 1)); // 主要是j的值可以暂时为负数！！！
+        return memo[i][k] = res;
     }
 }

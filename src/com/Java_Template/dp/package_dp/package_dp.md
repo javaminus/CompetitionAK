@@ -250,7 +250,8 @@ class Solution {
 }
 ```
 
-3181. 执行操作可获得的最大总奖励 II（bitset/bigint 优化 0-1 背包 + 两数之和优化 ）
+## 3181. 执行操作可获得的最大总奖励 II（bitset/bigint 优化 0-1 背包 + 两数之和优化 ）
+
 -----------------------
 
 给你一个整数数组 `rewardValues`，长度为 `n`，代表奖励的值。
@@ -398,6 +399,95 @@ class Solution {
             f = f.or(f.and(mask).shiftLeft(x));
         }
         return f.bitLength() - 1;
+    }
+}
+```
+
+2742\. 给墙壁刷油漆
+-------------
+
+给你两个长度为 `n` 下标从 **0** 开始的整数数组 `cost` 和 `time` ，分别表示给 `n` 堵不同的墙刷油漆需要的开销和时间。你有两名油漆匠：
+
+*   一位需要 **付费** 的油漆匠，刷第 `i` 堵墙需要花费 `time[i]` 单位的时间，开销为 `cost[i]` 单位的钱。
+*   一位 **免费** 的油漆匠，刷 **任意** 一堵墙的时间为 `1` 单位，开销为 `0` 。但是必须在付费油漆匠 **工作** 时，免费油漆匠才会工作。
+
+请你返回刷完 `n` 堵墙最少开销为多少。
+
+**示例 1：**
+
+**输入：**cost = \[1,2,3,2\], time = \[1,2,3,2\]
+**输出：**3
+**解释：**下标为 0 和 1 的墙由付费油漆匠来刷，需要 3 单位时间。同时，免费油漆匠刷下标为 2 和 3 的墙，需要 2 单位时间，开销为 0 。总开销为 1 + 2 = 3 。
+
+**示例 2：**
+
+**输入：**cost = \[2,3,4,2\], time = \[1,1,1,1\]
+**输出：**4
+**解释：**下标为 0 和 3 的墙由付费油漆匠来刷，需要 2 单位时间。同时，免费油漆匠刷下标为 1 和 2 的墙，需要 2 单位时间，开销为 0 。总开销为 2 + 2 = 4 。
+
+**提示：**
+
+*   `1 <= cost.length <= 500`
+*   `cost.length == time.length`
+*   `1 <= cost[i] <= 106`
+*   `1 <= time[i] <= 500`
+
+[https://leetcode.cn/problems/painting-the-walls/description/?envType=daily-question&envId=2024-06-28](https://leetcode.cn/problems/painting-the-walls/description/?envType=daily-question&envId=2024-06-28)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 我喜欢从i = 0开始走
+    int n;
+    int[][] memo;
+    int[] cost, time;
+    public int paintWalls(int[] cost, int[] time) {
+        n = cost.length;
+        this.cost = cost;
+        this.time = time;
+        memo = new int[n][n * 2 + 1];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(0, 0);
+    }
+
+    private int dfs(int i, int j) { // 表示刷到第i堵墙，付费时间 - 免费时间 = j
+        if (j >= n - i) { // 剩余的墙都可以免费刷
+            return 0;
+        }
+        if (i >= n) {
+            return Integer.MAX_VALUE / 2;
+        }
+        int k = j + n; // 加上偏移量，防止出现负数，只有在memo里面才需要使用k
+        if (memo[i][k] != -1) {
+            return memo[i][k];
+        }
+        int res = dfs(i + 1, j + time[i]) + cost[i];
+        res = Math.min(res, dfs(i + 1, j - 1)); // 核心：主要是j的值可以暂时为负数！！！
+        return memo[i][k] = res;
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    // 把 time[i]+1 看成物品体积，cost[i] 看成物品价值，问题变成：
+	// 从 n 个物品中选择体积和至少为 n 的物品，价值和最小是多少？
+    public int paintWalls(int[] cost, int[] time) {
+        int n = cost.length;
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+        for (int i = 0; i < n; i++) {
+            int c = cost[i], t = time[i] + 1;
+            for (int j = n; j >= 0; j--) {
+                dp[j] = Math.min(dp[j], dp[Math.max(j - t, 0)] + c);
+            }
+        }
+        return dp[n];
     }
 }
 ```
