@@ -1,33 +1,38 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class Solution {
-    int n;
-    int[][] memo;
-    int[] cost, time;
-    public int paintWalls(int[] cost, int[] time) {
-        n = cost.length;
-        this.cost = cost;
-        this.time = time;
-        memo = new int[n][n * 2 + 1];
-        for (int i = 0; i < n; i++) {
-            Arrays.fill(memo[i], -1);
-        }
-        return dfs(0, 0);
+    public int minimumDiameterAfterMerge(int[][] edges1, int[][] edges2) {
+        int d1 = diameter(edges1);
+        int d2 = diameter(edges2);
+        return Math.max(Math.max(d1, d2), (d1 + 1) / 2 + (d2 + 1) / 2 + 1);
     }
 
-    private int dfs(int i, int j) { // 表示刷到第i堵墙，付费时间 - 免费时间 = j
-        if (j > n - i) { // 剩余的墙都可以免费刷
-            return 0;
+    int res;
+    private int diameter(int[][] edges) { // 求一棵树的直径
+        int n = edges.length + 1;
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
         }
-        if (i >= n) {
-            return Integer.MAX_VALUE / 2;
+        res = 0;
+        dfs(g, 0, -1);
+        return res;
+    }
+
+    private int dfs(List<Integer>[] g, int x, int fa) {
+        int maxLen = 0; // 从点x出发的最长子链
+        for (int y : g[x]) {
+            if (y != fa) {
+                int subLen = dfs(g, y, x) + 1;
+                res = Math.max(res, subLen + maxLen);
+                maxLen = Math.max(maxLen, subLen);
+            }
         }
-        int k = j + n; // 加上偏移量，防止出现负数，只有在memo里面才需要使用k
-        if (memo[i][k] != -1) {
-            return memo[i][k];
-        }
-        int res = dfs(i + 1, j + time[i]) + cost[i];
-        res = Math.min(res, dfs(i + 1, j - 1)); // 主要是j的值可以暂时为负数！！！
-        return memo[i][k] = res;
+        return maxLen;
     }
 }
