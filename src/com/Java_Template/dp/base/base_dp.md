@@ -1597,3 +1597,84 @@ class Solution {
 }
 ```
 
+1478\. 安排邮筒
+-----------
+
+给你一个房屋数组`houses` 和一个整数 `k` ，其中 `houses[i]` 是第 `i` 栋房子在一条街上的位置，现需要在这条街上安排 `k` 个邮筒。
+
+请你返回每栋房子与离它最近的邮筒之间的距离的 **最小** 总和。
+
+答案保证在 32 位有符号整数范围以内。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_11_1816.png)
+
+**输入：**houses = \[1,4,8,10,20\], k = 3
+**输出：**5
+**解释：**将邮筒分别安放在位置 3， 9 和 20 处。
+每个房子到最近邮筒的距离和为 |3-1| + |4-3| + |9-8| + |10-9| + |20-20| = 5 。
+
+**示例 2：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_2_1816.png)**
+
+**输入：**houses = \[2,3,5,12,18\], k = 2
+**输出：**9
+**解释：**将邮筒分别安放在位置 3 和 14 处。
+每个房子到最近邮筒距离和为 |2-3| + |3-3| + |5-3| + |12-14| + |18-14| = 9 。
+
+**示例 3：**
+
+**输入：**houses = \[7,4,6,1\], k = 1
+**输出：**8
+
+**示例 4：**
+
+**输入：**houses = \[3,6,14,10\], k = 4
+**输出：**0
+
+**提示：**
+
+*   `n == houses.length`
+*   `1 <= n <= 100`
+*   `1 <= houses[i] <= 10^4`
+*   `1 <= k <= n`
+*   数组 `houses` 中的整数互不相同。
+
+[https://leetcode.cn/problems/allocate-mailboxes/description/](https://leetcode.cn/problems/allocate-mailboxes/description/)
+
+```java
+// 一开始以为是二分，没想到是dp
+// 不过这个题就算想到dp，也比较难。我们一定要将其转化为子问题，dp[i][j]表示到第i个房子，使用j个邮筒的最小总和；然后递推公式：dp[i][j] = Math.min(dp[i - 1][p]+prefixSum[p][i]);其中的prefixSum[p][i]表示从[p,i]之间只放一个邮筒需要的距离总和因为[p,i]之间可能有很多个房子。
+import java.util.Arrays;
+
+class Solution {
+    public int minDistance(int[] houses,  int k) { // 双重dp
+        Arrays.sort(houses);
+        int n = houses.length;
+        int[][] prefixSum = new int[n][n]; // prefixSum[i][j]，表示在下标范围[i,j]的房子与邮筒距离之和最小值
+        for (int i = n - 2; i >= 0; i--) { // 这里逆序遍历！我这里都想不到
+            for (int j = i + 1; j < n; j++) {
+                prefixSum[i][j] = prefixSum[i + 1][j - 1] + houses[j] - houses[i]; // 这里就是一重dp
+            }
+        }
+        // dp[i][j]表示给前i个房子放置j个邮筒的最小总和
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            int maxMailboxes = Math.min(i, k);
+            for (int j = 1; j <= maxMailboxes; j++) { // 枚举可用邮筒个数
+                for (int p = 0; p < i; p++) { // 枚举这个邮筒的放置位置
+                    dp[i][j] = Math.min(dp[i][j], dp[p][j - 1] + prefixSum[p][i - 1]);
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
