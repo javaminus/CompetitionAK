@@ -2,9 +2,6 @@ package com.Java_Template.dictionary_tree;
 
 import java.util.*;
 
-/**
- *
- */
 public class problemImpl implements problem {
     class Node{
         HashMap<Integer, Node> son = new HashMap<>();

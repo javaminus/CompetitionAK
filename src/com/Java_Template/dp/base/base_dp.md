@@ -172,7 +172,7 @@ class Solution {
         HashMap<Integer, Integer> dp = new HashMap<>(); // 存储以key结尾的最大长度
         for (int num : nums) {
             // 当前数+1
-            dp.put(num + 1, dp.getOrDefault(num, 0) + 1);
+            dp.put(num + 1, dp.getOrDefault(num, 0) + 1); // 不能交换顺序！！！
             // 不+1
             dp.put(num, dp.getOrDefault(num - 1, 0) + 1);
         }
@@ -184,8 +184,6 @@ class Solution {
     }
 }
 ```
-
-
 
 2767\. 将字符串分割为最少的美丽子字符串
 -----------------------
@@ -483,7 +481,7 @@ class Solution {
 import java.util.Arrays;
 
 class Solution {
-    public int minimumSubstringsInPartition(String s) { // 1:1翻译成递推同样超时，时间主要因为judge需要O(n)
+    public int minimumSubstringsInPartition(String s) { // 压缩一维翻译成递推同样超时，时间主要因为judge需要O(n)
         int n = s.length();
         int[] dp = new int[n + 1];
         Arrays.setAll(dp, i -> i);
@@ -1408,11 +1406,7 @@ class Solution {
 
 给你一个整数数组 `nums` 和一个 **非负** 整数 `k` 。如果一个整数序列 `seq` 满足在范围下标范围 `[0, seq.length - 2]` 中存在 **不超过** `k` 个下标 `i` 满足 `seq[i] != seq[i + 1]` ，那么我们称这个整数序列为 **好** 序列。
 
-请你返回 `nums` 中 **好**
-
-子序列
-
- 的最长长度
+请你返回 `nums` 中 **好子序列**的最长长度
 
 **示例 1：**
 
@@ -1443,36 +1437,23 @@ class Solution {
 [https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/)
 
 ```java
-// 超级难，这个题必须优化dp才能过
-class Solution {
-    public int maximumLength(int[] nums, int k) { // 最多允许k个不同的相邻元素的子序列
-		// 首先我们考虑到最多是k个不同相邻元素组成的子序列
-        // 所以我们可以用hash表的key存储每个元素，然后value = new int[k+1]存储以元素key结尾的，至多包含 j 个不同相邻元素的子序列的最大长度
-        // 使用一个records存储答案，new int[k+1][3]
-       HashMap<Integer, int[]> fs = new HashMap<>(); // <k,v> 以k结尾的int[]
-        int[][] records = new int[k + 1][3];
+import java.util.HashMap;
+
+class Solution { // 直接看视频，不要看灵神的题解（别犟，千万只看视频）https://www.bilibili.com/video/BV1Tx4y1b7wk/
+    public int maximumLength(int[] nums, int k) {
+        HashMap<Integer, int[]> fs = new HashMap<>();
+        int[] mx = new int[k + 1]; // mx[i]表示不同个数为i的子序列最大长度
         for (int x : nums) {
-            int[] f = fs.computeIfAbsent(x, i -> new int[k + 1]); // f表示至多包含 j 个不同相邻元素的子序列的最大长度
-            for (int i = k; i >= 0; i--) { // i就是枚举 包含i个不同相邻元素的子序列
-                f[i]++; // 选，且和子序列的前一个数一样，或者作为子序列的第一个数：f[x][j] 增加 1。
-                if (i > 0) { // 挑选不同的，和f[i]比较
-                    int mx = records[i - 1][0], mx2 = records[i - 1][1], num = records[i - 1][2];
-                    f[i] = Math.max(f[i], (x == num ? mx2 : mx) + 1);
+            int[] f = fs.computeIfAbsent(x, e -> new int[k + 1]);
+            for (int i = k; i >= 0; i--) {
+                f[i]++;
+                if (i > 0) {
+                    f[i] = Math.max(f[i], mx[i - 1] + 1);
                 }
-                int v = f[i];
-                int[] p = records[i];
-                if (v > p[0]) {
-                    if (x != p[2]) {
-                        p[2] = x;
-                        p[1] = p[0];
-                    }
-                    p[0] = v;
-                } else if (x != p[2] && v > p[1]) {
-                    p[1] = v;
-                }
+                mx[i] = Math.max(mx[i], f[i]);
             }
         }
-        return records[k][0];
+        return mx[k];
     }
 }
 ```
@@ -1726,6 +1707,34 @@ class Solution {
 [https://leetcode.cn/problems/find-two-non-overlapping-sub-arrays-each-with-target-sum/description/](https://leetcode.cn/problems/find-two-non-overlapping-sub-arrays-each-with-target-sum/description/)
 
 ```java
+import java.util.Arrays;
 
+class Solution {
+    public int minSumOfLengths(int[] arr, int target) {
+        int n = arr.length;
+        int left = 0, right = 0; // 滑窗左闭右闭
+        int[] dp = new int[n]; // 使用dp(j)表示当前j以及j之前的满足条件的最小区间长度
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        int sum = 0, ans = Integer.MAX_VALUE / 2;
+        while (right < n) {
+            sum += arr[right];
+            while (left <= right && sum > target) {
+                sum -= arr[left++];
+            }
+            if (sum == target) {
+                dp[right] = right - left + 1;
+                if (left != 0) {
+                    ans = Math.min(ans, dp[left - 1] + dp[right]);
+                }
+            }
+            if (right != 0) {
+                dp[right] = Math.min(dp[right], dp[right - 1]);
+            }
+            right++;
+        }
+        return ans == Integer.MAX_VALUE / 2 ? -1 : ans;
+    }
+
+}
 ```
 
