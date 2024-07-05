@@ -55,7 +55,7 @@ class TreeAncestor {
         }
         // s是想要去往的层数
         int s = deep[node] - k;
-        for (int p = 32 - Integer.numberOfLeadingZeros(k); p >= 0; p--) { // 这里使用位运算也行
+        for (int p = 32 - Integer.numberOfLeadingZeros(k); p >= 0; p--) {
             if (deep[stjump[node][p]] >= s) {
                 node = stjump[node][p];
             }
