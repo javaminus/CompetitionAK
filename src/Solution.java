@@ -1,31 +1,20 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 class Solution {
-    public long maximumValueSum(int[] nums, int k, int[][] edges) {
-        int n = nums.length;
-        List<Integer>[] g = new List[n];
-        Arrays.setAll(g, e -> new ArrayList<>());
-        for (int[] e : edges) {
-            int x = e[0], y = e[1];
-            g[x].add(y);
-            g[y].add(x);
-        }
-        return dfs(0, -1, g, nums, k)[0];
-    }
-
-    private long[] dfs(int x, int fa, List<Integer>[] g, int[] nums, int k) {
-        long f0 = 0, f1 = Long.MIN_VALUE;
-        for (int y : g[x]) {
-            if (y != fa) {
-                long[] r = dfs(y, x, g, nums, k);
-                long t = Math.max(f1 + r[0], f0 + r[1]);
-                f0 = Math.max(f0 + r[0], f1 + r[1]);
-                f1 = t;
+    public int minimumOperations(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][3];
+        dp[0][0] = s.charAt(0) == 'y' ? 1 : 0;
+        dp[0][1] = dp[0][2] = dp[1][2] = Integer.MAX_VALUE;
+        for (int i = 1; i < n; i++) {
+            int isRed = s.charAt(i) == 'r' ? 1 : 0;
+            int isYellow = s.charAt(i) == 'y' ? 1 : 0;
+            dp[i][0] = dp[i - 1][0] + isYellow;
+            dp[i][1] = Math.min(dp[i - 1][0], dp[i - 1][1]) + isRed;
+            if (i > 1) {
+                dp[i][2] = Math.min(dp[i - 1][1], dp[i - 1][2]) + isYellow;
             }
         }
-        return new long[]{Math.max(f0 + nums[x], f1 + (nums[x] ^ k)),
-                Math.max(f1 + nums[x], f0 + (nums[x] ^ k))};
+        return dp[n - 1][2];
     }
 }
