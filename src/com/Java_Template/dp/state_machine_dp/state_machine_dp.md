@@ -1910,8 +1910,6 @@ class Solution {
 
 给你一个数组 `nums` （**仅** 包含整数 `0`，`1` 和 `2`），请你返回 **不同特殊子序列的数目** 。由于答案可能很大，请你将它对 `109 + 7` **取余** 后返回。
 
-一个数组的 **子序列** 是从原数组中删除零个或者若干个元素后，剩下元素不改变顺序得到的序列。如果两个子序列的 **下标集合** 不同，那么这两个子序列是 **不同的** 。
-
 **示例 1：**
 
 **输入：**nums = \[0,1,2,2\]
@@ -1969,6 +1967,113 @@ class Solution {
             }
         }
         return (int) (dp[n - 1][2] % Mod);
+    }
+}
+```
+
+3068\. 最大节点价值之和
+---------------
+
+给你一棵 `n` 个节点的 **无向** 树，节点从 `0` 到 `n - 1` 编号。树以长度为 `n - 1` 下标从 **0** 开始的二维整数数组 `edges` 的形式给你，其中 `edges[i] = [ui, vi]` 表示树中节点 `ui` 和 `vi` 之间有一条边。同时给你一个 **正** 整数 `k` 和一个长度为 `n` 下标从 **0** 开始的 **非负** 整数数组 `nums` ，其中 `nums[i]` 表示节点 `i` 的 **价值** 。
+
+Alice 想 **最大化** 树中所有节点价值之和。为了实现这一目标，Alice 可以执行以下操作 **任意** 次（**包括** **0 次**）：
+
+*   选择连接节点 `u` 和 `v` 的边 `[u, v]` ，并将它们的值更新为：
+    *   `nums[u] = nums[u] XOR k`
+    *   `nums[v] = nums[v] XOR k`
+
+请你返回 Alice 通过执行以上操作 **任意次** 后，可以得到所有节点 **价值之和** 的 **最大值** 。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2023/11/09/screenshot-2023-11-10-012513.png)
+
+**输入：**nums = \[1,2,1\], k = 3, edges = \[\[0,1\],\[0,2\]\]
+**输出：**6
+**解释：**Alice 可以通过一次操作得到最大价值和 6 ：
+- 选择边 \[0,2\] 。nums\[0\] 和 nums\[2\] 都变为：1 XOR 3 = 2 ，数组 nums 变为：\[1,2,1\] -> \[2,2,2\] 。
+  所有节点价值之和为 2 + 2 + 2 = 6 。
+  6 是可以得到最大的价值之和。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2024/01/09/screenshot-2024-01-09-220017.png)
+
+**输入：**nums = \[2,3\], k = 7, edges = \[\[0,1\]\]
+**输出：**9
+**解释：**Alice 可以通过一次操作得到最大和 9 ：
+- 选择边 \[0,1\] 。nums\[0\] 变为：2 XOR 7 = 5 ，nums\[1\] 变为：3 XOR 7 = 4 ，数组 nums 变为：\[2,3\] -> \[5,4\] 。
+  所有节点价值之和为 5 + 4 = 9 。
+  9 是可以得到最大的价值之和。
+
+**示例 3：**
+
+![](https://assets.leetcode.com/uploads/2023/11/09/screenshot-2023-11-10-012641.png)
+
+**输入：**nums = \[7,7,7,7,7,7\], k = 3, edges = \[\[0,1\],\[0,2\],\[0,3\],\[0,4\],\[0,5\]\]
+**输出：**42
+**解释：**Alice 不需要执行任何操作，就可以得到最大价值之和 42 。
+
+**提示：**
+
+*   `2 <= n == nums.length <= 2 * 104`
+*   `1 <= k <= 109`
+*   `0 <= nums[i] <= 109`
+*   `edges.length == n - 1`
+*   `edges[i].length == 2`
+*   `0 <= edges[i][0], edges[i][1] <= n - 1`
+*   输入保证 `edges` 构成一棵合法的树。
+
+[https://leetcode.cn/problems/find-the-maximum-sum-of-node-values/description/](https://leetcode.cn/problems/find-the-maximum-sum-of-node-values/description/)
+
+```java
+class Solution {
+    public long maximumValueSum(int[] nums, int k, int[][] edges) { // 状态机dp，这个题和edge无关
+        int n = nums.length;
+        long[][] dp = new long[n + 1][2];
+        dp[0][0] = 0;
+        dp[0][1] = Long.MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            dp[i + 1][0] = Math.max(dp[i][0] + nums[i], dp[i][1] + (nums[i] ^ k));
+            dp[i + 1][1] = Math.max(dp[i][1] + nums[i], dp[i][0] + (nums[i] ^ k));
+        }
+        return dp[n][0];
+    }
+}
+```
+
+![1720436713160](assets/1720436713160.png)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public long maximumValueSum(int[] nums, int k, int[][] edges) {
+        int n = nums.length;
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] e : edges) {
+            int x = e[0], y = e[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        return dfs(0, -1, g, nums, k)[0];
+    }
+
+    private long[] dfs(int x, int fa, List<Integer>[] g, int[] nums, int k) {
+        long f0 = 0, f1 = Long.MIN_VALUE;
+        for (int y : g[x]) {
+            if (y != fa) { // 从子树中挑选最大的 f0 与 f1
+                long[] r = dfs(y, x, g, nums, k);
+                long t = Math.max(f1 + r[0], f0 + r[1]);
+                f0 = Math.max(f0 + r[0], f1 + r[1]);
+                f1 = t;
+            }
+        }
+        return new long[]{Math.max(f0 + nums[x], f1 + (nums[x] ^ k)),
+                Math.max(f1 + nums[x], f0 + (nums[x] ^ k))};
     }
 }
 ```

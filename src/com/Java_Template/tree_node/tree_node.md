@@ -145,9 +145,9 @@ class TreeAncestor {
     }
 
     private static void addEdge(int u, int v) { // u -> v
-        next[cnt] = head[u];
-        to[cnt] = v;
-        head[u] = cnt++;
+        next[cnt] = head[u]; // 类似链表的next，这是下一条边的索引
+        to[cnt] = v; // 第cnt条边指向节点v
+        head[u] = cnt++;// 节点u有第cnt条边
     }
 
     private static void dfs(int x, int fa) {

@@ -272,6 +272,75 @@ class Solution {
 
 > AND 的数越多，结果越小。OR 的数越多，结果越大。 移除元素可以num ^= x;
 
+3209\. 子数组按位与值为 K 的数目（ AND 经典logtrick题目）
+---------------------
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你返回 `nums` 中有多少个
+
+子数组
+
+满足：子数组中所有元素按位 `AND` 的结果为 `k` 。
+
+**示例 1：**
+
+**输入：**nums = \[1,1,1\], k = 1
+
+**输出：**6
+
+**解释：**
+
+所有子数组都只含有元素 1 。
+
+**示例 2：**
+
+**输入：**nums = \[1,1,2\], k = 1
+
+**输出：**3
+
+**解释：**
+
+按位 `AND` 值为 1 的子数组包括：`[**1**,1,2]`, `[1,**1**,2]`, `[**1,1**,2]` 。
+
+**示例 3：**
+
+**输入：**nums = \[1,2,3\], k = 2
+
+**输出：**2
+
+**解释：**
+
+按位 `AND` 值为 2 的子数组包括：`[1,**2**,3]`, `[1,**2,3**]` 。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `0 <= nums[i], k <= 109`
+
+[https://leetcode.cn/problems/number-of-subarrays-with-and-value-of-k/description/](https://leetcode.cn/problems/number-of-subarrays-with-and-value-of-k/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public long countSubarrays(int[] nums, int k) { // 经典logtrick题目, 解法特别多，这是我觉得最简单的解法
+        HashMap<Integer, Integer> prev = new HashMap<>();
+        long ans = 0;
+        for (int x : nums) {
+            HashMap<Integer, Integer> curr = new HashMap<>();
+            for (Integer y : prev.keySet()) {
+                curr.merge(y & x, prev.get(y), Integer::sum);
+            }
+            curr.merge(x, 1, Integer::sum);
+            prev = curr;
+            ans += prev.getOrDefault(k, 0);
+        }
+        return ans;
+    }
+}
+```
+
+
+
 2871\. 将数组分割成最多数目的子数组
 ---------------------
 
@@ -801,7 +870,7 @@ class Solution {
 }
 ```
 
-1521\. 找到最接近目标值的函数值
+1521\. 找到最接近目标值的函数值（AND logtrick）
 -------------------
 
 ![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/change.png)
