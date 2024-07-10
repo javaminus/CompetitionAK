@@ -318,3 +318,656 @@ class Solution {
 }
 ```
 
+132\. 分割回文串 II
+--------------
+
+给你一个字符串 `s`，请你将 `s` 分割成一些子串，使每个子串都是
+
+回文串
+
+。
+
+返回符合要求的 **最少分割次数** 。
+
+**示例 1：**
+
+**输入：**s = "aab"
+**输出：**1
+**解释：**只需一次分割就可将 _s_ 分割成 \["aa","b"\] 这样两个回文子串。
+
+**示例 2：**
+
+**输入：**s = "a"
+**输出：**0
+
+**示例 3：**
+
+**输入：**s = "ab"
+**输出：**1
+
+**提示：**
+
+*   `1 <= s.length <= 2000`
+*   `s` 仅由小写英文字母组成
+
+[https://leetcode.cn/problems/palindrome-partitioning-ii/description/](https://leetcode.cn/problems/palindrome-partitioning-ii/description/)
+
+> 总结：求回文串都可以用f数组表示i到j是否是回文串
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minCut(String s) {
+        // 定义f[i][j]表示字符串[i,j]是否是回文串
+        int n = s.length();
+        boolean[][] f = new boolean[n][n]; // 最终是[0,n - 1]，所以先降序，后升序
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(f[i], true);
+        }
+        for (int i = n - 1; i >= 0; i--) { // 模板
+            for (int j = i + 1; j < n; j++) {
+                f[i][j] = s.charAt(i) == s.charAt(j) && f[i + 1][j - 1];
+            }
+        }
+        int[] dp = new int[n];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        for (int i = 0; i < n; i++) {
+            if (f[0][i]) {
+                dp[i] = 0;
+            }else{
+                for (int j = 0; j < i; j++) {
+                    if (f[j + 1][i]) {
+                        dp[i] = Math.min(dp[i], dp[j] + 1);
+                    }
+                }
+            }
+        }
+        return dp[n - 1];
+    }
+    
+}
+```
+
+2707\. 字符串中的额外字符
+----------------
+
+给你一个下标从 **0** 开始的字符串 `s` 和一个单词字典 `dictionary` 。你需要将 `s` 分割成若干个 **互不重叠** 的子字符串，每个子字符串都在 `dictionary` 中出现过。`s` 中可能会有一些 **额外的字符** 不在任何子字符串中。
+
+请你采取最优策略分割 `s` ，使剩下的字符 **最少** 。
+
+**示例 1：**
+
+**输入：**s = "leetscode", dictionary = \["leet","code","leetcode"\]
+**输出：**1
+**解释：**将 s 分成两个子字符串：下标从 0 到 3 的 "leet" 和下标从 5 到 8 的 "code" 。只有 1 个字符没有使用（下标为 4），所以我们返回 1 。
+
+**示例 2：**
+
+**输入：**s = "sayhelloworld", dictionary = \["hello","world"\]
+**输出：**3
+**解释：**将 s 分成两个子字符串：下标从 3 到 7 的 "hello" 和下标从 8 到 12 的 "world" 。下标为 0 ，1 和 2 的字符没有使用，所以我们返回 3 。
+
+**提示：**
+
+*   `1 <= s.length <= 50`
+*   `1 <= dictionary.length <= 50`
+*   `1 <= dictionary[i].length <= 50`
+*   `dictionary[i]` 和 `s` 只包含小写英文字母。
+*   `dictionary` 中的单词互不相同。
+
+[https://leetcode.cn/problems/extra-characters-in-a-string/description/](https://leetcode.cn/problems/extra-characters-in-a-string/description/)
+
+```java
+import java.util.HashSet;
+
+class Solution {
+    public int minExtraChar(String s, String[] dictionary) {
+        HashSet<String> set = new HashSet<>();
+        for (String x : dictionary) {
+            set.add(x);
+        }
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = dp[i] + 1; // 不选
+            for (int j = 0; j <= i; j++) {
+                if (set.contains(s.substring(j, i + 1))) {
+                    dp[i + 1] = Math.min(dp[i + 1], dp[j]);
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```java
+class Solution {
+    public int minExtraChar(String s, String[] dictionary) {
+        int n = s.length();
+        int[] dp = new int[n + 1]; // 表示字符串前i个位置最多剩下的次数
+        Trie root = new Trie();
+        for (String x : dictionary) {
+            root.insert(new StringBuilder(x).reverse().toString());
+        }
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = dp[i] + 1;
+            Trie curr = root;
+            for (int j = i; j >= 0; j--) {
+                if (curr.son[s.charAt(j) - 'a'] == null) {
+                    break;
+                }
+                curr = curr.son[s.charAt(j) - 'a'];
+                if (curr.len != -1) { // 表示从j到i这一段为0
+                    dp[i + 1] = Math.min(dp[i + 1], dp[j]);
+                }
+            }
+        }
+        return dp[n];
+    }
+
+    class Trie{
+        Trie[] son;
+        int len;
+
+        public Trie() {
+            son = new Trie[26];
+            len = -1;
+        }
+
+        void insert(String s) {
+            Trie root = this;
+            int n = s.length();
+            for (int i = 0; i < n; i++) {
+                int index = s.charAt(i) - 'a';
+                if (root.son[index] == null) {
+                    root.son[index] = new Trie();
+                }
+                root = root.son[index];
+            }
+            root.len = n;
+        }
+    }
+}
+```
+
+3196\. 最大化子数组的总成本
+-----------------
+
+给你一个长度为 `n` 的整数数组 `nums`。
+
+子数组 `nums[l..r]`（其中 `0 <= l <= r < n`）的 **成本** 定义为：
+
+`cost(l, r) = nums[l] - nums[l + 1] + ... + nums[r] * (−1)r − l`
+
+你的任务是将 `nums` 分割成若干子数组，使得所有子数组的成本之和 **最大化**，并确保每个元素 **正好** 属于一个子数组。
+
+具体来说，如果 `nums` 被分割成 `k` 个子数组，且分割点为索引 `i1, i2, ..., ik − 1`（其中 `0 <= i1 < i2 < ... < ik - 1 < n - 1`），则总成本为：
+
+`cost(0, i1) + cost(i1 + 1, i2) + ... + cost(ik − 1 + 1, n − 1)`
+
+返回在最优分割方式下的子数组成本之和的最大值。
+
+**注意：**如果 `nums` 没有被分割，即 `k = 1`，则总成本即为 `cost(0, n - 1)`。
+
+**示例 1：**
+
+**输入：** nums = \[1,-2,3,4\]
+
+**输出：** 10
+
+**解释：**
+
+一种总成本最大化的方法是将 `[1, -2, 3, 4]` 分割成子数组 `[1, -2, 3]` 和 `[4]`。总成本为 `(1 + 2 + 3) + 4 = 10`。
+
+**示例 2：**
+
+**输入：** nums = \[1,-1,1,-1\]
+
+**输出：** 4
+
+**解释：**
+
+一种总成本最大化的方法是将 `[1, -1, 1, -1]` 分割成子数组 `[1, -1]` 和 `[1, -1]`。总成本为 `(1 + 1) + (1 + 1) = 4`。
+
+**示例 3：**
+
+**输入：** nums = \[0\]
+
+**输出：** 0
+
+**解释：**
+
+无法进一步分割数组，因此答案为 0。
+
+**示例 4：**
+
+**输入：** nums = \[1,-1\]
+
+**输出：** 2
+
+**解释：**
+
+选择整个数组，总成本为 `1 + 1 = 2`，这是可能的最大成本。
+
+**提示：**
+
+*   `1 <= nums.length <= 105`
+*   `-109 <= nums[i] <= 109`
+
+[https://leetcode.cn/problems/maximize-total-cost-of-alternating-subarrays/description/](https://leetcode.cn/problems/maximize-total-cost-of-alternating-subarrays/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 45ms
+    long[][] memo;
+    public long maximumTotalCost(int[] nums) {
+        int n = nums.length;
+        memo = new long[n][2];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(1, 0, nums) + nums[0];
+    }
+
+    private long dfs(int i,int j, int[] nums) { // 定义到达点i的最大值
+        if (i == nums.length) {
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        long res = 0L;
+        if (j == 0) { // 表示上一位选的正
+            res = Math.max(nums[i] + dfs(i + 1, 0, nums), -nums[i] + dfs(i + 1, 1, nums));
+        }
+        if (j == 1) { // 表示上一位选的负
+            res = nums[i] + dfs(i + 1, 0, nums);
+        }
+        return memo[i][j] = res;
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution { // 2ms
+    public long maximumTotalCost(int[] nums) {
+        // 就是任意节点都可以是加正号，但是负号前面的那个数必须是正号
+        int n = nums.length;
+        long[] dp = new long[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = dp[i - 1] + nums[i - 1];
+            if (i > 1 && nums[i - 1] < 0) {
+                dp[i] = Math.max(dp[i], dp[i - 2] + nums[i - 2] - nums[i - 1]);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+2767\. 将字符串分割为最少的美丽子字符串
+-----------------------
+
+给你一个二进制字符串 `s` ，你需要将字符串分割成一个或者多个 **子字符串**  ，使每个子字符串都是 **美丽** 的。
+
+如果一个字符串满足以下条件，我们称它是 **美丽** 的：
+
+*   它不包含前导 0 。
+*   它是 `5` 的幂的 **二进制** 表示。
+
+请你返回分割后的子字符串的 **最少** 数目。如果无法将字符串 `s` 分割成美丽子字符串，请你返回 `-1` 。
+
+子字符串是一个字符串中一段连续的字符序列。
+
+**示例 1：**
+
+**输入：**s = "1011"
+**输出：**2
+**解释：**我们可以将输入字符串分成 \["101", "1"\] 。
+- 字符串 "101" 不包含前导 0 ，且它是整数 51 = 5 的二进制表示。
+- 字符串 "1" 不包含前导 0 ，且它是整数 50 = 1 的二进制表示。
+  最少可以将 s 分成 2 个美丽子字符串。
+
+**示例 2：**
+
+**输入：**s = "111"
+**输出：**3
+**解释：**我们可以将输入字符串分成 \["1", "1", "1"\] 。
+- 字符串 "1" 不包含前导 0 ，且它是整数 50 = 1 的二进制表示。
+  最少可以将 s 分成 3 个美丽子字符串。
+
+**示例 3：**
+
+**输入：**s = "0"
+**输出：**\-1
+**解释：**无法将给定字符串分成任何美丽子字符串。
+
+**提示：**
+
+*   `1 <= s.length <= 15`
+*   `s[i]` 要么是 `'0'` 要么是 `'1'` 。
+
+[https://leetcode.cn/problems/partition-string-into-minimum-beautiful-substrings/](https://leetcode.cn/problems/partition-string-into-minimum-beautiful-substrings/)
+
+```java
+import java.util.Arrays;
+import java.util.HashSet;
+
+class Solution {
+    private static HashSet<String> set = new HashSet<>();
+    static { // 先预处理5的二进制
+        for (int i = 1; i < 40000; i *= 5) {
+            set.add(Integer.toString(i, 2));
+        }
+    }
+    public int minimumBeautifulSubstrings(String s) {
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                if (set.contains(s.substring(j, i + 1))) {
+                    dp[i + 1] = Math.min(dp[i + 1], dp[j] + 1);
+                }
+            }
+        }
+        return dp[n] == Integer.MAX_VALUE / 2 ? -1 : dp[n];
+    }
+}
+```
+
+91\. 解码方法
+---------
+
+一条包含字母 `A-Z` 的消息通过以下映射进行了 **编码** ：
+
+'A' -> "1"
+'B' -> "2"
+...
+'Z' -> "26"
+
+要 **解码** 已编码的消息，所有数字必须基于上述映射的方法，反向映射回字母（可能有多种方法）。例如，`"11106"` 可以映射为：
+
+*   `"AAJF"` ，将消息分组为 `(1 1 10 6)`
+*   `"KJF"` ，将消息分组为 `(11 10 6)`
+
+注意，消息不能分组为  `(1 11 06)` ，因为 `"06"` 不能映射为 `"F"` ，这是由于 `"6"` 和 `"06"` 在映射中并不等价。
+
+给你一个只含数字的 **非空** 字符串 `s` ，请计算并返回 **解码** 方法的 **总数** 。
+
+题目数据保证答案肯定是一个 **32 位** 的整数。
+
+**示例 1：**
+
+**输入：**s = "12"
+**输出：**2
+**解释：**它可以解码为 "AB"（1 2）或者 "L"（12）。
+
+**示例 2：**
+
+**输入：**s = "226"
+**输出：**3
+**解释：**它可以解码为 "BZ" (2 26), "VF" (22 6), 或者 "BBF" (2 2 6) 。
+
+**示例 3：**
+
+**输入：**s = "06"
+**输出：**0
+**解释：**"06" 无法映射到 "F" ，因为存在前导零（"6" 和 "06" 并不等价）。
+
+**提示：**
+
+*   `1 <= s.length <= 100`
+*   `s` 只包含数字，并且可能包含前导零。
+
+[https://leetcode.cn/problems/decode-ways/description/](https://leetcode.cn/problems/decode-ways/description/)
+
+```java
+class Solution {
+    public int numDecodings(String s) {
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        if (s.charAt(0) == '0') {
+            return 0;
+        }
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = dp[i];
+            if (i > 0) {
+                if (s.charAt(i) == '0') {
+                    if (s.charAt(i - 1) - '0' > 2 || s.charAt(i - 1) == '0') {
+                        return 0;
+                    }
+                    dp[i + 1] = dp[i - 1];
+                    continue;
+                }
+                if (s.charAt(i - 1) != '0'&& Integer.parseInt(s.substring(i - 1, i + 1)) <= 26) {
+                    dp[i + 1] += dp[i - 1] + 1;
+                }
+            }
+        }
+        return dp[n] + 1;
+    }
+}
+```
+
+639\. 解码方法 II
+-------------
+
+一条包含字母 `A-Z` 的消息通过以下的方式进行了 **编码** ：
+
+'A' -> "1"
+'B' -> "2"
+...
+'Z' -> "26"
+
+要 **解码** 一条已编码的消息，所有的数字都必须分组，然后按原来的编码方案反向映射回字母（可能存在多种方式）。例如，`"11106"` 可以映射为：
+
+*   `"AAJF"` 对应分组 `(1 1 10 6)`
+*   `"KJF"` 对应分组 `(11 10 6)`
+
+注意，像 `(1 11 06)` 这样的分组是无效的，因为 `"06"` 不可以映射为 `'F'` ，因为 `"6"` 与 `"06"` 不同。
+
+**除了** 上面描述的数字字母映射方案，编码消息中可能包含 `'*'` 字符，可以表示从 `'1'` 到 `'9'` 的任一数字（不包括 `'0'`）。例如，编码字符串 `"1*"` 可以表示 `"11"`、`"12"`、`"13"`、`"14"`、`"15"`、`"16"`、`"17"`、`"18"` 或 `"19"` 中的任意一条消息。对 `"1*"` 进行解码，相当于解码该字符串可以表示的任何编码消息。
+
+给你一个字符串 `s` ，由数字和 `'*'` 字符组成，返回 **解码** 该字符串的方法 **数目** 。
+
+由于答案数目可能非常大，返回 `109 + 7` 的 **模** 。
+
+**示例 1：**
+
+**输入：**s = "\*"
+**输出：**9
+**解释：**这一条编码消息可以表示 "1"、"2"、"3"、"4"、"5"、"6"、"7"、"8" 或 "9" 中的任意一条。
+可以分别解码成字符串 "A"、"B"、"C"、"D"、"E"、"F"、"G"、"H" 和 "I" 。
+因此，"\*" 总共有 9 种解码方法。
+
+**示例 2：**
+
+**输入：**s = "1\*"
+**输出：**18
+**解释：**这一条编码消息可以表示 "11"、"12"、"13"、"14"、"15"、"16"、"17"、"18" 或 "19" 中的任意一条。
+每种消息都可以由 2 种方法解码（例如，"11" 可以解码成 "AA" 或 "K"）。
+因此，"1\*" 共有 9 \* 2 = 18 种解码方法。
+
+**示例 3：**
+
+**输入：**s = "2\*"
+**输出：**15
+**解释：**这一条编码消息可以表示 "21"、"22"、"23"、"24"、"25"、"26"、"27"、"28" 或 "29" 中的任意一条。
+"21"、"22"、"23"、"24"、"25" 和 "26" 由 2 种解码方法，但 "27"、"28" 和 "29" 仅有 1 种解码方法。
+因此，"2\*" 共有 (6 \* 2) + (3 \* 1) = 12 + 3 = 15 种解码方法。
+
+**提示：**
+
+*   `1 <= s.length <= 105`
+*   `s[i]` 是 `0 - 9` 中的一位数字或字符 `'*'`
+
+[https://leetcode.cn/problems/decode-ways-ii/description/](https://leetcode.cn/problems/decode-ways-ii/description/)
+
+```java
+class Solution {
+    private static final int Mod = (int) 1e9 + 7;
+    public int numDecodings(String s) {
+        int n = s.length();
+        long[] dp = new long[n + 1];
+        dp[0] = 1;
+        dp[1] = (s.charAt(0) == '*' ? 9 : 1);
+        if (s.charAt(0) == '0') {
+            return 0;
+        }
+        for (int i = 1; i < n; i++) {
+            if (s.charAt(i) != '*') {
+                if (s.charAt(i) != '0') {
+                    dp[i + 1] = dp[i];
+                }
+                if (s.charAt(i - 1) == '1') {
+                    dp[i + 1] += dp[i - 1];
+                } else if (s.charAt(i - 1) == '2' && s.charAt(i) < '7') {
+                    dp[i + 1] += dp[i - 1];
+                } else if (s.charAt(i - 1) == '*') {
+                    if (s.charAt(i) < '7') {
+                        dp[i + 1] += (dp[i - 1] * 2);
+                    }else{
+                        dp[i + 1] += dp[i - 1];
+                    }
+                }
+            }else{
+                dp[i + 1] = dp[i] * 9;
+                if (s.charAt(i - 1) == '1') {
+                    dp[i + 1] += dp[i - 1] * 9;
+                } else if (s.charAt(i - 1) == '2') {
+                    dp[i + 1] += dp[i - 1] * 6;
+                } else if (s.charAt(i - 1) == '*') {
+                    dp[i + 1] += dp[i - 1] * 15;
+                }
+            }
+            dp[i + 1] %= Mod;
+        }
+        return (int) dp[n];
+    }
+}
+```
+
+LCR 165. 解密数字
+-------------
+
+现有一串神秘的密文 `ciphertext`，经调查，密文的特点和规则如下：
+
+*   密文由非负整数组成
+*   数字 0-25 分别对应字母 a-z
+
+请根据上述规则将密文 `ciphertext` 解密为字母，并返回共有多少种解密结果。
+
+**示例 1:**
+
+**输入:** ciphertext = 216612
+**输出:** `6`
+**解释:** 216612 解密后有 6 种不同的形式，分别是 "cbggbc"，"vggbc"，"vggm"，"cbggm"，"cqggbc" 和 "cqggm" 
+
+**提示：**
+
+*   `0 <= ciphertext < 231`
+
+[https://leetcode.cn/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/description/](https://leetcode.cn/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/description/)
+
+```java
+class Solution {
+    public int crackNumber(int num) {
+        String s = Integer.toString(num);
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        dp[0] = dp[1] = 1;
+        for (int i = 1; i < n; i++) {
+            dp[i + 1] = dp[i];
+            String pre = s.substring(i - 1, i + 1);
+            if (pre.compareTo("25") <= 0 && pre.compareTo("10") >= 0) {
+                dp[i + 1] += dp[i - 1];
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+1416\. 恢复数组
+-----------
+
+某个程序本来应该输出一个整数数组。但是这个程序忘记输出空格了以致输出了一个数字字符串，我们所知道的信息只有：数组中所有整数都在 `[1, k]` 之间，且数组中的数字都没有前导 0 。
+
+给你字符串 `s` 和整数 `k` 。可能会有多种不同的数组恢复结果。
+
+按照上述程序，请你返回所有可能输出字符串 `s` 的数组方案数。
+
+由于数组方案数可能会很大，请你返回它对 `10^9 + 7` **取余** 后的结果。
+
+**示例 1：**
+
+**输入：**s = "1000", k = 10000
+**输出：**1
+**解释：**唯一一种可能的数组方案是 \[1000\]
+
+**示例 2：**
+
+**输入：**s = "1000", k = 10
+**输出：**0
+**解释：**不存在任何数组方案满足所有整数都 >= 1 且 <= 10 同时输出结果为 s 。
+
+**示例 3：**
+
+**输入：**s = "1317", k = 2000
+**输出：**8
+**解释：**可行的数组方案为 \[1317\]，\[131,7\]，\[13,17\]，\[1,317\]，\[13,1,7\]，\[1,31,7\]，\[1,3,17\]，\[1,3,1,7\]
+
+**示例 4：**
+
+**输入：**s = "2020", k = 30
+**输出：**1
+**解释：**唯一可能的数组方案是 \[20,20\] 。 \[2020\] 不是可行的数组方案，原因是 2020 > 30 。 \[2,020\] 也不是可行的数组方案，因为 020 含有前导 0 。
+
+**示例 5：**
+
+**输入：**s = "1234567890", k = 90
+**输出：**34
+
+**提示：**
+
+*   `1 <= s.length <= 10^5`.
+*   `s` 只包含数字且不包含前导 0 。
+*   `1 <= k <= 10^9`.
+
+[https://leetcode.cn/problems/restore-the-array/description/](https://leetcode.cn/problems/restore-the-array/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 285ms 切片耗时
+    private static final int Mod = (int) 1e9 + 7;
+    public int numberOfArrays(String s, int k) {
+        int n = s.length();
+        if (s.charAt(0) == '0') {
+            return 0;
+        }
+        long[] dp = new long[n + 1];
+        dp[0] = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = Math.max(0, i - 10); j <= i; j++) { // 表示[j,i]可以
+                if (dp[j] != 0 && s.charAt(j) != '0') {
+                    long p = Long.parseLong(s.substring(j, i + 1));
+                    if (p <= k) {
+                        dp[i + 1] += dp[j];
+                    }
+                }
+            }
+            dp[i + 1] %= Mod;
+        }
+        return (int) dp[n];
+    }
+}
+```
+
