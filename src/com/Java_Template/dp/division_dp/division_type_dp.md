@@ -1,3 +1,12 @@
+# §6.2 计算划分最优值
+
+> 计算最少（最多）可以划分出多少段、最优划分得分等。
+>
+> 一般定义 f[i] 表示长为 i 的前缀 a[:i] 在题目约束下，分割出的最少（最多）子数组个数（或者定义成分割方案数）。
+>
+> 枚举最后一个子数组的左端点 L，从 f[L] 转移到 f[i]，并考虑 a[L:j]对最优解的影响。
+>
+
 3130\. 找出所有稳定的二进制数组 II
 ----------------------
 
@@ -967,6 +976,591 @@ class Solution { // 285ms 切片耗时
             dp[i + 1] %= Mod;
         }
         return (int) dp[n];
+    }
+}
+```
+
+2472\. 不重叠回文子字符串的最大数目
+---------------------
+
+给你一个字符串 `s` 和一个 **正** 整数 `k` 。
+
+从字符串 `s` 中选出一组满足下述条件且 **不重叠** 的子字符串：
+
+*   每个子字符串的长度 **至少** 为 `k` 。
+*   每个子字符串是一个 **回文串** 。
+
+返回最优方案中能选择的子字符串的 **最大** 数目。
+
+**子字符串** 是字符串中一个连续的字符序列。
+
+**示例 1 ：**
+
+**输入：**s = "abaccdbbd", k = 3
+**输出：**2
+**解释：**可以选择 s = "_**aba**_cc_**dbbd**_" 中斜体加粗的子字符串。"aba" 和 "dbbd" 都是回文，且长度至少为 k = 3 。
+可以证明，无法选出两个以上的有效子字符串。
+
+**示例 2 ：**
+
+**输入：**s = "adbcda", k = 2
+**输出：**0
+**解释：**字符串中不存在长度至少为 2 的回文子字符串。
+
+**提示：**
+
+*   `1 <= k <= s.length <= 2000`
+*   `s` 仅由小写英文字母组成
+
+[https://leetcode.cn/problems/maximum-number-of-non-overlapping-palindrome-substrings/description/](https://leetcode.cn/problems/maximum-number-of-non-overlapping-palindrome-substrings/description/)
+
+```java
+class Solution { // o(n^2) 132ms
+    public int maxPalindromes(String s, int k) { 
+        int n = s.length();
+        boolean[][] f = new boolean[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j) && (j - i <= 1 || f[i + 1][j - 1])) {
+                    f[i][j] = true;
+                }
+            }
+        }
+        int[] dp = new int[n + 1];
+        for (int i = k - 1; i < n; i++) {
+            dp[i + 1] = dp[i]; // 不选择
+            for (int j = i - k + 1; j >= 0; j--) { // 枚举[j,i]之间的回文串
+                if (f[j][i]) {
+                    dp[i + 1] = Math.max(dp[i + 1], dp[j] + 1);
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```java
+class Solution { // o(nk) 3ms
+    public int maxPalindromes(String S, int k) {
+        char[] s = S.toCharArray();
+        int n = s.length;
+        int[] f = new int[n + 1];
+        for (int i = 0; i < 2 * n - 1; ++i) {
+            int l = i / 2, r = l + i % 2; // 中心扩展法
+            f[l + 1] = Math.max(f[l + 1], f[l]);
+            for (; l >= 0 && r < n && s[l] == s[r]; --l, ++r) {
+                if (r - l + 1 >= k) {
+                    f[r + 1] = Math.max(f[r + 1], f[l] + 1);
+                    break;
+                }
+            }
+        }
+        return f[n];
+    }
+}
+
+```
+
+1105\. 填充书架
+-----------
+
+给定一个数组 `books` ，其中 `books[i] = [thicknessi, heighti]` 表示第 `i` 本书的厚度和高度。你也会得到一个整数 `shelfWidth` 。
+
+**按顺序** 将这些书摆放到总宽度为 `shelfWidth` 的书架上。
+
+先选几本书放在书架上（它们的厚度之和小于等于书架的宽度 `shelfWidth` ），然后再建一层书架。重复这个过程，直到把所有的书都放在书架上。
+
+需要注意的是，在上述过程的每个步骤中，**摆放书的顺序与给定图书数组** `books` **顺序相同**。
+
+*   例如，如果这里有 5 本书，那么可能的一种摆放情况是：第一和第二本书放在第一层书架上，第三本书放在第二层书架上，第四和第五本书放在最后一层书架上。
+
+每一层所摆放的书的最大高度就是这一层书架的层高，书架整体的高度为各层高之和。
+
+以这种方式布置书架，返回书架整体可能的最小高度。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2019/06/24/shelves.png)
+
+**输入：**books = \[\[1,1\],\[2,3\],\[2,3\],\[1,1\],\[1,1\],\[1,1\],\[1,2\]\], shelfWidth = 4
+**输出：**6
+**解释：**
+3 层书架的高度和为 1 + 3 + 2 = 6 。
+第 2 本书不必放在第一层书架上。
+
+**示例 2:**
+
+**输入:** books = \[\[1,3\],\[2,4\],\[3,2\]\], shelfWidth = 6
+**输出:** 4
+
+**提示：**
+
+*   `1 <= books.length <= 1000`
+*   `1 <= thicknessi <= shelfWidth <= 1000`
+*   `1 <= heighti <= 1000`
+
+[https://leetcode.cn/problems/filling-bookcase-shelves/description/](https://leetcode.cn/problems/filling-bookcase-shelves/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private int[][] books;
+    private int shelfWidth;
+    private int[] memo;
+    public int minHeightShelves(int[][] books, int shelfWidth) {
+        // 其实就是枚举当前的书放在当前层或则进入下一层
+        this.books = books;
+        this.shelfWidth = shelfWidth;
+        int n = books.length;
+        memo = new int[n];
+        Arrays.fill(memo, -1);
+        return dfs(n - 1);
+    }
+
+    private int dfs(int i) {
+        if (i < 0) {
+            return 0; // 没有书了，高度是0
+        }
+        if (memo[i] != -1) {
+            return memo[i];
+        }
+        int res = Integer.MAX_VALUE, maxH = 0, leftW = shelfWidth;
+        for (int j = i; j >= 0; j--) {
+            leftW -= books[j][0];
+            if (leftW < 0) {
+                break;
+            }
+            maxH = Math.max(maxH, books[j][1]);
+            res = Math.min(res, dfs(j - 1) + maxH);
+        }
+        return memo[i] = res;
+    }
+}
+```
+
+```java
+class Solution {
+    public int minHeightShelves(int[][] books, int shelfWidth) {
+        int n = books.length;
+        int[] dp = new int[n + 1]; // 表示放到第i本书需要的最小高度
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = Integer.MAX_VALUE;
+            int maxH = 0, leftW = shelfWidth;
+            for (int j = i; j >= 0; j--) {
+                leftW -= books[j][0]; // 第j本书放在当前层
+                if (leftW < 0) { 
+                    break;
+                }
+                // 表示[j,i]的书可以放在同一层，枚举从哪一本书单开一层使最后结果最优
+                maxH = Math.max(maxH, books[j][1]); // 更新当前层的最大高度
+                dp[i + 1] = Math.min(dp[i + 1], dp[j] + maxH); // 表示将第j本书放在
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+2547\. 拆分数组的最小代价
+----------------
+
+给你一个整数数组 `nums` 和一个整数 `k` 。
+
+将数组拆分成一些非空子数组。拆分的 **代价** 是每个子数组中的 **重要性** 之和。
+
+令 `trimmed(subarray)` 作为子数组的一个特征，其中所有仅出现一次的数字将会被移除。
+
+*   例如，`trimmed([3,1,2,4,3,4]) = [3,4,3,4]` 。
+
+子数组的 **重要性** 定义为 `k + trimmed(subarray).length` 。
+
+*   例如，如果一个子数组是 `[1,2,3,3,3,4,4]` ，`trimmed([1,2,3,3,3,4,4]) = [3,3,3,4,4]` 。这个子数组的重要性就是 `k + 5` 。
+
+找出并返回拆分 `nums` 的所有可行方案中的最小代价。
+
+**子数组** 是数组的一个连续 **非空** 元素序列。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,1,2,1,3,3\], k = 2
+**输出：**8
+**解释：**将 nums 拆分成两个子数组：\[1,2\], \[1,2,1,3,3\]
+\[1,2\] 的重要性是 2 + (0) = 2 。
+\[1,2,1,3,3\] 的重要性是 2 + (2 + 2) = 6 。
+拆分的代价是 2 + 6 = 8 ，可以证明这是所有可行的拆分方案中的最小代价。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,1,2,1\], k = 2
+**输出：**6
+**解释：**将 nums 拆分成两个子数组：\[1,2\], \[1,2,1\] 。
+\[1,2\] 的重要性是 2 + (0) = 2 。
+\[1,2,1\] 的重要性是 2 + (2) = 4 。
+拆分的代价是 2 + 4 = 6 ，可以证明这是所有可行的拆分方案中的最小代价。
+
+**示例 3：**
+
+**输入：**nums = \[1,2,1,2,1\], k = 5
+**输出：**10
+**解释：**将 nums 拆分成一个子数组：\[1,2,1,2,1\].
+\[1,2,1,2,1\] 的重要性是 5 + (3 + 2) = 10 。
+拆分的代价是 10 ，可以证明这是所有可行的拆分方案中的最小代价。
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `0 <= nums[i] < nums.length`
+*   `1 <= k <= 109`
+
+[https://leetcode.cn/problems/minimum-cost-to-split-an-array/description/](https://leetcode.cn/problems/minimum-cost-to-split-an-array/description/)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // o(n^2) 61ms
+    public int minCost(int[] nums, int k) {
+        int n = nums.length;
+        int[][] costs = new int[n][n]; // 表示[i,j]的cost
+        for (int i = 0; i < n; i++) {
+            int[] freq = new int[n];
+            int cnt = 0;
+            for (int j = i; j < n; j++) {
+                freq[nums[j]]++;
+                if (freq[nums[j]] == 2) {
+                    cnt += 2;
+                } else if (freq[nums[j]] > 2) {
+                    cnt++;
+                }
+                costs[i][j] = cnt;
+            }
+        }
+        int[] dp = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = Integer.MAX_VALUE;
+            for (int j = i; j >= 0; j--) { // 子状态推现在状态
+                dp[i + 1] = Math.min(dp[i + 1], dp[j] + costs[j][i] + k);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```java
+// 线段树优化 因为有区间查询
+```
+
+
+
+
+
+2430\. 对字母串可执行的最大删除数
+--------------------
+
+给你一个仅由小写英文字母组成的字符串 `s` 。在一步操作中，你可以：
+
+*   删除 **整个字符串** `s` ，或者
+*   对于满足 `1 <= i <= s.length / 2` 的任意 `i` ，如果 `s` 中的 **前** `i` 个字母和接下来的 `i` 个字母 **相等** ，删除 **前** `i` 个字母。
+
+例如，如果 `s = "ababc"` ，那么在一步操作中，你可以删除 `s` 的前两个字母得到 `"abc"` ，因为 `s` 的前两个字母和接下来的两个字母都等于 `"ab"` 。
+
+返回删除 `s` 所需的最大操作数。
+
+**示例 1：**
+
+**输入：**s = "abcabcdabc"
+**输出：**2
+**解释：**
+- 删除前 3 个字母（"abc"），因为它们和接下来 3 个字母相等。现在，s = "abcdabc"。
+- 删除全部字母。
+  一共用了 2 步操作，所以返回 2 。可以证明 2 是所需的最大操作数。
+  注意，在第二步操作中无法再次删除 "abc" ，因为 "abc" 的下一次出现并不是位于接下来的 3 个字母。
+
+**示例 2：**
+
+**输入：**s = "aaabaab"
+**输出：**4
+**解释：**
+- 删除第一个字母（"a"），因为它和接下来的字母相等。现在，s = "aabaab"。
+- 删除前 3 个字母（"aab"），因为它们和接下来 3 个字母相等。现在，s = "aab"。 
+- 删除第一个字母（"a"），因为它和接下来的字母相等。现在，s = "ab"。
+- 删除全部字母。
+  一共用了 4 步操作，所以返回 4 。可以证明 4 是所需的最大操作数。
+
+**示例 3：**
+
+**输入：**s = "aaaaa"
+**输出：**5
+**解释：**在每一步操作中，都可以仅删除 s 的第一个字母。
+
+**提示：**
+
+*   `1 <= s.length <= 4000`
+*   `s` 仅由小写英文字母组成
+
+[https://leetcode.cn/problems/maximum-deletions-on-a-string/](https://leetcode.cn/problems/maximum-deletions-on-a-string/)
+
+```java
+class Solution {
+    public int deleteString(String S) {
+        // 难点1:每次要反复遍历字串，使用kmp中的Next数组应该可以优化成o(n)
+        // 难点2:字符串是一直在改变,所以n/2一直在改变
+        char[] s = S.toCharArray();
+        int n = s.length;
+        if (allEqual(s)) { // 特判全部相同的情况
+            return n;
+        }
+        int[][] f = new int[n + 1][n + 1]; // 预处理解决难点1：表示 s[i:] 和 s[j:] 的最长公共前缀
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = n - 1; j > i; j--) {
+                if (s[i] == s[j]) {
+                    f[i][j] = f[i + 1][j + 1] + 1;
+                }
+            }
+        }
+        int[] dp = new int[n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = 1; i + j * 2 <= n; j++) {
+                if (f[i][i + j] >= j) {
+                    dp[i] = Math.max(dp[i], dp[i + j]);
+                }
+            }
+            dp[i]++;
+        }
+        return dp[0];
+    }
+    
+    private boolean allEqual(char[] s) {
+        for (int i = 1; i < s.length; i++) {
+            if (s[i] != s[0]) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+2463\. 最小移动总距离
+--------------
+
+X 轴上有一些机器人和工厂。给你一个整数数组 `robot` ，其中 `robot[i]` 是第 `i` 个机器人的位置。再给你一个二维整数数组 `factory` ，其中 `factory[j] = [positionj, limitj]` ，表示第 `j` 个工厂的位置在 `positionj` ，且第 `j` 个工厂最多可以修理 `limitj` 个机器人。
+
+每个机器人所在的位置 **互不相同** 。每个工厂所在的位置也 **互不相同** 。注意一个机器人可能一开始跟一个工厂在 **相同的位置** 。
+
+所有机器人一开始都是坏的，他们会沿着设定的方向一直移动。设定的方向要么是 X 轴的正方向，要么是 X 轴的负方向。当一个机器人经过一个没达到上限的工厂时，这个工厂会维修这个机器人，且机器人停止移动。
+
+**任何时刻**，你都可以设置 **部分** 机器人的移动方向。你的目标是最小化所有机器人总的移动距离。
+
+请你返回所有机器人移动的最小总距离。测试数据保证所有机器人都可以被维修。
+
+**注意：**
+
+*   所有机器人移动速度相同。
+*   如果两个机器人移动方向相同，它们永远不会碰撞。
+*   如果两个机器人迎面相遇，它们也不会碰撞，它们彼此之间会擦肩而过。
+*   如果一个机器人经过了一个已经达到上限的工厂，机器人会当作工厂不存在，继续移动。
+*   机器人从位置 `x` 到位置 `y` 的移动距离为 `|y - x|` 。
+
+**示例 1：**
+
+![](https://pic.leetcode-cn.com/1667542978-utuiPv-image.png)
+
+**输入：**robot = \[0,4,6\], factory = \[\[2,2\],\[6,2\]\]
+**输出：**4
+**解释：**如上图所示：
+- 第一个机器人从位置 0 沿着正方向移动，在第一个工厂处维修。
+- 第二个机器人从位置 4 沿着负方向移动，在第一个工厂处维修。
+- 第三个机器人在位置 6 被第二个工厂维修，它不需要移动。
+  第一个工厂的维修上限是 2 ，它维修了 2 个机器人。
+  第二个工厂的维修上限是 2 ，它维修了 1 个机器人。
+  总移动距离是 |2 - 0| + |2 - 4| + |6 - 6| = 4 。没有办法得到比 4 更少的总移动距离。
+
+**示例 2：**
+
+![](https://pic.leetcode-cn.com/1667542984-OAIRFN-image.png)
+
+**输入：**robot = \[1,-1\], factory = \[\[-2,1\],\[2,1\]\]
+**输出：**2
+**解释：**如上图所示：
+- 第一个机器人从位置 1 沿着正方向移动，在第二个工厂处维修。
+- 第二个机器人在位置 -1 沿着负方向移动，在第一个工厂处维修。
+  第一个工厂的维修上限是 1 ，它维修了 1 个机器人。
+  第二个工厂的维修上限是 1 ，它维修了 1 个机器人。
+  总移动距离是 |2 - 1| + |(-2) - (-1)| = 2 。没有办法得到比 2 更少的总移动距离。
+
+**提示：**
+
+*   `1 <= robot.length, factory.length <= 100`
+*   `factory[j].length == 2`
+*   `-109 <= robot[i], positionj <= 109`
+*   `0 <= limitj <= robot.length`
+*   测试数据保证所有机器人都可以被维修。
+
+[https://leetcode.cn/problems/minimum-total-distance-traveled/description/](https://leetcode.cn/problems/minimum-total-distance-traveled/description/)
+
+```java
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+class Solution {
+    // f[i][j]表示第i~n-1个工厂处理第j~m-1个机器人的代价总和
+    long[][] f;
+    long inf = (long)1e13;
+
+    public long minimumTotalDistance(List<Integer> robot, int[][] factory) {
+        int m = robot.size(), n = factory.length;
+        Arrays.sort(factory, (o, p) -> o[0] - p[0]);
+        Collections.sort(robot);
+        f = new long[n][m];
+        for(int i = 0;i < n;i++)
+            Arrays.fill(f[i], inf);
+        return dfs(0, 0, robot, factory);
+    }
+
+    public long dfs(int i, int j, List<Integer> robot, int[][] factory) {
+        int m = robot.size(), n = factory.length;
+        // 如果到第i个工厂时，所有的机器人都被处理完毕
+        if(j == m) {
+            return 0;
+        }
+        // 处理最后一个工厂
+        if(i == n - 1) {
+            // 当前剩余未处理的机器人个数大于最后一个工厂的limit
+            // 表示无法以题目的要求处理完成，返回一个无穷大
+            if(m - j > factory[i][1]) {
+                return inf;
+            }
+            // 否则，计算剩下的机器人到最后一个工厂的距离之和
+            long ans = 0;
+            for(int k = j;k < m;k++)
+                ans += Math.abs(robot.get(k) - factory[i][0]);
+            f[i][j] = ans;
+            return ans;
+        }
+        // 如果当前状态已经计算过就直接返回
+        if(f[i][j] != inf)
+            return f[i][j];
+        // 当前工厂不处理任何机器人的情况
+        long ans = dfs(i + 1, j, robot, factory);
+        // 记录当前工厂处理的机器人与工厂的距离总和
+        long dis = 0;		
+        for(int k = j;k < Math.min(m, j + factory[i][1]);k++) {
+            dis += Math.abs(robot.get(k) - factory[i][0]);
+            long c = dfs(i + 1, k + 1, robot, factory);
+            ans = Math.min(ans, c + dis);
+        }
+        f[i][j] = ans;
+        return ans;
+    }
+}
+```
+
+# §6.3 约束划分个数
+
+![1720677431918](assets/1720677431918.png)
+
+410\. 分割数组的最大值
+--------------
+
+给定一个非负整数数组 `nums` 和一个整数 `k` ，你需要将这个数组分成 `k` 个非空的连续子数组。
+
+设计一个算法使得这 `k` 个子数组各自和的最大值最小。
+
+**示例 1：**
+
+**输入：**nums = \[7,2,5,10,8\], k = 2
+**输出：**18
+**解释：**
+一共有四种方法将 nums 分割为 2 个子数组。 
+其中最好的方式是将其分为 \[7,2,5\] 和 \[10,8\] 。
+因为此时这两个子数组各自的和的最大值为18，在所有情况中最小。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,4,5\], k = 2
+**输出：**9
+
+**示例 3：**
+
+**输入：**nums = \[1,4,4\], k = 3
+**输出：**4
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `0 <= nums[i] <= 106`
+*   `1 <= k <= min(50, nums.length)`
+
+[https://leetcode.cn/problems/split-array-largest-sum/description/](https://leetcode.cn/problems/split-array-largest-sum/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int splitArray(int[] nums, int k) {
+        // 定义dp[][] 表示前i个数被划分为j个数组的最大值
+        int n = nums.length;
+        int[] prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
+        }
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], Math.max(dp[x][j - 1], prefixSum[i] - prefixSum[x]));
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+```java
+// 最快的做法 二分+贪心
+class Solution {
+    // 贪心+二分
+    public int splitArray(int[] nums, int k) {
+        int left = 0, right = 0; // left是nums中最大元素，right = Math.sum(nums), 代表二分的上下界
+        for (int num : nums) {
+            if (left < num) {
+                left = num;
+            }
+            right += num;
+        }
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (check(nums, mid, k)) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return right + 1;
+    }
+
+    private boolean check(int[] nums, int limit, int k) {
+        int sum = 0;
+        int cnt = 1; // 划分的子数组数量
+        for (int num : nums) {
+            if (sum + num > limit) {
+                sum = num;
+                cnt++;
+            }else{
+                sum += num;
+            }
+        }
+        return cnt <= k; // 贪心思想
     }
 }
 ```
