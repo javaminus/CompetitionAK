@@ -111,7 +111,7 @@ treeAncestor.getKthAncestor(6, 3);  // 返回 -1 因为不存在满足要求的�
 
 [https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/description/](https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/description/)
 
-> 链式前向星建图，方法一比较万能，方法二比较简洁
+> 链式前向星建图，方法一比较万能
 
 ```java
 import java.util.Arrays;
@@ -158,7 +158,7 @@ class TreeAncestor {
         }
         stjump[x][0] = fa;
         for (int i = 1; i <= power; i++) {
-            stjump[x][i] = stjump[stjump[x][i - 1]][i - 1];
+            stjump[x][i] = stjump[stjump[x][i - 1]][i - 1]; // 递推式，举例：比如i = 3我们往上走2^2 = 4步,到达节点a,a再往上走2^2 = 4步，就到b，也就是第8步的位置
         }
         for (int e = head[x]; e != 0; e = next[e]) {
             dfs(to[e], x);
@@ -188,43 +188,4 @@ class TreeAncestor {
 ```
 
 
-
-```java
-class TreeAncestor {
-    private int[][] pa;
-    public TreeAncestor(int n, int[] parent) {
-        // Integer.numberOfLeadingZeros(n);从左到右数n有多少个连续0
-        int m = 32 - Integer.numberOfLeadingZeros(n); // n的二进制长度
-        pa = new int[n][m]; // pa[x][i]表示pa的第2^i个祖先节点,pa[x][0]就是父节点,pa[x][1]=pa[pa[x][0]][0]，即爷爷节点。
-        for (int i = 0; i < n; i++) {
-            pa[i][0] = parent[i];
-        }
-        for (int i = 0; i < m - 1; i++) {
-            for (int x = 0; x < n; x++) {
-                int p = pa[x][i];
-                pa[x][i + 1] = p < 0 ? -1 : pa[p][i]; // 厉害
-            }
-        }
-    }
-
-    public int getKthAncestor(int node, int k) { // 写法一
-        int m = 32 - Integer.numberOfLeadingZeros(k);
-        for (int i = 0; i < m; i++) {
-            if (((k >> i) & 1) > 0) { // k 的二进制从低到高第 i 位是 1
-                node = pa[node][i];
-                if (node < 0) {
-                    break;
-                }
-            }
-        }
-        return node;
-    }
-}
-
-/**
- * Your TreeAncestor object will be instantiated and called as such:
- * TreeAncestor obj = new TreeAncestor(n, parent);
- * int param_1 = obj.getKthAncestor(node,k);
- */
-```
 

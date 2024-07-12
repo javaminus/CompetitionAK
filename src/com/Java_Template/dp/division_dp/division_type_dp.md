@@ -1906,3 +1906,191 @@ class Solution {
 }
 ```
 
+1473\. 粉刷房子 III
+---------------
+
+在一个小城市里，有 `m` 个房子排成一排，你需要给每个房子涂上 `n` 种颜色之一（颜色编号为 `1` 到 `n` ）。有的房子去年夏天已经涂过颜色了，所以这些房子不可以被重新涂色。
+
+我们将连续相同颜色尽可能多的房子称为一个街区。（比方说 `houses = [1,2,2,3,3,2,1,1]` ，它包含 5 个街区  `[{1}, {2,2}, {3,3}, {2}, {1,1}]` 。）
+
+给你一个数组 `houses` ，一个 `m * n` 的矩阵 `cost` 和一个整数 `target` ，其中：
+
+*   `houses[i]`：是第 `i` 个房子的颜色，**0** 表示这个房子还没有被涂色。
+*   `cost[i][j]`：是将第 `i` 个房子涂成颜色 `j+1` 的花费。
+
+请你返回房子涂色方案的最小总花费，使得每个房子都被涂色后，恰好组成 `target` 个街区。如果没有可用的涂色方案，请返回 **\-1** 。
+
+**示例 1：**
+
+**输入：**houses = \[0,0,0,0,0\], cost = \[\[1,10\],\[10,1\],\[10,1\],\[1,10\],\[5,1\]\], m = 5, n = 2, target = 3
+**输出：**9
+**解释：**房子涂色方案为 \[1,2,2,1,1\]
+此方案包含 target = 3 个街区，分别是 \[{1}, {2,2}, {1,1}\]。
+涂色的总花费为 (1 + 1 + 1 + 1 + 5) = 9。
+
+**示例 2：**
+
+**输入：**houses = \[0,2,1,2,0\], cost = \[\[1,10\],\[10,1\],\[10,1\],\[1,10\],\[5,1\]\], m = 5, n = 2, target = 3
+**输出：**11
+**解释：**有的房子已经被涂色了，在此基础上涂色方案为 \[2,2,1,2,2\]
+此方案包含 target = 3 个街区，分别是 \[{2,2}, {1}, {2,2}\]。
+给第一个和最后一个房子涂色的花费为 (10 + 1) = 11。
+
+**示例 3：**
+
+**输入：**houses = \[0,0,0,0,0\], cost = \[\[1,10\],\[10,1\],\[1,10\],\[10,1\],\[1,10\]\], m = 5, n = 2, target = 5
+**输出：**5
+
+**示例 4：**
+
+**输入：**houses = \[3,1,2,3\], cost = \[\[1,1,1\],\[1,1,1\],\[1,1,1\],\[1,1,1\]\], m = 4, n = 3, target = 3
+**输出：**\-1
+**解释：**房子已经被涂色并组成了 4 个街区，分别是 \[{3},{1},{2},{3}\] ，无法形成 target = 3 个街区。
+
+**提示：**
+
+*   `m == houses.length == cost.length`
+*   `n == cost[i].length`
+*   `1 <= m <= 100`
+*   `1 <= n <= 20`
+*   `1 <= target <= m`
+*   `0 <= houses[i] <= n`
+*   `1 <= cost[i][j] <= 10^4`
+
+[https://leetcode.cn/problems/paint-house-iii/description/](https://leetcode.cn/problems/paint-house-iii/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static final int INF = 0x3f3f3f3f;
+    public int minCost(int[] houses, int[][] cost, int m, int n, int target) {
+        // dp[i][j][k] 表示将[0, i]区间的房屋分成j个街道, 并且最后一个房屋刷的颜色是第k种颜色, 此时的最小总花费
+        int[][][] dp = new int[m + 1][target + 1][n + 1];
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= target; j++) {
+                Arrays.fill(dp[i][j], INF);
+            }
+        }
+        Arrays.fill(dp[0][0], 0);
+        // 初始化第0个房子
+        // 第0个房子已经涂色
+        if(houses[0] > 0){
+            dp[1][1][houses[0]] = 0;
+        }else{
+            // 第0个房子没有涂色，初始化cost
+            for(int i = 1; i <= n; i++){
+                dp[1][1][i] = cost[0][i - 1];
+            }
+        }
+        for (int i = 1; i <= m; i++) { // 前i个房子
+            for (int j = 1; j <= target; j++) { // 分成j个街道
+                if (houses[i - 1] == 0) { // 没有被染色
+                    for (int k = 1; k <= n; k++) { // 枚举上一个房子染什么颜色[1,n]
+                        for (int x = 1; x <= n; x++) { // 枚举当前房子染什么颜色
+                            if (k == x) { // 颜色相同
+                                dp[i][j][x] = Math.min(dp[i][j][x], dp[i - 1][j][k] + cost[i - 1][x - 1]);
+                            }else{
+                                dp[i][j][x] = Math.min(dp[i][j][x], dp[i - 1][j - 1][k] + cost[i - 1][x - 1]);
+                            }
+                        }
+                    }
+                }else{ // 当前房子已经被染色
+                    for (int k = 1; k <= n; k++) { // 枚举上一个房子染什么颜色
+                        int curColor = houses[i - 1];
+                        if (k == curColor) {
+                            dp[i][j][curColor] = Math.min(dp[i][j][curColor], dp[i - 1][j][k]);
+                        }else{
+                            dp[i][j][curColor] = Math.min(dp[i][j][curColor], dp[i - 1][j - 1][k]);
+                        }
+                    }
+                }
+            }
+        }
+        // System.out.println(Arrays.deepToString(dp));
+        int ans = INF;
+        for (int i = 1; i <= n; i++) {
+            ans = Math.min(ans, dp[m][target][i]);
+        }
+        return ans == INF ? -1 : ans;
+    }
+}
+```
+
+1478. 安排邮筒 划分型DP模板题（中位数贪心，前缀和计算） 
+-----------
+
+给你一个房屋数组`houses` 和一个整数 `k` ，其中 `houses[i]` 是第 `i` 栋房子在一条街上的位置，现需要在这条街上安排 `k` 个邮筒。
+
+请你返回每栋房子与离它最近的邮筒之间的距离的 **最小** 总和。
+
+答案保证在 32 位有符号整数范围以内。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_11_1816.png)
+
+**输入：**houses = \[1,4,8,10,20\], k = 3
+**输出：**5
+**解释：**将邮筒分别安放在位置 3， 9 和 20 处。
+每个房子到最近邮筒的距离和为 |3-1| + |4-3| + |9-8| + |10-9| + |20-20| = 5 。
+
+**示例 2：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_2_1816.png)**
+
+**输入：**houses = \[2,3,5,12,18\], k = 2
+**输出：**9
+**解释：**将邮筒分别安放在位置 3 和 14 处。
+每个房子到最近邮筒距离和为 |2-3| + |3-3| + |5-3| + |12-14| + |18-14| = 9 。
+
+**示例 3：**
+
+**输入：**houses = \[7,4,6,1\], k = 1
+**输出：**8
+
+**示例 4：**
+
+**输入：**houses = \[3,6,14,10\], k = 4
+**输出：**0
+
+**提示：**
+
+*   `n == houses.length`
+*   `1 <= n <= 100`
+*   `1 <= houses[i] <= 10^4`
+*   `1 <= k <= n`
+*   数组 `houses` 中的整数互不相同。
+
+[https://leetcode.cn/problems/allocate-mailboxes/description/](https://leetcode.cn/problems/allocate-mailboxes/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minDistance(int[] houses, int k) {
+        int n = houses.length;
+        Arrays.sort(houses);
+        int[][] prefixSum = new int[n][n];// prefixSum[i][j]，表示在下标范围[i,j]的房子中间放一个邮筒，距离之和最小值。中位数贪心
+        for (int i = n - 2; i >= 0; i--) { // 这里真的细节，后面要用i+1,所以这里直接i = n - 2，后面J的处理同理；
+            for (int j = i + 1; j < n; j++) {
+                prefixSum[i][j] = prefixSum[i + 1][j - 1] + houses[j] - houses[i];
+            }
+        }
+        int[][] dp = new int[n + 1][k + 1]; // 表示前i个房子，使用j个桶的最小距离和
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) { // 枚举可用邮筒的数量
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + prefixSum[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
