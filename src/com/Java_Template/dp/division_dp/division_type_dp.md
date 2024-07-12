@@ -1460,7 +1460,7 @@ class Solution {
 }
 ```
 
-# §6.3 约束划分个数
+# §6.3 约束划分个数(全是模板，三层for循环)
 
 ![1720677431918](assets/1720677431918.png)
 
@@ -1561,6 +1561,347 @@ class Solution {
             }
         }
         return cnt <= k; // 贪心思想
+    }
+}
+```
+
+1043\. 分隔数组以得到最大和（求数组中i到j的最大值util）
+-----------------
+
+给你一个整数数组 `arr`，请你将该数组分隔为长度 **最多** 为 k 的一些（连续）子数组。分隔完成后，每个子数组的中的所有值都会变为该子数组中的最大值。
+
+返回将数组分隔变换后能够得到的元素最大和。本题所用到的测试用例会确保答案是一个 32 位整数。
+
+**示例 1：**
+
+**输入：**arr = \[1,15,7,9,2,5,10\], k = 3
+**输出：**84
+**解释：**数组变为 \[15,15,15,9,10,10,10\]
+
+**示例 2：**
+
+**输入：**arr = \[1,4,1,5,7,3,6,1,9,9,3\], k = 4
+**输出：**83
+
+**示例 3：**
+
+**输入：**arr = \[1\], k = 1
+**输出：**1
+
+**提示：**
+
+*   `1 <= arr.length <= 500`
+*   `0 <= arr[i] <= 109`
+*   `1 <= k <= arr.length`
+
+[https://leetcode.cn/problems/partition-array-for-maximum-sum/description/](https://leetcode.cn/problems/partition-array-for-maximum-sum/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int maxSumAfterPartitioning(int[] arr, int k) {
+        int n = arr.length;
+        // f[][]表示i到j的最大值 dp[i][j] = Math.max(dp[i][j - 1],nums[j])
+        int[][] f = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            f[i][i] = arr[i];
+            for (int j = i + 1; j < n; j++) {
+                f[i][j] = Math.max(f[i][j - 1], arr[j]);
+            }
+        }
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            for (int j = i - 1; j >= 0 && i - j <= k; j--) {
+                dp[i] = Math.max(dp[i], dp[j] + (i - j) * f[j][i - 1]);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```java
+class Solution {
+    public int maxSumAfterPartitioning(int[] nums, int k) { // 优化时空复杂度
+        int n = nums.length;
+        int[] dp = new int[n + 1];
+        int mx = 0;
+        for (int i = 1; i <= n; i++) {
+            mx = nums[i - 1];
+            for (int j = i - 1; j >= 0 && i - j <= k; j--) {
+                dp[i] = Math.max(dp[i], dp[j] + (i - j) * mx);
+                if (j > 0) {
+                    mx = Math.max(mx, nums[j - 1]);
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+1745\. 分割回文串 IV
+---------------
+
+给你一个字符串 `s` ，如果可以将它分割成三个 **非空** 回文子字符串，那么返回 `true` ，否则返回 `false` 。
+
+当一个字符串正着读和反着读是一模一样的，就称其为 **回文字符串** 。
+
+**示例 1：**
+
+**输入：**s = "abcbdd"
+**输出：**true
+**解释：**"abcbdd" = "a" + "bcb" + "dd"，三个子字符串都是回文的。
+
+**示例 2：**
+
+**输入：**s = "bcbddxy"
+**输出：**false
+**解释：**s 没办法被分割成 3 个回文子字符串。
+
+**提示：**
+
+*   `3 <= s.length <= 2000`
+*   `s`​​​​​​ 只包含小写英文字母。
+
+[https://leetcode.cn/problems/palindrome-partitioning-iv/description/](https://leetcode.cn/problems/palindrome-partitioning-iv/description/)
+
+```java
+class Solution {
+    public boolean checkPartitioning(String s) {
+        int n = s.length();
+        boolean[][] f = new boolean[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j) && (j - i <= 1 || f[i + 1][j - 1])) {
+                    f[i][j] = true;
+                }
+            }
+        }
+        // 枚举分割点
+        for (int i = 0; i < n - 2; i++) {
+            for (int j = i + 1; j < n - 1; j++) {
+                if (f[0][i] && f[i + 1][j] && f[j + 1][n - 1]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+```
+
+813\. 最大平均值和的分组
+---------------
+
+给定数组 `nums` 和一个整数 `k` 。我们将给定的数组 `nums` 分成 **最多** `k` 个非空子数组，且数组内部是连续的 。 **分数** 由每个子数组内的平均值的总和构成。
+
+注意我们必须使用 `nums` 数组中的每一个数进行分组，并且分数不一定需要是整数。
+
+返回我们所能得到的最大 **分数** 是多少。答案误差在 `10-6` 内被视为是正确的。
+
+**示例 1:**
+
+**输入:** nums = \[9,1,2,3,9\], k = 3
+**输出:** 20.00000
+**解释:** 
+nums 的最优分组是\[9\], \[1, 2, 3\], \[9\]. 得到的分数是 9 + (1 + 2 + 3) / 3 + 9 = 20. 
+我们也可以把 nums 分成\[9, 1\], \[2\], \[3, 9\]. 
+这样的分组得到的分数为 5 + 2 + 6 = 13, 但不是最大值.
+
+**示例 2:**
+
+**输入:** nums = \[1,2,3,4,5,6,7\], k = 4
+**输出:** 20.50000
+
+**提示:**
+
+*   `1 <= nums.length <= 100`
+*   `1 <= nums[i] <= 104`
+*   `1 <= k <= nums.length`
+
+[https://leetcode.cn/problems/largest-sum-of-averages/description/](https://leetcode.cn/problems/largest-sum-of-averages/description/)
+
+```java
+class Solution {
+    public double largestSumOfAverages(int[] nums, int k) {
+        // 这个题有点意思
+        int n = nums.length;
+        int[] prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
+        }
+        // 表示前i个数分为k个子数组的最大值
+        double[][] dp = new double[n + 1][k + 1];
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                if(j == 1){
+                    dp[i][j] = (double) prefixSum[i] / i;
+                }else{
+                    for (int x = 1; x < i; x++) { // 这里的x表示将[x,i)单独成一个组的值
+                        dp[i][j] = Math.max(dp[i][j], dp[x][j - 1] + (double) (prefixSum[i] - prefixSum[x]) / (i - x));
+                    }
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+1278\. 分割回文串 III
+----------------
+
+给你一个由小写字母组成的字符串 `s`，和一个整数 `k`。
+
+请你按下面的要求分割字符串：
+
+*   首先，你可以将 `s` 中的部分字符修改为其他的小写英文字母。
+*   接着，你需要把 `s` 分割成 `k` 个非空且不相交的子串，并且每个子串都是回文串。
+
+请返回以这种方式分割字符串所需修改的最少字符数。
+
+**示例 1：**
+
+**输入：**s = "abc", k = 2
+**输出：**1
+**解释：**你可以把字符串分割成 "ab" 和 "c"，并修改 "ab" 中的 1 个字符，将它变成回文串。
+
+**示例 2：**
+
+**输入：**s = "aabbc", k = 3
+**输出：**0
+**解释：**你可以把字符串分割成 "aa"、"bb" 和 "c"，它们都是回文串。
+
+**示例 3：**
+
+**输入：**s = "leetcode", k = 8
+**输出：**0
+
+**提示：**
+
+*   `1 <= k <= s.length <= 100`
+*   `s` 中只含有小写英文字母。
+
+[https://leetcode.cn/problems/palindrome-partitioning-iii/description/](https://leetcode.cn/problems/palindrome-partitioning-iii/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int palindromePartition(String s, int k) {
+        int n = s.length();
+        int[][] f = new int[n][n]; // [i,j]变成回文串需要的操作次数
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (j - i == 0) {
+                    f[i][j] = 0;
+                } else if (j - i == 1) {
+                    f[i][j] = s.charAt(i) == s.charAt(j) ? 0 : 1;
+                } else{
+                    f[i][j] = s.charAt(i) == s.charAt(j) ? f[i + 1][j - 1] : f[i + 1][j - 1] + 1;
+                }
+            }
+        }
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) { // 分割为[0,x - 1],[x,i - 1]
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + f[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+1335\. 工作计划的最低难度
+----------------
+
+你需要制定一份 `d` 天的工作计划表。工作之间存在依赖，要想执行第 `i` 项工作，你必须完成全部 `j` 项工作（ `0 <= j < i`）。
+
+你每天 **至少** 需要完成一项任务。工作计划的总难度是这 `d` 天每一天的难度之和，而一天的工作难度是当天应该完成工作的最大难度。
+
+给你一个整数数组 `jobDifficulty` 和一个整数 `d`，分别代表工作难度和需要计划的天数。第 `i` 项工作的难度是 `jobDifficulty[i]`。
+
+返回整个工作计划的 **最小难度** 。如果无法制定工作计划，则返回 **\-1** 。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/26/untitled.png)
+
+**输入：**jobDifficulty = \[6,5,4,3,2,1\], d = 2
+**输出：**7
+**解释：**第一天，您可以完成前 5 项工作，总难度 = 6.
+第二天，您可以完成最后一项工作，总难度 = 1.
+计划表的难度 = 6 + 1 = 7 
+
+**示例 2：**
+
+**输入：**jobDifficulty = \[9,9,9\], d = 4
+**输出：**\-1
+**解释：**就算你每天完成一项工作，仍然有一天是空闲的，你无法制定一份能够满足既定工作时间的计划表。
+
+**示例 3：**
+
+**输入：**jobDifficulty = \[1,1,1\], d = 3
+**输出：**3
+**解释：**工作计划为每天一项工作，总难度为 3 。
+
+**示例 4：**
+
+**输入：**jobDifficulty = \[7,1,7,1,7,1\], d = 3
+**输出：**15
+
+**示例 5：**
+
+**输入：**jobDifficulty = \[11,111,22,222,33,333,44,444\], d = 6
+**输出：**843
+
+**提示：**
+
+*   `1 <= jobDifficulty.length <= 300`
+*   `0 <= jobDifficulty[i] <= 1000`
+*   `1 <= d <= 10`
+
+[https://leetcode.cn/problems/minimum-difficulty-of-a-job-schedule/description/](https://leetcode.cn/problems/minimum-difficulty-of-a-job-schedule/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minDifficulty(int[] nums, int k) {
+        int n = nums.length;
+        int[][] f = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                // f[i][j] = max(f[i][j - 1], nums[j])
+                if (i == j) {
+                    f[i][j] = nums[j];
+                }else{
+                    f[i][j] = Math.max(f[i][j - 1], nums[j]);
+                }
+            }
+        }
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 0; i < n + 1; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + f[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k] == Integer.MAX_VALUE / 2 ? -1 : dp[n][k];
     }
 }
 ```

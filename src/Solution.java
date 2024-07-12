@@ -1,36 +1,31 @@
-// 最快的做法 二分+贪心
-class Solution {
-    // 贪心+二分
-    public int splitArray(int[] nums, int k) {
-        int left = 0, right = 0; // left是nums中最大元素，right = Math.sum(nums), 代表二分的上下界
-        for (int num : nums) {
-            if (left < num) {
-                left = num;
-            }
-            right += num;
-        }
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (check(nums, mid, k)) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return right + 1;
-    }
+import java.util.Arrays;
 
-    private boolean check(int[] nums, int limit, int k) {
-        int sum = 0;
-        int cnt = 1; // 划分的子数组数量
-        for (int num : nums) {
-            if (sum + num > limit) {
-                sum = num;
-                cnt++;
-            }else{
-                sum += num;
+class Solution {
+    public int minDifficulty(int[] nums, int k) {
+        int n = nums.length;
+        int[][] f = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                // f[i][j] = max(f[i][j - 1], nums[j])
+                if (i == j) {
+                    f[i][j] = nums[j];
+                }else{
+                    f[i][j] = Math.max(f[i][j - 1], nums[j]);
+                }
             }
         }
-        return cnt <= k; // 贪心思想
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 0; i < n + 1; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + f[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k] == Integer.MAX_VALUE / 2 ? -1 : dp[n][k];
     }
 }
