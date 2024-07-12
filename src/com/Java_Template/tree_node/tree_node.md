@@ -187,5 +187,189 @@ class TreeAncestor {
  */
 ```
 
+## 【模板】最近公共祖先（LCA）
 
+> ## 题目描述
+>
+> 如题，给定一棵有根多叉树，请求出指定两个点直接最近的公共祖先。
+>
+> ## 输入格式
+>
+> 第一行包含三个正整数 $N,M,S$，分别表示树的结点个数、询问的个数和树根结点的序号。
+>
+> 接下来 $N-1$ 行每行包含两个正整数 $x, y$，表示 $x$ 结点和 $y$ 结点之间有一条直接连接的边（数据保证可以构成树）。
+>
+> 接下来 $M$ 行每行包含两个正整数 $a, b$，表示询问 $a$ 结点和 $b$ 结点的最近公共祖先。
+>
+> ## 输出格式
+>
+> 输出包含 $M$ 行，每行包含一个正整数，依次为每一个询问的结果。
+>
+> ## 样例 #1
+>
+> ### 样例输入 #1
+>
+> ```
+> 5 5 4
+> 3 1
+> 2 4
+> 5 1
+> 1 4
+> 2 4
+> 3 2
+> 3 5
+> 1 2
+> 4 5
+> ```
+>
+> ### 样例输出 #1
+>
+> ```
+> 4
+> 4
+> 1
+> 4
+> 4
+> ```
+>
+> ## 提示
+>
+> 对于 $30\%$ 的数据，$N\leq 10$，$M\leq 10$。
+>
+> 对于 $70\%$ 的数据，$N\leq 10000$，$M\leq 10000$。
+>
+> 对于 $100\%$ 的数据，$1 \leq N,M\leq 500000$，$1 \leq x, y,a ,b \leq N$，**不保证** $a \neq b$。
+>
+>
+> 样例说明：
+>
+> 该树结构如下：
+>
+>  ![](https://cdn.luogu.com.cn/upload/pic/2282.png) 
+>
+> 第一次询问：$2, 4$ 的最近公共祖先，故为 $4$。
+>
+> 第二次询问：$3, 2$ 的最近公共祖先，故为 $4$。
+>
+> 第三次询问：$3, 5$ 的最近公共祖先，故为 $1$。
+>
+> 第四次询问：$1, 2$ 的最近公共祖先，故为 $4$。
+>
+> 第五次询问：$4, 5$ 的最近公共祖先，故为 $4$。
+>
+> 故输出依次为 $4, 4, 1, 4, 4$。
+>
+>
+> 2021/10/4 数据更新 @fstqwq：应要求加了两组数据卡掉了暴力跳。
+
+```java
+import java.io.*;
+import java.util.Arrays;
+
+public class Main {
+    public static int MAXN = 500001;
+
+    public static int LIMIT = 20;
+
+    // 根据节点个数n，计算出2的几次方就够用了
+    public static int power;
+
+    // 链式前向星建图
+    public static int[] head = new int[MAXN];
+
+    public static int[] next = new int[MAXN << 1];
+
+    public static int[] to = new int[MAXN << 1];
+
+    public static int cnt;
+
+    // deep[i] : 节点i在第几层
+    public static int[] deep = new int[MAXN];
+
+    // stjump[i][p] : 节点i往上跳2的p次方步，到达的节点编号
+    public static int[][] stjump = new int[MAXN][LIMIT];
+    public static void build(int n) {
+        power = 32 - Integer.numberOfLeadingZeros(n);
+        cnt = 1;
+        Arrays.fill(head, 1, n + 1, 0);
+    }
+
+    public static void addEdge(int u, int v) {
+        next[cnt] = head[u];
+        to[cnt] = v;
+        head[u] = cnt++;
+    }
+
+    // dfs递归版
+    // 一般来说都这么写，但是本题附加的测试数据很毒
+    // java这么写就会因为递归太深而爆栈，c++这么写就能通过
+    public static void dfs(int x, int fa) {
+        deep[x] = deep[fa] + 1;
+        stjump[x][0] = fa;
+        for (int p = 1; p <= power; p++) {
+            stjump[x][p] = stjump[stjump[x][p - 1]][p - 1];
+        }
+        for (int e = head[x]; e != 0; e = next[e]) {
+            if (to[e] != fa) {
+                dfs(to[e], x);
+            }
+        }
+    }
+
+    private static int lca(int a, int b) {
+        if (deep[a] < deep[b]) {
+            int tmp = a;
+            a = b;
+            b = tmp;
+        }
+        for (int p = power; p >= 0; p--) {
+            if (deep[stjump[a][p]] >= deep[b]) {
+                a = stjump[a][p];
+            }
+        }
+        if (a == b) {
+            return a;
+        }
+        // a和b在同一层
+        for (int p = power; p >= 0; p--) {
+            if (stjump[a][p] != stjump[b][p]) {
+                a = stjump[a][p];
+                b = stjump[b][p];
+            }
+        }
+        return stjump[a][0];
+    }
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StreamTokenizer in = new StreamTokenizer(br);
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+        in.nextToken();
+        int n = (int) in.nval;
+        in.nextToken();
+        int m = (int) in.nval;
+        in.nextToken();
+        int root = (int) in.nval;
+        build(n);
+        for (int i = 1, u, v; i < n; i++) {
+            in.nextToken();
+            u = (int) in.nval;
+            in.nextToken();
+            v = (int) in.nval;
+            addEdge(u, v);
+            addEdge(v, u);
+        }
+        dfs(root, 0);
+        for (int i = 1, a, b; i <= m; i++) {
+            in.nextToken();
+            a = (int) in.nval;
+            in.nextToken();
+            b = (int) in.nval;
+            out.println(lca(a, b));
+        }
+        out.flush();
+        out.close();
+        br.close();
+    }
+}
+```
 
