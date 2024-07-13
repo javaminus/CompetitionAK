@@ -1,21 +1,30 @@
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 class Solution {
-    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {
-        int n = startTime.length;
-        Integer[] ids = new Integer[n];
-        Arrays.setAll(ids, i -> i);
-        Arrays.sort(ids, (i, j) -> endTime[i] - endTime[j]);
-        int[] dp = new int[n + 1]; // 表示前i个工作能获得的最大报酬
+    public int maxValue(int[][] events, int k) {
+        int n = events.length;
+        Arrays.sort(events, (a, b) -> a[1] - b[1]); // 按照结束时间排序
+        int[][] dp = new int[n + 1][k + 1];
         for (int i = 1; i <= n; i++) {
-            dp[i] = dp[i - 1];
-            for (int j = 0; j < n; j++) {
-                if (startTime[ids[i - 1]] >= endTime[ids[j]]) {
-                    dp[i] = Math.max(dp[i], dp[ids[j]] + profit[ids[j]]);
-                }
+            int index = search(events, events[i - 1][0], i);
+            for (int j = 1; j <= k; j++) {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[index + 1][j - 1] + events[i - 1][2]);
             }
         }
-        return dp[n];
+        return dp[n][k];
+    }
+
+    // 返回 endTime < target 的最大下标
+    private int search(int[][] events, int target, int right) {
+        int left = 0;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (events[mid][1] < target) {
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        return left - 1;
     }
 }
