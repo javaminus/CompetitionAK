@@ -2094,3 +2094,493 @@ class Solution {
 }
 ```
 
+1478\. 安排邮筒
+-----------
+
+给你一个房屋数组`houses` 和一个整数 `k` ，其中 `houses[i]` 是第 `i` 栋房子在一条街上的位置，现需要在这条街上安排 `k` 个邮筒。
+
+请你返回每栋房子与离它最近的邮筒之间的距离的 **最小** 总和。
+
+答案保证在 32 位有符号整数范围以内。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_11_1816.png)
+
+**输入：**houses = \[1,4,8,10,20\], k = 3
+**输出：**5
+**解释：**将邮筒分别安放在位置 3， 9 和 20 处。
+每个房子到最近邮筒的距离和为 |3-1| + |4-3| + |9-8| + |10-9| + |20-20| = 5 。
+
+**示例 2：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/13/sample_2_1816.png)**
+
+**输入：**houses = \[2,3,5,12,18\], k = 2
+**输出：**9
+**解释：**将邮筒分别安放在位置 3 和 14 处。
+每个房子到最近邮筒距离和为 |2-3| + |3-3| + |5-3| + |12-14| + |18-14| = 9 。
+
+**示例 3：**
+
+**输入：**houses = \[7,4,6,1\], k = 1
+**输出：**8
+
+**示例 4：**
+
+**输入：**houses = \[3,6,14,10\], k = 4
+**输出：**0
+
+**提示：**
+
+*   `n == houses.length`
+*   `1 <= n <= 100`
+*   `1 <= houses[i] <= 10^4`
+*   `1 <= k <= n`
+*   数组 `houses` 中的整数互不相同。
+
+[https://leetcode.cn/problems/allocate-mailboxes/description/](https://leetcode.cn/problems/allocate-mailboxes/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minDistance(int[] houses, int k) {
+        int n = houses.length;
+        Arrays.sort(houses);
+        int[][] prefixSum = new int[n][n];
+        for (int i = n - 2; i >= 0; i--) { // prefixSum[i][j]，表示在下标范围[i,j]的房子中间放一个邮筒，距离之和最小值。中位数贪心
+            for (int j = i + 1; j < n; j++) {
+                prefixSum[i][j] = prefixSum[i + 1][j - 1] + houses[j] - houses[i];
+            }
+        }
+        int[][] dp = new int[n + 1][k + 1]; // 表示前i个房子，使用j个桶的最小距离和
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + prefixSum[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+1959\. K 次调整数组大小浪费的最小总空间
+------------------------
+
+你正在设计一个动态数组。给你一个下标从 **0** 开始的整数数组 `nums` ，其中 `nums[i]` 是 `i` 时刻数组中的元素数目。除此以外，你还有一个整数 `k` ，表示你可以 **调整** 数组大小的 **最多** 次数（每次都可以调整成 **任意** 大小）。
+
+`t` 时刻数组的大小 `sizet` 必须大于等于 `nums[t]` ，因为数组需要有足够的空间容纳所有元素。`t` 时刻 **浪费的空间** 为 `sizet - nums[t]` ，**总** 浪费空间为满足 `0 <= t < nums.length` 的每一个时刻 `t` 浪费的空间 **之和** 。
+
+在调整数组大小不超过 `k` 次的前提下，请你返回 **最小总浪费空间** 。
+
+**注意：**数组最开始时可以为 **任意大小** ，且 **不计入** 调整大小的操作次数。
+
+**示例 1：**
+
+**输入：**nums = \[10,20\], k = 0
+**输出：**10
+**解释：**size = \[20,20\].
+我们可以让数组初始大小为 20 。
+总浪费空间为 (20 - 10) + (20 - 20) = 10 。
+
+**示例 2：**
+
+**输入：**nums = \[10,20,30\], k = 1
+**输出：**10
+**解释：**size = \[20,20,30\].
+我们可以让数组初始大小为 20 ，然后时刻 2 调整大小为 30 。
+总浪费空间为 (20 - 10) + (20 - 20) + (30 - 30) = 10 。
+
+**示例 3：**
+
+**输入：**nums = \[10,20,15,30,20\], k = 2
+**输出：**15
+**解释：**size = \[10,20,20,30,30\].
+我们可以让数组初始大小为 10 ，时刻 1 调整大小为 20 ，时刻 3 调整大小为 30 。
+总浪费空间为 (10 - 10) + (20 - 20) + (20 - 15) + (30 - 30) + (30 - 20) = 15 。
+
+**提示：**
+
+*   `1 <= nums.length <= 200`
+*   `1 <= nums[i] <= 106`
+*   `0 <= k <= nums.length - 1`
+
+[https://leetcode.cn/problems/minimum-total-space-wasted-with-k-resizing-operations/description/](https://leetcode.cn/problems/minimum-total-space-wasted-with-k-resizing-operations/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    /**
+     * 难点：
+     * 题意转换：给定数组 nums 以及整数 k，需要把数组完整地分成 k+1 段连续的子数组，每一段的权值是「这一段的最大值乘以这一段的长度再减去这一段的元素和」。需要最小化总权值。
+     */
+    public int minSpaceWastedKResizing(int[] nums, int k) {
+        int n = nums.length;
+        int[][] f = new int[n][n]; // 求f数组也是难点
+        for (int i = 0; i < n; i++) {
+            int mx = Integer.MIN_VALUE;
+            int sum = 0;
+            for (int j = i; j < n; j++) {
+                mx = Math.max(mx, nums[j]);
+                sum += nums[j];
+                f[i][j] = mx * (j - i + 1) - sum;
+            }
+        }
+        k += 1; // 划分成k+1个子数组
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 1; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= Math.min(k, i); j++) {
+                for (int x = 0; x < i; x++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[x][j - 1] + f[x][i - 1]);
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+2478\. 完美分割的方案数
+---------------
+
+给你一个字符串 `s` ，每个字符是数字 `'1'` 到 `'9'` ，再给你两个整数 `k` 和 `minLength` 。
+
+如果对 `s` 的分割满足以下条件，那么我们认为它是一个 **完美** 分割：
+
+*   `s` 被分成 `k` 段互不相交的子字符串。
+*   每个子字符串长度都 **至少** 为 `minLength` 。
+*   每个子字符串的第一个字符都是一个 **质数** 数字，最后一个字符都是一个 **非质数** 数字。质数数字为 `'2'` ，`'3'` ，`'5'` 和 `'7'` ，剩下的都是非质数数字。
+
+请你返回 `s` 的 **完美** 分割数目。由于答案可能很大，请返回答案对 `109 + 7` **取余** 后的结果。
+
+一个 **子字符串** 是字符串中一段连续字符串序列。
+
+**示例 1：**
+
+**输入：**s = "23542185131", k = 3, minLength = 2
+**输出：**3
+**解释：**存在 3 种完美分割方案：
+"2354 | 218 | 5131"
+"2354 | 21851 | 31"
+"2354218 | 51 | 31"
+
+**示例 2：**
+
+**输入：**s = "23542185131", k = 3, minLength = 3
+**输出：**1
+**解释：**存在一种完美分割方案："2354 | 218 | 5131" 。
+
+**示例 3：**
+
+**输入：**s = "3312958", k = 3, minLength = 1
+**输出：**1
+**解释：**存在一种完美分割方案："331 | 29 | 58" 。
+
+**提示：**
+
+*   `1 <= k, minLength <= s.length <= 1000`
+*   `s` 每个字符都为数字 `'1'` 到 `'9'` 之一。
+
+[https://leetcode.cn/problems/number-of-beautiful-partitions/description/](https://leetcode.cn/problems/number-of-beautiful-partitions/description/)
+
+```java
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashSet;
+
+class Solution { // 超时
+    private static HashSet<Character> set = new HashSet<>();
+    private static int Mod = (int) 1e9 + 7;
+    static {
+        set.add('2');
+        set.add('3');
+        set.add('5');
+        set.add('7');
+    }
+    public int beautifulPartitions(String s, int k, int minLength) {
+        int n = s.length();
+        boolean[][] f = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            if (set.contains(s.charAt(i))) {
+                for (int j = i; j < n; j++) {
+                    if (!set.contains(s.charAt(j)) && j - i + 1 >= minLength) {
+                        f[i][j] = true;
+                    }
+                }
+            }
+        }
+        int[][] dp = new int[n + 1][k + 1];
+        dp[0][0] = 1;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= k; j++) {
+                for (int x = 0; x < i; x++) {
+                    if (f[x][i - 1]) {
+                        dp[i][j] += dp[x][j - 1] ;
+                        dp[i][j] %= Mod;
+                    }
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
+```java
+class Solution { // 双指针，一边更新前面的sum，一边计算后面的dp[i][j];真的好难
+    private static final int Mod = (int) 1e9 + 7;
+    public int beautifulPartitions(String S, int k, int minLength) {
+        char[] s = S.toCharArray();
+        int n = s.length;
+        if (k * minLength > n || !isPrime(s[0]) || isPrime(s[n - 1])) { // 剪枝
+            return 0;
+        }
+        int[][] dp = new int[k + 1][n + 1];
+        dp[0][0] = 1;
+        for (int j = 1; j <= k; j++) { // 划分的个数
+            int sum = 0;
+            for (int i = j * minLength; i + (k - j) * minLength <= n; i++) {
+                if (canPartition(s, i - minLength)) {
+                    sum = (sum + dp[j - 1][i - minLength]) % Mod;
+                }
+                if (canPartition(s, i)) {
+                    dp[j][i] = sum;
+                }
+            }
+        }
+        return dp[k][n];
+    }
+
+    private boolean isPrime(char c) {
+        return c == '2' || c == '3' || c == '5' || c == '7';
+    }
+
+    // 判断是否可以在 j-1 和 j 之间分割（开头和末尾也算）
+    private boolean canPartition(char[] s, int j) {
+        return j == 0 || j == s.length || !isPrime(s[j - 1]) && isPrime(s[j]);
+    }
+}
+```
+
+# §6.4 不相交区间
+
+2830\. 销售利润最大化
+--------------
+
+给你一个整数 `n` 表示数轴上的房屋数量，编号从 `0` 到 `n - 1` 。
+
+另给你一个二维整数数组 `offers` ，其中 `offers[i] = [starti, endi, goldi]` 表示第 `i` 个买家想要以 `goldi` 枚金币的价格购买从 `starti` 到 `endi` 的所有房屋。
+
+作为一名销售，你需要有策略地选择并销售房屋使自己的收入最大化。
+
+返回你可以赚取的金币的最大数目。
+
+**注意** 同一所房屋不能卖给不同的买家，并且允许保留一些房屋不进行出售。
+
+**示例 1：**
+
+**输入：**n = 5, offers = \[\[0,0,1\],\[0,2,2\],\[1,3,2\]\]
+**输出：**3
+**解释：**
+有 5 所房屋，编号从 0 到 4 ，共有 3 个购买要约。
+将位于 \[0,0\] 范围内的房屋以 1 金币的价格出售给第 1 位买家，并将位于 \[1,3\] 范围内的房屋以 2 金币的价格出售给第 3 位买家。
+可以证明我们最多只能获得 3 枚金币。
+
+**示例 2：**
+
+**输入：**n = 5, offers = \[\[0,0,1\],\[0,2,10\],\[1,3,2\]\]
+**输出：**10
+**解释：**有 5 所房屋，编号从 0 到 4 ，共有 3 个购买要约。
+将位于 \[0,2\] 范围内的房屋以 10 金币的价格出售给第 2 位买家。
+可以证明我们最多只能获得 10 枚金币。
+
+**提示：**
+
+*   `1 <= n <= 105`
+*   `1 <= offers.length <= 105`
+*   `offers[i].length == 3`
+*   `0 <= starti <= endi <= n - 1`
+*   `1 <= goldi <= 103`
+
+[https://leetcode.cn/problems/maximize-the-profit-as-the-salesman/description/](https://leetcode.cn/problems/maximize-the-profit-as-the-salesman/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public int maximizeTheProfit(int n, List<List<Integer>> offers) {
+        List<int[]>[] groups = new List[n];
+        Arrays.setAll(groups, e -> new ArrayList<>());
+        for (List<Integer> offer : offers) {
+            groups[offer.get(1)].add(new int[]{offer.get(0), offer.get(2)});
+        }
+        int[] dp = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            dp[i + 1] = dp[i];
+            for (int[] p : groups[i]) {
+                dp[i + 1] = Math.max(dp[i + 1], dp[p[0]] + p[1]);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+2008\. 出租车的最大盈利
+---------------
+
+你驾驶出租车行驶在一条有 `n` 个地点的路上。这 `n` 个地点从近到远编号为 `1` 到 `n` ，你想要从 `1` 开到 `n` ，通过接乘客订单盈利。你只能沿着编号递增的方向前进，不能改变方向。
+
+乘客信息用一个下标从 **0** 开始的二维数组 `rides` 表示，其中 `rides[i] = [starti, endi, tipi]` 表示第 `i` 位乘客需要从地点 `starti` 前往 `endi` ，愿意支付 `tipi` 元的小费。
+
+**每一位** 你选择接单的乘客 `i` ，你可以 **盈利** `endi - starti + tipi` 元。你同时 **最多** 只能接一个订单。
+
+给你 `n` 和 `rides` ，请你返回在最优接单方案下，你能盈利 **最多** 多少元。
+
+**注意：**你可以在一个地点放下一位乘客，并在同一个地点接上另一位乘客。
+
+**示例 1：**
+
+**输入：**n = 5, rides = \[_**\[2,5,4\]**_,\[1,5,1\]\]
+**输出：**7
+**解释：**我们可以接乘客 0 的订单，获得 5 - 2 + 4 = 7 元。
+
+**示例 2：**
+
+**输入：**n = 20, rides = \[\[1,6,1\],**_\[3,10,2\]_**,_**\[10,12,3\]**_,\[11,12,2\],\[12,15,2\],**_\[13,18,1\]_**\]
+**输出：**20
+**解释：**我们可以接以下乘客的订单：
+- 将乘客 1 从地点 3 送往地点 10 ，获得 10 - 3 + 2 = 9 元。
+- 将乘客 2 从地点 10 送往地点 12 ，获得 12 - 10 + 3 = 5 元。
+- 将乘客 5 从地点 13 送往地点 18 ，获得 18 - 13 + 1 = 6 元。
+  我们总共获得 9 + 5 + 6 = 20 元。
+
+**提示：**
+
+*   `1 <= n <= 105`
+*   `1 <= rides.length <= 3 * 104`
+*   `rides[i].length == 3`
+*   `1 <= starti < endi <= n`
+*   `1 <= tipi <= 105`
+
+[https://leetcode.cn/problems/maximum-earnings-from-taxi/description/](https://leetcode.cn/problems/maximum-earnings-from-taxi/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution { // 和上一个题目套路一模一样
+    public long maxTaxiEarnings(int n, int[][] rides) {
+        List<int[]>[] groups = new List[n + 1];
+        Arrays.setAll(groups, e -> new ArrayList<>());
+        for (int[] ride : rides) {
+            groups[ride[1]].add(new int[]{ride[0], ride[2]});
+        }
+        long[] dp = new long[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = dp[i - 1];
+            for (int[] p : groups[i]) {
+                dp[i] = Math.max(dp[i], dp[p[0]] + p[1] + i - p[0]);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+1235\. 规划兼职工作
+-------------
+
+你打算利用空闲时间来做兼职工作赚些零花钱。
+
+这里有 `n` 份兼职工作，每份工作预计从 `startTime[i]` 开始到 `endTime[i]` 结束，报酬为 `profit[i]`。
+
+给你一份兼职工作表，包含开始时间 `startTime`，结束时间 `endTime` 和预计报酬 `profit` 三个数组，请你计算并返回可以获得的最大报酬。
+
+注意，时间上出现重叠的 2 份工作不能同时进行。
+
+如果你选择的工作在时间 `X` 结束，那么你可以立刻进行在时间 `X` 开始的下一份工作。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/10/19/sample1_1584.png)**
+
+**输入：**startTime = \[1,2,3,3\], endTime = \[3,4,5,6\], profit = \[50,10,40,70\]
+**输出：**120
+**解释：**
+我们选出第 1 份和第 4 份工作， 
+时间范围是 \[1-3\]+\[3-6\]，共获得报酬 120 = 50 + 70。
+
+**示例 2：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/10/19/sample22_1584.png)**
+
+**输入：**startTime = \[1,2,3,4,6\], endTime = \[3,5,10,6,9\], profit = \[20,20,100,70,60\]
+**输出：**150
+**解释：**
+我们选择第 1，4，5 份工作。 
+共获得报酬 150 = 20 + 70 + 60。
+
+**示例 3：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/10/19/sample3_1584.png)**
+
+**输入：**startTime = \[1,1,1\], endTime = \[2,3,4\], profit = \[5,6,4\]
+**输出：**6
+
+**提示：**
+
+*   `1 <= startTime.length == endTime.length == profit.length <= 5 * 10^4`
+*   `1 <= startTime[i] < endTime[i] <= 10^9`
+*   `1 <= profit[i] <= 10^4`
+
+[https://leetcode.cn/problems/maximum-profit-in-job-scheduling/description/](https://leetcode.cn/problems/maximum-profit-in-job-scheduling/description/)
+
+```java
+class Solution {
+    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {
+        int n = startTime.length;
+        int[][] jobs = new int[n][3];
+        for (int i = 0; i < n; i++) {
+            jobs[i] = new int[]{startTime[i], endTime[i], profit[i]};
+        }
+        Arrays.sort(jobs, (a, b) -> a[1] - b[1]); // 按照结束时间排序
+
+        int[] dp = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            int j = search(jobs, i, jobs[i][0]);
+            dp[i + 1] = Math.max(dp[i], dp[j + 1] + jobs[i][2]);
+        }
+        return dp[n];
+    }
+
+    // 返回 endTime <= upper 的最大下标
+    private int search(int[][] jobs, int right, int upper) {
+        int left = -1;
+        while (left + 1 < right) {
+            int mid = (left + right) >>> 1;
+            if (jobs[mid][1] <= upper) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+}
+```
+
