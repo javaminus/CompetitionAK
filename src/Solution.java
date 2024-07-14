@@ -1,26 +1,20 @@
-import java.util.Arrays;
-
 class Solution {
-    public long minimumCost(int m, int n, int[] horizontalCut, int[] verticalCut) {
-        // 1.切一个m×n的蛋糕需要m×n-1刀
-        // 2.越后面切，需要的cost倍数越高，所以要从cost高往低切
-        // 3.横切刀的cost是cost[i]*(1+已切的竖刀次数)，竖切刀的情况类似
-        Arrays.sort(horizontalCut);
-        Arrays.sort(verticalCut);
-        long ans = 0;
-        int i = m - 2;
-        int j = n - 2;
-        int cntH = 1;
-        int cntV = 1;
-        while (i >= 0 || j >= 0) {
-            if (j < 0 || i >= 0 && horizontalCut[i] > verticalCut[j]) {
-                ans += (long) horizontalCut[i--] * cntH;
-                cntV++;
-            }else{
-                ans += (long) verticalCut[j--] * cntV;
-                cntH++;
+    public int minRefuelStops(int target, int startFuel, int[][] stations) {
+        int n = stations.length;
+        int[] dp = new int[n + 1]; // dp[i] 表示加油 i 次的最大行驶英里数
+        dp[0] = startFuel;
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j >= 0; j--) {
+                if (dp[j] >= stations[i][0]) {
+                    dp[j + 1] = Math.max(dp[j + 1], dp[j] + stations[i][1]);
+                }
             }
         }
-        return ans;
+        for (int i = 0; i <= n; i++) {
+            if (dp[i] >= target) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
