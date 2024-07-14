@@ -1225,3 +1225,132 @@ class Solution {
 }
 ```
 
+100367\. 切蛋糕的最小总开销 II
+---------------------
+
+有一个 `m x n` 大小的矩形蛋糕，需要切成 `1 x 1` 的小块。
+
+给你整数 `m` ，`n` 和两个数组：
+
+*   `horizontalCut` 的大小为 `m - 1` ，其中 `horizontalCut[i]` 表示沿着水平线 `i` 切蛋糕的开销。
+*   `verticalCut` 的大小为 `n - 1` ，其中 `verticalCut[j]` 表示沿着垂直线 `j` 切蛋糕的开销。
+
+一次操作中，你可以选择任意不是 `1 x 1` 大小的矩形蛋糕并执行以下操作之一：
+
+1.  沿着水平线 `i` 切开蛋糕，开销为 `horizontalCut[i]` 。
+2.  沿着垂直线 `j` 切开蛋糕，开销为 `verticalCut[j]` 。
+
+每次操作后，这块蛋糕都被切成两个独立的小蛋糕。
+
+每次操作的开销都为最开始对应切割线的开销，并且不会改变。
+
+请你返回将蛋糕全部切成 `1 x 1` 的蛋糕块的 **最小** 总开销。
+
+**示例 1：**
+
+**输入：**m = 3, n = 2, horizontalCut = \[1,3\], verticalCut = \[5\]
+
+**输出：**13
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/06/04/ezgifcom-animated-gif-maker-1.gif)
+
+*   沿着垂直线 0 切开蛋糕，开销为 5 。
+*   沿着水平线 0 切开 `3 x 1` 的蛋糕块，开销为 1 。
+*   沿着水平线 0 切开 `3 x 1` 的蛋糕块，开销为 1 。
+*   沿着水平线 1 切开 `2 x 1` 的蛋糕块，开销为 3 。
+*   沿着水平线 1 切开 `2 x 1` 的蛋糕块，开销为 3 。
+
+总开销为 `5 + 1 + 1 + 3 + 3 = 13` 。
+
+**示例 2：**
+
+**输入：**m = 2, n = 2, horizontalCut = \[7\], verticalCut = \[4\]
+
+**输出：**15
+
+**解释：**
+
+*   沿着水平线 0 切开蛋糕，开销为 7 。
+*   沿着垂直线 0 切开 `1 x 2` 的蛋糕块，开销为 4 。
+*   沿着垂直线 0 切开 `1 x 2` 的蛋糕块，开销为 4 。
+
+总开销为 `7 + 4 + 4 = 15` 。
+
+**提示：**
+
+*   `1 <= m, n <= 105`
+*   `horizontalCut.length == m - 1`
+*   `verticalCut.length == n - 1`
+*   `1 <= horizontalCut[i], verticalCut[i] <= 103`
+
+[https://leetcode.cn/problems/minimum-cost-for-cutting-cake-ii/description/](https://leetcode.cn/problems/minimum-cost-for-cutting-cake-ii/description/)
+
+```java
+class Solution { // dp超内存, 真没想到是贪心
+    public long minimumCost(int m, int n, int[] horizontalCut, int[] verticalCut) {
+        Arrays.sort(horizontalCut);
+        Arrays.sort(verticalCut);
+        long[][] dp = new long[m + 1][n + 1];
+        for (int i = 2; i <= m; i++) {
+            for (int j = 2; j <= n; j++) {
+                dp[i][j] = Long.MAX_VALUE / 2;
+            }
+        }
+
+        for (int i = 1; i < m; i++) {
+            dp[i + 1][1] = dp[i][1] + horizontalCut[i - 1];
+        }
+        for (int i = 1; i < n; i++) {
+            dp[1][i + 1] = dp[1][i] + verticalCut[i - 1];
+        }
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (i == 1 && j == 1) {
+                    continue;
+                }
+                if (i > 1) {
+                    dp[i][j] = Math.min(dp[i][j], horizontalCut[i - 2] + dp[1][j] + dp[i - 1][j]);
+                }
+                if (j > 1) {
+                    dp[i][j] = Math.min(dp[i][j], verticalCut[j - 2] + dp[i][1] + dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public long minimumCost(int m, int n, int[] horizontalCut, int[] verticalCut) {
+        // 1.切一个m×n的蛋糕需要m×n-1刀
+        // 2.越后面切，需要的cost倍数越高，所以要从cost高往低切
+        // 3.横切刀的cost是cost[i]*(1+已切的竖刀次数)，竖切刀的情况类似
+        Arrays.sort(horizontalCut);
+        Arrays.sort(verticalCut);
+        long ans = 0;
+        int i = m - 2;
+        int j = n - 2;
+        int cntH = 1;
+        int cntV = 1;
+        while (i >= 0 || j >= 0) {
+            if (j < 0 || i >= 0 && horizontalCut[i] > verticalCut[j]) {
+                ans += (long) horizontalCut[i--] * cntH;
+                cntV++;
+            }else{
+                ans += (long) verticalCut[j--] * cntV;
+                cntH++;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+
