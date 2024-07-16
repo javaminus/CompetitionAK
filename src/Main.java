@@ -1,108 +1,25 @@
-import java.io.*;
-import java.util.Arrays;
-
-public class Main {
-    public static int MAXN = 500001;
-
-    public static int LIMIT = 20;
-
-    // 根据节点个数n，计算出2的几次方就够用了
-    public static int power;
-
-    // 链式前向星建图
-    public static int[] head = new int[MAXN];
-
-    public static int[] next = new int[MAXN << 1];
-
-    public static int[] to = new int[MAXN << 1];
-
-    public static int cnt;
-
-    // deep[i] : 节点i在第几层
-    public static int[] deep = new int[MAXN];
-
-    // stjump[i][p] : 节点i往上跳2的p次方步，到达的节点编号
-    public static int[][] stjump = new int[MAXN][LIMIT];
-    public static void build(int n) {
-        power = 32 - Integer.numberOfLeadingZeros(n);
-        cnt = 1;
-        Arrays.fill(head, 1, n + 1, 0);
+class Main{
+    public static void main(String[] args) {
+        System.out.println(xorN(200));
+        System.out.println(xorN(100));
+        System.out.println(xorN(200) ^ xorN(100));
+        int ans = 0;
+        for (int i = 101; i <= 200; i++) {
+            ans ^= i;
+        }
+        System.out.println(ans);
     }
 
-    public static void addEdge(int u, int v) {
-        next[cnt] = head[u];
-        to[cnt] = v;
-        head[u] = cnt++;
-    }
-
-    // dfs递归版
-    // 一般来说都这么写，但是本题附加的测试数据很毒
-    // java这么写就会因为递归太深而爆栈，c++这么写就能通过
-    public static void dfs(int x, int fa) {
-        deep[x] = deep[fa] + 1;
-        stjump[x][0] = fa;
-        for (int p = 1; p <= power; p++) {
-            stjump[x][p] = stjump[stjump[x][p - 1]][p - 1];
+    private static int xorN(int n) {
+        switch (n % 4) {
+            case 0 :
+                return n;
+            case 1 :
+                return 1;
+            case 2 :
+                return n + 1;
+            default :
+                return 0;
         }
-        for (int e = head[x]; e != 0; e = next[e]) {
-            if (to[e] != fa) {
-                dfs(to[e], x);
-            }
-        }
-    }
-
-    private static int lca(int a, int b) {
-        if (deep[a] < deep[b]) {
-            int tmp = a;
-            a = b;
-            b = tmp;
-        }
-        for (int p = power; p >= 0; p--) {
-            if (deep[stjump[a][p]] >= deep[b]) {
-                a = stjump[a][p];
-            }
-        }
-        if (a == b) {
-            return a;
-        }
-        // a和b在同一层
-        for (int p = power; p >= 0; p--) {
-            if (stjump[a][p] != stjump[b][p]) {
-                a = stjump[a][p];
-                b = stjump[b][p];
-            }
-        }
-        return stjump[a][0];
-    }
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StreamTokenizer in = new StreamTokenizer(br);
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-        in.nextToken();
-        int n = (int) in.nval;
-        in.nextToken();
-        int m = (int) in.nval;
-        in.nextToken();
-        int root = (int) in.nval;
-        build(n);
-        for (int i = 1, u, v; i < n; i++) {
-            in.nextToken();
-            u = (int) in.nval;
-            in.nextToken();
-            v = (int) in.nval;
-            addEdge(u, v);
-            addEdge(v, u);
-        }
-        dfs(root, 0);
-        for (int i = 1, a, b; i <= m; i++) {
-            in.nextToken();
-            a = (int) in.nval;
-            in.nextToken();
-            b = (int) in.nval;
-            out.println(lca(a, b));
-        }
-        out.flush();
-        out.close();
-        br.close();
     }
 }

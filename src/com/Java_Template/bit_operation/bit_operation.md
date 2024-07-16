@@ -1036,6 +1036,25 @@ class Solution {
 
 # 异或（XOR）的性质
 
+# 异或板子：
+
+```java
+    private static int xorN(int n) {
+        switch (n % 4) {
+            case 0 :
+                return n;
+            case 1 :
+                return 1;
+            case 2 :
+                return n + 1;
+            default :
+                return 0;
+        }
+    }
+```
+
+
+
 2429\. 最小异或
 -----------
 

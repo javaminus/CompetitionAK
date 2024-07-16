@@ -511,3 +511,294 @@ class Solution { // 贪心 + 优先队列
 }
 ```
 
+2896\. 执行操作使两个字符串相等
+-------------------
+
+给你两个下标从 **0** 开始的二进制字符串 `s1` 和 `s2` ，两个字符串的长度都是 `n` ，再给你一个正整数 `x` 。
+
+你可以对字符串 `s1` 执行以下操作 **任意次** ：
+
+*   选择两个下标 `i` 和 `j` ，将 `s1[i]` 和 `s1[j]` 都反转，操作的代价为 `x` 。
+*   选择满足 `i < n - 1` 的下标 `i` ，反转 `s1[i]` 和 `s1[i + 1]` ，操作的代价为 `1` 。
+
+请你返回使字符串 `s1` 和 `s2` 相等的 **最小** 操作代价之和，如果无法让二者相等，返回 `-1` 。
+
+**注意** ，反转字符的意思是将 `0` 变成 `1` ，或者 `1` 变成 `0` 。
+
+**示例 1：**
+
+**输入：**s1 = "1100011000", s2 = "0101001010", x = 2
+**输出：**4
+**解释：**我们可以执行以下操作：
+- 选择 i = 3 执行第二个操作。结果字符串是 s1 = "110_**11**_11000" 。
+- 选择 i = 4 执行第二个操作。结果字符串是 s1 = "1101_**00**_1000" 。
+- 选择 i = 0 和 j = 8 ，执行第一个操作。结果字符串是 s1 = "_**0**_1010010_**1**_0" = s2 。
+  总代价是 1 + 1 + 2 = 4 。这是最小代价和。
+
+**示例 2：**
+
+**输入：**s1 = "10110", s2 = "00011", x = 4
+**输出：**\-1
+**解释：**无法使两个字符串相等。
+
+**提示：**
+
+*   `n == s1.length == s2.length`
+*   `1 <= n, x <= 500`
+*   `s1` 和 `s2` 只包含字符 `'0'` 和 `'1'` 。
+
+[https://leetcode.cn/problems/apply-operations-to-make-two-strings-equal/description/](https://leetcode.cn/problems/apply-operations-to-make-two-strings-equal/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 记忆化搜索 O(n ^ 2)
+    public int minOperations(String s1, String s2, int x) {
+        char[] s = s1.toCharArray(), t = s2.toCharArray();
+        int n = s.length;
+        int diff = 0;
+        // 如果s与t之间1的个数不同，直接返回-1
+        for (int i = 0; i < n; i++) {
+            diff ^= s[i] ^ t[i];
+        }
+        if (diff != 0) {
+            return -1;
+        }
+        int[][][] memo = new int[n][n + 1][2]; // 下标 i，还需要知道免费反转次数 j，以及上一个字符是否选择了第二种操作 preRev。
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= n; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        return dfs(n - 1, 0, 0, memo, s, t, x);
+    }
+
+    private int dfs(int i, int j, int preRev, int[][][] memo, char[] s, char[] t, int x) {
+        if (i < 0) {
+            return j > 0 || preRev > 0 ? Integer.MAX_VALUE / 2 : 0;
+        }
+        if (memo[i][j][preRev] != -1) {
+            return memo[i][j][preRev];
+        }
+        if ((s[i] == t[i]) == (preRev == 0)) { // 无需反转
+            return dfs(i - 1, j, 0, memo, s, t, x);
+        }
+        int res = Math.min(dfs(i - 1, j + 1, 0, memo, s, t, x) + x, dfs(i - 1, j, 1, memo, s, t, x) + 1);
+        if (j > 0) {
+            // 可以免费反转
+            res = Math.min(res, dfs(i - 1, j - 1, 0, memo, s, t, x));
+        }
+        return memo[i][j][preRev] = res;
+    }
+}
+```
+
+![1721093984765](assets/1721093984765.png)
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+
+class Solution {
+    public int minOperations(String s1, String s2, int x) {
+        char[] s = s1.toCharArray();
+        char[] t = s2.toCharArray();
+        int n = s.length;
+        ArrayList<Integer> ps = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if ((s[i] ^ t[i]) == 1) {
+                ps.add(i);
+            }
+        }
+        int len = ps.size();
+        if (len % 2 == 1) {
+            return -1;
+        }
+        if(len == 0){
+            return 0;
+        }
+//        int[] dp = new int[len + 1]; // dp[i] = max(dp[i - 1] + x, dp[i - 2] + (p[i] - p[i - 1]) * 2)
+//        dp[1] = x;
+//        for (int i = 1; i < len; i++) {
+//            dp[i + 1] = Math.min(dp[i] + x, dp[i - 1] + (ps.get(i) - ps.get(i - 1)) * 2);
+//        }
+//        return dp[len] / 2;
+        int f0 = 0, f1 = x;
+        for (int i = 1; i < len; i++) {
+            int newF = Math.min(f1 + x, f0 + (ps.get(i) - ps.get(i - 1)) * 2);
+            f0 = f1;
+            f1 = newF;
+        }
+        return f1 / 2;
+    }
+}
+```
+
+2167. 移除所有载有违禁货物车厢所需的最少时间（套路：这种左右删除的题目，直接枚举分割线 ）
+--------------------------
+
+给你一个下标从 **0** 开始的二进制字符串 `s` ，表示一个列车车厢序列。`s[i] = '0'` 表示第 `i` 节车厢 **不** 含违禁货物，而 `s[i] = '1'` 表示第 `i` 节车厢含违禁货物。
+
+作为列车长，你需要清理掉所有载有违禁货物的车厢。你可以不限次数执行下述三种操作中的任意一个：
+
+1.  从列车 **左** 端移除一节车厢（即移除 `s[0]`），用去 1 单位时间。
+2.  从列车 **右** 端移除一节车厢（即移除 `s[s.length - 1]`），用去 1 单位时间。
+3.  从列车车厢序列的 **任意位置** 移除一节车厢，用去 2 单位时间。
+
+返回移除所有载有违禁货物车厢所需要的 **最少** 单位时间数。
+
+注意，空的列车车厢序列视为没有车厢含违禁货物。
+
+**示例 1：**
+
+**输入：**s = "_**11**_00_**1**_0_**1**_"
+**输出：**5
+**解释：**
+一种从序列中移除所有载有违禁货物的车厢的方法是：
+- 从左端移除一节车厢 2 次。所用时间是 2 \* 1 = 2 。
+- 从右端移除一节车厢 1 次。所用时间是 1 。
+- 移除序列中间位置载有违禁货物的车厢。所用时间是 2 。
+  总时间是 2 + 1 + 2 = 5 。
+
+一种替代方法是：
+- 从左端移除一节车厢 2 次。所用时间是 2 \* 1 = 2 。
+- 从右端移除一节车厢 3 次。所用时间是 3 \* 1 = 3 。
+  总时间也是 2 + 3 = 5 。
+
+5 是移除所有载有违禁货物的车厢所需要的最少单位时间数。
+没有其他方法能够用更少的时间移除这些车厢。
+
+**示例 2：**
+
+**输入：**s = "00_**1**_0"
+**输出：**2
+**解释：**
+一种从序列中移除所有载有违禁货物的车厢的方法是：
+- 从左端移除一节车厢 3 次。所用时间是 3 \* 1 = 3 。
+  总时间是 3.
+
+另一种从序列中移除所有载有违禁货物的车厢的方法是：
+- 移除序列中间位置载有违禁货物的车厢。所用时间是 2 。
+  总时间是 2.
+
+另一种从序列中移除所有载有违禁货物的车厢的方法是：
+- 从右端移除一节车厢 2 次。所用时间是 2 \* 1 = 2 。
+  总时间是 2.
+
+2 是移除所有载有违禁货物的车厢所需要的最少单位时间数。
+没有其他方法能够用更少的时间移除这些车厢。
+
+**提示：**
+
+*   `1 <= s.length <= 2 * 105`
+*   `s[i]` 为 `'0'` 或 `'1'`
+
+[https://leetcode.cn/problems/minimum-time-to-remove-all-cars-containing-illegal-goods/description/](https://leetcode.cn/problems/minimum-time-to-remove-all-cars-containing-illegal-goods/description/)
+
+```java
+class Solution {
+    public int minimumTime(String s) { // s.length = 1e5，记忆化的空间会超，考虑动规。 套路：这种左右删除的题目，直接枚举分割线
+        int n = s.length();
+        int[] suf = new int[n + 1];
+        for (int i = n - 1; i >= 0; i--) {
+            suf[i] = s.charAt(i) == '0' ? suf[i + 1] : Math.min(suf[i + 1] + 2, n - i);
+        }
+        int ans = suf[0];
+        int pre = 0;
+        for (int i = 0; i < n; i++) {
+            if (s.charAt(i) == '1') {
+                pre = Math.min(pre + 2, i + 1);
+                ans = Math.min(ans, pre + suf[i + 1]);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+2188\. 完成比赛的最少时间
+----------------
+
+给你一个下标从 **0** 开始的二维整数数组 `tires` ，其中 `tires[i] = [fi, ri]` 表示第 `i` 种轮胎如果连续使用，第 `x` 圈需要耗时 `fi * ri(x-1)` 秒。
+
+*   比方说，如果 `fi = 3` 且 `ri = 2` ，且一直使用这种类型的同一条轮胎，那么该轮胎完成第 `1` 圈赛道耗时 `3` 秒，完成第 `2` 圈耗时 `3 * 2 = 6` 秒，完成第 `3` 圈耗时 `3 * 22 = 12` 秒，依次类推。
+
+同时给你一个整数 `changeTime` 和一个整数 `numLaps` 。
+
+比赛总共包含 `numLaps` 圈，你可以选择 **任意** 一种轮胎开始比赛。每一种轮胎都有 **无数条** 。每一圈后，你可以选择耗费 `changeTime` 秒 **换成** 任意一种轮胎（也可以换成当前种类的新轮胎）。
+
+请你返回完成比赛需要耗费的 **最少** 时间。
+
+**示例 1：**
+
+**输入：**tires = \[\[2,3\],\[3,4\]\], changeTime = 5, numLaps = 4
+**输出：**21
+**解释：**
+第 1 圈：使用轮胎 0 ，耗时 2 秒。
+第 2 圈：继续使用轮胎 0 ，耗时 2 \* 3 = 6 秒。
+第 3 圈：耗费 5 秒换一条新的轮胎 0 ，然后耗时 2 秒完成这一圈。
+第 4 圈：继续使用轮胎 0 ，耗时 2 \* 3 = 6 秒。
+总耗时 = 2 + 6 + 5 + 2 + 6 = 21 秒。
+完成比赛的最少时间为 21 秒。
+
+**示例 2：**
+
+**输入：**tires = \[\[1,10\],\[2,2\],\[3,4\]\], changeTime = 6, numLaps = 5
+**输出：**25
+**解释：**
+第 1 圈：使用轮胎 1 ，耗时 2 秒。
+第 2 圈：继续使用轮胎 1 ，耗时 2 \* 2 = 4 秒。
+第 3 圈：耗时 6 秒换一条新的轮胎 1 ，然后耗时 2 秒完成这一圈。
+第 4 圈：继续使用轮胎 1 ，耗时 2 \* 2 = 4 秒。
+第 5 圈：耗时 6 秒换成轮胎 0 ，然后耗时 1 秒完成这一圈。
+总耗时 = 2 + 4 + 6 + 2 + 4 + 6 + 1 = 25 秒。
+完成比赛的最少时间为 25 秒。
+
+**提示：**
+
+*   `1 <= tires.length <= 105`
+*   `tires[i].length == 2`
+*   `1 <= fi, changeTime <= 105`
+*   `2 <= ri <= 105`
+*   `1 <= numLaps <= 1000`
+
+[https://leetcode.cn/problems/minimum-time-to-finish-the-race/description/](https://leetcode.cn/problems/minimum-time-to-finish-the-race/description/)
+
+![1721108711218](assets/1721108711218.png)
+
+> 怎么想到的呢？
+>
+> 一眼dp，然后就是换轮胎，换哪种类型的轮胎。我们可以计算出一个轮胎最多使用17次就可以换了，不然就太费时间了。  然后预处理使用一种轮胎跑[1, 17]圈的最少时间，我们就使用这种类型的轮胎跑，然后就是线性dp。
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minimumFinishTime(int[][] tires, int changeTime, int numLaps) {
+        int[] minSec = new int[18]; // 代表用一个轮胎，跑i圈，所用的最少时间（不换轮胎）
+        Arrays.fill(minSec, Integer.MAX_VALUE / 2);
+        for (int[] t : tires) {
+            long time = t[0];
+            for (int x = 1, sum = 0; time <= changeTime + t[0]; x++) { // x是圈数
+                sum += time;
+                minSec[x] = Math.min(minSec[x], sum);
+                time *= t[1];
+            }
+        }
+        int[] dp = new int[numLaps + 1]; // 表示换轮胎的情况下，跑i圈的最小时间
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+        for (int i = 1; i <= numLaps; i++) {
+            // 先跑i-j圈，剩下的j圈，用一个轮胎跑完，所用的最少时间
+            // 一个轮胎，最多跑17圈
+            for (int j = 1; j <= Math.min(i, 17); j++) {
+                dp[i] = Math.min(dp[i], dp[i - j] + minSec[j]);
+            }
+            //最后的i-j圈，由一个新的轮胎跑，所以中间有一个换胎过程
+            dp[i] += changeTime; // 这里跑一圈也加了换胎过程，所以最后需要减去
+        }
+        return dp[numLaps] - changeTime; // 减去刚开始的一次换胎过程
+    }
+}
+```
+
