@@ -5,9 +5,7 @@
 
 给你一个整数数组 `nums` 和一个 **正** 整数 `k` 。
 
-`nums` 的一个 
-
-子序列
+`nums` 的一个 子序列
 
 `sub` 的长度为 `x` ，如果其满足以下条件，则称其为 **有效子序列** ：
 
@@ -798,6 +796,580 @@ class Solution {
             dp[i] += changeTime; // 这里跑一圈也加了换胎过程，所以最后需要减去
         }
         return dp[numLaps] - changeTime; // 减去刚开始的一次换胎过程
+    }
+}
+```
+
+# §7.2 特殊子序列
+
+> 比较特殊的一类题型，递推比记忆化搜索好写。 
+
+2501\. 数组中最长的方波
+---------------
+
+给你一个整数数组 `nums` 。如果 `nums` 的子序列满足下述条件，则认为该子序列是一个 **方波** ：
+
+*   子序列的长度至少为 `2` ，并且
+*   将子序列从小到大排序 **之后** ，除第一个元素外，每个元素都是前一个元素的 **平方** 。
+
+返回 `nums` 中 **最长方波** 的长度，如果不存在 **方波** 则返回 `-1` 。
+
+**子序列** 也是一个数组，可以由另一个数组删除一些或不删除元素且不改变剩余元素的顺序得到。
+
+**示例 1 ：**
+
+**输入：**nums = \[4,3,6,16,8,2\]
+**输出：**3
+**解释：**选出子序列 \[4,16,2\] 。排序后，得到 \[2,4,16\] 。
+- 4 = 2 \* 2.
+- 16 = 4 \* 4.
+  因此，\[4,16,2\] 是一个方波.
+  可以证明长度为 4 的子序列都不是方波。
+
+**示例 2 ：**
+
+**输入：**nums = \[2,3,5,6,7\]
+**输出：**\-1
+**解释：**nums 不存在方波，所以返回 -1 。
+
+**提示：**
+
+*   `2 <= nums.length <= 105`
+*   `2 <= nums[i] <= 105`
+
+[https://leetcode.cn/problems/longest-square-streak-in-an-array/description/](https://leetcode.cn/problems/longest-square-streak-in-an-array/description/)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int longestSquareStreak(int[] nums) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        HashMap<Long, Integer> dp = new HashMap<>();
+        for (int i = n - 1; i >=0; i--) {
+            long p = (long) nums[i] * nums[i];
+            if (dp.containsKey(p)) {
+                dp.put((long) nums[i], dp.get(p) + 1);
+            }else{
+                dp.put((long) nums[i], 1);
+            }
+        }
+        int ans = 0;
+        for (int x : dp.values()) {
+            ans = Math.max(ans, x);
+        }
+        return ans < 2 ? -1 : ans;
+    }
+
+}
+```
+
+```java
+import java.util.*;
+
+class Solution { // 优化成 o(n)
+        public int longestSquareStreak(int[] nums) {
+        Set<Long> set = new HashSet<>();
+        for (int x : nums) set.add((long) x);
+        int ans = 0;
+        for (long x : nums) {
+            int cnt = 1;
+            while (set.contains(x *= x)) cnt++;
+            ans = Math.max(ans, cnt);
+        }
+        return ans > 1 ? ans : -1;
+    }
+}
+```
+
+1218\. 最长定差子序列
+--------------
+
+给你一个整数数组 `arr` 和一个整数 `difference`，请你找出并返回 `arr` 中最长等差子序列的长度，该子序列中相邻元素之间的差等于 `difference` 。
+
+**子序列** 是指在不改变其余元素顺序的情况下，通过删除一些元素或不删除任何元素而从 `arr` 派生出来的序列。
+
+**示例 1：**
+
+**输入：**arr = \[1,2,3,4\], difference = 1
+**输出：**4
+**解释：**最长的等差子序列是 \[1,2,3,4\]。
+
+**示例 2：**
+
+**输入：**arr = \[1,3,5,7\], difference = 1
+**输出：**1
+**解释：**最长的等差子序列是任意单个元素。
+
+**示例 3：**
+
+**输入：**arr = \[1,5,7,8,5,3,4,2,1\], difference = -2
+**输出：**4
+**解释：**最长的等差子序列是 \[7,5,3,1\]。
+
+**提示：**
+
+*   `1 <= arr.length <= 105`
+*   `-104 <= arr[i], difference <= 104`
+
+[https://leetcode.cn/problems/longest-arithmetic-subsequence-of-given-difference/description/](https://leetcode.cn/problems/longest-arithmetic-subsequence-of-given-difference/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int longestSubsequence(int[] arr, int difference) {
+        int ans = 0;
+        HashMap<Integer, Integer> dp = new HashMap<>();
+        for (int v : arr) {
+            dp.put(v, dp.getOrDefault(v - difference, 0) + 1);
+            ans = Math.max(ans, dp.get(v));
+        }
+        return ans;
+    }
+}
+```
+
+1027\. 最长等差数列
+-------------
+
+给你一个整数数组 `nums`，返回 `nums` 中最长等差子序列的**长度**。
+
+回想一下，`nums` 的子序列是一个列表 `nums[i1], nums[i2], ..., nums[ik]` ，且 `0 <= i1 < i2 < ... < ik <= nums.length - 1`。并且如果 `seq[i+1] - seq[i]`( `0 <= i < seq.length - 1`) 的值都相同，那么序列 `seq` 是等差的。
+
+**示例 1：**
+
+**输入：**nums = \[3,6,9,12\]
+**输出：**4
+**解释：** 
+整个数组是公差为 3 的等差数列。
+
+**示例 2：**
+
+**输入：**nums = \[9,4,7,2,10\]
+**输出：**3
+**解释：**
+最长的等差子序列是 \[4,7,10\]。
+
+**示例 3：**
+
+**输入：**nums = \[20,1,15,3,10,5,8\]
+**输出：**4
+**解释：**
+最长的等差子序列是 \[20,15,10,5\]。
+
+**提示：**
+
+*   `2 <= nums.length <= 1000`
+*   `0 <= nums[i] <= 500`
+
+[https://leetcode.cn/problems/longest-arithmetic-subsequence/description/](https://leetcode.cn/problems/longest-arithmetic-subsequence/description/)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 暴力枚举 727ms
+    public int longestArithSeqLength(int[] nums) {
+        int mx = Arrays.stream(nums).max().getAsInt();
+        int ans = 0;
+        for (int i = -mx; i <= mx; i++) {
+            ans = Math.max(ans, cal(nums, i));
+        }
+        return ans;
+    }
+
+    private int cal(int[] nums, int k) {
+        int ans = 0;
+        HashMap<Integer, Integer> dp = new HashMap<>();
+        for (int x : nums) {
+            dp.put(x, dp.getOrDefault(x - k, 0) + 1);
+            ans = Math.max(ans, dp.get(x));
+        }
+        return ans;
+    }
+
+}
+```
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 手算mx，608ms，居然快了100ms
+    public int longestArithSeqLength(int[] nums) {
+        int mx = 0;
+        for (int x : nums) {
+            mx = Math.max(mx, x);
+        }
+        int ans = 0;
+        for (int i = -mx; i <= mx; i++) {
+            ans = Math.max(ans, cal(nums, i));
+        }
+        return ans;
+    }
+
+    private int cal(int[] nums, int k) {
+        int ans = 0;
+        HashMap<Integer, Integer> dp = new HashMap<>();
+        for (int x : nums) {
+            dp.put(x, dp.getOrDefault(x - k, 0) + 1);
+            ans = Math.max(ans, dp.get(x));
+        }
+        return ans;
+    }
+
+}
+```
+
+```java
+class Solution {
+    public int longestArithSeqLength(int[] nums) { // 数组代替hash表 29ms
+        int ans = 0;
+        int m = 0;
+        for (int x : nums) {
+            m = Math.max(m, x);
+        }
+        for (int d = -m; d <= m; d++) {
+            int[] dp = new int[m + 1];
+            for (int x : nums) {
+                dp[x] = 0 <= x - d && x - d <= m ? dp[x - d] + 1 : 1; // 确定x - d的范围
+                ans = Math.max(ans, dp[x]);
+            }
+        }
+        return ans;
+    }
+}
+
+```
+
+3202\. 找出有效子序列的最大长度 II
+----------------------
+
+给你一个整数数组 `nums` 和一个 **正** 整数 `k` 。
+
+`nums` 的一个 
+
+子序列
+
+`sub` 的长度为 `x` ，如果其满足以下条件，则称其为 **有效子序列** ：
+
+*   `(sub[0] + sub[1]) % k == (sub[1] + sub[2]) % k == ... == (sub[x - 2] + sub[x - 1]) % k`
+
+返回 `nums` 的 **最长****有效子序列** 的长度。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,3,4,5\], k = 2
+
+**输出：**5
+
+**解释：**
+
+最长有效子序列是 `[1, 2, 3, 4, 5]` 。
+
+**示例 2：**
+
+**输入：**nums = \[1,4,2,3,1,4\], k = 3
+
+**输出：**4
+
+**解释：**
+
+最长有效子序列是 `[1, 4, 1, 4]` 。
+
+**提示：**
+
+*   `2 <= nums.length <= 103`
+*   `1 <= nums[i] <= 107`
+*   `1 <= k <= 103`
+
+[https://leetcode.cn/problems/find-the-maximum-length-of-valid-subsequence-ii/description/](https://leetcode.cn/problems/find-the-maximum-length-of-valid-subsequence-ii/description/)
+
+```java
+class Solution {
+    public int maximumLength(int[] nums, int k) { // 太牛了
+        int[][] dp = new int[k][k]; // 表示前一个数是i,前前个数是j的最大长度
+        int ans = 0;
+        for (int x : nums) {
+            x %= k;
+            for (int y = 0; y < k; y++) { // 枚举前前个数
+                dp[x][y] = dp[y][x] + 1;
+                ans = Math.max(ans, dp[x][y]);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+873\. 最长的斐波那契子序列的长度
+-------------------
+
+如果序列 `X_1, X_2, ..., X_n` 满足下列条件，就说它是 _斐波那契式_ 的：
+
+*   `n >= 3`
+*   对于所有 `i + 2 <= n`，都有 `X_i + X_{i+1} = X_{i+2}`
+
+给定一个**严格递增**的正整数数组形成序列 arr ，找到 arr 中最长的斐波那契式的子序列的长度。如果一个不存在，返回  0 。
+
+_（回想一下，子序列是从原序列 arr 中派生出来的，它从 arr 中删掉任意数量的元素（也可以不删），而不改变其余元素的顺序。例如， `[3, 5, 8]` 是 `[3, 4, 5, 6, 7, 8]` 的一个子序列）_
+
+**示例 1：**
+
+**输入:** arr = \[1,2,3,4,5,6,7,8\]
+**输出:** 5
+**解释:** 最长的斐波那契式子序列为 \[1,2,3,5,8\] 。
+
+**示例 2：**
+
+**输入:** arr = \[1,3,7,11,12,14,18\]
+**输出:** 3
+**解释**: 最长的斐波那契式子序列有 \[1,11,12\]、\[3,11,14\] 以及 \[7,11,18\] 。
+
+**提示：**
+
+*   `3 <= arr.length <= 1000`
+*   `1 <= arr[i] < arr[i + 1] <= 10^9`
+
+
+[https://leetcode.cn/problems/length-of-longest-fibonacci-subsequence/description/](https://leetcode.cn/problems/length-of-longest-fibonacci-subsequence/description/)
+
+```java
+import java.util.Arrays;
+import java.util.HashSet;
+
+class Solution { // 暴力枚举起点
+    public int lenLongestFibSubseq(int[] arr) {
+        HashSet<Integer> set = new HashSet<>();
+        for (int x : arr) {
+            set.add(x);
+        }
+        int ans = 0;
+        int n = arr.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                ans = Math.max(ans, f(set, arr[j], arr[i]));
+            }
+        }
+        return ans > 2 ? ans : 0;
+    }
+
+    private int f(HashSet<Integer> set, int x, int y) {
+        int ans = 2;
+        while (set.contains(x + y)) {
+            ans++;
+            int t = x + y;
+            y = x;
+            x = t;
+        }
+        return ans;
+    }
+}
+```
+
+446\. 等差数列划分 II - 子序列
+---------------------
+
+给你一个整数数组 `nums` ，返回 `nums` 中所有 **等差子序列** 的数目。
+
+如果一个序列中 **至少有三个元素** ，并且任意两个相邻元素之差相同，则称该序列为等差序列。
+
+*   例如，`[1, 3, 5, 7, 9]`、`[7, 7, 7, 7]` 和 `[3, -1, -5, -9]` 都是等差序列。
+*   再例如，`[1, 1, 2, 5, 7]` 不是等差序列。
+
+数组中的子序列是从数组中删除一些元素（也可能不删除）得到的一个序列。
+
+*   例如，`[2,5,10]` 是 `[1,2,1,_**2**_,4,1,**_5_**,_**10**_]` 的一个子序列。
+
+题目数据保证答案是一个 **32-bit** 整数。
+
+**示例 1：**
+
+**输入：**nums = \[2,4,6,8,10\]
+**输出：**7
+**解释：**所有的等差子序列为：
+\[2,4,6\]
+\[4,6,8\]
+\[6,8,10\]
+\[2,4,6,8\]
+\[4,6,8,10\]
+\[2,4,6,8,10\]
+\[2,6,10\]
+
+**示例 2：**
+
+**输入：**nums = \[7,7,7,7,7\]
+**输出：**16
+**解释：**数组中的任意子序列都是等差子序列。
+
+**提示：**
+
+*   `1  <= nums.length <= 1000`
+*   `-231 <= nums[i] <= 231 - 1`
+
+[https://leetcode.cn/problems/arithmetic-slices-ii-subsequence/description/](https://leetcode.cn/problems/arithmetic-slices-ii-subsequence/description/)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 过不了用例 [0,2000000000,-294967296]
+    public int numberOfArithmeticSlices(int[] nums) {
+        int n = nums.length;
+        if (n < 3) {
+            return 0;
+        }
+        HashMap<Integer, Integer>[] dp = new HashMap[n]; // 表示前i个数以key为公差的最长子序列
+        Arrays.setAll(dp, e -> new HashMap<Integer, Integer>());
+        int ans = 0;
+        for (int i = 0; i < n; i++) { // 枚举公差
+            for (int j = 0; j < i; j++) {
+                // dp[i][diff] += dp[j][diff] + 1
+                int diff = nums[i] - nums[j];
+                dp[i].put(diff, dp[i].getOrDefault(diff, 0) + dp[j].getOrDefault(diff, 0) + 1);
+                if (dp[j].containsKey(diff)) {
+                    ans += dp[j].get(diff);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+public class Solution {
+
+    public int numberOfArithmeticSlices(int[] nums) {
+        int len = nums.length;
+        if (len < 3) {
+            return 0;
+        }
+
+        Map<Long, Integer>[] dp = new HashMap[len];
+        for (int i = 0; i < len; i++) {
+            dp[i] = new HashMap<>();
+        }
+
+        int res = 0;
+        for (int i = 1; i < len; i++) {
+            for (int j = 0; j < i; j++) {
+                long diff = (long) nums[i] - nums[j]; // 这里做修改，[0,2000000000,-294967296]
+                if (diff > Integer.MAX_VALUE || diff < Integer.MIN_VALUE) {
+                    continue;
+                }
+                dp[i].put(diff, dp[i].getOrDefault(diff, 0) + dp[j].getOrDefault(diff, 0) + 1);
+                if (dp[j].containsKey(diff)) {
+                    res += dp[j].get(diff);
+                }
+            }
+        }
+        return res;
+    }
+}
+
+```
+
+1048\. 最长字符串链
+-------------
+
+给出一个单词数组 `words` ，其中每个单词都由小写英文字母组成。
+
+如果我们可以 **不改变其他字符的顺序** ，在 `wordA` 的任何地方添加 **恰好一个** 字母使其变成 `wordB` ，那么我们认为 `wordA` 是 `wordB` 的 **前身** 。
+
+*   例如，`"abc"` 是 `"abac"` 的 **前身** ，而 `"cba"` 不是 `"bcad"` 的 **前身**
+
+**词链**是单词 `[word_1, word_2, ..., word_k]` 组成的序列，`k >= 1`，其中 `word1` 是 `word2` 的前身，`word2` 是 `word3` 的前身，依此类推。一个单词通常是 `k == 1` 的 **单词链** 。
+
+从给定单词列表 `words` 中选择单词组成词链，返回 词链的 **最长可能长度** 。  
+
+
+**示例 1：**
+
+**输入：**words = \["a","b","ba","bca","bda","bdca"\]
+**输出：**4
+**解释：**最长单词链之一为 \["a","ba","bda","bdca"\]
+
+**示例 2:**
+
+**输入：**words = \["xbc","pcxbcf","xb","cxbc","pcxbc"\]
+**输出：**5
+**解释：**所有的单词都可以放入单词链 \["xb", "xbc", "cxbc", "pcxbc", "pcxbcf"\].
+
+**示例 3:**
+
+**输入：**words = \["abcd","dbqca"\]
+**输出：**1
+**解释：**字链\["abcd"\]是最长的字链之一。
+\["abcd"，"dbqca"\]不是一个有效的单词链，因为字母的顺序被改变了。
+
+**提示：**
+
+*   `1 <= words.length <= 1000`
+*   `1 <= words[i].length <= 16`
+*   `words[i]` 仅由小写英文字母组成。
+
+[https://leetcode.cn/problems/longest-string-chain/description/](https://leetcode.cn/problems/longest-string-chain/description/)
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution { // 37ms
+    private Map<String, Integer> memo = new HashMap<>();
+    public int longestStrChain(String[] words) {
+        // 这里的难点就是如何判断两个字符串是否是可以连接的
+        for (String s : words) {
+            memo.put(s, 0);
+        }
+        int ans = 0;
+        for (String s : memo.keySet()) {
+            ans = Math.max(ans, dfs(s));
+        }
+        return ans;
+    }
+
+    private int dfs(String s) {
+        int res = memo.get(s);
+        if (res > 0) {
+            return res; // 之前计算过
+        }
+        for (int i = 0; i < s.length(); i++) { // 枚举去掉 s[i]
+            String t = s.substring(0, i) + s.substring(i + 1, s.length());
+            if (memo.containsKey(t)) {
+                res = Math.max(res, dfs(t));
+            }
+        }
+        memo.put(s, res + 1);
+        return res + 1;
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution {
+    public int longestStrChain(String[] words) { // 43ms
+        Arrays.sort(words, (a, b) -> a.length() - b.length());
+        int ans = 0;
+        HashMap<String, Integer> dp = new HashMap<String, Integer>();
+        for (String s : words) {
+            int res = 0;
+            for (int i = 0; i < s.length(); i++) { // 枚举去掉 s[i]
+                String t = s.substring(0, i) + s.substring(i + 1);
+                res = Math.max(res, dp.getOrDefault(t, 0));
+            }
+            dp.put(s, res + 1);
+            ans = Math.max(ans, res + 1);
+        }
+        return ans;
     }
 }
 ```
