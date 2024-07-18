@@ -1553,3 +1553,263 @@ class Solution {
 }
 ```
 
+493\. 翻转对(离散化+线段树区间合并板子)
+---------
+
+给定一个数组 `nums` ，如果 `i < j` 且 `nums[i] > 2*nums[j]` 我们就将 `(i, j)` 称作一个**_重要翻转对_**。
+
+你需要返回给定数组中的重要翻转对的数量。
+
+**示例 1:**
+
+**输入**: \[1,3,2,3,1\]
+**输出**: 2
+
+**示例 2:**
+
+**输入**: \[2,4,3,5,1\]
+**输出**: 3
+
+**注意:**
+
+1.  给定数组的长度不会超过`50000`。
+2.  输入数组中的所有数字都在32位整数的表示范围内。
+
+[https://leetcode.cn/problems/reverse-pairs/description/](https://leetcode.cn/problems/reverse-pairs/description/)
+
+```java
+import java.util.*;
+
+class Solution { // 线段树做法
+
+    int N = 50000;
+
+    class Node {
+        Node leftNode, rightNode;
+        int val, add;
+    }
+
+    Node root = new Node();
+
+    int query(Node node, int leftChild, int rightChild, int left, int right) {
+        // int len = right - left + 1;
+        int len = rightChild - leftChild + 1;
+        if (left <= leftChild && right >= rightChild) {
+            return node.val;
+        }
+        pushdown(node, len);
+        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0;
+        if (left <= mid) {
+            ans =  query(node.leftNode, leftChild, mid, left, right);
+        }
+        if (right > mid) {
+            ans += query(node.rightNode, mid + 1, rightChild, left, right);
+        }
+        return ans;
+    }
+
+    void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
+        // int len = right - left + 1;
+        int len = rightChild - leftChild + 1;
+        if (left <= leftChild && right >= rightChild) {
+            node.val += delta == 1 ? len : 0;
+            node.add = delta;
+            return;
+        }
+        pushdown(node, len);
+        int mid = leftChild + (rightChild - leftChild) / 2;
+        if (left <= mid) {
+            update(node.leftNode, leftChild, mid, left, right, delta);
+        }
+        if (right > mid) {
+            update(node.rightNode, mid + 1, rightChild, left, right, delta);
+        }
+        pushup(node);
+    }
+
+    void pushdown(Node node, int len) {
+        if (node.leftNode == null) {
+            node.leftNode = new Node();
+        }
+        if (node.rightNode == null) {
+            node.rightNode = new Node();
+        }
+        int add = node.add;
+        if (add == 0) {
+            return;
+        }
+        if (add == -1) {
+            node.leftNode.val = node.rightNode.val = 0;
+        }else{
+            node.leftNode.val = len - len / 2; // 如果为奇数，左区间 = 右区间 + 1
+            node.rightNode.val = len / 2;
+        }
+        node.leftNode.add = node.rightNode.add = add;
+        node.add = 0;
+    }
+
+    void pushup(Node node) {
+        node.val = node.leftNode.val + node.rightNode.val;
+    }
+    
+    public int reversePairs(int[] nums) {
+        int ans = 0;
+        Map<Integer, Integer> ranks = getRanks(nums);
+        int n = nums.length;
+        int[] sorted = new int[n];
+        for (int i = 0; i < n; i++) {
+            sorted[i] = nums[i];
+        }
+        Arrays.sort(sorted);
+        for (int i = 0; i < n; i++) {
+            int rank = ranks.get(nums[i]);
+            int minRank = binarySearch(sorted, (long) 2 * nums[i] + 1);
+            ans += query(root, 0, N, minRank, n - 1);
+            update(root, 0, N, rank, rank, 1);
+        }
+        return ans;
+    }
+
+    public Map<Integer, Integer> getRanks(int[] nums) {
+        int length = nums.length;
+        int[] sorted = new int[length];
+        System.arraycopy(nums, 0, sorted, 0, length);
+        Arrays.sort(sorted);
+        Map<Integer, Integer> ranks = new HashMap<Integer, Integer>();
+        for (int i = 0; i < length; i++) {
+            int num = sorted[i];
+            if (i == 0 || num > sorted[i - 1]) {
+                ranks.put(num, i);
+            }
+        }
+        return ranks;
+    }
+
+    public int binarySearch(int[] nums, long target) {
+        int low = 0, high = nums.length;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] >= target) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    }
+}
+```
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        if (nums.length == 0) {
+            return 0;
+        }
+        return reversePairsRecursive(nums, 0, nums.length - 1);
+    }
+
+    public int reversePairsRecursive(int[] nums, int left, int right) {
+        if (left == right) {
+            return 0;
+        } else {
+            int mid = (left + right) / 2;
+            int n1 = reversePairsRecursive(nums, left, mid);
+            int n2 = reversePairsRecursive(nums, mid + 1, right);
+            int ret = n1 + n2;
+
+            // 首先统计下标对的数量
+            int i = left;
+            int j = mid + 1;
+            while (i <= mid) {
+                while (j <= right && (long) nums[i] > 2 * (long) nums[j]) {
+                    j++;
+                }
+                ret += j - mid - 1;
+                i++;
+            }
+
+            // 随后合并两个排序数组
+            int[] sorted = new int[right - left + 1];
+            int p1 = left, p2 = mid + 1;
+            int p = 0;
+            while (p1 <= mid || p2 <= right) {
+                if (p1 > mid) {
+                    sorted[p++] = nums[p2++];
+                } else if (p2 > right) {
+                    sorted[p++] = nums[p1++];
+                } else {
+                    if (nums[p1] < nums[p2]) {
+                        sorted[p++] = nums[p1++];
+                    } else {
+                        sorted[p++] = nums[p2++];
+                    }
+                }
+            }
+            for (int k = 0; k < sorted.length; k++) {
+                nums[left + k] = sorted[k];
+            }
+            return ret;
+        }
+    }
+}
+```
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        Set<Long> allNumbers = new TreeSet<Long>();
+        for (int x : nums) {
+            allNumbers.add((long) x);
+            allNumbers.add((long) x * 2);
+        }
+        // 利用哈希表进行离散化
+        Map<Long, Integer> values = new HashMap<Long, Integer>();
+        int idx = 0;
+        for (long x : allNumbers) {
+            values.put(x, idx);
+            idx++;
+        }
+
+        int ret = 0;
+        BIT bit = new BIT(values.size());
+        for (int i = 0; i < nums.length; i++) {
+            int left = values.get((long) nums[i] * 2), right = values.size() - 1;
+            ret += bit.query(right + 1) - bit.query(left + 1);
+            bit.update(values.get((long) nums[i]) + 1, 1);
+        }
+        return ret;
+    }
+}
+
+class BIT {
+    int[] tree;
+    int n;
+
+    public BIT(int n) {
+        this.n = n;
+        this.tree = new int[n + 1];
+    }
+
+    public static int lowbit(int x) {
+        return x & (-x);
+    }
+
+    public void update(int x, int d) {
+        while (x <= n) {
+            tree[x] += d;
+            x += lowbit(x);
+        }
+    }
+
+    public int query(int x) {
+        int ans = 0;
+        while (x != 0) {
+            ans += tree[x];
+            x -= lowbit(x);
+        }
+        return ans;
+    }
+}
+```
+
