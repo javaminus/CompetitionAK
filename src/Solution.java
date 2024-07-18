@@ -2,19 +2,27 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 class Solution {
-    public int longestStrChain(String[] words) {
-        Arrays.sort(words, (a, b) -> a.length() - b.length());
-        int ans = 0;
-        HashMap<String, Integer> dp = new HashMap<String, Integer>();
-        for (String s : words) {
-            int res = 0;
-            for (int i = 0; i < s.length(); i++) { // 枚举去掉 s[i]
-                String t = s.substring(0, i) + s.substring(i + 1);
-                res = Math.max(res, dp.getOrDefault(t, 0));
-            }
-            dp.put(s, res + 1);
-            ans = Math.max(ans, res + 1);
+    private static long Mod = (int) 1e9 + 7;
+    HashMap<String, Long> memo = new HashMap<>();
+    public int sumOfPowers(int[] nums, int k) {
+        Arrays.sort(nums);
+        return (int) dfs(nums.length - 1 , k , Integer.MAX_VALUE / 2 , Integer.MAX_VALUE / 2 , nums);
+    }
+
+    private long dfs(int i, int rest, int pre, int min, int[] nums) {
+        if (i + 1 < rest) {
+            return 0;
         }
-        return ans;
+        if (rest == 0) {
+            return min;
+        }
+        String key = i + "_" + rest + "_" + pre + "_" + min;
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        long res1 = dfs(i - 1, rest, pre, min, nums) % Mod;
+        long res2 = dfs(i - 1, rest - 1, nums[i], Math.min(min, nums[i] - pre), nums) % Mod;
+        memo.put(key, (res1 + res2) % Mod);
+        return (res1 + res2) % Mod;
     }
 }
