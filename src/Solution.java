@@ -1,13 +1,18 @@
+import java.util.Arrays;
+
 class Solution {
-    private static int Mod = (int) 1e9 + 7;
-    public int numTilings(int n) {
-        if (n <= 2) {
-            return n;
-        }
-        long[][] start = {{2, 1, 1}};
-        long[][] base = {{2, 1, 0}, {0, 0, 1}, {1, 0, 0}};
-        long[][] ans = multiply(start, power(base, n - 2));
-        return (int) (ans[0][0] % Mod);
+    private static long Mod = (long) 1e9 + 7;
+    public int checkRecord(int n) {
+        long[][] start = {{1, 0, 0, 0, 0, 0}};
+        long[][] base = {{1, 1, 0, 1, 0, 0},
+                {1, 0, 1, 1, 0, 0},
+                {1, 0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 1, 0, 1},
+                {0, 0, 0, 1, 0, 0}};
+        long[][] ans = multiply(start, power(base, n));
+        long sum = Arrays.stream(ans[0]).sum();
+        return (int) (sum % Mod);
     }
 
     // 矩阵相乘
@@ -20,7 +25,8 @@ class Solution {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 for (int c = 0; c < k; c++) {
-                    ans[i][j] += (long) a[i][c] * b[c][j] % Mod;
+                    // ans[i][j] += (long) a[i][c] * b[c][j] % Mod; 报错
+                    ans[i][j] = (ans[i][j] + (a[i][c] * b[c][j] % Mod)) % Mod;
                 }
             }
         }
@@ -46,4 +52,5 @@ class Solution {
         }
         return ans;
     }
+
 }

@@ -1752,7 +1752,8 @@ class Solution {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 for (int c = 0; c < k; c++) {
-                    ans[i][j] += (long) a[i][c] * b[c][j] % Mod;
+                    // ans[i][j] += (long) a[i][c] * b[c][j] % Mod;
+                     ans[i][j] = (ans[i][j] + (a[i][c] * b[c][j] % Mod)) % Mod;
                 }
             }
         }
@@ -1778,6 +1779,290 @@ class Solution {
         }
         return ans;
     }
+}
+```
+
+1220\. 统计元音字母序列的数目
+------------------
+
+给你一个整数 `n`，请你帮忙统计一下我们可以按下述规则形成多少个长度为 `n` 的字符串：
+
+*   字符串中的每个字符都应当是小写元音字母（`'a'`, `'e'`, `'i'`, `'o'`, `'u'`）
+*   每个元音 `'a'` 后面都只能跟着 `'e'`
+*   每个元音 `'e'` 后面只能跟着 `'a'` 或者是 `'i'`
+*   每个元音 `'i'` 后面 **不能** 再跟着另一个 `'i'`
+*   每个元音 `'o'` 后面只能跟着 `'i'` 或者是 `'u'`
+*   每个元音 `'u'` 后面只能跟着 `'a'`
+
+由于答案可能会很大，所以请你返回 模 `10^9 + 7` 之后的结果。
+
+**示例 1：**
+
+**输入：**n = 1
+**输出：**5
+**解释：**所有可能的字符串分别是："a", "e", "i" , "o" 和 "u"。
+
+**示例 2：**
+
+**输入：**n = 2
+**输出：**10
+**解释：**所有可能的字符串分别是："ae", "ea", "ei", "ia", "ie", "io", "iu", "oi", "ou" 和 "ua"。
+
+**示例 3：**
+
+**输入：**n = 5
+**输出：**68
+
+**提示：**
+
+*   `1 <= n <= 2 * 10^4`
+
+[https://leetcode.cn/problems/count-vowels-permutation/description/](https://leetcode.cn/problems/count-vowels-permutation/description/)
+
+```java
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int countVowelPermutation(int n) {
+        long a = 1, e = 1, i = 1, o = 1, u = 1;
+        while (n-- > 1) {
+            long[] t = {a, e, i, o, u};
+            a = (t[1] + t[2] + t[4]) % Mod;
+            e = (t[0] + t[2]) % Mod;
+            i = (t[1] + t[3]) % Mod;
+            o = t[2] % Mod;
+            u = (t[2] + t[3]) % Mod;
+        }
+        return (int) ((a + e + i + o + u) % Mod);
+    }
+}
+```
+
+```java
+// 矩阵快速幂
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    public int countVowelPermutation(int n) {
+        long[][] start = {{1, 1, 1, 1, 1}};
+        long[][] base = {{0, 1, 0, 0, 0}, {1, 0, 1, 0, 0}, {1, 1, 0, 1, 1}, {0, 0, 1, 0, 1}, {1, 0, 0, 0, 0}};
+        long[][] ans = multiply(start, power(base, n - 1));
+        return (int) ((ans[0][0] + ans[0][1] + ans[0][2] + ans[0][3] + ans[0][4]) % Mod);
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static long[][] multiply(long[][] a, long[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        long[][] ans = new long[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    // ans[i][j] += (long) a[i][c] * b[c][j] % Mod; 报错
+                    ans[i][j] = (ans[i][j] + (a[i][c] * b[c][j] % Mod)) % Mod;
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static long[][] power(long[][] matrix, int p) {
+        int n = matrix.length;
+        long[][] ans = new long[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+}
+```
+
+552\. 学生出勤记录 II
+---------------
+
+可以用字符串表示一个学生的出勤记录，其中的每个字符用来标记当天的出勤情况（缺勤、迟到、到场）。记录中只含下面三种字符：
+
+*   `'A'`：Absent，缺勤
+*   `'L'`：Late，迟到
+*   `'P'`：Present，到场
+
+如果学生能够 **同时** 满足下面两个条件，则可以获得出勤奖励：
+
+*   按 **总出勤** 计，学生缺勤（`'A'`）**严格** 少于两天。
+*   学生 **不会** 存在 **连续** 3 天或 **连续** 3 天以上的迟到（`'L'`）记录。
+
+给你一个整数 `n` ，表示出勤记录的长度（次数）。请你返回记录长度为 `n` 时，可能获得出勤奖励的记录情况 **数量** 。答案可能很大，所以返回对 `109 + 7` **取余** 的结果。
+
+**示例 1：**
+
+**输入：**n = 2
+**输出：**8
+**解释：**
+有 8 种长度为 2 的记录将被视为可奖励：
+"PP" , "AP", "PA", "LP", "PL", "AL", "LA", "LL" 
+只有"AA"不会被视为可奖励，因为缺勤次数为 2 次（需要少于 2 次）。
+
+**示例 2：**
+
+**输入：**n = 1
+**输出：**3
+
+**示例 3：**
+
+**输入：**n = 10101
+**输出：**183236316
+
+**提示：**
+
+*   `1 <= n <= 105`
+
+[https://leetcode.cn/problems/student-attendance-record-ii/description/](https://leetcode.cn/problems/student-attendance-record-ii/description/)
+
+```java
+// 暴力dfs   413ms
+import java.util.Arrays;
+
+class Solution {  
+    int[][][] memo;
+    private static long Mod = (long) 1e9 + 7;
+    public int checkRecord(int n) {
+        memo = new int[n + 1][3][3];
+        for (int i = 0; i < n + 1; i++) {
+            for (int j = 0; j < 3; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        return (int) dfs(n, 1, 0);
+    }
+
+    private long dfs(int i, int a, int l) {
+        if (i == 0) {
+            return 1;
+        }
+        if (memo[i][a][l] != -1) {
+            return memo[i][a][l];
+        }
+        long res = dfs(i - 1, a, 0);
+        if (a - 1 >= 0) {
+            res = (res + dfs(i - 1, a - 1, 0)) % Mod;
+        }
+        if (l < 2) {
+            res = (res + dfs(i - 1, a, l + 1)) % Mod;
+        }
+        return memo[i][a][l] = (int) res;
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {  // 319ms
+    private static long Mod = (long) 1e9 + 7;
+    public int checkRecord(int n) {
+        long[][] dp = new long[2][3]; // 缺勤次数/ 连续迟到次数
+        dp[0][0] = 1;
+        for (int i = 1; i <= n; i++) {
+            long[][] newDp = new long[2][3];
+            // 以 P 结尾的数量
+            for (int j = 0; j <= 1; j++) {
+                for (int k = 0; k <= 2; k++) {
+                    newDp[j][0] = (newDp[j][0] + dp[j][k]) % Mod;
+                }
+            }
+            // 以 L结尾
+            for (int j = 0; j <= 1; j++) {
+                for (int k = 1; k <= 2; k++) {
+                    newDp[j][k] = (newDp[j][k] + dp[j][k - 1]) % Mod;
+                }
+            }
+            // 以A 结尾
+            for (int k = 0; k <= 2; k++) {
+                newDp[1][0] = (newDp[1][0] + dp[0][k]) % Mod;
+            }
+            dp = newDp;
+        }
+        long ans = 0;
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 3; j++) {
+                ans = (ans + dp[i][j]) % Mod;
+            }
+        }
+        return (int) ans;
+    }
+
+}
+```
+
+![1721390961728](assets/1721390961728.png)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    public int checkRecord(int n) {
+        long[][] start = {{1, 0, 0, 0, 0, 0}};
+        long[][] base = {{1, 1, 0, 1, 0, 0},
+                {1, 0, 1, 1, 0, 0},
+                {1, 0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 1, 0, 1},
+                {0, 0, 0, 1, 0, 0}};
+        long[][] ans = multiply(start, power(base, n));
+        long sum = Arrays.stream(ans[0]).sum();
+        return (int) (sum % Mod);
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static long[][] multiply(long[][] a, long[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        long[][] ans = new long[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    // ans[i][j] += (long) a[i][c] * b[c][j] % Mod; 报错
+                    ans[i][j] = (ans[i][j] + (a[i][c] * b[c][j] % Mod)) % Mod;
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static long[][] power(long[][] matrix, int p) {
+        int n = matrix.length;
+        long[][] ans = new long[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+
 }
 ```
 
