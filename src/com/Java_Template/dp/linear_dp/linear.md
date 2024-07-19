@@ -1594,3 +1594,190 @@ class Solution {
 }
 ```
 
+1137\. 第 N 个泰波那契数
+-----------------
+
+泰波那契序列 Tn 定义如下： 
+
+T0 = 0, T1 = 1, T2 = 1, 且在 n >= 0 的条件下 Tn+3 = Tn + Tn+1 + Tn+2
+
+给你整数 `n`，请返回第 n 个泰波那契数 Tn 的值。
+
+**示例 1：**
+
+**输入：**n = 4
+**输出：**4
+**解释：**
+T\_3 = 0 + 1 + 1 = 2
+T\_4 = 1 + 1 + 2 = 4
+
+**示例 2：**
+
+**输入：**n = 25
+**输出：**1389537
+
+**提示：**
+
+*   `0 <= n <= 37`
+*   答案保证是一个 32 位整数，即 `answer <= 2^31 - 1`。
+
+[https://leetcode.cn/problems/n-th-tribonacci-number/description/](https://leetcode.cn/problems/n-th-tribonacci-number/description/)
+
+```java
+class Solution {
+    public int tribonacci(int n) {
+        if (n == 0) {
+            return 0;
+        }
+        if (n == 1 || n == 2) {
+            return 1;
+        }
+        int[][] start = {{1, 1, 0}};
+        int[][] base = {{1, 1, 0}, {1, 0, 1}, {1, 0, 0}};
+        int[][] ans = multiply(start, power(base, n - 2));
+        return ans[0][0];
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static int[][] multiply(int[][] a, int[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        int[][] ans = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    ans[i][j] += a[i][c] * b[c][j];
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static int[][] power(int[][] matrix, int p) {
+        int n = matrix.length;
+        int[][] ans = new int[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+}
+```
+
+790\. 多米诺和托米诺平铺
+---------------
+
+有两种形状的瓷砖：一种是 `2 x 1` 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。
+
+![](https://assets.leetcode.com/uploads/2021/07/15/lc-domino.jpg)
+
+给定整数 n ，返回可以平铺 `2 x n` 的面板的方法的数量。**返回对** `109 + 7` **取模** 的值。
+
+平铺指的是每个正方形都必须有瓷砖覆盖。两个平铺不同，当且仅当面板上有四个方向上的相邻单元中的两个，使得恰好有一个平铺有一个瓷砖占据两个正方形。
+
+**示例 1:**
+
+![](https://assets.leetcode.com/uploads/2021/07/15/lc-domino1.jpg)
+
+**输入:** n = 3
+**输出:** 5
+**解释:** 五种不同的方法如上所示。
+
+**示例 2:**
+
+**输入:** n = 1
+**输出:** 1
+
+**提示：**
+
+*   `1 <= n <= 1000`
+
+[https://leetcode.cn/problems/domino-and-tromino-tiling/description/](https://leetcode.cn/problems/domino-and-tromino-tiling/description/)
+
+![790-5.png](assets/1668157188-nBzesC-790-5.png) 
+
+```java
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int numTilings(int n) {
+        if (n == 1) {
+            return 1;
+        }
+        long a = 1, b = 1, c = 2;
+        for (int i = 3; i <= n; i++) {
+            long f = (c * 2 + a) % Mod;
+            a = b;
+            b = c;
+            c = f;
+        }
+        return (int) c;
+    }
+}
+```
+
+```java
+// f[n] = 2 * f[n - 1] + f[n - 3]
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int numTilings(int n) {
+        if (n <= 2) {
+            return n;
+        }
+        long[][] start = {{2, 1, 1}};
+        long[][] base = {{2, 1, 0}, {0, 0, 1}, {1, 0, 0}};
+        long[][] ans = multiply(start, power(base, n - 2));
+        return (int) (ans[0][0] % Mod);
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static long[][] multiply(long[][] a, long[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        long[][] ans = new long[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    ans[i][j] += (long) a[i][c] * b[c][j] % Mod;
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static long[][] power(long[][] matrix, int p) {
+        int n = matrix.length;
+        long[][] ans = new long[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+}
+```
+
