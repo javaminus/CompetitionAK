@@ -1,28 +1,48 @@
-import java.util.Arrays;
-import java.util.HashMap;
-
 class Solution {
-    private static long Mod = (int) 1e9 + 7;
-    HashMap<String, Long> memo = new HashMap<>();
-    public int sumOfPowers(int[] nums, int k) {
-        Arrays.sort(nums);
-        return (int) dfs(nums.length - 1 , k , Integer.MAX_VALUE / 2 , Integer.MAX_VALUE / 2 , nums);
+    public int fib(int n) {
+        if (n < 2) {
+            return n;
+        }
+        int[][] start = {{0, 1}};
+        int[][] base = {{1, 1}, {1, 0}};
+        int[][] ans = multiply(start, power(base, n - 1));
+        return ans[0][0];
     }
 
-    private long dfs(int i, int rest, int pre, int min, int[] nums) {
-        if (i + 1 < rest) {
-            return 0;
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static int[][] multiply(int[][] a, int[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        int[][] ans = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    ans[i][j] += a[i][c] * b[c][j];
+                }
+            }
         }
-        if (rest == 0) {
-            return min;
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static int[][] power(int[][] matrix, int p) {
+        int n = matrix.length;
+        int[][] ans = new int[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
         }
-        String key = i + "_" + rest + "_" + pre + "_" + min;
-        if (memo.containsKey(key)) {
-            return memo.get(key);
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
         }
-        long res1 = dfs(i - 1, rest, pre, min, nums) % Mod;
-        long res2 = dfs(i - 1, rest - 1, nums[i], Math.min(min, nums[i] - pre), nums) % Mod;
-        memo.put(key, (res1 + res2) % Mod);
-        return (res1 + res2) % Mod;
+        return ans;
     }
 }

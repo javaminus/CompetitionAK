@@ -1458,3 +1458,139 @@ class Solution {
 }
 ```
 
+# §7.3 矩阵快速幂优化
+
+> 部分题目由于数据范围小，也可以用线性 DP。
+
+70\. 爬楼梯
+--------
+
+假设你正在爬楼梯。需要 `n` 阶你才能到达楼顶。
+
+每次你可以爬 `1` 或 `2` 个台阶。你有多少种不同的方法可以爬到楼顶呢？
+
+**示例 1：**
+
+**输入：**n = 2
+**输出：**2
+**解释：**有两种方法可以爬到楼顶。
+1. 1 阶 + 1 阶
+2. 2 阶
+
+**示例 2：**
+
+**输入：**n = 3
+**输出：**3
+**解释：**有三种方法可以爬到楼顶。
+1. 1 阶 + 1 阶 + 1 阶
+2. 1 阶 + 2 阶
+3. 2 阶 + 1 阶
+
+**提示：**
+
+*   `1 <= n <= 45`
+
+[https://leetcode.cn/problems/climbing-stairs/description/](https://leetcode.cn/problems/climbing-stairs/description/)
+
+```java
+class Solution {
+    public int climbStairs(int n) {
+        int f1 = 1, f2 = 2;
+        if (n == 1) {
+            return 1;
+        }
+        for (int i = 3; i <= n; i++) {
+            int newF = f2;
+            f2 = f1 + f2;
+            f1 = newF;
+        }
+        return f2;
+    }
+}
+```
+
+509\. 斐波那契数
+-----------
+
+**斐波那契数** （通常用 `F(n)` 表示）形成的序列称为 **斐波那契数列** 。该数列由 `0` 和 `1` 开始，后面的每一项数字都是前面两项数字的和。也就是：
+
+F(0) = 0，F(1) = 1
+F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+
+给定 `n` ，请计算 `F(n)` 。
+
+**示例 1：**
+
+**输入：**n = 2
+**输出：**1
+**解释：**F(2) = F(1) + F(0) = 1 + 0 = 1
+
+**示例 2：**
+
+**输入：**n = 3
+**输出：**2
+**解释：**F(3) = F(2) + F(1) = 1 + 1 = 2
+
+**示例 3：**
+
+**输入：**n = 4
+**输出：**3
+**解释：**F(4) = F(3) + F(2) = 2 + 1 = 3
+
+**提示：**
+
+*   `0 <= n <= 30`
+
+[https://leetcode.cn/problems/fibonacci-number/solutions/](https://leetcode.cn/problems/fibonacci-number/solutions/)
+
+```java
+class Solution {
+    public int fib(int n) {
+        if (n < 2) {
+            return n;
+        }
+        int[][] start = {{1, 0}};
+        int[][] base = {{1, 1}, {1, 0}};
+        int[][] ans = multiply(start, power(base, n - 1));
+        return ans[0][0];
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static int[][] multiply(int[][] a, int[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        int[][] ans = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    ans[i][j] += a[i][c] * b[c][j];
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static int[][] power(int[][] matrix, int p) {
+        int n = matrix.length;
+        int[][] ans = new int[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+}
+```
+
