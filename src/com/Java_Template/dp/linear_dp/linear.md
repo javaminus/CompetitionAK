@@ -2208,3 +2208,132 @@ class Solution {
 
 ```
 
+# §7.4 子矩形
+
+> 部分题目由于数据范围小，也可以用线性 DP。 
+
+3148\. 矩阵中的最大得分
+---------------
+
+给你一个由 **正整数** 组成、大小为 `m x n` 的矩阵 `grid`。你可以从矩阵中的任一单元格移动到另一个位于正下方或正右侧的任意单元格（不必相邻）。从值为 `c1` 的单元格移动到值为 `c2` 的单元格的得分为 `c2 - c1` 。
+
+你可以从 **任一** 单元格开始，并且必须至少移动一次。
+
+返回你能得到的 **最大** 总得分。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2024/03/14/grid1.png)
+
+**输入：**grid = \[\[9,5,7,3\],\[8,9,6,1\],\[6,7,14,3\],\[2,5,3,1\]\]
+
+**输出：**9
+
+**解释：**从单元格 `(0, 1)` 开始，并执行以下移动：  
+\- 从单元格 `(0, 1)` 移动到 `(2, 1)`，得分为 `7 - 5 = 2` 。  
+\- 从单元格 `(2, 1)` 移动到 `(2, 2)`，得分为 `14 - 7 = 7` 。  
+总得分为 `2 + 7 = 9` 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2024/04/08/moregridsdrawio-1.png)
+
+**输入：**grid = \[\[4,3,2\],\[3,2,1\]\]
+
+**输出：**\-1
+
+**解释：**从单元格 `(0, 0)` 开始，执行一次移动：从 `(0, 0)` 到 `(0, 1)` 。得分为 `3 - 4 = -1` 。
+
+**提示：**
+
+*   `m == grid.length`
+*   `n == grid[i].length`
+*   `2 <= m, n <= 1000`
+*   `4 <= m * n <= 105`
+*   `1 <= grid[i][j] <= 105`
+
+[https://leetcode.cn/problems/maximum-difference-score-in-a-grid/](https://leetcode.cn/problems/maximum-difference-score-in-a-grid/)
+
+```java
+class Solution {
+    public int maxScore(List<List<Integer>> grid) {
+        int m = grid.size(), n = grid.get(0).size();
+        int[][] dp = new int[m + 1][n + 1];
+        int ans = Integer.MIN_VALUE;
+        int t = Integer.MIN_VALUE;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                //for (int k = 1; k < Math.max(m, n) && k <= Math.max(i, j); k++) {
+                int k = 1;
+                if (i - k >= 0) {
+                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i + 1 - k][j + 1] + grid.get(i).get(j) - grid.get(i - k).get(j));
+                    t = Math.max(t, grid.get(i).get(j) - grid.get(i - k).get(j));
+                }
+                if (j - k >= 0) {
+                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i + 1][j + 1 - k] + grid.get(i).get(j) - grid.get(i).get(j - k));
+                    t = Math.max(t, grid.get(i).get(j) - grid.get(i).get(j - k));
+                }
+                ans = Math.max(ans, dp[i + 1][j + 1]);
+            }
+        }
+        if (t < 0) {
+            return t;
+        }
+        return ans;
+    }
+}
+```
+
+221\. 最大正方形
+-----------
+
+在一个由 `'0'` 和 `'1'` 组成的二维矩阵内，找到只包含 `'1'` 的最大正方形，并返回其面积。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2020/11/26/max1grid.jpg)
+
+**输入：**matrix = \[\["1","0","1","0","0"\],\["1","0","1","1","1"\],\["1","1","1","1","1"\],\["1","0","0","1","0"\]\]
+**输出：**4
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2020/11/26/max2grid.jpg)
+
+**输入：**matrix = \[\["0","1"\],\["1","0"\]\]
+**输出：**1
+
+**示例 3：**
+
+**输入：**matrix = \[\["0"\]\]
+**输出：**0
+
+**提示：**
+
+*   `m == matrix.length`
+*   `n == matrix[i].length`
+*   `1 <= m, n <= 300`
+*   `matrix[i][j]` 为 `'0'` 或 `'1'`
+
+[https://leetcode.cn/problems/maximal-square/description/](https://leetcode.cn/problems/maximal-square/description/)
+
+```java
+class Solution {
+    // 221. 最大正方形
+    public int maximalSquare(char[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int ans = 0;
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    dp[i + 1][j + 1] = Math.min(Math.min(dp[i][j], dp[i + 1][j]), dp[i][j + 1]) + 1;
+                    ans = Math.max(dp[i + 1][j + 1], ans);
+                }
+            }
+        }
+        return ans * ans;
+    }
+}
+```
+
