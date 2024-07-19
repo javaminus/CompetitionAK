@@ -34,6 +34,28 @@ public class MyKmp {
         }
         return -1;
     }
+    
+     private static int[] findAll(String s, String pattern, int[] next) { // 获取所有匹配的节点
+        List<Integer> matchIndices = new ArrayList<>();
+        int n = s.length();
+        for (int i = 0, j = 0; i < n; i++) {
+            while (j > 0 && s.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1]; // Move to the next possible match position
+            }
+            if (s.charAt(i) == pattern.charAt(j)) {
+                j++; // Increment the pattern index
+            }
+            if (j == pattern.length()) {
+                matchIndices.add(i - j + 1); // Add the matching index to the list
+                j = next[j - 1]; // Reset the pattern index to the next possible match position
+            }
+        }
+        int[] result = new int[matchIndices.size()];
+        for (int i = 0; i < matchIndices.size(); i++) {
+            result[i] = matchIndices.get(i);
+        }
+        return result;
+    }
 
     public static void printNext(String s){
         System.out.println("********************");
