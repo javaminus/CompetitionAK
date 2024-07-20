@@ -1,29 +1,34 @@
-import java.util.List;
-
 class Solution {
-    public int maxScore(List<List<Integer>> grid) {
-        int m = grid.size(), n = grid.get(0).size();
-        int[][] dp = new int[m + 1][n + 1];
-        int ans = Integer.MIN_VALUE;
-        int t = Integer.MIN_VALUE;
+    private int[][] dp;
+    private int m, n, result = 0;
+    public int countPyramids(int[][] grid) {
+        // 跑两次倒三角
+        m = grid.length;
+        n = grid[0].length;
+        dp = new int[m][n];
+        f(grid);
+        for (int i = 0; i < m >> 1; i++) {
+            int[] t = grid[i];
+            grid[i] = grid[m - i - 1];
+            grid[m - i - 1] = t;
+        }
+        f(grid);
+        return result;
+    }
+
+    private void f(int[][] grid) {
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                //for (int k = 1; k < Math.max(m, n) && k <= Math.max(i, j); k++) {
-                int k = 1;
-                if (i - k >= 0) {
-                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i + 1 - k][j + 1] + grid.get(i).get(j) - grid.get(i - k).get(j));
-                    t = Math.max(t, grid.get(i).get(j) - grid.get(i - k).get(j));
-                }
-                if (j - k >= 0) {
-                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i + 1][j + 1 - k] + grid.get(i).get(j) - grid.get(i).get(j - k));
-                    t = Math.max(t, grid.get(i).get(j) - grid.get(i).get(j - k));
-                }
-                ans = Math.max(ans, dp[i + 1][j + 1]);
+                dp[i][j] = grid[i][j];
             }
         }
-        if (t < 0) {
-            return t;
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n - 1; j++) {
+                if (grid[i][j] == 1) {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i - 1][j + 1])) + 1;
+                    result += dp[i][j] - 1;
+                }
+            }
         }
-        return ans;
     }
 }

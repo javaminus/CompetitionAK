@@ -2337,3 +2337,456 @@ class Solution {
 }
 ```
 
+1277\. 统计全为 1 的正方形子矩阵
+---------------------
+
+给你一个 `m * n` 的矩阵，矩阵中的元素不是 `0` 就是 `1`，请你统计并返回其中完全由 `1` 组成的 **正方形** 子矩阵的个数。
+
+**示例 1：**
+
+**输入：**matrix =
+\[
+  \[0,1,1,1\],
+  \[1,1,1,1\],
+  \[0,1,1,1\]
+\]
+**输出：**15
+**解释：** 
+边长为 1 的正方形有 **10** 个。
+边长为 2 的正方形有 **4** 个。
+边长为 3 的正方形有 **1** 个。
+正方形的总数 = 10 + 4 + 1 = **15**.
+
+**示例 2：**
+
+**输入：**matrix = 
+\[
+  \[1,0,1\],
+  \[1,1,0\],
+  \[1,1,0\]
+\]
+**输出：**7
+**解释：**
+边长为 1 的正方形有 **6** 个。 
+边长为 2 的正方形有 **1** 个。
+正方形的总数 = 6 + 1 = **7**.
+
+**提示：**
+
+*   `1 <= arr.length <= 300`
+*   `1 <= arr[0].length <= 300`
+*   `0 <= arr[i][j] <= 1`
+
+[https://leetcode.cn/problems/count-square-submatrices-with-all-ones/description/](https://leetcode.cn/problems/count-square-submatrices-with-all-ones/description/)
+
+```java
+class Solution {
+    public int countSquares(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int[][] dp = new int[m + 1][n + 1];
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == 1) {
+                    dp[i + 1][j + 1] = Math.min(dp[i + 1][j], Math.min(dp[i][j + 1], dp[i][j])) + 1;
+                    ans += dp[i + 1][j + 1];
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+2088\. 统计农场中肥沃金字塔的数目
+--------------------
+
+有一个 **矩形网格** 状的农场，划分为 `m` 行 `n` 列的单元格。每个格子要么是 **肥沃的** （用 `1` 表示），要么是 **贫瘠** 的（用 `0` 表示）。网格图以外的所有与格子都视为贫瘠的。
+
+农场中的 **金字塔** 区域定义如下：
+
+1.  区域内格子数目 **大于** `1` 且所有格子都是 **肥沃的** 。
+2.  金字塔 **顶端** 是这个金字塔 **最上方** 的格子。金字塔的高度是它所覆盖的行数。令 `(r, c)` 为金字塔的顶端且高度为 `h` ，那么金字塔区域内包含的任一格子 `(i, j)` 需满足 `r <= i <= r + h - 1` **且** `c - (i - r) <= j <= c + (i - r)` 。
+
+一个 **倒金字塔** 类似定义如下：
+
+1.  区域内格子数目 **大于** `1` 且所有格子都是 **肥沃的** 。
+2.  倒金字塔的 **顶端** 是这个倒金字塔 **最下方** 的格子。倒金字塔的高度是它所覆盖的行数。令 `(r, c)` 为金字塔的顶端且高度为 `h` ，那么金字塔区域内包含的任一格子 `(i, j)` 需满足 `r - h + 1 <= i <= r` **且** `c - (r - i) <= j <= c + (r - i)` 。
+
+下图展示了部分符合定义和不符合定义的金字塔区域。黑色区域表示肥沃的格子。
+
+![](https://assets.leetcode.com/uploads/2021/11/08/image.png)
+
+给你一个下标从 **0** 开始且大小为 `m x n` 的二进制矩阵 `grid` ，它表示农场，请你返回 `grid` 中金字塔和倒金字塔的 **总数目** 。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/10/23/eg11.png) ![](https://assets.leetcode.com/uploads/2021/10/23/exa12.png) ![](https://assets.leetcode.com/uploads/2021/10/23/exa13.png)
+
+**输入：**grid = \[\[0,1,1,0\],\[1,1,1,1\]\]
+**输出：**2
+**解释：**
+2 个可能的金字塔区域分别如上图蓝色和红色区域所示。
+这个网格图中没有倒金字塔区域。
+所以金字塔区域总数为 2 + 0 = 2 。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/10/23/eg21.png) ![](https://assets.leetcode.com/uploads/2021/10/23/exa22.png) ![](https://assets.leetcode.com/uploads/2021/10/23/exa23.png)
+
+**输入：**grid = \[\[1,1,1\],\[1,1,1\]\]
+**输出：**2
+**解释：**
+金字塔区域如上图蓝色区域所示，倒金字塔如上图红色区域所示。
+所以金字塔区域总数目为 1 + 1 = 2 。
+
+**示例 3：**
+
+![](https://assets.leetcode.com/uploads/2021/10/23/eg3.png)
+
+**输入：**grid = \[\[1,0,1\],\[0,0,0\],\[1,0,1\]\]
+**输出：**0
+**解释：**
+网格图中没有任何金字塔或倒金字塔区域。
+
+**示例 4：**
+
+![](https://assets.leetcode.com/uploads/2021/10/23/eg41.png) ![](https://assets.leetcode.com/uploads/2021/10/23/eg42.png) ![](https://assets.leetcode.com/uploads/2021/10/23/eg43.png) ![](https://assets.leetcode.com/uploads/2021/10/23/eg44.png)
+
+**输入：**grid = \[\[1,1,1,1,0\],\[1,1,1,1,1\],\[1,1,1,1,1\],\[0,1,0,0,1\]\]
+**输出：**13
+**解释：**
+有 7 个金字塔区域。上图第二和第三张图中展示了它们中的 3 个。
+有 6 个倒金字塔区域。上图中最后一张图展示了它们中的 2 个。
+所以金字塔区域总数目为 7 + 6 = 13.
+
+**提示：**
+
+*   `m == grid.length`
+*   `n == grid[i].length`
+*   `1 <= m, n <= 1000`
+*   `1 <= m * n <= 105`
+*   `grid[i][j]` 要么是 `0` ，要么是 `1` 。
+
+[https://leetcode.cn/problems/count-fertile-pyramids-in-a-land/description/](https://leetcode.cn/problems/count-fertile-pyramids-in-a-land/description/)
+
+```java
+// 暴力 O(m*n*max(m,n))
+class Solution {
+    public int countPyramids(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[][] prefixSum = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                prefixSum[i + 1][j + 1] = prefixSum[i + 1][j] + prefixSum[i][j + 1] - prefixSum[i][j] + grid[i][j];
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 1; j < n - 1; j++) {
+                if (grid[i][j] == 0) {
+                    continue;
+                }
+                // 正三角顶点
+                int left = j - 1, right = j + 1, high = i + 1;
+                while (left >= 0 && right < n && high < m && prefixSum[high + 1][right + 1] - prefixSum[high + 1][left] - prefixSum[high][right + 1] + prefixSum[high][left] == right - left + 1) {
+                    ans++;
+                    left--;
+                    right++;
+                    high++;
+                }
+                // 倒三角顶点
+                left = j - 1; right = j + 1; high = i - 1;
+                while (left >= 0 && right < n && high >= 0 && prefixSum[high + 1][right + 1] - prefixSum[high + 1][left] - prefixSum[high][right + 1] + prefixSum[high][left] == right - left + 1) {
+                    ans++;
+                    left--;
+                    right++;
+                    high--;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution {
+    private int[][] dp;
+    private int m, n, result = 0;
+    public int countPyramids(int[][] grid) {
+        // 跑两次倒三角
+        m = grid.length;
+        n = grid[0].length;
+        dp = new int[m][n];
+        f(grid);
+        for (int i = 0; i < m >> 1; i++) {
+            int[] t = grid[i];
+            grid[i] = grid[m - i - 1];
+            grid[m - i - 1] = t;
+        }
+        f(grid);
+        return result;
+    }
+
+    private void f(int[][] grid) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                dp[i][j] = grid[i][j];
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n - 1; j++) {
+                if (grid[i][j] == 1) {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i - 1][j + 1])) + 1;
+                    result += dp[i][j] - 1;
+                }
+            }
+        }
+    }
+}
+```
+
+3197\. 包含所有 1 的最小矩形面积 II
+------------------------
+
+给你一个二维 **二进制** 数组 `grid`。你需要找到 3 个 **不重叠**、面积 **非零** 、边在水平方向和竖直方向上的矩形，并且满足 `grid` 中所有的 1 都在这些矩形的内部。
+
+返回这些矩形面积之和的 **最小** 可能值。
+
+**注意**，这些矩形可以相接。
+
+**示例 1：**
+
+**输入：** grid = \[\[1,0,1\],\[1,1,1\]\]
+
+**输出：** 5
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/05/14/example0rect21.png)
+
+*   位于 `(0, 0)` 和 `(1, 0)` 的 1 被一个面积为 2 的矩形覆盖。
+*   位于 `(0, 2)` 和 `(1, 2)` 的 1 被一个面积为 2 的矩形覆盖。
+*   位于 `(1, 1)` 的 1 被一个面积为 1 的矩形覆盖。
+
+**示例 2：**
+
+**输入：** grid = \[\[1,0,1,0\],\[0,1,0,1\]\]
+
+**输出：** 5
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/05/14/example1rect2.png)
+
+*   位于 `(0, 0)` 和 `(0, 2)` 的 1 被一个面积为 3 的矩形覆盖。
+*   位于 `(1, 1)` 的 1 被一个面积为 1 的矩形覆盖。
+*   位于 `(1, 3)` 的 1 被一个面积为 1 的矩形覆盖。
+
+**提示：**
+
+*   `1 <= grid.length, grid[i].length <= 30`
+*   `grid[i][j]` 是 0 或 1。
+*   输入保证 `grid` 中至少有三个 1 。
+
+[https://leetcode.cn/problems/find-the-minimum-area-to-cover-all-ones-ii/description/](https://leetcode.cn/problems/find-the-minimum-area-to-cover-all-ones-ii/description/)
+
+```java
+public class Solution { // 太难，不要求掌握
+    public int minimumSum(int[][] grid) {
+        return Math.min(f(grid), f(rotate(grid)));
+    }
+
+    private int f(int[][] a) {
+        int ans = Integer.MAX_VALUE;
+        int m = a.length;
+        int n = a[0].length;
+        if (m >= 3) {
+            for (int i = 1; i < m; i++) {
+                for (int j = i + 1; j < m; j++) {
+                    // 图片上左
+                    int area = minimumArea(a, 0, i, 0, n);
+                    area += minimumArea(a, i, j, 0, n);
+                    area += minimumArea(a, j, m, 0, n);
+                    ans = Math.min(ans, area);
+                }
+            }
+        }
+        if (m >= 2 && n >= 2) {
+            for (int i = 1; i < m; i++) {
+                for (int j = 1; j < n; j++) {
+                    // 图片上中
+                    int area = minimumArea(a, 0, i, 0, n);
+                    area += minimumArea(a, i, m, 0, j);
+                    area += minimumArea(a, i, m, j, n);
+                    ans = Math.min(ans, area);
+                    // 图片上右
+                    area = minimumArea(a, 0, i, 0, j);
+                    area += minimumArea(a, 0, i, j, n);
+                    area += minimumArea(a, i, m, 0, n);
+                    ans = Math.min(ans, area);
+                }
+            }
+        }
+        return ans;
+    }
+
+    private int minimumArea(int[][] a, int u, int d, int l, int r) {
+        int left = a[0].length;
+        int right = 0;
+        int top = a.length;
+        int bottom = 0;
+        for (int i = u; i < d; i++) {
+            for (int j = l; j < r; j++) {
+                if (a[i][j] == 1) {
+                    left = Math.min(left, j);
+                    right = Math.max(right, j);
+                    top = Math.min(top, i);
+                    bottom = i;
+                }
+            }
+        }
+        return (right - left + 1) * (bottom - top + 1);
+    }
+
+    // 顺时针旋转矩阵 90°
+    private int[][] rotate(int[][] a) {
+        int m = a.length;
+        int n = a[0].length;
+        int[][] b = new int[n][m];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                b[j][m - 1 - i] = a[i][j];
+            }
+        }
+        return b;
+    }
+}
+```
+
+```java
+class Solution {
+    public int minimumSum(int[][] grid) {
+        return Math.min(f(grid), f(rotate(grid)));
+    }
+
+    private int f(int[][] a) {
+        int m = a.length;
+        int n = a[0].length;
+        int[][] lr = new int[m][2]; // 每一行最左最右 1 的列号
+        for (int i = 0; i < m; i++) {
+            int l = -1;
+            int r = 0;
+            for (int j = 0; j < n; j++) {
+                if (a[i][j] > 0) {
+                    if (l < 0) {
+                        l = j;
+                    }
+                    r = j;
+                }
+            }
+            lr[i][0] = l;
+            lr[i][1] = r;
+        }
+
+        // lt[i+1][j+1] = 包含【左上角为 (0,0) 右下角为 (i,j) 的子矩形】中的所有 1 的最小矩形面积
+        int[][] lt = minimumArea(a);
+        a = rotate(a);
+        // lb[i][j+1] = 包含【左下角为 (m-1,0) 右上角为 (i,j) 的子矩形】中的所有 1 的最小矩形面积
+        int[][] lb = rotate(rotate(rotate(minimumArea(a))));
+        a = rotate(a);
+        // rb[i][j] = 包含【右下角为 (m-1,n-1) 左上角为 (i,j) 的子矩形】中的所有 1 的最小矩形面积
+        int[][] rb = rotate(rotate(minimumArea(a)));
+        a = rotate(a);
+        // rt[i+1][j] = 包含【右上角为 (0,n-1) 左下角为 (i,j) 的子矩形】中的所有 1 的最小矩形面积
+        int[][] rt = rotate(minimumArea(a));
+
+        int ans = Integer.MAX_VALUE;
+        if (m >= 3) {
+            for (int i = 1; i < m; i++) {
+                int left = n;
+                int right = 0;
+                int top = m;
+                int bottom = 0;
+                for (int j = i + 1; j < m; j++) {
+                    int l = lr[j - 1][0];
+                    if (l >= 0) {
+                        left = Math.min(left, l);
+                        right = Math.max(right, lr[j - 1][1]);
+                        top = Math.min(top, j - 1);
+                        bottom = j - 1;
+                    }
+                    // 图片上左
+                    ans = Math.min(ans, lt[i][n] + (right - left + 1) * (bottom - top + 1) + lb[j][n]);
+                }
+            }
+        }
+
+        if (m >= 2 && n >= 2) {
+            for (int i = 1; i < m; i++) {
+                for (int j = 1; j < n; j++) {
+                    // 图片上中
+                    ans = Math.min(ans, lt[i][n] + lb[i][j] + rb[i][j]);
+                    // 图片上右
+                    ans = Math.min(ans, lt[i][j] + rt[i][j] + lb[i][n]);
+                }
+            }
+        }
+        return ans;
+    }
+
+    private int[][] minimumArea(int[][] a) {
+        int m = a.length;
+        int n = a[0].length;
+        // f[i+1][j+1] 表示包含【左上角为 (0,0) 右下角为 (i,j) 的子矩形】中的所有 1 的最小矩形面积
+        int[][] f = new int[m + 1][n + 1];
+        int[][] border = new int[n][3];
+        for (int j = 0; j < n; j++) {
+            border[j][0] = -1;
+        }
+        for (int i = 0; i < m; i++) {
+            int left = -1;
+            int right = 0;
+            for (int j = 0; j < n; j++) {
+                if (a[i][j] == 1) {
+                    if (left < 0) {
+                        left = j;
+                    }
+                    right = j;
+                }
+                int[] preB = border[j];
+                if (left < 0) { // 这一排目前全是 0
+                    f[i + 1][j + 1] = f[i][j + 1]; // 等于上面的结果
+                } else if (preB[0] < 0) { // 这一排有 1，上面全是 0
+                    f[i + 1][j + 1] = right - left + 1;
+                    border[j][0] = i;
+                    border[j][1] = left;
+                    border[j][2] = right;
+                } else { // 这一排有 1，上面也有 1
+                    int l = Math.min(preB[1], left);
+                    int r = Math.max(preB[2], right);
+                    f[i + 1][j + 1] = (r - l + 1) * (i - preB[0] + 1);
+                    border[j][1] = l;
+                    border[j][2] = r;
+                }
+            }
+        }
+        return f;
+    }
+
+    // 顺时针旋转矩阵 90°
+    private int[][] rotate(int[][] a) {
+        int m = a.length;
+        int n = a[0].length;
+        int[][] b = new int[n][m];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                b[j][m - 1 - i] = a[i][j];
+            }
+        }
+        return b;
+    }
+}
+```
+
