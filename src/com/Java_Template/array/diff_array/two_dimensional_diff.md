@@ -489,3 +489,83 @@ class Solution {
 }
 ```
 
+3224\. 使差值相等的最少数组改动次数（一维差分）
+---------------------
+
+给你一个长度为 `n` 的整数数组 `nums` ，`n` 是 **偶数** ，同时给你一个整数 `k` 。
+
+你可以对数组进行一些操作。每次操作中，你可以将数组中 **任一** 元素替换为 `0` 到 `k` 之间的 **任一** 整数。
+
+执行完所有操作以后，你需要确保最后得到的数组满足以下条件：
+
+*   存在一个整数 `X` ，满足对于所有的 `(0 <= i < n)` 都有 `abs(a[i] - a[n - i - 1]) = X` 。
+
+请你返回满足以上条件 **最少** 修改次数。
+
+**示例 1：**
+
+**输入：**nums = \[1,0,1,2,4,3\], k = 4
+
+**输出：**2
+
+**解释：**  
+我们可以执行以下操作：
+
+*   将 `nums[1]` 变为 2 ，结果数组为 `nums = [1,_**2**_,1,2,4,3]` 。
+*   将 `nums[3]` 变为 3 ，结果数组为 `nums = [1,2,1,_**3**_,4,3]` 。
+
+整数 `X` 为 2 。
+
+**示例 2：**
+
+**输入：**nums = \[0,1,2,3,3,6,5,4\], k = 6
+
+**输出：**2
+
+**解释：**  
+我们可以执行以下操作：
+
+*   将 `nums[3]` 变为 0 ，结果数组为 `nums = [0,1,2,_**0**_,3,6,5,4]` 。
+*   将 `nums[4]` 变为 4 ，结果数组为 `nums = [0,1,2,0,_**4**_,6,5,4]` 。
+
+整数 `X` 为 4 。
+
+**提示：**
+
+*   `2 <= n == nums.length <= 105`
+*   `n` 是偶数。
+*   `0 <= nums[i] <= k <= 105`
+
+[https://leetcode.cn/problems/minimum-array-changes-to-make-differences-equal/submissions/548777686/](https://leetcode.cn/problems/minimum-array-changes-to-make-differences-equal/submissions/548777686/)
+
+```java
+class Solution {
+    public int minChanges(int[] nums, int k) {
+        // 差分
+        int n = nums.length;
+        int[] diff = new int[k + 2];
+        for(int i = 0; i < n / 2; i++){
+            int p = nums[i], q = nums[n - 1 - i];
+            if(p > q){ // 保证p < q;
+                int temp = p;
+                p = q;
+                q = temp;
+            }
+            int x = q - p;
+            int mx = Math.max(k - p, q);
+            diff[0]++;
+            diff[x]--; // 表示区间[0, x - 1]之间的元素全部加一
+            diff[x + 1]++;
+            diff[mx + 1]++;
+        }
+        int ans = n;
+        int minModify = 0;
+        for(int x: diff){
+            minModify += x;
+            ans = Math.min(ans, minModify);
+        }
+        return ans;
+    }
+}
+```
+

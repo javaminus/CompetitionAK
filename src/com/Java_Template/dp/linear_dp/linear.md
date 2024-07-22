@@ -2790,3 +2790,295 @@ class Solution {
 }
 ```
 
+# §7.5 多维
+
+2370\. 最长理想子序列
+--------------
+
+给你一个由小写字母组成的字符串 `s` ，和一个整数 `k` 。如果满足下述条件，则可以将字符串 `t` 视作是 **理想字符串** ：
+
+*   `t` 是字符串 `s` 的一个子序列。
+*   `t` 中每两个 **相邻** 字母在字母表中位次的绝对差值小于或等于 `k` 。
+
+返回 **最长** 理想字符串的长度。
+
+字符串的子序列同样是一个字符串，并且子序列还满足：可以经由其他字符串删除某些字符（也可以不删除）但不改变剩余字符的顺序得到。
+
+**注意：**字母表顺序不会循环。例如，`'a'` 和 `'z'` 在字母表中位次的绝对差值是 `25` ，而不是 `1` 。
+
+**示例 1：**
+
+**输入：**s = "acfgbd", k = 2
+**输出：**4
+**解释：**最长理想字符串是 "acbd" 。该字符串长度为 4 ，所以返回 4 。
+注意 "acfgbd" 不是理想字符串，因为 'c' 和 'f' 的字母表位次差值为 3 。
+
+**示例 2：**
+
+**输入：**s = "abcd", k = 3
+**输出：**4
+**解释：**最长理想字符串是 "abcd" ，该字符串长度为 4 ，所以返回 4 。
+
+**提示：**
+
+*   `1 <= s.length <= 105`
+*   `0 <= k <= 25`
+*   `s` 由小写英文字母组成
+
+[https://leetcode.cn/problems/longest-ideal-subsequence/description/](https://leetcode.cn/problems/longest-ideal-subsequence/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 暴力模拟， 412ms
+    String s;
+    int k, n;
+    int[][] memo;
+    public int longestIdealString(String s, int k) {
+        this.s = s;
+        this.k = k;
+        n = s.length();
+        memo = new int[n + 1][27];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(0, 26);
+    }
+
+    private int dfs(int i, int pre) {
+        if (i == n) {
+            return 0;
+        }
+        if (memo[i][pre] != -1) {
+            return memo[i][pre];
+        }
+        int res = dfs(i + 1, pre);
+        if (pre == 26 || Math.abs(s.charAt(i) - 'a' - pre) <= k) {
+            res = Math.max(res, dfs(i + 1, s.charAt(i) - 'a') + 1);
+        }
+        return memo[i][pre] = res;
+    }
+}
+```
+
+```java
+class Solution {
+    public int longestIdealString(String s, int k) { // 错误的写法，错误原因见末尾
+        // 定义状态为以字母x结尾的最大长度
+        int[] dp = new int[26];
+        int ans = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int c = s.charAt(i) - 'a';
+            for (int j = Math.max(0, c - k); j <= Math.min(25, c + k); j++) {
+                dp[c] = Math.max(dp[c], dp[j] + 1);
+            }
+            ans = Math.max(ans, dp[c]);
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution {
+    public int longestIdealString(String s, int k) { // 正确的写法
+        // 定义状态为以字母x结尾的最大长度
+        int[] dp = new int[26];
+        int ans = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int c = s.charAt(i) - 'a';
+            for (int j = Math.max(0, c - k); j <= Math.min(25, c + k); j++) {
+                dp[c] = Math.max(dp[c], dp[j]);
+            }
+            ans = Math.max(ans, ++dp[c]);
+        }
+        return ans;
+    }
+}
+```
+
+> 错误原因：比如我们要访问字符g，但是我们 dp[g] 在访问到 dp[f] 时有 dp[g] = dp[f] + 1, 这里dp[g] = dp[g] +1,这里相当于 +2
+
+3176\. 求出最长好子序列 I
+-----------------
+
+给你一个整数数组 `nums` 和一个 **非负** 整数 `k` 。如果一个整数序列 `seq` 满足在范围下标范围 `[0, seq.length - 2]` 中存在 **不超过** `k` 个下标 `i` 满足 `seq[i] != seq[i + 1]` ，那么我们称这个整数序列为 **好** 序列。
+
+请你返回 `nums` 中 **好**
+
+子序列
+
+ 的最长长度
+
+**示例 1：**
+
+**输入：**nums = \[1,2,1,1,3\], k = 2
+
+**输出：**4
+
+**解释：**
+
+最长好子序列为 `[_**1**_,_**2**_,**_1_**,_**1**_,3]` 。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,4,5,1\], k = 0
+
+**输出：**2
+
+**解释：**
+
+最长好子序列为 `[**_1_**,2,3,4,5,**_1_**]` 。
+
+**提示：**
+
+*   `1 <= nums.length <= 500`
+*   `1 <= nums[i] <= 109`
+*   `0 <= k <= min(nums.length, 25)`
+
+[https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-i/description/](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-i/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution { // 暴力模拟超时
+    int n;
+    HashMap<Long, Integer> memo;
+    public int maximumLength(int[] nums, int k) {
+        n = nums.length;
+        memo = new HashMap<>();
+        return dfs(0, 0, -1, nums, k);
+    }
+
+    private int dfs(int i, int j, int pre, int[] nums, int k) {
+        // 到达下标i，满足条件的最长子序列,j是不同的数
+        if (j > k) {
+            return -1;
+        }
+        if (i == n) {
+            return 0;
+        }
+        long key = ((long) pre << 32) + ((long) i << 19) + ((long) j << 9);
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        int res = 0;
+        res = Math.max(dfs(i + 1, j + (nums[i] == pre || pre == -1 ? 0 : 1), nums[i], nums, k) + 1, dfs(i + 1, j, pre, nums, k));
+        memo.put(key, res);
+        return res;
+    }
+}
+```
+
+```java
+import java.util.*;
+
+class Solution { // 去重+离散化，暴力模拟勉强能过
+    int n;
+   int[][][] memo;
+    public int maximumLength(int[] nums, int k) {
+        n = nums.length;
+        List<Integer> distinctNums = new ArrayList<>();
+        for (int num : nums) {
+            if (!distinctNums.contains(num)) {
+                distinctNums.add(num);
+            }
+        }
+        Collections.sort(distinctNums);
+        Map<Integer, Integer> mapping = new HashMap<>();
+        for (int i = 0; i < distinctNums.size(); i++) {
+            mapping.put(distinctNums.get(i), i + 1);
+        }
+        memo = new int[n + 1][k + 1][mapping.size() + 5];
+        for (int i = 0; i < n + 1; i++) {
+            for (int j = 0; j < k + 1; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            nums[i] = mapping.get(nums[i]);
+        }
+        return dfs(0, 0, 0, nums, k);
+    }
+
+    private int dfs(int i, int j, int pre, int[] nums, int k) {
+        // 到达下标i，满足条件的最长子序列,j是不同的数
+        if (j > k) {
+            return -1;
+        }
+        if (i == n) {
+            return 0;
+        }
+        if (memo[i][j][pre] != -1) {
+            return memo[i][j][pre];
+        }
+        int res = 0;
+        res = Math.max(dfs(i + 1, j + (nums[i] == pre || pre == 0 ? 0 : 1), nums[i], nums, k) + 1, dfs(i + 1, j, pre, nums, k));
+        return memo[i][j][pre] = res;
+    }
+
+}
+```
+
+3177\. 求出最长好子序列 II
+------------------
+
+给你一个整数数组 `nums` 和一个 **非负** 整数 `k` 。如果一个整数序列 `seq` 满足在范围下标范围 `[0, seq.length - 2]` 中存在 **不超过** `k` 个下标 `i` 满足 `seq[i] != seq[i + 1]` ，那么我们称这个整数序列为 **好** 序列。
+
+请你返回 `nums` 中 **好**
+
+子序列
+
+ 的最长长度
+
+**示例 1：**
+
+**输入：**nums = \[1,2,1,1,3\], k = 2
+
+**输出：**4
+
+**解释：**
+
+最长好子序列为 `[_**1**_,_**2**_,**_1_**,_**1**_,3]` 。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,4,5,1\], k = 0
+
+**输出：**2
+
+**解释：**
+
+最长好子序列为 `[**_1_**,2,3,4,5,**_1_**]` 。
+
+**提示：**
+
+*   `1 <= nums.length <= 5 * 103`
+*   `1 <= nums[i] <= 109`
+*   `0 <= k <= min(50, nums.length)`
+
+[https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/description/)
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int maximumLength(int[] nums, int k) {
+        // dp[i][j]表示以i结尾的剩余j个不同下标可用的最长子序列
+        HashMap<Integer, int[]> fs = new HashMap<>();
+        int[] mx = new int[k + 1]; // mx[i]表示不同个数为i的子序列最大长度
+        for (int x : nums) {
+            int[] f = fs.computeIfAbsent(x, e -> new int[k + 1]);
+            for (int i = k; i >= 0; i--) {
+                f[i]++;
+                if (i > 0) {
+                    f[i] = Math.max(f[i], mx[i - 1] + 1);
+                }
+                mx[i] = Math.max(mx[i], f[i]);
+            }
+        }
+        return mx[k];
+    }
+}
+```
+
