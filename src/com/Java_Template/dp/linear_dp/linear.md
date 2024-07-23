@@ -3082,3 +3082,320 @@ class Solution {
 }
 ```
 
+576\. 出界的路径数
+------------
+
+给你一个大小为 `m x n` 的网格和一个球。球的起始坐标为 `[startRow, startColumn]` 。你可以将球移到在四个方向上相邻的单元格内（可以穿过网格边界到达网格之外）。你 **最多** 可以移动 `maxMove` 次球。
+
+给你五个整数 `m`、`n`、`maxMove`、`startRow` 以及 `startColumn` ，找出并返回可以将球移出边界的路径数量。因为答案可能非常大，返回对 `109 + 7` **取余** 后的结果。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/04/28/out_of_boundary_paths_1.png)
+
+**输入：**m = 2, n = 2, maxMove = 2, startRow = 0, startColumn = 0
+**输出：**6
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/04/28/out_of_boundary_paths_2.png)
+
+**输入：**m = 1, n = 3, maxMove = 3, startRow = 0, startColumn = 1
+**输出：**12
+
+**提示：**
+
+*   `1 <= m, n <= 50`
+*   `0 <= maxMove <= 50`
+*   `0 <= startRow < m`
+*   `0 <= startColumn < n`
+
+[https://leetcode.cn/problems/out-of-boundary-paths/description/](https://leetcode.cn/problems/out-of-boundary-paths/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static int[][] dirs = new int[][]{{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    private static long Mod = (long) 1e9 + 7;
+    public int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        long[][][] dp = new long[maxMove + 1][m][n];
+        long ans = 0;
+        dp[0][startRow][startColumn] = 1;
+        for (int k = 0; k < maxMove; k++) {
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    long cnt = dp[k][i][j];
+                    if (cnt > 0) {
+                        for (int[] d : dirs) {
+                            int x = i + d[0], y = j + d[1];
+                            if (x >= 0 && y >= 0 && x < m && y < n) {
+                                dp[k + 1][x][y] += cnt;
+                                dp[k + 1][x][y] %= Mod;
+                            }else{
+                                ans += cnt;
+                                ans %= Mod;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return (int) ans;
+    }
+}
+```
+
+```java
+// 空间优化
+import java.util.Arrays;
+
+class Solution {
+    private static int[][] dirs = new int[][]{{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    private static long Mod = (long) 1e9 + 7;
+    public int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        long[][] dp = new long[m][n];
+        long ans = 0;
+        dp[startRow][startColumn] = 1;
+        for (int k = 0; k < maxMove; k++) {
+            long[][] dpNew = new long[m][n];
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    long cnt = dp[i][j];
+                    if (cnt > 0) {
+                        for (int[] d : dirs) {
+                            int x = i + d[0], y = j + d[1];
+                            if (x >= 0 && y >= 0 && x < m && y < n) {
+                                dpNew[x][y] += cnt;
+                                dpNew[x][y] %= Mod;
+                            }else{
+                                ans += cnt;
+                                ans %= Mod;
+                            }
+                        }
+                    }
+                }
+            }
+            dp = dpNew;
+        }
+        return (int) ans;
+    }
+}
+```
+
+403\. 青蛙过河
+----------
+
+一只青蛙想要过河。 假定河流被等分为若干个单元格，并且在每一个单元格内都有可能放有一块石子（也有可能没有）。 青蛙可以跳上石子，但是不可以跳入水中。
+
+给你石子的位置列表 `stones`（用单元格序号 **升序** 表示）， 请判定青蛙能否成功过河（即能否在最后一步跳至最后一块石子上）。开始时， 青蛙默认已站在第一块石子上，并可以假定它第一步只能跳跃 `1` 个单位（即只能从单元格 1 跳至单元格 2 ）。
+
+如果青蛙上一步跳跃了 `k` 个单位，那么它接下来的跳跃距离只能选择为 `k - 1`、`k` 或 `k + 1` 个单位。 另请注意，青蛙只能向前方（终点的方向）跳跃。
+
+**示例 1：**
+
+**输入：**stones = \[0,1,3,5,6,8,12,17\]
+**输出：**true
+**解释：**青蛙可以成功过河，按照如下方案跳跃：跳 1 个单位到第 2 块石子, 然后跳 2 个单位到第 3 块石子, 接着 跳 2 个单位到第 4 块石子, 然后跳 3 个单位到第 6 块石子, 跳 4 个单位到第 7 块石子, 最后，跳 5 个单位到第 8 个石子（即最后一块石子）。
+
+**示例 2：**
+
+**输入：**stones = \[0,1,2,3,4,8,9,11\]
+**输出：**false
+**解释：**这是因为第 5 和第 6 个石子之间的间距太大，没有可选的方案供青蛙跳跃过去。
+
+**提示：**
+
+*   `2 <= stones.length <= 2000`
+*   `0 <= stones[i] <= 231 - 1`
+*   `stones[0] == 0`
+*   `stones` 按严格升序排列
+
+[https://leetcode.cn/problems/frog-jump/description/](https://leetcode.cn/problems/frog-jump/description/)
+
+```java
+class Solution {
+    public boolean canCross(int[] stones) {
+        int n = stones.length;
+        boolean[][] dp = new boolean[n][n + 1]; // 表示在第i个位置，使用的步数j跳到位置stones[i]
+        dp[0][1] = true;
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (dp[i - 1][j]) { // 这个位置跳了j格
+                    for (int k = i; k < n; k++) {
+                        int dis = stones[k] - stones[i - 1];
+                        if (dis > j + 1) {
+                            break;
+                        }
+                        if (i > 1 && dis == j - 1) {
+                            dp[k][j - 1] = true;
+                        }
+                        if (dis == j) {
+                            dp[k][j] = true;
+                        }
+                        if (i > 1 && dis == j + 1) {
+                            dp[k][j + 1] = true;
+                        }
+                    }
+                }
+            }
+        }
+        for (boolean b : dp[n - 1]) {
+            if (b) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+1223\. 掷骰子模拟
+------------
+
+有一个骰子模拟器会每次投掷的时候生成一个 1 到 6 的随机数。
+
+不过我们在使用它时有个约束，就是使得投掷骰子时，**连续** 掷出数字 `i` 的次数不能超过 `rollMax[i]`（`i` 从 1 开始编号）。
+
+现在，给你一个整数数组 `rollMax` 和一个整数 `n`，请你来计算掷 `n` 次骰子可得到的不同点数序列的数量。
+
+假如两个序列中至少存在一个元素不同，就认为这两个序列是不同的。由于答案可能很大，所以请返回 **模 `10^9 + 7`** 之后的结果。
+
+**示例 1：**
+
+**输入：**n = 2, rollMax = \[1,1,2,2,2,3\]
+**输出：**34
+**解释：**我们掷 2 次骰子，如果没有约束的话，共有 6 \* 6 = 36 种可能的组合。但是根据 rollMax 数组，数字 1 和 2 最多连续出现一次，所以不会出现序列 (1,1) 和 (2,2)。因此，最终答案是 36-2 = 34。
+
+**示例 2：**
+
+**输入：**n = 2, rollMax = \[1,1,1,1,1,1\]
+**输出：**30
+
+**示例 3：**
+
+**输入：**n = 3, rollMax = \[1,1,1,2,2,3\]
+**输出：**181
+
+**提示：**
+
+*   `1 <= n <= 5000`
+*   `rollMax.length == 6`
+*   `1 <= rollMax[i] <= 15`
+
+[https://leetcode.cn/problems/dice-roll-simulation/description/](https://leetcode.cn/problems/dice-roll-simulation/description/)
+
+```java
+// 会超时的回溯写法
+class Solution {
+    private static final long MOD = (long) 1e9 + 7;
+    private int[] rollMax;
+
+    public int dieSimulator(int n, int[] rollMax) {
+        this.rollMax = rollMax;
+        int m = rollMax.length;
+        long ans = 0;
+        for (int j = 0; j < m; ++j) {
+            ans += dfs(n - 1, j, rollMax[j] - 1);
+        }
+        return (int) (ans % MOD);
+    }
+
+    private int dfs(int i, int last, int left) {
+        if (i == 0) return 1;
+        long res = 0;
+        for (int j = 0; j < rollMax.length; ++j) {
+            if (j != last) {
+                res += dfs(i - 1, j, rollMax[j] - 1);
+            } else if (left > 0) {
+                res += dfs(i - 1, j, left - 1);
+            }
+        }
+        return (int) (res % MOD);
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static final long Mod = (long) 1e9 + 7;
+    int[] rollMax;
+    int m;
+    long[][][] memo;
+    public int dieSimulator(int n, int[] rollMax) {
+        m = rollMax.length;
+        this.rollMax = rollMax;
+        memo = new long[n + 1][m][16];
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j < m; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        long ans = 0;
+        for (int i = 0; i < m; i++) {
+            ans += dfs(n - 1, i, rollMax[i] - 1);
+            ans %= Mod;
+        }
+        return (int) ans;
+    }
+
+    private long dfs(int i, int pre, int cnt){
+        if (i == 0) {
+            return 1;
+        }
+        if (memo[i][pre][cnt] != -1) {
+            return memo[i][pre][cnt];
+        }
+        long res = 0;
+        for (int j = 0; j < m; j++) {
+            if (j != pre) {
+                res += dfs(i - 1, j, rollMax[j] - 1);
+            } else if (cnt > 0) {
+                res += dfs(i - 1, j, cnt - 1);
+            }
+        }
+        res %= Mod;
+        return memo[i][pre][cnt] = res;
+    }
+}
+
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static final long Mod = (long) 1e9 + 7;
+
+    public int dieSimulator(int n, int[] rollMax) {
+        int m = rollMax.length; // 6
+        int[][][] f = new int[n][m][15];
+        for (int j = 0; j < m; ++j) {
+            Arrays.fill(f[0][j], 1);
+        }
+        for (int i = 1; i < n; ++i) {
+            for (int last = 0; last < m; ++last) {
+                for (int left = 0; left < rollMax[last]; ++left) {
+                    long res = 0;
+                    for (int j = 0; j < m; ++j) {
+                        if (j != last) {
+                            res += f[i - 1][j][rollMax[j] - 1];
+                        } else if (left > 0) {
+                            res += f[i - 1][j][left - 1];
+                        }
+                    }
+                    f[i][last][left] = (int) (res % Mod);
+                }
+            }
+        }
+        long ans = 0;
+        for (int j = 0; j < m; ++j) {
+            ans += f[n - 1][j][rollMax[j] - 1];
+        }
+        return (int) (ans % Mod);
+    }
+}
+```
+

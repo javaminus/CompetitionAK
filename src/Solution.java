@@ -1,20 +1,33 @@
-import java.util.HashMap;
+import java.util.Arrays;
 
 class Solution {
-    public int maximumLength(int[] nums, int k) {
-        // dp[i][j]表示以i结尾的剩余j个不同下标可用的最长子序列
-        HashMap<Integer, int[]> fs = new HashMap<>();
-        int[] mx = new int[k + 1]; // mx[i]表示不同个数为i的子序列最大长度
-        for (int x : nums) {
-            int[] f = fs.computeIfAbsent(x, e -> new int[k + 1]);
-            for (int i = k; i >= 0; i--) {
-                f[i]++;
-                if (i > 0) {
-                    f[i] = Math.max(f[i], mx[i - 1] + 1);
+    private static final long Mod = (long) 1e9 + 7;
+
+    public int dieSimulator(int n, int[] rollMax) {
+        int m = rollMax.length; // 6
+        int[][][] f = new int[n][m][15];
+        for (int j = 0; j < m; ++j) {
+            Arrays.fill(f[0][j], 1);
+        }
+        for (int i = 1; i < n; ++i) {
+            for (int last = 0; last < m; ++last) {
+                for (int left = 0; left < rollMax[last]; ++left) {
+                    long res = 0;
+                    for (int j = 0; j < m; ++j) {
+                        if (j != last) {
+                            res += f[i - 1][j][rollMax[j] - 1];
+                        } else if (left > 0) {
+                            res += f[i - 1][j][left - 1];
+                        }
+                    }
+                    f[i][last][left] = (int) (res % Mod);
                 }
-                mx[i] = Math.max(mx[i], f[i]);
             }
         }
-        return mx[k];
+        long ans = 0;
+        for (int j = 0; j < m; ++j) {
+            ans += f[n - 1][j][rollMax[j] - 1];
+        }
+        return (int) (ans % Mod);
     }
 }
