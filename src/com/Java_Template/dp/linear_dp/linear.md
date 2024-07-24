@@ -3399,3 +3399,274 @@ class Solution {
 }
 ```
 
+1320\. 二指输入的的最小距离
+-----------------
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/11/leetcode_keyboard.png)
+
+二指输入法定制键盘在 **X-Y** 平面上的布局如上图所示，其中每个大写英文字母都位于某个坐标处。
+
+*   例如字母 **A** 位于坐标 **(0,0)**，字母 **B** 位于坐标 **(0,1)**，字母 **P** 位于坐标 **(2,3)** 且字母 **Z** 位于坐标 **(4,1)**。
+
+给你一个待输入字符串 `word`，请你计算并返回在仅使用两根手指的情况下，键入该字符串需要的最小移动总距离。
+
+坐标 `**(x1,y1)**` 和 `**(x2,y2)**` 之间的 **距离** 是 `**|x1 - x2| + |y1 - y2|**`。 
+
+**注意**，两根手指的起始位置是零代价的，不计入移动总距离。你的两根手指的起始位置也不必从首字母或者前两个字母开始。
+
+**示例 1：**
+
+**输入：**word = "CAKE"
+**输出：**3
+**解释：** 
+使用两根手指输入 "CAKE" 的最佳方案之一是： 
+手指 1 在字母 'C' 上 -> 移动距离 = 0 
+手指 1 在字母 'A' 上 -> 移动距离 = 从字母 'C' 到字母 'A' 的距离 = 2 
+手指 2 在字母 'K' 上 -> 移动距离 = 0 
+手指 2 在字母 'E' 上 -> 移动距离 = 从字母 'K' 到字母 'E' 的距离  = 1 
+总距离 = 3
+
+**示例 2：**
+
+**输入：**word = "HAPPY"
+**输出：**6
+**解释：** 
+使用两根手指输入 "HAPPY" 的最佳方案之一是：
+手指 1 在字母 'H' 上 -> 移动距离 = 0
+手指 1 在字母 'A' 上 -> 移动距离 = 从字母 'H' 到字母 'A' 的距离 = 2
+手指 2 在字母 'P' 上 -> 移动距离 = 0
+手指 2 在字母 'P' 上 -> 移动距离 = 从字母 'P' 到字母 'P' 的距离 = 0
+手指 1 在字母 'Y' 上 -> 移动距离 = 从字母 'A' 到字母 'Y' 的距离 = 4
+总距离 = 6
+
+**提示：**
+
+*   `2 <= word.length <= 300`
+*   每个 `word[i]` 都是一个大写英文字母。
+
+[https://leetcode.cn/problems/minimum-distance-to-type-a-word-using-two-fingers/description/](https://leetcode.cn/problems/minimum-distance-to-type-a-word-using-two-fingers/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minimumDistance(String word) {
+        int n = word.length();
+        char[] s = word.toCharArray();
+        int[][][] dp = new int[n][26][26]; // 定义前k个字母，起始第一个字母为i，最后一个字母为j的最小总距离
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 26; j++) {
+                Arrays.fill(dp[i][j], Integer.MAX_VALUE / 2);
+            }
+        }
+        // left、right都可以从word[0]处开始，不需要任何开销
+        for (int i = 0; i < 26; i++) {
+            dp[0][i][s[0] - 'A'] = dp[0][s[0] - 'A'][i] = 0;
+        }
+        // 贪心的思想，这里的初始手指一定有一个在s[0]
+        for (int i = 1; i < n; i++) {
+            int cur = s[i] - 'A', pre = s[i - 1] - 'A';
+            // 当前字符左手按，上一个字符也是左手
+            for (int j = 0; j < 26; j++) { // 枚举右手字符的位置，当前和上一个的右手位置都不变
+                dp[i][cur][j] = Math.min(dp[i][cur][j], dp[i - 1][pre][j] + getDist(pre, cur));
+            }
+            // 当前左手，上一个字符是右手
+            for (int j = 0; j < 26; j++) { // 枚举上一个左手的位置
+                dp[i][cur][pre] = Math.min(dp[i][cur][pre], dp[i - 1][j][pre] + getDist(j, cur));
+            }
+            // 当前右手，上一个字符右手
+            for (int j = 0; j < 26; j++) {
+                dp[i][j][cur] = Math.min(dp[i][j][cur], dp[i - 1][j][pre] + getDist(pre, cur));
+            }
+            // 当前右手，上一个字符左手
+            for (int j = 0; j < 26; j++) {
+                dp[i][pre][cur] = Math.min(dp[i][pre][cur], dp[i - 1][pre][j] + getDist(j, cur));
+            }
+        }
+        int ans = Integer.MAX_VALUE / 2;
+        for (int i = 0; i < 26; i++) {
+            ans = Math.min(ans, Math.min(dp[n - 1][s[n - 1] - 'A'][i], dp[n - 1][i][s[n - 1] - 'A']));
+        }
+        return ans;
+    }
+
+    private int getDist(int p, int q) {
+        int x1 = p / 6, y1 = p % 6;
+        int x2 = q / 6, y2 = q % 6;
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+}
+```
+
+1575\. 统计所有可行路径
+---------------
+
+给你一个 **互不相同** 的整数数组，其中 `locations[i]` 表示第 `i` 个城市的位置。同时给你 `start`，`finish` 和 `fuel` 分别表示出发城市、目的地城市和你初始拥有的汽油总量
+
+每一步中，如果你在城市 `i` ，你可以选择任意一个城市 `j` ，满足  `j != i` 且 `0 <= j < locations.length` ，并移动到城市 `j` 。从城市 `i` 移动到 `j` 消耗的汽油量为 `|locations[i] - locations[j]|`，`|x|` 表示 `x` 的绝对值。
+
+请注意， `fuel` 任何时刻都 **不能** 为负，且你 **可以** 经过任意城市超过一次（包括 `start` 和 `finish` ）。
+
+请你返回从 `start` 到 `finish` 所有可能路径的数目。
+
+由于答案可能很大， 请将它对 `10^9 + 7` 取余后返回。
+
+**示例 1：**
+
+**输入：**locations = \[2,3,6,8,4\], start = 1, finish = 3, fuel = 5
+**输出：**4
+**解释：**以下为所有可能路径，每一条都用了 5 单位的汽油：
+1 -> 3
+1 -> 2 -> 3
+1 -> 4 -> 3
+1 -> 4 -> 2 -> 3
+
+**示例 2：**
+
+**输入：**locations = \[4,3,1\], start = 1, finish = 0, fuel = 6
+**输出：**5
+**解释：**以下为所有可能的路径：
+1 -> 0，使用汽油量为 fuel = 1
+1 -> 2 -> 0，使用汽油量为 fuel = 5
+1 -> 2 -> 1 -> 0，使用汽油量为 fuel = 5
+1 -> 0 -> 1 -> 0，使用汽油量为 fuel = 3
+1 -> 0 -> 1 -> 0 -> 1 -> 0，使用汽油量为 fuel = 5
+
+**示例 3：**
+
+**输入：**locations = \[5,2,1\], start = 0, finish = 2, fuel = 3
+**输出：**0
+**解释：**没有办法只用 3 单位的汽油从 0 到达 2 。因为最短路径需要 4 单位的汽油。
+
+**提示：**
+
+*   `2 <= locations.length <= 100`
+*   `1 <= locations[i] <= 109`
+*   所有 `locations` 中的整数 **互不相同** 。
+*   `0 <= start, finish < locations.length`
+*   `1 <= fuel <= 200`
+
+[https://leetcode.cn/problems/count-all-possible-routes/description/](https://leetcode.cn/problems/count-all-possible-routes/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    long[][] memo;
+    public int countRoutes(int[] locations, int start, int finish, int fuel) {
+        int n = locations.length;
+        memo = new long[n][fuel + 1];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return (int) dfs(start, fuel, finish, locations) + (start == finish ? 1 : 0);
+    }
+
+    private long dfs(int i, int fuel, int finish, int[] locations) { // 表示走到第i个位置的剩余油量为fuel的路径数量
+        if (memo[i][fuel] != -1) {
+            return memo[i][fuel];
+        }
+        long res = 0;
+        for (int j = 0; j < locations.length; j++) {
+            if (j == i) {
+                continue;
+            }
+            int cost = Math.abs(locations[i] - locations[j]);
+            if (cost <= fuel) {
+                res = (dfs(j, fuel - cost, finish, locations) + (j == finish ? 1 : 0) + res) % Mod;
+            }
+        }
+        return memo[i][fuel] = res;
+    }
+}
+```
+
+3154\. 到达第 K 级台阶的方案数
+--------------------
+
+给你有一个 **非负** 整数 `k` 。有一个无限长度的台阶，**最低** 一层编号为 0 。
+
+虎老师有一个整数 `jump` ，一开始值为 0 。虎老师从台阶 1 开始，虎老师可以使用 **任意** 次操作，目标是到达第 `k` 级台阶。假设虎老师位于台阶 `i` ，一次 **操作** 中，虎老师可以：
+
+*   向下走一级到 `i - 1` ，但该操作 **不能** 连续使用，如果在台阶第 0 级也不能使用。
+*   向上走到台阶 `i + 2jump` 处，然后 `jump` 变为 `jump + 1` 。
+
+请你返回虎老师到达台阶 `k` 处的总方案数。
+
+**注意** ，虎老师可能到达台阶 `k` 处后，通过一些操作重新回到台阶 `k` 处，这视为不同的方案。
+
+**示例 1：**
+
+**输入：**k = 0
+
+**输出：**2
+
+**解释：**
+
+2 种到达台阶 0 的方案为：
+
+*   虎老师从台阶 1 开始。
+    *   执行第一种操作，从台阶 1 向下走到台阶 0 。
+*   虎老师从台阶 1 开始。
+    *   执行第一种操作，从台阶 1 向下走到台阶 0 。
+    *   执行第二种操作，向上走 20 级台阶到台阶 1 。
+    *   执行第一种操作，从台阶 1 向下走到台阶 0 。
+
+**示例 2：**
+
+**输入：**k = 1
+
+**输出：**4
+
+**解释：**
+
+4 种到达台阶 1 的方案为：
+
+*   虎老师从台阶 1 开始，已经到达台阶 1 。
+*   虎老师从台阶 1 开始。
+    *   执行第一种操作，从台阶 1 向下走到台阶 0 。
+    *   执行第二种操作，向上走 20 级台阶到台阶 1 。
+*   虎老师从台阶 1 开始。
+    *   执行第二种操作，向上走 20 级台阶到台阶 2 。
+    *   执行第一种操作，向下走 1 级台阶到台阶 1 。
+*   虎老师从台阶 1 开始。
+    *   执行第一种操作，从台阶 1 向下走到台阶 0 。
+    *   执行第二种操作，向上走 20 级台阶到台阶 1 。
+    *   执行第一种操作，向下走 1 级台阶到台阶 0 。
+    *   执行第二种操作，向上走 21 级台阶到台阶 2 。
+    *   执行第一种操作，向下走 1 级台阶到台阶 1 。
+
+**提示：**
+
+*   `0 <= k <= 109`
+
+[https://leetcode.cn/problems/find-number-of-ways-to-reach-the-k-th-stair/submissions/549264829/](https://leetcode.cn/problems/find-number-of-ways-to-reach-the-k-th-stair/submissions/549264829/)
+
+```java
+public class Solution { // 暴力方法就不解释了，这里学习一下组合数学吧
+    private static final int MX = 31;
+    private static final int[][] c = new int[MX][MX];
+
+    static {
+        for (int i = 0; i < MX; i++) {
+            c[i][0] = c[i][i] = 1;
+            for (int j = 1; j < i; j++) {
+                c[i][j] = c[i - 1][j - 1] + c[i - 1][j];
+            }
+        }
+    }
+
+    public int waysToReachStair(int k) {
+        int ans = 0;
+        for (int j = 32 - Integer.numberOfLeadingZeros(Math.max(k - 1, 0)); (1 << j) - k <= j + 1; j++) {
+            ans += c[j + 1][(1 << j) - k];
+        }
+        return ans;
+    }
+}
+```
+
+
+

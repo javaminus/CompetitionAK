@@ -1,33 +1,31 @@
 import java.util.Arrays;
 
 class Solution {
-    private static final long Mod = (long) 1e9 + 7;
-
-    public int dieSimulator(int n, int[] rollMax) {
-        int m = rollMax.length; // 6
-        int[][][] f = new int[n][m][15];
-        for (int j = 0; j < m; ++j) {
-            Arrays.fill(f[0][j], 1);
+    private static long Mod = (long) 1e9 + 7;
+    long[][] memo;
+    public int countRoutes(int[] locations, int start, int finish, int fuel) {
+        int n = locations.length;
+        memo = new long[n][fuel + 1];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
         }
-        for (int i = 1; i < n; ++i) {
-            for (int last = 0; last < m; ++last) {
-                for (int left = 0; left < rollMax[last]; ++left) {
-                    long res = 0;
-                    for (int j = 0; j < m; ++j) {
-                        if (j != last) {
-                            res += f[i - 1][j][rollMax[j] - 1];
-                        } else if (left > 0) {
-                            res += f[i - 1][j][left - 1];
-                        }
-                    }
-                    f[i][last][left] = (int) (res % Mod);
-                }
+        return (int) dfs(start, fuel, finish, locations) + (start == finish ? 1 : 0);
+    }
+
+    private long dfs(int i, int fuel, int finish, int[] locations) {
+        if (memo[i][fuel] != -1) {
+            return memo[i][fuel];
+        }
+        long res = 0;
+        for (int j = 0; j < locations.length; j++) {
+            if (j == i) {
+                continue;
+            }
+            int cost = Math.abs(locations[i] - locations[j]);
+            if (cost <= fuel) {
+                res = (dfs(j, fuel - cost, finish, locations) + (j == finish ? 1 : 0) + res) % Mod;
             }
         }
-        long ans = 0;
-        for (int j = 0; j < m; ++j) {
-            ans += f[n - 1][j][rollMax[j] - 1];
-        }
-        return (int) (ans % Mod);
+        return memo[i][fuel] = res;
     }
 }
