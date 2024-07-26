@@ -3670,3 +3670,569 @@ public class Solution { // 暴力方法就不解释了，这里学习一下组�
 
 
 
+2318\. 不同骰子序列的数目
+----------------
+
+给你一个整数 `n` 。你需要掷一个 6 面的骰子 `n` 次。请你在满足以下要求的前提下，求出 **不同** 骰子序列的数目：
+
+1.  序列中任意 **相邻** 数字的 **最大公约数** 为 `1` 。
+2.  序列中 **相等** 的值之间，至少有 `2` 个其他值的数字。正式地，如果第 `i` 次掷骰子的值 **等于** 第 `j` 次的值，那么 `abs(i - j) > 2` 。
+
+请你返回不同序列的 **总数目** 。由于答案可能很大，请你将答案对 `109 + 7` **取余** 后返回。
+
+如果两个序列中至少有一个元素不同，那么它们被视为不同的序列。
+
+**示例 1：**
+
+**输入：**n = 4
+**输出：**184
+**解释：**一些可行的序列为 (1, 2, 3, 4) ，(6, 1, 2, 3) ，(1, 2, 3, 1) 等等。
+一些不可行的序列为 (1, 2, 1, 3) ，(1, 2, 3, 6) 。
+(1, 2, 1, 3) 是不可行的，因为第一个和第三个骰子值相等且 abs(1 - 3) = 2 （下标从 1 开始表示）。
+(1, 2, 3, 6) i是不可行的，因为 3 和 6 的最大公约数是 3 。
+总共有 184 个不同的可行序列，所以我们返回 184 。
+
+**示例 2：**
+
+**输入：**n = 2
+**输出：**22
+**解释：**一些可行的序列为 (1, 2) ，(2, 1) ，(3, 2) 。
+一些不可行的序列为 (3, 6) ，(2, 4) ，因为最大公约数不为 1 。
+总共有 22 个不同的可行序列，所以我们返回 22 。
+
+**提示：**
+
+*   `1 <= n <= 104`
+
+[https://leetcode.cn/problems/number-of-distinct-roll-sequences/description/](https://leetcode.cn/problems/number-of-distinct-roll-sequences/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 暴力dfs 三维，修改为dp可以压缩维度 232ms
+    private static long Mod = (long) 1e9 + 7;
+    int n;
+    private long[][][] memo;
+    public int distinctSequences(int n) {
+        this.n = n;
+        memo = new long[n + 1][7][7];
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j < 7; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        long ans = 0;
+        for (int i = 0; i < 6; i++) {
+            ans += dfs(1, i, 6);
+            ans %= Mod;
+        }
+        return (int) ans;
+    }
+
+    private long dfs(int i, int pre, int ppre) {
+        if (i == n) {
+            return 1;
+        }
+        if (memo[i][pre][ppre] != -1) {
+            return memo[i][pre][ppre];
+        }
+        long res = 0L;
+        for (int j = 0; j < 6; j++) {
+            if (gcd(pre + 1, j + 1) == 1 && j != pre && j != ppre) {
+                res = (res + dfs(i + 1, j, pre)) % Mod;
+            }
+        }
+        return memo[i][pre][ppre] = res;
+    }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+```java
+class Solution { // 67ms
+    private static final int Mod = (int) 1e9 + 7, MX = (int) 1e4;
+    static final int[][][] dp = new int[MX + 1][6][6];
+    static {
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                if (i != j && gcd(j + 1, i + 1) == 1) {
+                    dp[2][i][j] = 1;
+                }
+            }
+        }
+        for (int i = 2; i < MX; i++) {
+            for (int j = 0; j < 6; j++) {
+                for (int k = 0; k < 6; k++) {
+                    if (j != k && gcd(j + 1, k + 1) == 1) {
+                        for (int l = 0; l < 6; l++) {
+                            if (l != j) {
+                                dp[i + 1][j][k] = (dp[i + 1][j][k] + dp[i][k][l]) % Mod;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public int distinctSequences(int n) {
+        if (n == 1) {
+            return 6;
+        }
+        int ans = 0;
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                ans += dp[n][i][j];
+                ans %= Mod;
+            }
+        }
+        return ans;
+    }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+```java
+class Solution { // 优化成二维，看不懂
+    static final int MOD = (int) 1e9 + 7, MX = (int) 1e4;
+    static final int[][] dp = new int[MX + 1][6];
+
+    static {
+        for (int i = 0; i < 6; ++i)
+            dp[1][i] = 1;
+        for (int i = 2; i <= MX; ++i)
+            for (int j = 0; j < 6; ++j) {
+                long s = 0L;
+                for (int k = 0; k < 6; ++k)
+                    if (k != j && gcd(k + 1, j + 1) == 1)
+                        s += dp[i - 1][k] - dp[i - 2][j];
+                if (i > 3) s += dp[i - 2][j];
+                dp[i][j] = (int) (s % MOD);
+            }
+    }
+
+    public int distinctSequences(int n) {
+        long ans = 0L;
+        for (int v : dp[n])
+            ans += v;
+        return (int) (ans % MOD + MOD) % MOD; // 保证结果非负
+    }
+
+    static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+
+```
+
+2209\. 用地毯覆盖后的最少白色砖块
+--------------------
+
+给你一个下标从 **0** 开始的 **二进制** 字符串 `floor` ，它表示地板上砖块的颜色。
+
+*   `floor[i] = '0'` 表示地板上第 `i` 块砖块的颜色是 **黑色** 。
+*   `floor[i] = '1'` 表示地板上第 `i` 块砖块的颜色是 **白色** 。
+
+同时给你 `numCarpets` 和 `carpetLen` 。你有 `numCarpets` 条 **黑色** 的地毯，每一条 **黑色** 的地毯长度都为 `carpetLen` 块砖块。请你使用这些地毯去覆盖砖块，使得未被覆盖的剩余 **白色** 砖块的数目 **最小** 。地毯相互之间可以覆盖。
+
+请你返回没被覆盖的白色砖块的 **最少** 数目。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2022/02/10/ex1-1.png)
+
+**输入：**floor = "10110101", numCarpets = 2, carpetLen = 2
+**输出：**2
+**解释：**
+上图展示了剩余 2 块白色砖块的方案。
+没有其他方案可以使未被覆盖的白色砖块少于 2 块。
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2022/02/10/ex2.png)
+
+**输入：**floor = "11111", numCarpets = 2, carpetLen = 3
+**输出：**0
+**解释：**
+上图展示了所有白色砖块都被覆盖的一种方案。
+注意，地毯相互之间可以覆盖。
+
+**提示：**
+
+*   `1 <= carpetLen <= floor.length <= 1000`
+*   `floor[i]` 要么是 `'0'` ，要么是 `'1'` 。
+*   `1 <= numCarpets <= 1000`
+
+[https://leetcode.cn/problems/minimum-white-tiles-after-covering-with-carpets/submissions/549436918/](https://leetcode.cn/problems/minimum-white-tiles-after-covering-with-carpets/submissions/549436918/)
+
+```java
+class Solution {
+    public int minimumWhiteTiles(String floor, int n, int carpetLen) {
+        int m = floor.length();
+        if (n * carpetLen >= m) {
+            return 0;
+        }
+        int[][] dp = new int[n + 1][m]; // 表示长i的楼梯使用j个木板的最少白色
+        dp[0][0] = floor.charAt(0) - '0';
+        for (int i = 1; i < m; i++) {
+            dp[0][i] = dp[0][i - 1] + floor.charAt(i) - '0';
+        }
+        for (int i = 1; i <= n; i++) { // 板子数量
+            for (int j = carpetLen * i; j < m; j++) {
+                dp[i][j] = Math.min(dp[i][j - 1] + floor.charAt(j) - '0', dp[i - 1][j - carpetLen]);
+            }
+        }
+        return dp[n][m - 1];
+    }
+}
+```
+
+1444\. 切披萨的方案数(新题型：多看)
+--------------
+
+给你一个 `rows x cols` 大小的矩形披萨和一个整数 `k` ，矩形包含两种字符： `'A'` （表示苹果）和 `'.'` （表示空白格子）。你需要切披萨 `k-1` 次，得到 `k` 块披萨并送给别人。
+
+切披萨的每一刀，先要选择是向垂直还是水平方向切，再在矩形的边界上选一个切的位置，将披萨一分为二。如果垂直地切披萨，那么需要把左边的部分送给一个人，如果水平地切，那么需要把上面的部分送给一个人。在切完最后一刀后，需要把剩下来的一块送给最后一个人。
+
+请你返回确保每一块披萨包含 **至少** 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/05/10/ways_to_cut_apple_1.png)**
+
+**输入：**pizza = \["A..","AAA","..."\], k = 3
+**输出：**3 
+**解释：**上图展示了三种切披萨的方案。注意每一块披萨都至少包含一个苹果。
+
+**示例 2：**
+
+**输入：**pizza = \["A..","AA.","..."\], k = 3
+**输出：**1
+
+**示例 3：**
+
+**输入：**pizza = \["A..","A..","..."\], k = 1
+**输出：**1
+
+**提示：**
+
+*   `1 <= rows, cols <= 50`
+*   `rows == pizza.length`
+*   `cols == pizza[i].length`
+*   `1 <= k <= 10`
+*   `pizza` 只包含字符 `'A'` 和 `'.'` 。
+
+[https://leetcode.cn/problems/number-of-ways-of-cutting-a-pizza/description/](https://leetcode.cn/problems/number-of-ways-of-cutting-a-pizza/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    int m,n;
+    long[][][] memo;
+    int[][] prefixSum;
+    public int ways(String[] pizza, int k) {
+        m = pizza.length;
+        n = pizza[0].length();
+        prefixSum = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                prefixSum[i + 1][j + 1] = prefixSum[i + 1][j] + prefixSum[i][j + 1] - prefixSum[i][j] + (pizza[i].charAt(j) == 'A' ? 1 : 0);
+            }
+        }
+        memo = new long[k][m][n];
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < m; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        return (int) dfs(k - 1, 0, 0);
+    }
+
+    private long dfs(int k,int i, int j) { // 表示切 k 刀，以（i，j）为右上角的切割方案数
+        if (k == 0) {
+            return query(i, j, m, n) > 0 ? 1 : 0;
+        }
+        if (memo[k][i][j] != -1) {
+            return memo[k][i][j];
+        }
+        long res = 0;
+        // 枚举切割的位置
+        for (int x = i + 1; x < m; x++) { // 横切
+            if (query(i, j, x, n) > 0) {
+                res += dfs(k - 1, x, j);
+                res %= Mod;
+            }
+        }
+        for (int y = j + 1; y < n; y++) { // 竖切
+            if (query(i, j, m, y) > 0) {
+                res += dfs(k - 1, i, y);
+                res %= Mod;
+            }
+        }
+        return memo[k][i][j] = res;
+    }
+
+    private int query(int i, int j, int m, int n) {
+        return prefixSum[m][n] - prefixSum[m][j] - prefixSum[i][n] + prefixSum[i][j];
+    }
+
+}
+```
+
+> - dfs 改成 f 数组；
+> - 递归改成循环（每个参数都对应一层循环）；
+> - 递归边界改成 f 数组的初始值。
+
+```java
+class Solution {
+    public int ways(String[] pizza, int k) {
+        final int MOD = (int) 1e9 + 7;
+        MatrixSum ms = new MatrixSum(pizza);
+        int m = pizza.length, n = pizza[0].length();
+        var f = new int[k][m][n];
+        for (int c = 0; c < k; c++) {
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (c == 0) {
+                        f[c][i][j] = ms.query(i, j, m, n) > 0 ? 1 : 0;
+                        continue;
+                    }
+                    int res = 0;
+                    for (int j2 = j + 1; j2 < n; j2++) // 垂直切
+                        if (ms.query(i, j, m, j2) > 0) // 有苹果
+                            res = (res + f[c - 1][i][j2]) % MOD;
+                    for (int i2 = i + 1; i2 < m; i2++) // 水平切
+                        if (ms.query(i, j, i2, n) > 0) // 有苹果
+                            res = (res + f[c - 1][i2][j]) % MOD;
+                    f[c][i][j] = res;
+                }
+            }
+        }
+        return f[k - 1][0][0];
+    }
+}
+
+// 二维前缀和模板（'A' 的 ASCII 码最低位为 1，'.' 的 ASCII 码最低位为 0）
+class MatrixSum {
+    private final int[][] sum;
+
+    public MatrixSum(String[] matrix) {
+        int m = matrix.length, n = matrix[0].length();
+        sum = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                sum[i + 1][j + 1] = sum[i + 1][j] + sum[i][j + 1] - sum[i][j] + (matrix[i].charAt(j) & 1);
+            }
+        }
+    }
+
+    // 返回左上角在 (r1,c1) 右下角在 (r2-1,c2-1) 的子矩阵元素和（类似前缀和的左闭右开）
+    public int query(int r1, int c1, int r2, int c2) {
+        return sum[r2][c2] - sum[r2][c1] - sum[r1][c2] + sum[r1][c1];
+    }
+}
+
+// 作者：灵茶山艾府
+// 链接：https://leetcode.cn/problems/number-of-ways-of-cutting-a-pizza/solutions/2392051/ji-bai-100cong-di-gui-dao-di-tui-dao-you-dxz5/
+// 来源：力扣（LeetCode）
+// 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+1420\. 生成数组
+-----------
+
+给定三个整数 `n`、`m` 和 `k` 。考虑使用下图描述的算法找出正整数数组中最大的元素。
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/04/19/e.png)
+
+请你构建一个具有以下属性的数组 `arr` ：
+
+*   `arr` 中包含确切的 `n` 个整数。
+*   `1 <= arr[i] <= m` 其中 `(0 <= i < n)` 。
+*   将上面提到的算法应用于 `arr` 之后，`search_cost` 的值等于 `k` 。
+
+返回在满足上述条件的情况下构建数组 `arr` 的 _方法数量_ ，由于答案可能会很大，所以 **必须** 对 `10^9 + 7` 取余。
+
+**示例 1：**
+
+**输入：**n = 2, m = 3, k = 1
+**输出：**6
+**解释：**可能的数组分别为 \[1, 1\], \[2, 1\], \[2, 2\], \[3, 1\], \[3, 2\] \[3, 3\]
+
+**示例 2：**
+
+**输入：**n = 5, m = 2, k = 3
+**输出：**0
+**解释：**没有数组可以满足上述条件
+
+**示例 3：**
+
+**输入：**n = 9, m = 1, k = 1
+**输出：**1
+**解释：**唯一可能的数组是 \[1, 1, 1, 1, 1, 1, 1, 1, 1\]
+
+**提示：**
+
+*   `1 <= n <= 50`
+*   `1 <= m <= 100`
+*   `0 <= k <= n`
+
+[https://leetcode.cn/problems/build-array-where-you-can-find-the-maximum-exactly-k-comparisons/description/](https://leetcode.cn/problems/build-array-where-you-can-find-the-maximum-exactly-k-comparisons/description/)
+
+```java
+class Solution {
+    private static long Mod = (long) 1e9 + 7;
+    public int numOfArrays(int n, int m, int k) {
+        // 其中 dp[i][j][s] 表示长度为 i、最大值为 j 且查找代价为 s 的数组个数。
+        long[][][] dp = new long[n + 1][m + 1][k + 1];
+        for (int i = 1; i <= m; i++) {
+            dp[1][i][1] = 1;
+        }
+        for (int i = 2; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                for (int s = 1; s <= Math.min(k, i); s++) {
+                    dp[i][j][s] = dp[i - 1][j][s] * j % Mod; // 第i个数选择[1,j]
+                    for (int p = 1; p < j; p++) {
+                        dp[i][j][s] += dp[i - 1][p][s - 1];
+                    }
+                    dp[i][j][s] %= Mod;
+                }
+            }
+        }
+        long ans = 0;
+        for (int j = 1; j <= m; j++) {
+            ans += dp[n][j][k];
+            ans %= Mod;
+        }
+        return (int) ans;
+    }
+}
+```
+
+3193\. 统计逆序对的数目
+---------------
+
+给你一个整数 `n` 和一个二维数组 `requirements` ，其中 `requirements[i] = [endi, cnti]` 表示这个要求中的末尾下标和 **逆序对** 的数目。
+
+整数数组 `nums` 中一个下标对 `(i, j)` 如果满足以下条件，那么它们被称为一个 **逆序对** ：
+
+*   `i < j` 且 `nums[i] > nums[j]`
+
+请你返回 `[0, 1, 2, ..., n - 1]` 的 
+
+排列
+
+`perm` 的数目，满足对 **所有** 的 `requirements[i]` 都有 `perm[0..endi]` 恰好有 `cnti` 个逆序对。
+
+由于答案可能会很大，将它对 `109 + 7` **取余** 后返回。
+
+**示例 1：**
+
+**输入：**n = 3, requirements = \[\[2,2\],\[0,0\]\]
+
+**输出：**2
+
+**解释：**
+
+两个排列为：
+
+*   `[2, 0, 1]`
+    *   前缀 `[2, 0, 1]` 的逆序对为 `(0, 1)` 和 `(0, 2)` 。
+    *   前缀 `[2]` 的逆序对数目为 0 个。
+*   `[1, 2, 0]`
+    *   前缀 `[1, 2, 0]` 的逆序对为 `(0, 2)` 和 `(1, 2)` 。
+    *   前缀 `[1]` 的逆序对数目为 0 个。
+
+**示例 2：**
+
+**输入：**n = 3, requirements = \[\[2,2\],\[1,1\],\[0,0\]\]
+
+**输出：**1
+
+**解释：**
+
+唯一满足要求的排列是 `[2, 0, 1]` ：
+
+*   前缀 `[2, 0, 1]` 的逆序对为 `(0, 1)` 和 `(0, 2)` 。
+*   前缀 `[2, 0]` 的逆序对为 `(0, 1)` 。
+*   前缀 `[2]` 的逆序对数目为 0 。
+
+**示例 3：**
+
+**输入：**n = 2, requirements = \[\[0,0\],\[1,0\]\]
+
+**输出：**1
+
+**解释：**
+
+唯一满足要求的排列为 `[0, 1]` ：
+
+*   前缀 `[0]` 的逆序对数目为 0 。
+*   前缀 `[0, 1]` 的逆序对为 `(0, 1)` 。
+
+**提示：**
+
+*   `2 <= n <= 300`
+*   `1 <= requirements.length <= n`
+*   `requirements[i] = [endi, cnti]`
+*   `0 <= endi <= n - 1`
+*   `0 <= cnti <= 400`
+*   输入保证至少有一个 `i` 满足 `endi == n - 1` 。
+*   输入保证所有的 `endi` 互不相同。
+
+[https://leetcode.cn/problems/count-the-number-of-inversions/description/](https://leetcode.cn/problems/count-the-number-of-inversions/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int numberOfPermutations(int n, int[][] requirements) {
+        int[] req = new int[n]; // req[i] = j表示前i个数有j个逆序对
+        Arrays.fill(req, -1);
+        req[0] = 0;
+        int m = 0;
+        for (int[] p : requirements) {
+            req[p[0]] = p[1];
+            m = Math.max(m, p[1]);
+        }
+        if (req[0] > 0) {
+            return 0;
+        }
+        int[][] memo = new int[n][m + 1];
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+        return dfs(n - 1, req[n - 1], req, memo);
+    }
+
+    private int dfs(int i, int j, int[] req, int[][] memo) {
+        if (i == 0) {
+            return 1;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        int res = 0;
+        int cnt = req[i - 1];
+        if (cnt >= 0) {
+            if (j >= cnt && j - i <= cnt) {
+                res = dfs(i - 1, cnt, req, memo);
+            }
+        }else{ // 没有逆序对要求
+            for (int k = 0; k <= Math.min(i, j); k++) {
+                res = (res + dfs(i - 1, j - k, req, memo)) % Mod;
+            }
+        }
+        return memo[i][j] = res;
+    }
+}
+```
+

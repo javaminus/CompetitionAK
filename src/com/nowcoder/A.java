@@ -7,6 +7,6 @@ import java.util.Scanner;
 public class A {
     static Scanner sc = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
     public static void main(String[] args) {
-        System.out.println();
+
     }
 }
