@@ -503,7 +503,7 @@ private int[] nums;
         - 如果我的数字更小，则下一步需要猜测的数字范围是 \[1,2\] 。你可以猜测数字为 1 。
             - 如果这是我选中的数字，你的总费用为 $7 + $3 = $10 。否则，你需要支付 $1 。
             - 如果我的数字更大，那么这个数字一定是 2 。你猜测数字为 2 并赢得游戏，总费用为 $7 + $3 + $1 = $11 。
-  在最糟糕的情况下，你需要支付 $16 。因此，你只需要 $16 就可以确保自己赢得游戏。
+        在最糟糕的情况下，你需要支付 $16 。因此，你只需要 $16 就可以确保自己赢得游戏。
 
 **示例 2：**
 
@@ -519,7 +519,7 @@ private int[] nums;
 - 你可以先猜 1 。
     - 如果这是我选中的数字，你的总费用为 $0 。否则，你需要支付 $1 。
     - 如果我的数字更大，那么这个数字一定是 2 。你猜测数字为 2 并赢得游戏，总费用为 $1 。
-  最糟糕的情况下，你需要支付 $1 。
+    最糟糕的情况下，你需要支付 $1 。
 
 **提示：**
 
@@ -944,31 +944,39 @@ class Solution {
 ```
 
 ```java
-class Solution {
-    private int[] v;
-    private int[][] memo;
+import java.util.Arrays;
 
+class Solution {
+    private int[][] memo;
+    private int[] v;
+    int n;
     public int minScoreTriangulation(int[] values) {
         v = values;
-        int n = v.length;
+        n = v.length;
         memo = new int[n][n];
-        for (int i = 0; i < n; ++i)
-            Arrays.fill(memo[i], -1); // -1 表示没有访问过
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
         return dfs(0, n - 1);
     }
 
     private int dfs(int i, int j) {
-        if (i + 1 == j) return 0; // 只有两个点，无法组成三角形
-        if (memo[i][j] != -1) return memo[i][j];
+        if (i + 1 == j) { // 只有两个点，无法构成三角形
+            return 0;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
         int res = Integer.MAX_VALUE;
-        for (int k = i + 1; k < j; ++k) // 枚举顶点 k
+        for (int k = i + 1; k < j; k++) { // 枚举顶点 k
             res = Math.min(res, dfs(i, k) + dfs(k, j) + v[i] * v[j] * v[k]);
+        }
         return memo[i][j] = res;
     }
 }
 ```
 
-546\. 移除盒子（史诗级难题3000+）
+546\. 移除盒子（史诗级难题3000+）（感觉遇到过很多类似的题目，模板题）
 ----------
 
 给出一些不同颜色的盒子 `boxes` ，盒子的颜色由不同的正数表示。
@@ -1045,6 +1053,125 @@ class Solution {
 		return ans;
 	}
 }
+```
+
+1000\. 合并石头的最低成本
+----------------
+
+有 `n` 堆石头排成一排，第 `i` 堆中有 `stones[i]` 块石头。
+
+每次 **移动** 需要将 **连续的** `k` 堆石头合并为一堆，而这次移动的成本为这 `k` 堆中石头的总数。
+
+返回把所有石头合并成一堆的最低成本。如果无法合并成一堆，返回 `-1` 。
+
+**示例 1：**
+
+**输入：**stones = \[3,2,4,1\], K = 2
+**输出：**20
+**解释：**
+从 \[3, 2, 4, 1\] 开始。
+合并 \[3, 2\]，成本为 5，剩下 \[5, 4, 1\]。
+合并 \[4, 1\]，成本为 5，剩下 \[5, 5\]。
+合并 \[5, 5\]，成本为 10，剩下 \[10\]。
+总成本 20，这是可能的最小值。
+
+**示例 2：**
+
+**输入：**stones = \[3,2,4,1\], K = 3
+**输出：**\-1
+**解释：**任何合并操作后，都会剩下 2 堆，我们无法再进行合并。所以这项任务是不可能完成的。.
+
+**示例 3：**
+
+**输入：**stones = \[3,5,1,2,6\], K = 3
+**输出：**25
+**解释：**
+从 \[3, 5, 1, 2, 6\] 开始。
+合并 \[5, 1, 2\]，成本为 8，剩下 \[3, 8, 6\]。
+合并 \[3, 8, 6\]，成本为 17，剩下 \[17\]。
+总成本 25，这是可能的最小值。
+
+**提示：**
+
+*   `n == stones.length`
+*   `1 <= n <= 30`
+*   `1 <= stones[i] <= 100`
+*   `2 <= k <= 30`
+
+[https://leetcode.cn/problems/minimum-cost-to-merge-stones/description/](https://leetcode.cn/problems/minimum-cost-to-merge-stones/description/)
+
+![1000-3d-cut.png](assets/1680534488-qZHfMY-1000-3d-cut.png) 
+
+```java
+class Solution {
+    int[][][] memo;
+    int[] prefixSum;
+    int k;
+    public int mergeStones(int[] stones, int k) {
+        int n = stones.length;
+        this.k = k;
+        memo = new int[n][n][k + 1];
+        if ((n - 1) % (k - 1) > 0) { // 无法合成一堆
+            return -1;
+        }
+        prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + stones[i];
+        }
+        return dfs(0, n - 1, 1);
+    }
+
+    private int dfs(int i, int j, int p) {
+        if (memo[i][j][p] > 0) {
+            return memo[i][j][p];
+        }
+        if (p == 1) { // 合成一个
+            return memo[i][j][p] = i == j ? 0 : dfs(i, j, k) + prefixSum[j + 1] - prefixSum[i];
+        }
+        int res = Integer.MAX_VALUE;
+        for (int m = i; m < j; m += k - 1) { // 枚举哪些石头堆合并成第一堆
+            res = Math.min(res, dfs(i, m, 1) + dfs(m + 1, j, p - 1));
+        }
+        return memo[i][j][p] = res;
+    }
+}
+```
+
+![1000-2d.png](assets/1680534839-WSibYe-1000-2d.png) 
+
+```java
+class Solution {
+    private int[][] memo;
+    private int[] s;
+    private int k;
+
+    public int mergeStones(int[] stones, int k) {
+        int n = stones.length;
+        if ((n - 1) % (k - 1) > 0) // 无法合并成一堆
+            return -1;
+
+        s = new int[n + 1];
+        for (int i = 0; i < n; i++)
+            s[i + 1] = s[i] + stones[i]; // 前缀和
+        this.k = k;
+        memo = new int[n][n];
+        for (int i = 0; i < n; ++i)
+            Arrays.fill(memo[i], -1); // -1 表示还没有计算过
+        return dfs(0, n - 1);
+    }
+
+    private int dfs(int i, int j) {
+        if (i == j) return 0; // 只有一堆石头，无需合并
+        if (memo[i][j] != -1) return memo[i][j];
+        int res = Integer.MAX_VALUE;
+        for (int m = i; m < j; m += k - 1)
+            res = Math.min(res, dfs(i, m) + dfs(m + 1, j));
+        if ((j - i) % (k - 1) == 0) // 可以合并成一堆
+            res += s[j + 1] - s[i];
+        return memo[i][j] = res;
+    }
+}
+
 ```
 
 
