@@ -1,10 +1,13 @@
+package com.lanqiao.game15;
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.StringTokenizer;
 
+/**
+ * 蓝桥第 15 场小白入门赛 / 强者挑战赛非官方题解 —— 代码很少，但想得多！一些数学的小思考
+ */
 public class Main {
-    private final static int INF = Integer.MAX_VALUE;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     static class Read{
         BufferedReader bf;
         StringTokenizer st;
@@ -101,14 +104,14 @@ public class Main {
 
     static Read sc = new Read();
     public static void main(String[] args) throws IOException {
-        solve();
         sc.bw.flush();
         sc.bw.close();
     }
 
-    // 首先，不论如何操作，数组元素之和sum是不变的，那么，数组和为正数时，如果除了最大数之外的元素之和也是正数，
-    // 最后就会剩下两个正数（想象成用所有负数去消耗剩下的正数，还消耗不完），无法操作；数组和为负数时同理。
-    private static void solve() throws IOException {
+    // https://www.lanqiao.cn/problems/19744/learning/?contest_id=197
+    private static void solve1() throws IOException {
+        // 首先，不论如何操作，数组元素之和sum是不变的，那么，数组和为正数时，如果除了最大数之外的元素之和也是正数，
+        // 最后就会剩下两个正数（想象成用所有负数去消耗剩下的正数，还消耗不完），无法操作；数组和为负数时同理。
         int n = sc.nextInt();
         int[] nums = new int[n];
         int mn = Integer.MAX_VALUE, mx = Integer.MIN_VALUE;
@@ -128,5 +131,3 @@ public class Main {
         }
     }
 }
-
-

@@ -589,3 +589,102 @@ class UnionFind {
 }
 ```
 
+100347\. 判断矩形的两个角落是否可达
+----------------------
+
+给你两个正整数 `X` 和 `Y` 和一个二维整数数组 `circles` ，其中 `circles[i] = [xi, yi, ri]` 表示一个圆心在 `(xi, yi)` 半径为 `ri` 的圆。
+
+坐标平面内有一个左下角在原点，右上角在 `(X, Y)` 的矩形。你需要判断是否存在一条从左下角到右上角的路径满足：路径 **完全** 在矩形内部，**不会** 触碰或者经过 **任何** 圆的内部和边界，同时 **只** 在起点和终点接触到矩形。
+
+如果存在这样的路径，请你返回 `true` ，否则返回 `false` 。
+
+**示例 1：**
+
+**输入：**X = 3, Y = 4, circles = \[\[2,1,1\]\]
+
+**输出：**true
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/05/18/example2circle1.png)
+
+黑色曲线表示一条从 `(0, 0)` 到 `(3, 4)` 的路径。
+
+**示例 2：**
+
+**输入：**X = 3, Y = 3, circles = \[\[1,1,2\]\]
+
+**输出：**false
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/05/18/example1circle.png)
+
+不存在从 `(0, 0)` 到 `(3, 3)` 的路径。
+
+**示例 3：**
+
+**输入：**X = 3, Y = 3, circles = \[\[2,1,1\],\[1,2,1\]\]
+
+**输出：**false
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/05/18/example0circle.png)
+
+不存在从 `(0, 0)` 到 `(3, 3)` 的路径。
+
+**提示：**
+
+*   `3 <= X, Y <= 109`
+*   `1 <= circles.length <= 1000`
+*   `circles[i].length == 3`
+*   `1 <= xi, yi, ri <= 109`
+
+[https://leetcode.cn/problems/check-if-the-rectangle-corner-is-reachable/description/](https://leetcode.cn/problems/check-if-the-rectangle-corner-is-reachable/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public boolean canReachCorner(int x, int y, int[][] circles) {
+        int n = circles.length;
+        int[] parent = new int[n + 2];
+        Arrays.setAll(parent, i -> i);
+        for (int i = 0; i < n; i++) {
+            int[] c = circles[i];
+            int ox = c[0], oy = c[1], r = c[2];
+            if (ox <= r || oy + r >= y) { // 圆 i 和左边界或上边界有交集
+                union(parent, i, n);
+            }
+            if (oy <= r || ox + r >= x) { // 圆 i 和下边界或右边界有交集
+                union(parent, i, n + 1);
+            }
+            for (int j = 0; j < i; j++) { // 圆i与圆j有交集
+                int[] q = circles[j];
+                if ((long) (ox - q[0]) * (ox - q[0]) + (long) (oy - q[1]) * (oy - q[1]) <= (long) (r + q[2]) * (r + q[2])) {
+                    union(parent, i, j);
+                }
+            }
+            if (find(parent, n) == find(parent, n + 1)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int find(int[] parent, int index) {
+        if (parent[index] != index) {
+            parent[index] = find(parent, parent[index]);
+        }
+        return parent[index];
+    }
+
+    private void union(int[] parent, int index1, int index2) {
+        parent[find(parent, index1)] = find(parent, index2);
+    }
+
+
+}
+```
+
