@@ -1,3 +1,185 @@
+# 九、状态压缩 DP（状压 DP）
+
+# §9.1 排列型 ① 相邻无关
+
+![1722221208568](assets/1722221208568.png)
+
+526\. 优美的排列
+-----------
+
+假设有从 1 到 n 的 n 个整数。用这些整数构造一个数组 `perm`（**下标从 1 开始**），只要满足下述条件 **之一** ，该数组就是一个 **优美的排列** ：
+
+*   `perm[i]` 能够被 `i` 整除
+*   `i` 能够被 `perm[i]` 整除
+
+给你一个整数 `n` ，返回可以构造的 **优美排列** 的 **数量** 。
+
+**示例 1：**
+
+**输入：**n = 2
+**输出：**2
+**解释：**
+第 1 个优美的排列是 \[1,2\]：
+    - perm\[1\] = 1 能被 i = 1 整除
+    - perm\[2\] = 2 能被 i = 2 整除
+第 2 个优美的排列是 \[2,1\]:
+    - perm\[1\] = 2 能被 i = 1 整除
+    - i = 2 能被 perm\[2\] = 1 整除
+
+**示例 2：**
+
+**输入：**n = 1
+**输出：**1
+
+**提示：**
+
+*   `1 <= n <= 15`
+
+[https://leetcode.cn/problems/beautiful-arrangement/description/](https://leetcode.cn/problems/beautiful-arrangement/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution { // 6ms
+    int[][] memo;
+    int n;
+    public int countArrangement(int n) {
+        this.n = n;
+        int x = 0;
+        memo = new int[n][(1 << n) + 1];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(0, x);
+    }
+
+    private int dfs(int i, int x) {
+        if (i == n) {
+            return x == (1 << n) - 1 ? 1 : 0;
+        }
+        if (memo[i][x] != -1) {
+            return memo[i][x];
+        }
+        int res = 0;
+        for (int j = 0; j < n; j++) {
+            if (((x >> j) & 1) == 0 && ((j + 1) % (i + 1) == 0 || (i + 1) % (j + 1) == 0)) {
+                res += dfs(i + 1, (1 << j) | x);
+            }
+        }
+        return memo[i][x] = res;
+    }
+}
+```
+
+> 优化：i就是填充的数位个数，其实 i == Integer.bitCount(x)，所以我们可以压缩一个维度
+
+```java
+import java.util.Arrays;
+
+class Solution { // 4ms
+    int[] memo;
+    int n;
+    public int countArrangement(int n) {
+        this.n = n;
+        memo = new int[(1 << n) + 1];
+        Arrays.fill(memo, -1);
+        return dfs(0);
+    }
+
+    private int dfs(int x) {
+        if (x == (1 << n) - 1) {
+            return 1;
+        }
+        if (memo[x] != -1) {
+            return memo[x];
+        }
+        int res = 0;
+        int i = Integer.bitCount(x);
+        for (int j = 0; j < n; j++) {
+            if (((x >> j) & 1) == 0 && ((j + 1) % (i + 1) == 0 || (i + 1) % (j + 1) == 0)) {
+                res += dfs((1 << j) | x);
+            }
+        }
+        return memo[x] = res;
+    }
+}
+```
+
+1879\. 两个数组最小的异或值之和(状压模板题)
+-------------------
+
+给你两个整数数组 `nums1` 和 `nums2` ，它们长度都为 `n` 。
+
+两个数组的 **异或值之和** 为 `(nums1[0] XOR nums2[0]) + (nums1[1] XOR nums2[1]) + ... + (nums1[n - 1] XOR nums2[n - 1])` （**下标从 0 开始**）。
+
+*   比方说，`[1,2,3]` 和 `[3,2,1]` 的 **异或值之和** 等于 `(1 XOR 3) + (2 XOR 2) + (3 XOR 1) = 2 + 0 + 2 = 4` 。
+
+请你将 `nums2` 中的元素重新排列，使得 **异或值之和** **最小** 。
+
+请你返回重新排列之后的 **异或值之和** 。
+
+**示例 1：**
+
+**输入：**nums1 = \[1,2\], nums2 = \[2,3\]
+**输出：**2
+**解释：**将 `nums2` 重新排列得到 `[3,2] 。`
+异或值之和为 (1 XOR 3) + (2 XOR 2) = 2 + 0 = 2 。
+
+**示例 2：**
+
+**输入：**nums1 = \[1,0,3\], nums2 = \[5,3,4\]
+**输出：**8
+**解释：**将 `nums2 重新排列得到` `[5,4,3] 。`
+异或值之和为 (1 XOR 5) + (0 XOR 4) + (3 XOR 3) = 4 + 4 + 0 = 8 。
+
+**提示：**
+
+*   `n == nums1.length`
+*   `n == nums2.length`
+*   `1 <= n <= 14`
+*   `0 <= nums1[i], nums2[i] <= 107`
+
+[https://leetcode.cn/problems/minimum-xor-sum-of-two-arrays/description/](https://leetcode.cn/problems/minimum-xor-sum-of-two-arrays/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minimumXORSum(int[] nums1, int[] nums2) {
+        // 状态压缩模板题
+        int n = nums1.length;
+        int[][] dp = new int[n + 1][(1 << n)];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int s = 0; s < (1 << n); s++) {
+                int c = Integer.bitCount(s);
+                if (c != i) {
+                    continue;
+                }
+                for (int j = 1; j <= n; j++) {
+                    if (((s >> (j - 1)) & 1) == 0) {
+                        continue;
+                    }
+                    dp[i][s] = Math.min(dp[i][s], dp[i - 1][s ^ (1 << (j - 1))] + (nums1[i - 1] ^ nums2[j - 1]));
+                }
+            }
+        }
+        return dp[n][(1 << n) - 1];
+    }
+}
+```
+
+> 二维压缩一维
+
+```java
+
+```
+
+
+
 > 状压做全排列简直是降维打击
 
 2850\. 将石头分散到网格图的最少移动次数
@@ -9,7 +191,7 @@
 
 请你返回每个格子恰好有一个石头的 **最少移动次数** 。
 
-**示例 1：**
+**示例 1：**	
 
 ![](https://assets.leetcode.com/uploads/2023/08/23/example1-3.svg)
 

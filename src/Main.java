@@ -106,26 +106,9 @@ public class Main {
         sc.bw.close();
     }
 
-    // 首先，不论如何操作，数组元素之和sum是不变的，那么，数组和为正数时，如果除了最大数之外的元素之和也是正数，
-    // 最后就会剩下两个正数（想象成用所有负数去消耗剩下的正数，还消耗不完），无法操作；数组和为负数时同理。
+
     private static void solve() throws IOException {
-        int n = sc.nextInt();
-        int[] nums = new int[n];
-        int mn = Integer.MAX_VALUE, mx = Integer.MIN_VALUE;
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            nums[i] = sc.nextInt();
-            mn = Math.min(mn, nums[i]);
-            mx = Math.max(mx, nums[i]);
-            sum += nums[i];
-        }
-        if (sum > 0) {
-            sc.println((sum - mx > 0 ? "N" : "Y"));
-        } else if (sum < 0) {
-            sc.println(sum - mn < 0 ? "N" : "Y");
-        }else{
-            sc.println("Y");
-        }
+
     }
 }
 

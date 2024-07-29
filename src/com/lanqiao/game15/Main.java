@@ -2,6 +2,8 @@ package com.lanqiao.game15;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 /**
@@ -130,4 +132,66 @@ public class Main {
             sc.println("Y");
         }
     }
+
+    // https://www.lanqiao.cn/problems/19750/learning/?contest_id=197
+    private static void solve2() throws IOException {
+        int n = sc.nextInt();
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = sc.nextInt();
+        }
+
+        long res = 0L;
+        for (int mid = 2; mid < n - 2; mid++) {
+            long l = 0L;
+            HashMap<Integer, Integer> lmap = new HashMap<>();
+            for (int i = 0; i < mid; i++) {
+                if (lmap.containsKey(nums[mid] - nums[i])) {
+                    l += lmap.get(nums[mid] - nums[i]);
+                }
+                lmap.merge(nums[i], 1, Integer::sum);
+            }
+
+            long r = 0L;
+            HashMap<Integer, Integer> rmap = new HashMap<>();
+            for (int i = n - 1; i > mid; i--) {
+                if (rmap.containsKey(nums[mid] - nums[i])) {
+                    r += rmap.get(nums[mid] - nums[i]);
+                }
+                rmap.merge(nums[i], 1, Integer::sum);
+            }
+            res += l * r;
+        }
+        sc.println(res);
+    }
+
+    // https://www.lanqiao.cn/problems/19749/learning/?contest_id=197
+    private static void solve3() throws IOException {
+        // 脑经急转弯：我们单独看一朵花。设这朵花的灵力为A，如果A <= k，那么直接拿走;
+        // 如果A > k，如果A是偶数，那么我们亏损为0，如果为奇数，我们可以分为1，A - 1，我们的亏损为1
+        int n = sc.nextInt();
+        int k = sc.nextInt();
+        long[] nums = new long[n];
+        long sum = 0;
+        for (int i = 0; i < n; i++) {
+            nums[i] = sc.nextInt();
+            sum += nums[i];
+        }
+
+        Long[] tmp = new Long[n];
+        for (int i = 0; i < n; i++) {
+            tmp[i] = (nums[i] > k ? -(nums[i] % 2) : nums[i]);
+        }
+        Arrays.sort(tmp, (a, b) -> b.compareTo(a));
+        long d = 0; // 孙悟空与六耳猕猴的灵力差值
+        for (int i = 0; i < n; i++) {
+            if (i % 2 == 0) {
+                d += tmp[i];
+            }else{
+                d -= tmp[i];
+            }
+        }
+        sc.println((sum + d) / 2);
+    }
+
 }
