@@ -183,7 +183,7 @@ public class Main {
     }
 
     // https://kamacoder.com/problempage.php?pid=1230 秒了
-    private static void solve() throws IOException {
+    private static void solve2() throws IOException {
         int freq = sc.nextInt();
         String[] words = sc.nextLine().split(" ");
         HashMap<Integer, Integer> map = new HashMap<>();
