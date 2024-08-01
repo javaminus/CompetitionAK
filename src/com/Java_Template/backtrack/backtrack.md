@@ -122,6 +122,66 @@ class Solution {
 }
 ```
 
+46\. 全排列
+--------
+
+给定一个不含重复数字的数组 `nums` ，返回其 _所有可能的全排列_ 。你可以 **按任意顺序** 返回答案。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,3\]
+**输出：**\[\[1,2,3\],\[1,3,2\],\[2,1,3\],\[2,3,1\],\[3,1,2\],\[3,2,1\]\]
+
+**示例 2：**
+
+**输入：**nums = \[0,1\]
+**输出：**\[\[0,1\],\[1,0\]\]
+
+**示例 3：**
+
+**输入：**nums = \[1\]
+**输出：**\[\[1\]\]
+
+**提示：**
+
+*   `1 <= nums.length <= 6`
+*   `-10 <= nums[i] <= 10`
+*   `nums` 中的所有整数 **互不相同**
+
+[https://leetcode.cn/problems/permutations/description/](https://leetcode.cn/problems/permutations/description/)
+
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+class Solution { // 核心：交换元素顺序
+    ArrayList<List<Integer>> ans = new ArrayList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        ArrayList<Integer> tmp = new ArrayList<>();
+        for (int x : nums) {
+            tmp.add(x);
+        }
+        dfs(tmp, 0, nums);
+        return ans;
+    }
+
+    private void dfs(List<Integer> tmp, int index, int[] nums) {
+        if (index == nums.length) {
+            ans.add(new ArrayList<>(tmp));
+        }
+        for (int i = index; i < nums.length; i++) {
+            Collections.swap(tmp, index, i);
+            dfs(tmp, index + 1, nums);
+            Collections.swap(tmp, index, i);
+        }
+
+    }
+}
+```
+
+
+
 131\. 分割回文串
 -----------
 

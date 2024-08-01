@@ -915,7 +915,7 @@ class Solution {
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-class Solution { // 回溯 + 贪心
+class Solution { // 回溯 + 贪心 1ms
     int result = Integer.MAX_VALUE;
     int[] nums;
     int k;
@@ -958,6 +958,559 @@ class Solution { // 回溯 + 贪心
         int size = 0;
         int mx = 0;
         Pair(){}
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+import java.util.HashSet;
+
+class Solution { // 状压dp 70ms,纯暴力，没有贪心思想
+    public int minimumIncompatibility(int[] nums, int k) {
+        int n = nums.length;
+        int mask = 1 << n;
+        int m = n / k;
+        int[] g = new int[mask]; // 预处理所有组合的不兼容值
+        Arrays.fill(g, -1);
+        for (int s = 1; s < mask; s++) {
+            if (Integer.bitCount(s) != m) {
+                continue;
+            }
+            HashSet<Integer> set = new HashSet<>();
+            int mn = Integer.MAX_VALUE, mx = Integer.MIN_VALUE;
+            for (int i = 0; i < n; i++) {
+                if (((s >> i) & 1) == 1) {
+                    if (!set.add(nums[i])) {
+                        break;
+                    }
+                    mn = Math.min(mn, nums[i]);
+                    mx = Math.max(mx, nums[i]);
+                }
+            }
+            if (set.size() == m) {
+                g[s] = mx - mn;
+            }
+        }
+
+        int[] dp = new int[mask]; // 表示组合为s时的最小不兼容性
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+        for (int s = 0; s < mask; s++) {
+            if (dp[s] == Integer.MAX_VALUE / 2) { // 提速250ms
+                continue;
+            }
+            HashSet<Integer> set = new HashSet<>();
+            int pre = 0;
+            for (int i = 0; i < n; i++) {
+                if (((s >> i) & 1) == 0 && !set.contains(nums[i])) {
+                    set.add(nums[i]);
+                    pre |= (1 << i);
+                }
+            }
+            if (set.size() < m) {
+                continue;
+            }
+            // set.size() >= m，枚举set中长度为 m 的子集
+            for (int i = pre; i > 0; i = (i - 1) & pre) { // 下面有对这段代码的详细解释
+                if (g[i] != -1) { // 保证i中有m个1组成
+                    dp[s | i] = Math.min(dp[s | i], dp[s] + g[i]);
+                }
+            }
+        }
+        return dp[mask - 1] == Integer.MAX_VALUE / 2 ? -1 : dp[mask - 1];
+    }
+}
+```
+
+> 
+>
+> 当然，我很乐意为您解释这个表达式。这是一个非常有趣的位操作，通常用于一些特定的算法中。让我们逐步分析这个表达式：
+>
+> ```java
+> i = (i - 1) & pre
+> ```
+>
+> 这个表达式包含了减法和按位与（&）操作。它的作用是找到小于 i 的最大的数，该数的二进制表示是 pre 的子集。
+>
+> 让我们通过一些例子来理解这个操作：
+>
+> =====
+>    - 📖 概念：位操作和子集枚举
+>    - 📝 解释：这个操作常用于子集枚举，特别是在处理二进制表示的集合时。
+>    - 💻 示例代码：
+> ```java
+> int pre = 0b1101000;  // 二进制表示
+> int i = 0b1101000;    // 初始值等于 pre
+> 
+> while (i > 0) {
+>     System.out.println(Integer.toBinaryString(i));
+>     i = (i - 1) & pre;
+> }
+> ```
+>    - 🏋️ 练习：尝试手动计算上述代码的输出。
+>     =====
+>
+> 让我们一步步看这个过程：
+>
+> 1. 初始状态：
+>    i = 1101000 (二进制)
+>    pre = 1101000 (二进制)
+>
+> 2. 第一次迭代：
+>    i - 1 = 1100111
+>    (i - 1) & pre = 1100000
+>
+> 3. 第二次迭代：
+>    i - 1 = 1011111
+>    (i - 1) & pre = 1001000
+>
+> 4. 第三次迭代：
+>    i - 1 = 1000111
+>    (i - 1) & pre = 1000000
+>
+> 5. 第四次迭代：
+>    i - 1 = 0111111
+>    (i - 1) & pre = 0101000
+>
+> 6. 第五次迭代：
+>    i - 1 = 0100111
+>    (i - 1) & pre = 0100000
+>
+> 7. 第六次迭代：
+>    i - 1 = 0011111
+>    (i - 1) & pre = 0001000
+>
+> 8. 第七次迭代：
+>    i - 1 = 0000111
+>    (i - 1) & pre = 0000000 (循环结束)
+>
+> 这个操作的巧妙之处在于：
+> 1. `i - 1` 会把最右边的 1 变成 0，并把它右边的所有 0 变成 1。
+> 2. 然后与 `pre` 进行按位与操作，会保留所有在 `pre` 中为 1 的位，抹去其他位。
+>
+> 这样，每次迭代都会得到一个比当前数小的、且是 `pre` 的子集的数。
+>
+> 这种技巧常用于需要枚举一个集合所有子集的场景，特别是在动态规划、状态压缩等算法中非常有用。
+>
+
+# §9.3 旅行商问题（TSP）
+
+# 本质上就是排列型 ②
+
+943\. 最短超级串(封神难题，模板)
+-----------
+
+给定一个字符串数组 `words`，找到以 `words` 中每个字符串作为子字符串的最短字符串。如果有多个有效最短字符串满足题目条件，返回其中 **任意一个** 即可。
+
+我们可以假设 `words` 中没有字符串是 `words` 中另一个字符串的子字符串。
+
+**示例 1：**
+
+**输入：**words = \["alex","loves","leetcode"\]
+**输出：**"alexlovesleetcode"
+**解释：**"alex"，"loves"，"leetcode" 的所有排列都会被接受。
+
+**示例 2：**
+
+**输入：**words = \["catg","ctaagt","gcta","ttca","atgcatc"\]
+**输出：**"gctaagttcatgcatc"
+
+**提示：**
+
+*   `1 <= words.length <= 12`
+*   `1 <= words[i].length <= 20`
+*   `words[i]` 由小写英文字母组成
+*   `words` 中的所有字符串 **互不相同**
+
+[https://leetcode.cn/problems/find-the-shortest-superstring/description/](https://leetcode.cn/problems/find-the-shortest-superstring/description/)
+
+```java
+class Solution {
+    public String shortestSuperstring(String[] words) {
+        int n = words.length;
+        int mask = 1 << n;
+        int[][] g = new int[n][n]; // 表示字符串i的后缀与j的前缀相同的长度
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                String a = words[i], b = words[j];
+                int l1 = a.length(), l2 = b.length(), len = Math.min(l1, l2);
+                for (int k = len; k >= 1; k--) {
+                    if (a.substring(l1 - k).equals(b.substring(0, k))) {
+                        g[i][j] = k;
+                        break;
+                    }
+                }
+            }
+        }
+
+        int[][] dp = new int[mask][n], p = new int[mask][n];
+        for (int s = 0; s < mask; s++) {
+            for (int i = 0; i < n; i++) {
+                if (((s >> i) & 1) == 0) {
+                    continue;
+                }
+                for (int j = 0; j < n; j++) {
+                    if (((s >> j) & 1) == 1) { // 表示当前字符已经被选择了
+                        continue;
+                    }
+                    if (dp[s | (1 << j)][j] <= dp[s][i] + g[i][j]) {
+                        dp[s | (1 << j)][j] = dp[s][i] + g[i][j];
+                        p[s | (1 << j)][j] = i; // 记录每个状态是由哪个前驱转移而来
+                    }
+                }
+            }
+        }
+
+        int mx = dp[mask - 1][0], idx = 0, last = -1, status = mask - 1;
+        for (int i = 1; i < n; i++) {
+            if (mx < dp[mask - 1][i]) {
+                mx = dp[mask - 1][i];
+                idx = i;
+            }
+        }
+        String ans = "";
+        while (status != 0) {
+            if (last == -1) {
+                ans = words[idx];
+            }else{
+                ans = words[idx].substring(0, words[idx].length() - g[idx][last]) + ans;
+            }
+            last = idx;
+            idx = p[status][idx];
+            status ^= (1 << last);
+        }
+        return ans;
+    }
+}
+```
+
+847\. 访问所有节点的最短路径（模板）
+-----------------
+
+存在一个由 `n` 个节点组成的无向连通图，图中的节点按从 `0` 到 `n - 1` 编号。
+
+给你一个数组 `graph` 表示这个图。其中，`graph[i]` 是一个列表，由所有与节点 `i` 直接相连的节点组成。
+
+返回能够访问所有节点的最短路径的长度。你可以在任一节点开始和停止，也可以多次重访节点，并且可以重用边。
+
+**示例 1：**
+
+![](https://assets.leetcode.com/uploads/2021/05/12/shortest1-graph.jpg)
+
+**输入：**graph = \[\[1,2,3\],\[0\],\[0\],\[0\]\]
+**输出：**4
+**解释：**一种可能的路径为 \[1,0,2,0,3\]
+
+**示例 2：**
+
+![](https://assets.leetcode.com/uploads/2021/05/12/shortest2-graph.jpg)
+
+**输入：**graph = \[\[1\],\[0,2,4\],\[1,3,4\],\[2\],\[1,2\]\]
+**输出：**4
+**解释：**一种可能的路径为 \[0,1,4,2,3\]
+
+**提示：**
+
+*   `n == graph.length`
+*   `1 <= n <= 12`
+*   `0 <= graph[i].length < n`
+*   `graph[i]` 不包含 `i`
+*   如果 `graph[a]` 包含 `b` ，那么 `graph[b]` 也包含 `a`
+*   输入的图总是连通图
+
+[https://leetcode.cn/problems/shortest-path-visiting-all-nodes/description/](https://leetcode.cn/problems/shortest-path-visiting-all-nodes/description/)
+
+> bfs + 状压dp 只适用于不带边权的图
+
+```java
+import java.util.ArrayDeque;
+import java.util.Arrays;
+
+class Solution {
+    public int shortestPathLength(int[][] graph) {
+        int n = graph.length;
+        int mask = 1 << n;
+        int[][] dp = new int[mask][n];
+        for (int i = 0; i < mask; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE/2);
+        }
+        ArrayDeque<int[]> deque = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            dp[1 << i][i] = 0;
+            deque.addLast(new int[]{1 << i, i});
+        }
+        while (!deque.isEmpty()) {
+            int[] poll = deque.pollFirst();
+            int state = poll[0], u = poll[1], step = dp[state][u];
+            if (state == mask - 1) {
+                return step;
+            }
+            for (int v : graph[u]) {
+                if (dp[state | (1 << v)][v] == Integer.MAX_VALUE/2) {
+                    dp[state | (1 << v)][v] = step + 1;
+                    deque.addLast(new int[]{state | (1 << v), v});
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+> floy + 状压dp 既适用于不带边权的图，也适用于带权的图
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int shortestPathLength(int[][] graph) {
+        int n = graph.length;
+        int mask = 1 << n;
+        int[][] dist = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dist[i], Integer.MAX_VALUE / 2);
+            dist[i][i] = 0;
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j : graph[i]) {
+                dist[i][j] = dist[j][i] = 1;
+            }
+        }
+        for (int k = 0; k < n; k++) { // floyd模板
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+
+        int[][] dp = new int[mask][n];
+        for (int i = 0; i < mask; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        for (int i = 0; i < n; i++) {
+            dp[1 << i][i] = 0;
+        }
+        for (int s = 0; s < mask; s++) {
+            // 枚举 state 中已经被访问过的点
+            for (int i = 0; i < n; i++) {
+                if (((s >> i) & 1) == 0) {
+                    continue;
+                }
+                // 枚举 state 中尚未被访问过的点
+                for (int j = 0; j < n; j++) {
+                    if (((s >> j) & 1) == 1) {
+                        continue;
+                    }
+                    dp[s | (1 << j)][j] = Math.min(dp[s | (1 << j)][j], dp[s][i] + dist[i][j]);
+                }
+            }
+        }
+        int ans = Integer.MAX_VALUE / 2;
+        for (int i = 0; i < n; i++) {
+            ans = Math.min(ans, dp[mask - 1][i]);
+        }
+        return ans;
+    }
+}
+```
+
+LCP 13. 寻宝
+----------
+
+我们得到了一副藏宝图，藏宝图显示，在一个迷宫中存在着未被世人发现的宝藏。
+
+迷宫是一个二维矩阵，用一个字符串数组表示。它标识了唯一的入口（用 'S' 表示），和唯一的宝藏地点（用 'T' 表示）。但是，宝藏被一些隐蔽的机关保护了起来。在地图上有若干个机关点（用 'M' 表示），**只有所有机关均被触发，才可以拿到宝藏。**
+
+要保持机关的触发，需要把一个重石放在上面。迷宫中有若干个石堆（用 'O' 表示），每个石堆都有**无限**个足够触发机关的重石。但是由于石头太重，我们一次只能搬**一个**石头到指定地点。
+
+迷宫中同样有一些墙壁（用 '#' 表示），我们不能走入墙壁。剩余的都是可随意通行的点（用 '.' 表示）。石堆、机关、起点和终点（无论是否能拿到宝藏）也是可以通行的。
+
+我们每步可以选择向上/向下/向左/向右移动一格，并且不能移出迷宫。搬起石头和放下石头不算步数。那么，从起点开始，我们最少需要多少步才能最后拿到宝藏呢？如果无法拿到宝藏，返回 -1 。
+
+**示例 1：**
+
+> 输入： \["S#O", "M..", "M.T"\]
+>
+> 输出：16
+>
+> 解释：最优路线为： S->O, cost = 4, 去搬石头 O->第二行的M, cost = 3, M机关触发 第二行的M->O, cost = 3, 我们需要继续回去 O 搬石头。 O->第三行的M, cost = 4, 此时所有机关均触发 第三行的M->T, cost = 2，去T点拿宝藏。 总步数为16。 ![图片.gif](https://pic.leetcode-cn.com/6bfff669ad65d494cdc237bcedfec10a2b1ac2f2593c2bf97e9aecb41dc8a08b-%E5%9B%BE%E7%89%87.gif)
+
+**示例 2：**
+
+> 输入： \["S#O", "M.#", "M.T"\]
+>
+> 输出：-1
+>
+> 解释：我们无法搬到石头触发机关
+
+**示例 3：**
+
+> 输入： \["S#O", "M.T", "M.."\]
+>
+> 输出：17
+>
+> 解释：注意终点也是可以通行的。
+
+**限制：**
+
+*   `1 <= maze.length <= 100`
+*   `1 <= maze[i].length <= 100`
+*   `maze[i].length == maze[j].length`
+*   S 和 T 有且只有一个
+*   0 <= M的数量 <= 16
+*   0 <= O的数量 <= 40，题目保证当迷宫中存在 M 时，一定存在至少一个 O 。
+
+[https://leetcode.cn/problems/xun-bao/description/](https://leetcode.cn/problems/xun-bao/description/)
+
+
+
+> ​    把点分为两种，一个列表放石头的，一个列表放机关的 然后求出每个机关到每个石头的距离 然后在求得每个机关到每个机关的距离 然后就是逆天的游戏理解 把一个数的二进制表示当前机关触发的状态 这个数的二进制第i位如果为0就表示第i个机关还没有被触发，反之为1就表示被触发了 然后再找出机关触发状态下，最短的距离 
+
+```java
+class Solution {
+  
+     public int minimalSteps(String[] maze) {
+        int n = maze.length;
+        char[][] mat = new char[n][];
+        for (int i = 0; i < n; i++) {
+            mat[i] = maze[i].toCharArray();
+        }
+
+        int m = mat[0].length;
+        List<int[]> triggers = new ArrayList<>();
+        List<int[]> stones = new ArrayList<>();
+        int[] start = null;
+        int[] end = null;
+        //把各个类型的点分开
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (mat[i][j] == 'M') {
+                    triggers.add(new int[]{i, j});
+                }
+                if (mat[i][j] == 'O') {
+                    stones.add(new int[]{i, j});
+                }
+                if (mat[i][j] == 'S') {
+                    start = new int[]{i, j};
+                }
+                if (mat[i][j] == 'T') {
+                    end = new int[]{i, j};
+                }
+            }
+        }
+        //把初始点加入机关队列，把终点加入石头队列
+        triggers.add(start);
+        stones.add(end);
+        int T = triggers.size();
+        int S = stones.size();
+
+        int[][] dist = new int[T][S];
+        //方向
+        int[][] dirs = new int[][]{
+                {1, 0},
+                {-1, 0},
+                {0, 1},
+                {0, -1}
+        };
+        //BFS（如果这里不懂得话，不建议先看这道题，先看一下BFS类型得题）
+        int inf = (int) 1e8;
+        Deque<int[]> dq = new ArrayDeque<>(n * m);
+        int[][] access = new int[n][m];
+        for (int i = 0; i < T; i++) {
+            dq.clear();
+            for (int[] a : access) {
+                Arrays.fill(a, -1);
+            }
+            int[] t = triggers.get(i);
+            access[t[0]][t[1]] = 0;
+            dq.addLast(t);
+            while (!dq.isEmpty()) {
+                int[] head = dq.removeFirst();
+                for (int[] dir : dirs) {
+                    int x = head[0] + dir[0];
+                    int y = head[1] + dir[1];
+                    if (x < 0 || x >= n || y < 0 || y >= m || mat[x][y] == '#' ||
+                            access[x][y] != -1) {
+                        continue;
+                    }
+                    access[x][y] = access[head[0]][head[1]] + 1;
+                    dq.addLast(new int[]{x, y});
+                }
+            }
+            //dist[i][j]这里就是 第i个机关到第j个石头的最短距离
+            for (int j = 0; j < S; j++) {
+                int[] s = stones.get(j);
+                if (access[s[0]][s[1]] == -1) {
+                    dist[i][j] = inf;
+                } else {
+                    dist[i][j] = access[s[0]][s[1]];
+                }
+            }
+        }
+        //循环所有的点，找到最小的移动点
+        int[][] move = new int[T][T];
+        for (int i = 0; i < T; i++) {
+            for (int j = 0; j < T; j++) {
+                if (i == j) {
+                    continue;
+                }
+                move[i][j] = inf;
+                //石堆的最后一个是终点，所以要-1
+                for (int k = 0; k < S - 1; k++) {
+                    //i到j的最短距离为：i到k石堆+j到k石堆
+                    move[i][j] = Math.min(move[i][j], dist[i][k] + dist[j][k]);
+                }
+            }
+        }
+        //初始化
+        //mask的二进制中，第j位如果为0，证明第j个机关没有触发
+        int mask = (1 << (T - 1)) - 1;
+        int[][] dp = new int[T][mask + 1];
+        for (int i = 0; i < T; i++) {
+            dp[i][0] = inf;
+        }
+        //这里运用二进制，i的第j位如果是0的话，证明第j个机关还没触发，反之，就是第j个机关触发了
+        dp[T - 1][0] = 0;
+        for (int i = 1; i <= mask; i++) {
+            for (int j = 0; j < T; j++) {
+                dp[j][i] = inf;
+                //这里相当于剪枝操作吧，如果都是i>>j的最后一位不能触发，就直接过吧
+                //既然有不能触发的机关，求出就没有意义
+                if (bit(i, j) == 0) {
+                    continue;
+                }
+                //这里异运算，就是找没触发的
+                //也就是需要改变的状态
+                int remove = i ^ (1 << j);
+                for (int k = 0; k < T; k++) {
+                    //当前的j个机关最小值，就是k个机关的remove状态，然后加上k到j的路径
+                    dp[j][i] = Math.min(dp[j][i], dp[k][remove] + move[k][j]);
+                }
+            }
+        }
+
+        int ans = inf;
+        if (T > 1) {
+            for (int i = 0; i < T - 1; i++) {
+                //找mask就是全都为1，证明全部机关触发
+                //dist是上面求得最短距离，第i个机关到s-1的最短路径（到终点的最短路径）
+                //因为开始的时候，把初始点加入到了机关队列，把终点加入到了石头队列
+                ans = Math.min(ans, dp[i][mask] + dist[i][S - 1]);
+            }
+        } else {
+            ans = dist[0][S - 1];
+        }
+
+        if (ans >= inf) {
+            return -1;
+        }
+        return ans;
+    }
+    
+    int bit(int x, int i) {
+        return (x >> i) & 1;
     }
 }
 ```
