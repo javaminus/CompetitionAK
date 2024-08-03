@@ -1,3 +1,61 @@
+## 【模板】dijkstraPlus找到距离节点k最远的点，并且打印路径
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+
+class Solution {
+    // 堆优化版本
+    public void dijkstraPlus(int[][] times, int n, int k) { // 找到距离节点k最远的点，打印路径
+        final int INF = Integer.MAX_VALUE / 2;
+        List<int[]>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int[] time : times) {
+            int x = time[0] - 1, y = time[1] - 1, z = time[2];
+            g[x].add(new int[] { y, z });
+        }
+        int[] dist = new int[n];
+        int[] p = new int[n];
+        Arrays.fill(p, -1);
+        Arrays.fill(dist, INF);
+        dist[k - 1] = 0;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        pq.offer(new int[] { k - 1, 0 });
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int x = poll[0], time = poll[1];
+            if (dist[x] < time) {
+                continue;
+            }
+            for (int[] e : g[x]) {
+                int y = e[0], d = e[1];
+                if (dist[y] > dist[x] + d) {
+                    dist[y] = dist[x] + d;
+                    p[y] = x;
+                    pq.offer(new int[] { y, dist[y] });
+                }
+            }
+        }
+        int mx = 0, idx = k;
+        for (int i = 0; i < dist.length; i++) {
+            if (dist[i] > mx) {
+                mx = dist[i];
+                idx = i;
+            }
+        }
+        String ans = "";
+        for (int x = idx; x != -1; x = p[x]) {
+            ans = (x + 1) + ans;
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+
+
 743\. 网络延迟时间
 ------------
 
@@ -176,7 +234,7 @@ class Graph {
  */
 ```
 
-1976\. 到达目的地的方案数
+1976\. 到达目的地的方案数（最短路方案数）
 ----------------
 
 你在一个城市里，城市由 `n` 个路口组成，路口编号为 `0` 到 `n - 1` ，某些路口之间有 **双向** 道路。输入保证你可以从任意路口出发到达其他任意路口，且任意两个路口之间最多有一条路。

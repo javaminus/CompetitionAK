@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 public class Main {
-    private final static int INF = Integer.MAX_VALUE;
+    private final static int INF = Integer.MAX_VALUE / 2;
     private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     static class Read{
         BufferedReader bf;
@@ -99,7 +99,6 @@ public class Main {
             return;
         }
     }
-
     private static int binarySearch1(int[] nums, int target) { // >=target
         int left = 0, right = nums.length - 1;
         while (left <= right) {
@@ -112,7 +111,6 @@ public class Main {
         }
         return right + 1;
     }
-
     private static int binarySearch2(int[] nums, int target) { // <=target
         int left = 0, right = nums.length - 1;
         while (left <= right) {
@@ -127,7 +125,7 @@ public class Main {
     }
 
     static Read sc = new Read();
-    static int T = 10;
+    static int T = 1;
     public static void main(String[] args) throws IOException {
         while (T-- > 0) {
             solve();
@@ -136,14 +134,10 @@ public class Main {
         sc.bw.close();
     }
 
-
     private static void solve() throws IOException {
-        double ans = sc.nextDouble();
-        DecimalFormat df = new DecimalFormat("#.0");
-        String formattedValue = df.format(ans);
-        System.out.println(formattedValue);
+        int n = sc.nextInt();
     }
 
-}
 
+}
 

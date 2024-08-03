@@ -1515,3 +1515,327 @@ class Solution {
 }
 ```
 
+# §9.4 枚举子集的子集
+
+![1722576431708](assets/1722576431708.png)
+
+2305\. 公平分发饼干
+-------------
+
+给你一个整数数组 `cookies` ，其中 `cookies[i]` 表示在第 `i` 个零食包中的饼干数量。另给你一个整数 `k` 表示等待分发零食包的孩子数量，**所有** 零食包都需要分发。在同一个零食包中的所有饼干都必须分发给同一个孩子，不能分开。
+
+分发的 **不公平程度** 定义为单个孩子在分发过程中能够获得饼干的最大总数。
+
+返回所有分发的最小不公平程度。
+
+**示例 1：**
+
+**输入：**cookies = \[8,15,10,20,8\], k = 2
+**输出：**31
+**解释：**一种最优方案是 \[8,15,8\] 和 \[10,20\] 。
+- 第 1 个孩子分到 \[8,15,8\] ，总计 8 + 15 + 8 = 31 块饼干。
+- 第 2 个孩子分到 \[10,20\] ，总计 10 + 20 = 30 块饼干。
+  分发的不公平程度为 max(31,30) = 31 。
+  可以证明不存在不公平程度小于 31 的分发方案。
+
+**示例 2：**
+
+**输入：**cookies = \[6,1,3,2,2,4,1,2\], k = 3
+**输出：**7
+**解释：**一种最优方案是 \[6,1\]、\[3,2,2\] 和 \[4,1,2\] 。
+- 第 1 个孩子分到 \[6,1\] ，总计 6 + 1 = 7 块饼干。 
+- 第 2 个孩子分到 \[3,2,2\] ，总计 3 + 2 + 2 = 7 块饼干。
+- 第 3 个孩子分到 \[4,1,2\] ，总计 4 + 1 + 2 = 7 块饼干。
+  分发的不公平程度为 max(7,7,7) = 7 。
+  可以证明不存在不公平程度小于 7 的分发方案。
+
+**提示：**
+
+*   `2 <= cookies.length <= 8`
+*   `1 <= cookies[i] <= 105`
+*   `2 <= k <= cookies.length`
+
+[https://leetcode.cn/problems/fair-distribution-of-cookies/description/](https://leetcode.cn/problems/fair-distribution-of-cookies/description/)
+
+```java
+class Solution { // 回溯写法  184ms
+    int ans = INF;
+    private final static int INF = Integer.MAX_VALUE / 2;
+    public int distributeCookies(int[] cookies, int k) {
+        int[] tmp = new int[k]; // k个小孩
+        dfs(cookies, tmp, 0, 0);
+        return ans;
+    }
+
+    private void dfs(int[] cookies, int[] tmp, int index,int mx) {
+        if (index == cookies.length) {
+            ans = Math.min(ans, mx);
+        }
+        for (int i = 0; i < tmp.length; i++) {
+            tmp[i] += cookies[index];
+            dfs(cookies, tmp, index + 1, Math.max(mx, tmp[i]));
+            tmp[i] -= cookies[index];
+        }
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    private final static int INF = Integer.MAX_VALUE / 2;
+    public int distributeCookies(int[] cookies, int k) {
+        int n = cookies.length;
+        int mask = 1 << n;
+        int[] g = new int[mask];
+        for (int s = 0; s < mask; s++) {
+            int t = 0;
+            for (int i = 0; i < n; i++) {
+                t += ((s >> i) & 1) == 1 ? cookies[i] : 0;
+            }
+            g[s] = t;
+        }
+        int[][] dp = new int[k + 1][mask];
+        for (int i = 0; i <= k; i++) {
+            Arrays.fill(dp[i], INF);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= k; i++) { // 前i个人
+            for (int s = 0; s < mask; s++) {
+                for (int p = s; p != 0; p = (p - 1) & s) { // 枚举子集
+                    dp[i][s] = Math.min(dp[i][s], Math.max(dp[i - 1][s - p], g[p]));
+                }
+            }
+        }
+        return dp[k][mask - 1];
+    }
+}
+```
+
+1986\. 完成任务的最少工作时间段
+-------------------
+
+你被安排了 `n` 个任务。任务需要花费的时间用长度为 `n` 的整数数组 `tasks` 表示，第 `i` 个任务需要花费 `tasks[i]` 小时完成。一个 **工作时间段** 中，你可以 **至多** 连续工作 `sessionTime` 个小时，然后休息一会儿。
+
+你需要按照如下条件完成给定任务：
+
+*   如果你在某一个时间段开始一个任务，你需要在 **同一个** 时间段完成它。
+*   完成一个任务后，你可以 **立马** 开始一个新的任务。
+*   你可以按 **任意顺序** 完成任务。
+
+给你 `tasks` 和 `sessionTime` ，请你按照上述要求，返回完成所有任务所需要的 **最少** 数目的 **工作时间段** 。
+
+测试数据保证 `sessionTime` **大于等于** `tasks[i]` 中的 **最大值** 。
+
+**示例 1：**
+
+**输入：**tasks = \[1,2,3\], sessionTime = 3
+**输出：**2
+**解释：**你可以在两个工作时间段内完成所有任务。
+- 第一个工作时间段：完成第一和第二个任务，花费 1 + 2 = 3 小时。
+- 第二个工作时间段：完成第三个任务，花费 3 小时。
+
+**示例 2：**
+
+**输入：**tasks = \[3,1,3,1,1\], sessionTime = 8
+**输出：**2
+**解释：**你可以在两个工作时间段内完成所有任务。
+- 第一个工作时间段：完成除了最后一个任务以外的所有任务，花费 3 + 1 + 3 + 1 = 8 小时。
+- 第二个工作时间段，完成最后一个任务，花费 1 小时。
+
+**示例 3：**
+
+**输入：**tasks = \[1,2,3,4,5\], sessionTime = 15
+**输出：**1
+**解释：**你可以在一个工作时间段以内完成所有任务。
+
+**提示：**
+
+*   `n == tasks.length`
+*   `1 <= n <= 14`
+*   `1 <= tasks[i] <= 10`
+*   `max(tasks[i]) <= sessionTime <= 15`
+
+[https://leetcode.cn/problems/minimum-number-of-work-sessions-to-finish-the-tasks/description/](https://leetcode.cn/problems/minimum-number-of-work-sessions-to-finish-the-tasks/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minSessions(int[] tasks, int sessionTime) {
+        // 凑出时间段
+        int n = tasks.length;
+        int mask = 1 << n;
+        int[] g = new int[mask];
+        Arrays.fill(g, Integer.MAX_VALUE / 2);
+        next:
+        for (int s = 0; s < mask; s++) { // 需要保证子序列没问题
+            int tmp = 0;
+            for (int i = 0; i < n; i++) {
+                if (((s >> i) & 1) == 1) {
+                    tmp += tasks[i];
+                }
+                if (tmp > sessionTime) {
+                    continue next; 
+                }
+            }
+            g[s] = (tmp + sessionTime - 1) / sessionTime;
+        }
+        int[] dp = new int[mask]; // dp[s] = Math.min(dp[s], dp[s - p] + g[p]);
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+        for (int s = 0; s < mask; s++) {
+            for (int p = s; p > 0; p = (p - 1) & s) {
+                dp[s] = Math.min(dp[s], dp[s - p] + g[p]);
+            }
+        }
+        return dp[mask - 1];
+    }
+}
+```
+
+1494\. 并行课程 II
+--------------
+
+给你一个整数 `n` 表示某所大学里课程的数目，编号为 `1` 到 `n` ，数组 `relations` 中， `relations[i] = [xi, yi]`  表示一个先修课的关系，也就是课程 `xi` 必须在课程 `yi` 之前上。同时你还有一个整数 `k` 。
+
+在一个学期中，你 **最多** 可以同时上 `k` 门课，前提是这些课的先修课在之前的学期里已经上过了。
+
+请你返回上完所有课最少需要多少个学期。题目保证一定存在一种上完所有课的方式。
+
+**示例 1：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/27/leetcode_parallel_courses_1.png)**
+
+**输入：**n = 4, relations = \[\[2,1\],\[3,1\],\[1,4\]\], k = 2
+**输出：**3 
+**解释：**上图展示了题目输入的图。在第一个学期中，我们可以上课程 2 和课程 3 。然后第二个学期上课程 1 ，第三个学期上课程 4 。
+
+**示例 2：**
+
+**![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/06/27/leetcode_parallel_courses_2.png)**
+
+**输入：**n = 5, relations = \[\[2,1\],\[3,1\],\[4,1\],\[1,5\]\], k = 2
+**输出：**4 
+**解释：**上图展示了题目输入的图。一个最优方案是：第一学期上课程 2 和 3，第二学期上课程 4 ，第三学期上课程 1 ，第四学期上课程 5 。
+
+**示例 3：**
+
+**输入：**n = 11, relations = \[\], k = 2
+**输出：**6
+
+**提示：**
+
+*   `1 <= n <= 15`
+*   `1 <= k <= n`
+*   `0 <= relations.length <= n * (n-1) / 2`
+*   `relations[i].length == 2`
+*   `1 <= xi, yi <= n`
+*   `xi != yi`
+*   所有先修关系都是不同的，也就是说 `relations[i] != relations[j]` 。
+*   题目输入的图是个有向无环图。
+
+[https://leetcode.cn/problems/parallel-courses-ii/description/](https://leetcode.cn/problems/parallel-courses-ii/description/)
+
+```java
+import java.util.Arrays;
+// waitStudy &= (~s); // 取waitStudy与s的补集
+// waitStudy -= s; 用上面的是265ms，换成这一行直接401ms 但是只有这个题会这样，难道是赋值的问题？
+class Solution {
+    public int minNumberOfSemesters(int n, int[][] relations, int k) {
+        int[] pre = new int[n];
+        for (int[] relation : relations) {
+            pre[relation[1] - 1] |= (1 << (relation[0] - 1));
+        }
+        int mask = 1 << n;
+        int[] dp = new int[mask];
+        Arrays.fill(dp, n);
+        dp[0] = 0;
+        for (int s = 0; s < mask; s++) { // s是已经学过的课程状态
+            int waitStudy = 0;
+            for (int i = 0; i < n; i++) {
+                if ((pre[i] & s) == pre[i]) { // 如果要学习课程i，需要满足的前提条件pre[i]
+                    waitStudy |= (1 << i);
+                }
+            }
+            // 排除已经学过的课程
+            waitStudy &= (~s); // 取waitStudy与s的补集
+            // waitStudy -= s; 用上面的是265ms，换成这一行直接401ms
+            for (int p = waitStudy; p > 0; p = (p - 1) & waitStudy) {
+                if (Integer.bitCount(p) > k) {
+                    continue;
+                }
+                dp[s | p] = Math.min(dp[s | p], dp[s] + 1);
+            }
+        }
+        return dp[mask - 1];
+    }
+}
+```
+
+1723\. 完成所有工作的最短时间
+------------------
+
+给你一个整数数组 `jobs` ，其中 `jobs[i]` 是完成第 `i` 项工作要花费的时间。
+
+请你将这些工作分配给 `k` 位工人。所有工作都应该分配给工人，且每项工作只能分配给一位工人。工人的 **工作时间** 是完成分配给他们的所有工作花费时间的总和。请你设计一套最佳的工作分配方案，使工人的 **最大工作时间** 得以 **最小化** 。
+
+返回分配方案中尽可能 **最小** 的 **最大工作时间** 。
+
+**示例 1：**
+
+**输入：**jobs = \[3,2,3\], k = 3
+**输出：**3
+**解释：**给每位工人分配一项工作，最大工作时间是 3 。
+
+**示例 2：**
+
+**输入：**jobs = \[1,2,4,7,8\], k = 2
+**输出：**11
+**解释：**按下述方式分配工作：
+1 号工人：1、2、8（工作时间 = 1 + 2 + 8 = 11）
+2 号工人：4、7（工作时间 = 4 + 7 = 11）
+最大工作时间是 11 。
+
+**提示：**
+
+*   `1 <= k <= jobs.length <= 12`
+*   `1 <= jobs[i] <= 107`
+
+[https://leetcode.cn/problems/find-minimum-time-to-finish-all-jobs/description/](https://leetcode.cn/problems/find-minimum-time-to-finish-all-jobs/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minimumTimeRequired(int[] jobs, int k) {
+        int n = jobs.length;
+        int mask = 1 << n;
+        int[] g = new int[mask];
+        for (int i = 0; i < mask; i++) {
+            int tmp = 0;
+            for (int j = 0; j < n; j++) {
+                if (((i >> j) & 1) == 1) {
+                    tmp += jobs[j];
+                }
+            }
+            g[i] = tmp;
+        }
+        int[][] dp = new int[k + 1][mask];
+        for (int i = 0; i <= k; i++) {
+            Arrays.fill(dp[i], Integer.MAX_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= k; i++) {
+            for (int s = 0; s < mask; s++) {
+                for (int p = s; p != 0; p = (p - 1) & s) {
+                    dp[i][s] = Math.min(dp[i][s], Math.max(dp[i - 1][s - p], g[p]));
+                }
+            }
+        }
+        return dp[k][mask - 1];
+    }
+}
+```
+

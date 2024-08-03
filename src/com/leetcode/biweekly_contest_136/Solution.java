@@ -1,4 +1,11 @@
+package com.leetcode.biweekly_contest_136;
+
+/**
+ * @author Minus
+ * @date 2024/8/4 0:53
+ */
 class Solution {
+    // https://leetcode.cn/problems/minimum-number-of-flips-to-make-binary-grid-palindromic-ii/
     public int minFlips(int[][] grid) {
         int m = grid.length, n = grid[0].length;
         int ans = 0;
