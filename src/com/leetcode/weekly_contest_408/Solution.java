@@ -1,6 +1,8 @@
 package com.leetcode.weekly_contest_408;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Minus
@@ -79,5 +81,6 @@ public class Solution {
     private void union(int[] parent, int index1, int index2) {
         parent[find(parent, index1)] = find(parent, index2);
     }
+
 
 }

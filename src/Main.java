@@ -129,7 +129,7 @@ import java.util.StringTokenizer;
         static Read sc = new Read();
         static int T = 1;
         public static void main(String[] args) throws IOException {
-            T = sc.nextInt();
+            // T = sc.nextInt();
             while (T-- > 0) {
                 solve();
             }
@@ -138,25 +138,19 @@ import java.util.StringTokenizer;
         }
         static String[] ss;
         private static void solve() throws IOException {
-            int n = sc.nextInt();
+            int N = sc.nextInt();
             ss = sc.nextLine().split(" ");
-            int[] nums = new int[n + 1];
-            for (int i = 1; i <= n; i++) {
-                nums[i] = Integer.parseInt(ss[i - 1]);
+            int[] cnt = new int[(int) 2e5 + 1];
+            for (int i = 0; i < N; i++) {
+                cnt[Integer.parseInt(ss[i])]++;
             }
-            int[] dp = new int[n + 1];
-            Arrays.fill(dp, INF);
-            dp[0] = 0;
-            for (int i = 1; i <= n; i++) {
-                // 当前长度
-                int len = nums[i];
-                // 第i张布必须覆盖第i个坐标
-                // j表示起始位置
-                for (int j = Math.max(1 , i - len + 1); j <= Math.min(i, n - len + 1); j++) {
-                    dp[j + len - 1] = Math.min(dp[j + len - 1], dp[j - 1] + 1);
+            long ans = 0;
+            for (int i = 1; i < (int) 2e5 + 1; i++) {
+                for (int j = 1; i * j < (int) 2e5 + 1; j++) {
+                    ans += (long) cnt[i] * cnt[j] * cnt[i * j];
                 }
             }
-            System.out.println(dp[n] == INF ? -1 : dp[n]);
+            sc.print(ans);
         }
     }
 
