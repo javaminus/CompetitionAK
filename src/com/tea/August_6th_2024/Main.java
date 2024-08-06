@@ -1,3 +1,10 @@
+package com.tea.August_6th_2024;
+
+/**
+ * @author Minus
+ * @date 2024/8/6 12:28
+ * https://atcoder.jp/contests/abc359/tasks/abc359_d  1381  (dp + 位运算 + 状压)
+ */
 import java.io.*;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -136,16 +143,57 @@ public class Main {
     }
     static String[] ss;
     static char[] s;
-    int[][] memo;
+    static int n;
+    static int k;
     private static final int Mod = 998244353;
     private static void solve() throws IOException {
-        int n = sc.nextInt();
-        int k = sc.nextInt();
+        n = sc.nextInt();
+        k = sc.nextInt();
         s = sc.nextLine().toCharArray();
-
-
+        memo = new int[n][1 << k];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        boolean[] isPal = new boolean[1 << k]; // 预处理长度为K的二进制回文字符串
+        for (int i = 0; i < (1 << k); i++) {
+            boolean flag = true;
+            for (int j = 0; j < k / 2; j++) {
+                if (((i >> j) & 1) != ((i >> (k - 1 - j)) & 1)) {
+                    flag = false;
+                    break;
+                }
+            }
+            isPal[i] = flag;
+        }
+        int mask = (1 << (k - 1)) - 1;
+        int res = dfs(s, n - 1, 0, isPal, mask);
+        System.out.println(res);
     }
 
+    private static int[][] memo;
+
+    // 表示i右边的k - 1个字母的二进制为j
+    private static int dfs(char[] s, int i, int j, boolean[] isPal, int mask) {
+        if (i < 0) {
+            return 1; // 判断[0, k]这一段是否合法
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        int res = 0;
+        for (int b = 0; b <= 1; b++) {
+            if (s[i] != '?' && ((s[i] - 'A') & 1) != b) {
+                continue;
+            }
+            int next = (j << 1) | b;
+            if (i > s.length - k || !isPal[next]) {
+                res += dfs(s, i - 1, next & mask, isPal, mask);
+                res %= Mod;
+            }
+        }
+        return memo[i][j] = res;
+    }
 
 }
+
 

@@ -1,6 +1,14 @@
+package com.tea.August_5th_2024;
+
+/**
+ * @author Minus
+ * @date 2024/8/5 12:26
+ *
+ * https://atcoder.jp/contests/abc249/tasks/abc249_d   983 (枚举 + 调和级数)
+ */
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -135,17 +143,21 @@ public class Main {
         sc.bw.close();
     }
     static String[] ss;
-    static char[] s;
-    int[][] memo;
-    private static final int Mod = 998244353;
     private static void solve() throws IOException {
-        int n = sc.nextInt();
-        int k = sc.nextInt();
-        s = sc.nextLine().toCharArray();
-
-
+        int N = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] cnt = new int[(int) 2e5 + 1];
+        for (int i = 0; i < N; i++) {
+            cnt[Integer.parseInt(ss[i])]++;
+        }
+        long ans = 0;
+        for (int i = 1; i < (int) 2e5 + 1; i++) {
+            for (int j = 1; i * j < (int) 2e5 + 1; j++) {
+                ans += (long) cnt[i] * cnt[j] * cnt[i * j];
+            }
+        }
+        sc.print(ans);
     }
-
-
 }
+
 
