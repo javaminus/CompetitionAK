@@ -1,6 +1,5 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -135,17 +134,31 @@ public class Main {
         sc.bw.close();
     }
     static String[] ss;
-    static char[] s;
-    int[][] memo;
-    private static final int Mod = 998244353;
+    static char[] chars;
+    static long[][] memo;
+    static boolean[] isPal;
+    static int k, n, mask;
+    private static final long Mod = 998244353;
     private static void solve() throws IOException {
         int n = sc.nextInt();
-        int k = sc.nextInt();
-        s = sc.nextLine().toCharArray();
-
-
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[] prefixSum = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
+        }
+        int ans = 0;
+        for (int i = 0; i < n - 1; i++) {
+            ans = Math.max(ans, gcd(prefixSum[i + 1], prefixSum[n] - prefixSum[i + 1]));
+        }
+        System.out.println(ans);
     }
 
-
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
 }
 
