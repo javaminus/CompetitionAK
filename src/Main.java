@@ -1,9 +1,10 @@
 import java.io.*;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
+    private final static int INF = Integer.MAX_VALUE;
     private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
     static class Read{
         BufferedReader bf;
@@ -98,7 +99,8 @@ public class Main {
             return;
         }
     }
-    private static int binarySearch1(int[] nums, int target) { // >=target
+
+    private static int binarySearch1(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
@@ -110,7 +112,8 @@ public class Main {
         }
         return right + 1;
     }
-    private static int binarySearch2(int[] nums, int target) { // <=target
+
+    private static int binarySearch2(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
@@ -122,57 +125,50 @@ public class Main {
         }
         return left - 1;
     }
-    public static TreeNode buildTree(int[] levelOrder) {
-        if (levelOrder == null || levelOrder.length == 0) {
-            return null;
-        }
 
-        TreeNode root = new TreeNode(levelOrder[0]);
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-
-        int i = 1;
-        while (!queue.isEmpty() && i < levelOrder.length) {
-            TreeNode currentNode = queue.poll();
-
-            if (levelOrder[i] != -1) {
-                currentNode.left = new TreeNode(levelOrder[i]);
-                queue.offer(currentNode.left);
-            }
-            i++;
-
-            if (i < levelOrder.length && levelOrder[i] != -1) {
-                currentNode.right = new TreeNode(levelOrder[i]);
-                queue.offer(currentNode.right);
-            }
-            i++;
-        }
-        return root;
-    }
-
-    static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode(int x) {
-            val = x;
-        }
-    }
     static Read sc = new Read();
-    static int T = 1;
     public static void main(String[] args) throws IOException {
-        // T = sc.nextInt();
+        int T = 1;
         while (T-- > 0) {
             solve();
         }
         sc.bw.flush();
         sc.bw.close();
     }
-    static String[] ss;
+
+
     private static void solve() throws IOException {
+        String[] split = sc.nextLine().split(",");
+        int n = split.length;
+        int[][] nums = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            String[] s = split[i].split(":");
+            nums[i][0] = Integer.parseInt(s[0]);
+            nums[i][1] = Integer.parseInt(s[1]);
+        }
+        Arrays.sort(nums, (a, b) -> a[1] == b[1] ? b[0] - a[0] : a[1] - b[1]);
+        int left = 0, right = 4800; // 4800:10,2:12,3:10
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (check(nums,mid)) {
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+        System.out.println(right> 4800 ? -1 : right + 1);
+    }
 
-
+    private static boolean check(int[][] nums, int sum) {
+        for (int i = nums.length - 1; i >= 0; i--) {
+            int a = nums[i][0], b = nums[i][1];
+            if (sum >= b && sum - a >= 0) {
+                sum -= a;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

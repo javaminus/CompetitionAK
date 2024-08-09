@@ -2018,3 +2018,144 @@ class Solution { // 55ms
 }
 ```
 
+1349\. 参加考试的最大学生数
+-----------------
+
+给你一个 `m * n` 的矩阵 `seats` 表示教室中的座位分布。如果座位是坏的（不可用），就用 `'#'` 表示；否则，用 `'.'` 表示。
+
+学生可以看到左侧、右侧、左上、右上这四个方向上紧邻他的学生的答卷，但是看不到直接坐在他前面或者后面的学生的答卷。请你计算并返回该考场可以容纳的同时参加考试且无法作弊的 **最大** 学生人数。
+
+学生必须坐在状况良好的座位上。
+
+**示例 1：**
+
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/02/09/image.png)
+
+**输入：**seats = \[\["#",".","#","#",".","#"\],
+              \[".","#","#","#","#","."\],
+              \["#",".","#","#",".","#"\]\]
+**输出：**4
+**解释：**教师可以让 4 个学生坐在可用的座位上，这样他们就无法在考试中作弊。 
+
+**示例 2：**
+
+**输入：**seats = \[\[".","#"\],
+              \["#","#"\],
+              \["#","."\],
+              \["#","#"\],
+              \[".","#"\]\]
+**输出：**3
+**解释：**让所有学生坐在可用的座位上。
+
+**示例 3：**
+
+**输入：**seats = \[\["#",".","**.**",".","#"\],
+              \["**.**","#","**.**","#","**.**"\],
+              \["**.**",".","#",".","**.**"\],
+              \["**.**","#","**.**","#","**.**"\],
+              \["#",".","**.**",".","#"\]\]
+**输出：**10
+**解释：**让学生坐在第 1、3 和 5 列的可用座位上。
+
+**提示：**
+
+*   `seats` 只包含字符 `'.' 和``'#'`
+*   `m == seats.length`
+*   `n == seats[i].length`
+*   `1 <= m <= 8`
+*   `1 <= n <= 8`
+
+[https://leetcode.cn/problems/maximum-students-taking-exam/](https://leetcode.cn/problems/maximum-students-taking-exam/)
+
+```java
+class Solution {
+    public int maxStudents(char[][] seats) {
+        int ans = 0;
+        int m = seats.length, n = seats[0].length;
+        int[][] dp = new int[m][1 << n];
+        for (int i = 0; i < m; i++) {
+            next:
+            for (int s = 0; s < 1 << n; s++) {
+                for (int j = 0; j < n; j++) {
+                    if (((s >> j) & 1) == 0) {
+                        continue;
+                    }
+                    // 判断第j个位置能否坐人
+                    if (seats[i][j] == '#' || (j > 0 && ((s >> (j - 1)) & 1) == 1)) {
+                        continue next;
+                    }
+                }
+                if (i == 0) { // 特判第0行
+                    dp[i][s] = Integer.bitCount(s);
+                    ans = Math.max(ans, dp[i][s]);
+                    continue;
+                }
+                // 寻找上一行符合要求的pres
+                int pres = (1 << n) - 1;
+                for (int j = 0; j < n; j++) {
+                    if (((s >> j) & 1) == 1) {
+                        if ((seats[i][j] == '#') && ((pres >> (j)) & 1) == 1) {
+                            pres ^= (1 << j);
+                        }
+                        if ((j > 0 && (((pres >> (j - 1)) & 1) == 1))) {
+                            pres ^= (1 << (j - 1));
+                        }
+                        if (j + 1 < n && (((pres >> (j + 1) & 1) == 1))) {
+                            pres ^= (1 << (j + 1));
+                        }
+                    }
+                }
+                // 枚举pres的子集
+                dp[i][s] = dp[i - 1][0] + Integer.bitCount(s);
+                for (int p = pres; p != 0; p = (p - 1) & pres) { // 这个题的特列就是p = 0,需要我们特判
+                    dp[i][s] = Math.max(dp[i][s], Math.max(dp[i - 1][s], dp[i - 1][p] + Integer.bitCount(s)));
+                    ans = Math.max(ans, dp[i][s]);
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution { // 灵神写法
+    public int maxStudents(char[][] seats) {
+        int m = seats.length;
+        int n = seats[0].length;
+        int[] a = new int[m]; // a[i] 是第 i 排可用椅子的下标集合
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (seats[i][j] == '.') {
+                    a[i] |= 1 << j;
+                }
+            }
+        }
+
+        int[][] f = new int[m][1 << n];
+        for (int j = 1; j < (1 << n); j++) {
+            int lb = j & -j;
+            f[0][j] = f[0][j & ~(lb * 3)] + 1;
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = a[i]; j > 0; j = (j - 1) & a[i]) { // 枚举 a[i] 的子集 j
+                f[i][j] = f[i - 1][a[i - 1]]; // 第 i 排空着
+                for (int s = j; s > 0; s = (s - 1) & j) { // 枚举 j 的子集 s
+                    if ((s & (s >> 1)) == 0) { // s 没有连续的 1
+                        int t = a[i - 1] & ~(s << 1 | s >> 1); // 去掉不能坐人的位置
+                        f[i][j] = Math.max(f[i][j], f[i - 1][t] + f[0][s]);
+                    }
+                }
+            }
+            f[i][0] = f[i - 1][a[i - 1]];
+        }
+        return f[m - 1][a[m - 1]];
+    }
+}
+
+作者：灵茶山艾府
+链接：https://leetcode.cn/problems/maximum-students-taking-exam/solutions/2580043/jiao-ni-yi-bu-bu-si-kao-dong-tai-gui-hua-9y5k/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
