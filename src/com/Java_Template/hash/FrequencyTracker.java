@@ -14,7 +14,7 @@ import java.util.HashMap;
  * void deleteOne(int number)：从数据结构中删除一个 number 。数据结构 可能不包含 number ，在这种情况下不删除任何内容。
  * bool hasFrequency(int frequency): 如果数据结构中存在出现 frequency 次的数字，则返回 true，否则返回 false。
  */
-class FrequencyTracker {
+public class FrequencyTracker {
     HashMap<Integer,Integer> cnt;
     HashMap<Integer, Integer> freq;
     public FrequencyTracker() {

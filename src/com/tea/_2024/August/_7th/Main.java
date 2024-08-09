@@ -1,6 +1,11 @@
+package com.tea._2024.August._7th;
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -122,47 +127,11 @@ public class Main {
         }
         return left - 1;
     }
-    public static TreeNode buildTree(int[] levelOrder) {
-        if (levelOrder == null || levelOrder.length == 0) {
-            return null;
-        }
 
-        TreeNode root = new TreeNode(levelOrder[0]);
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-
-        int i = 1;
-        while (!queue.isEmpty() && i < levelOrder.length) {
-            TreeNode currentNode = queue.poll();
-
-            if (levelOrder[i] != -1) {
-                currentNode.left = new TreeNode(levelOrder[i]);
-                queue.offer(currentNode.left);
-            }
-            i++;
-
-            if (i < levelOrder.length && levelOrder[i] != -1) {
-                currentNode.right = new TreeNode(levelOrder[i]);
-                queue.offer(currentNode.right);
-            }
-            i++;
-        }
-        return root;
-    }
-
-    static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode(int x) {
-            val = x;
-        }
-    }
     static Read sc = new Read();
     static int T = 1;
     public static void main(String[] args) throws IOException {
-        // T = sc.nextInt();
+        T = sc.nextInt();
         while (T-- > 0) {
             solve();
         }
@@ -170,9 +139,57 @@ public class Main {
         sc.bw.close();
     }
     static String[] ss;
+    static int n, k, c; // 树中顶点的数量、每条边的长度以及操作的成本。
+    static long ans;
+    static List<Integer>[] g;
+    static long[][] nodes;
+    static long[] tmp;
+    private static final long Mod = 998244353;
     private static void solve() throws IOException {
-
-
+        n = sc.nextInt();
+        k = sc.nextInt();
+        c = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        nodes = new long[n][3];
+        tmp = new long[n];
+        dfs(0, -1);
+        reRoot(0, -1, 0, 0);
+        sc.println(ans);
     }
 
+    private static long dfs(int x, int fa) {
+        long maxD = 0, maxD2 = 0, my = 0;
+        for (int y : g[x]) {
+            if (y != fa) {
+                long d = dfs(y, x) + k;
+                if (d > maxD) {
+                    maxD2 = maxD;
+                    maxD = d;
+                    my = y;
+                } else if (d > maxD2) {
+                    maxD2 = d;
+                }
+            }
+        }
+        nodes[x][0] = maxD;
+        nodes[x][1] = maxD2;
+        nodes[x][2] = my;
+        return maxD;
+    }
+
+    private static void reRoot(int x, int fa, long up, long cost) {
+        ans = Math.max(ans, Math.max(nodes[x][0], up) - cost);
+        for (int y : g[x]) {
+            if (y != fa) {
+                reRoot(y, x, Math.max(up, y == nodes[x][2] ? nodes[x][1] : nodes[x][0]) + k, cost + c);
+            }
+        }
+    }
 }
+

@@ -1839,3 +1839,182 @@ class Solution {
 }
 ```
 
+1655\. 分配重复整数(0-1背包模型)
+-------------
+
+给你一个长度为 `n` 的整数数组 `nums` ，这个数组中至多有 `50` 个不同的值。同时你有 `m` 个顾客的订单 `quantity` ，其中，整数 `quantity[i]` 是第 `i` 位顾客订单的数目。请你判断是否能将 `nums` 中的整数分配给这些顾客，且满足：
+
+*   第 `i` 位顾客 **恰好** 有 `quantity[i]` 个整数。
+*   第 `i` 位顾客拿到的整数都是 **相同的** 。
+*   每位顾客都满足上述两个要求。
+
+如果你可以分配 `nums` 中的整数满足上面的要求，那么请返回 `true` ，否则返回 `false` 。
+
+**示例 1：**
+
+**输入：**nums = \[1,2,3,4\], quantity = \[2\]
+**输出：**false
+**解释：**第 0 位顾客没办法得到两个相同的整数。
+
+**示例 2：**
+
+**输入：**nums = \[1,2,3,3\], quantity = \[2\]
+**输出：**true
+**解释：**第 0 位顾客得到 \[3,3\] 。整数 \[1,2\] 都没有被使用。
+
+**示例 3：**
+
+**输入：**nums = \[1,1,2,2\], quantity = \[2,2\]
+**输出：**true
+**解释：**第 0 位顾客得到 \[1,1\] ，第 1 位顾客得到 \[2,2\] 。
+
+**提示：**
+
+*   `n == nums.length`
+*   `1 <= n <= 105`
+*   `1 <= nums[i] <= 1000`
+*   `m == quantity.length`
+*   `1 <= m <= 10`
+*   `1 <= quantity[i] <= 105`
+*   `nums` 中至多有 `50` 个不同的数字。
+
+[https://leetcode.cn/problems/distribute-repeating-integers/description/](https://leetcode.cn/problems/distribute-repeating-integers/description/)
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+class Solution { // 用例[1,1,1,1,2,2,2,2,2,2,2,2,2] [3,3,3,4]干碎我的贪心解法
+    public boolean canDistribute(int[] nums, int[] quantity) {
+        HashMap<Integer, Integer> cnt1 = new HashMap<>();
+        TreeMap<Integer, Integer> freq1 = new TreeMap<>();
+        for (int x : nums) {
+            cnt1.merge(x, 1, Integer::sum);
+        }
+        for (int x : cnt1.keySet()) {
+            freq1.merge(cnt1.get(x), 1, Integer::sum);
+        }
+        for (int x : quantity) {
+            Map.Entry<Integer, Integer> entry = freq1.ceilingEntry(x);
+            if (entry == null || entry.getValue() == 0) {
+                return false;
+            } else if (entry.getValue() == 1) {
+                freq1.remove(entry.getKey());
+                if (entry.getKey() != x) {
+                    freq1.put(entry.getKey() - x, 1);
+                }
+            } else if (entry.getValue() > 1) {
+                freq1.put(entry.getKey(), entry.getValue() - 1);
+                if (entry.getKey() != x) {
+                    freq1.put(entry.getKey() - x, 1);
+                }
+            }
+        }
+        return true;
+    }
+}
+```
+
+```java
+// 状压dp
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 329ms
+    // 未来避免重复的选择，可以利用0-1背包的选择
+    public boolean canDistribute(int[] nums, int[] quantity) {
+        int m = quantity.length;
+        int mask = 1<<m;
+        int[] sum = new int[mask];
+        for(int s = 1;s < mask;s++){
+            for (int i = 0; i < m; i++) {
+                if (((s >> i) & 1) == 0) {
+                    continue;
+                }
+                sum[s] += quantity[i];
+            }
+        }
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        for (int x : nums) {
+            cnt.merge(x, 1, Integer::sum);
+        }
+        int n = cnt.size();
+        boolean[][] dp = new boolean[n + 1][mask]; // 表示考虑前i个数构成情况为s的boolean
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = true;
+        }
+        int i = 0;
+        for (int x : cnt.keySet()) { // 这里转成数组会快不少
+            for (int s = 1; s < mask; s++) {
+                if (dp[i][s]) {
+                    dp[i + 1][s] = true;
+                    continue;
+                }
+                for (int p = s; p != 0; p = (p - 1) & s) {
+                    if (sum[p] <= cnt.get(x) && dp[i][s ^ p]) { // 时间瓶颈：cnt.get(x)
+                        dp[i + 1][s] = true;
+                    }
+                }
+            }
+            i++;
+        }
+        return dp[n][mask - 1];
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 55ms 
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        solution.canDistribute(new int[]{1, 1, 2, 2}, new int[]{2, 2});
+    }
+    // 未来避免重复的选择，可以利用0-1背包的选择
+    public boolean canDistribute(int[] nums, int[] quantity) {
+        int m = quantity.length;
+        int mask = 1<<m;
+        int[] sum = new int[mask];
+        for(int s = 1;s < mask;s++){
+            for (int i = 0; i < m; i++) {
+                if (((s >> i) & 1) == 0) {
+                    continue;
+                }
+                sum[s] += quantity[i];
+            }
+        }
+        HashMap<Integer, Integer> cnt = new HashMap<>();
+        for (int x : nums) {
+            cnt.merge(x, 1, Integer::sum);
+        }
+        int n = cnt.size();
+        boolean[][] dp = new boolean[n + 1][mask]; // 表示考虑前i个数构成情况为s的boolean
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = true;
+        }
+        int i = 0;
+        int[] cc = new int[n];
+        for (int x : cnt.values()) {
+            cc[i++] = x;
+        }
+        for (i = 0; i < n; i++) {
+            for (int s = 1; s < mask; s++) {
+                if (dp[i][s]) {
+                    dp[i + 1][s] = true;
+                    continue;
+                }
+                for (int p = s; p != 0; p = (p - 1) & s) {
+                    if (sum[p] <= cc[i] && dp[i][s ^ p]) {
+                        dp[i + 1][s] = true;
+                    }
+                }
+            }
+        }
+        return dp[n][mask - 1];
+    }
+}
+```
+

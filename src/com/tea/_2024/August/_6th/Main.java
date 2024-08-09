@@ -1,4 +1,4 @@
-package com.tea.August_6th_2024;
+package com.tea._2024.August._6th;
 
 /**
  * @author Minus
