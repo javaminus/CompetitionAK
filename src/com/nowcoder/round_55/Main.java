@@ -1,3 +1,9 @@
+package com.nowcoder.round_55;
+
+/**
+ * @author Minus
+ * @date 2024/8/13 14:59
+ */
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
@@ -130,14 +136,118 @@ public class Main {
     public static void main(String[] args) throws IOException {  // 网格图用dfs你也是疯了，直接建队列，bfs呀！！！
         int T = 1;
         while (T-- > 0) {
-            solve();
+            // solve();
         }
         sc.bw.flush();
         sc.bw.close();
     }
     static String[] ss;
 
-    private static void solve() throws IOException {
+    // https://ac.nowcoder.com/acm/contest/87656/D
+    private static void solveD() throws IOException {
+        int n = sc.nextInt();
+        int[][] grid = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = Integer.parseInt(ss[j]);
+            }
+        }
+        ArrayList<int[]>[][] edges = new ArrayList[n][n]; // 表示两点之间的连通 这里是虫洞的传送点位
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                edges[i][j] = new ArrayList<>();
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    continue;
+                }
+                if (j == 0 || grid[i][j - 1] == 1) {
+                    int t = j + 1;
+                    while (t < n) {
+                        if (grid[i][t] == 1) {
+                            break;
+                        }
+                        t++;
+                    }
+                    if (t - 1 != j) {
+                        edges[i][j].add(new int[]{i, t - 1});
+                        edges[i][t - 1].add(new int[]{i, j});
+                    }
+                    j = t; // j移动到墙的位置
+                }
+            }
+        }
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < n; i++) {
+                if (grid[i][j] == 1) {
+                    continue;
+                }
+                if (i == 0 || grid[i - 1][j] == 1) {
+                    int t = i + 1;
+                    while (t < n) {
+                        if (grid[t][j] == 1) {
+                            break;
+                        }
+                        t++;
+                    }
+                    if (t - 1 != i) {
+                        edges[i][j].add(new int[]{t - 1, j});
+                        edges[t - 1][j].add(new int[]{i, j});
+                    }
+                    i = t;
+                }
+            }
+        }
+        // PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->a[2] - b[2]);
+        PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
+            @Override
+            public int compare(int[] a, int[] b) {
+                return Integer.compare(a[2], b[2]);
+            }
+        });
+        int[][] dist = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dist[i], INF);
+        }
+        dist[0][0] = 0;
+        pq.add(new int[]{0, 0, 0});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int x = poll[0], y = poll[1], z = poll[2];
+            if (x == n - 1 && y == n - 1) {
+                sc.print(z);
+                return;
+            }
+            if (dist[x][y] < z) {
+                continue;
+            }
+            for (int[] d : dirs) {
+                int newX = x + d[0], newY = y + d[1];
+                if (newX >= 0 && newY >= 0 && newX < n && newY < n && grid[newX][newY] == 0) {
+                    if (dist[newX][newY] > z + 1) {
+                        dist[newX][newY] = z + 1;
+                        pq.offer(new int[]{newX, newY, z + 1});
+                    }
+                }
+            }
+            for (int[] d : edges[x][y]) {
+                int newX = d[0], newY = d[1];
+                if (newX >= 0 && newY >= 0 && newX < n && newY < n) {
+                    if (dist[newX][newY] > z + 1) {
+                        dist[newX][newY] = z + 1;
+                        pq.offer(new int[]{newX, newY, z + 1});
+                    }
+                }
+            }
+        }
+        sc.print(-1);
+    }
+
+    // https://ac.nowcoder.com/acm/contest/87656/E
+    private static void solveE() throws IOException {
         int n = sc.nextInt();
         ss = sc.nextLine().split(" ");
         int[] nums = new int[n];
@@ -160,7 +270,6 @@ public class Main {
         }
         sc.print(ans);
     }
-
     private static long power(long a,long b,int p){ // 求 (a ^ b) % p
         long ans = 1;
         while (b > 0) {
@@ -172,5 +281,7 @@ public class Main {
         }
         return ans;
     }
+
+
 
 }

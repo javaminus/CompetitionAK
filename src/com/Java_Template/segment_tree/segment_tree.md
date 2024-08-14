@@ -1957,3 +1957,254 @@ public class Main {                                                             
 }
 ```
 
+2940\. 找到 Alice 和 Bob 可以相遇的建筑
+-----------------------------
+
+给你一个下标从 **0** 开始的正整数数组 `heights` ，其中 `heights[i]` 表示第 `i` 栋建筑的高度。
+
+如果一个人在建筑 `i` ，且存在 `i < j` 的建筑 `j` 满足 `heights[i] < heights[j]` ，那么这个人可以移动到建筑 `j` 。
+
+给你另外一个数组 `queries` ，其中 `queries[i] = [ai, bi]` 。第 `i` 个查询中，Alice 在建筑 `ai` ，Bob 在建筑 `bi` 。
+
+请你能返回一个数组 `ans` ，其中 `ans[i]` 是第 `i` 个查询中，Alice 和 Bob 可以相遇的 **最左边的建筑** 。如果对于查询 `i` ，Alice 和 Bob 不能相遇，令 `ans[i]` 为 `-1` 。
+
+**示例 1：**
+
+**输入：**heights = \[6,4,8,5,2,7\], queries = \[\[0,1\],\[0,3\],\[2,4\],\[3,4\],\[2,2\]\]
+**输出：**\[2,5,-1,5,2\]
+**解释：**第一个查询中，Alice 和 Bob 可以移动到建筑 2 ，因为 heights\[0\] < heights\[2\] 且 heights\[1\] < heights\[2\] 。
+第二个查询中，Alice 和 Bob 可以移动到建筑 5 ，因为 heights\[0\] < heights\[5\] 且 heights\[3\] < heights\[5\] 。
+第三个查询中，Alice 无法与 Bob 相遇，因为 Alice 不能移动到任何其他建筑。
+第四个查询中，Alice 和 Bob 可以移动到建筑 5 ，因为 heights\[3\] < heights\[5\] 且 heights\[4\] < heights\[5\] 。
+第五个查询中，Alice 和 Bob 已经在同一栋建筑中。
+对于 ans\[i\] != -1 ，ans\[i\] 是 Alice 和 Bob 可以相遇的建筑中最左边建筑的下标。
+对于 ans\[i\] == -1 ，不存在 Alice 和 Bob 可以相遇的建筑。
+
+**示例 2：**
+
+**输入：**heights = \[5,3,8,2,6,1,4,6\], queries = \[\[0,7\],\[3,5\],\[5,2\],\[3,0\],\[1,6\]\]
+**输出：**\[7,6,-1,4,6\]
+**解释：**第一个查询中，Alice 可以直接移动到 Bob 的建筑，因为 heights\[0\] < heights\[7\] 。
+第二个查询中，Alice 和 Bob 可以移动到建筑 6 ，因为 heights\[3\] < heights\[6\] 且 heights\[5\] < heights\[6\] 。
+第三个查询中，Alice 无法与 Bob 相遇，因为 Bob 不能移动到任何其他建筑。
+第四个查询中，Alice 和 Bob 可以移动到建筑 4 ，因为 heights\[3\] < heights\[4\] 且 heights\[0\] < heights\[4\] 。
+第五个查询中，Alice 可以直接移动到 Bob 的建筑，因为 heights\[1\] < heights\[6\] 。
+对于 ans\[i\] != -1 ，ans\[i\] 是 Alice 和 Bob 可以相遇的建筑中最左边建筑的下标。
+对于 ans\[i\] == -1 ，不存在 Alice 和 Bob 可以相遇的建筑。
+
+**提示：**
+
+*   `1 <= heights.length <= 5 * 104`
+*   `1 <= heights[i] <= 109`
+*   `1 <= queries.length <= 5 * 104`
+*   `queries[i] = [ai, bi]`
+*   `0 <= ai, bi <= heights.length - 1`
+
+[https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/](https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/)
+
+```java
+class Solution { // 单调栈写法，不过遇到极端情况会超时
+    public int[] leftmostBuildingQueries(int[] heights, int[][] queries) {
+        ArrayDeque<Integer> deque = new ArrayDeque<>();
+        int n = heights.length;
+        int[] next = new int[n];
+        Arrays.fill(next, -1);
+        for (int i = 0; i < n; i++) {
+            while (!deque.isEmpty() && heights[deque.peekLast()] < heights[i]) {
+                next[deque.pollLast()] = i;
+            }
+            deque.addLast(i);
+        }
+        int[] ans = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int a = queries[i][0];
+            int b = queries[i][1];
+            if (a == b) {
+                ans[i] = a;
+            } else if ((a > b && heights[a] > heights[b]) || (b > a && heights[b] > heights[a])) {
+                //a或b直接比对方更大，对方可以直接来
+                ans[i] = Math.max(a, b);
+            } else {
+                //这里要找比a和b更大的
+                int maxIdx = (next[a] != -1 && next[b] != -1) ? Math.max(next[a], next[b]) : -1;
+                int maxHeight = Math.max(heights[a], heights[b]) + 1;
+                while (maxIdx != -1 && heights[maxIdx] < maxHeight) {
+                    maxIdx = next[maxIdx];
+                }
+                ans[i] = maxIdx;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution { // 离线 + 最小堆
+    public int[] leftmostBuildingQueries(int[] heights, int[][] queries) {
+        int[] ans = new int[queries.length];
+        Arrays.fill(ans, -1);
+        List<int[]>[] qs = new ArrayList[heights.length];
+        Arrays.setAll(qs, i -> new ArrayList<>());
+
+        for (int i = 0; i < queries.length; i++) {
+            int a = queries[i][0];
+            int b = queries[i][1];
+            if (a > b) {
+                int tmp = a;
+                a = b;
+                b = tmp; // 保证 a <= b
+            }
+            if (a == b || heights[a] < heights[b]) {
+                ans[i] = b; // a 直接跳到 b
+            } else {
+                qs[b].add(new int[]{heights[a], i}); // 离线询问
+            }
+        }
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        for (int i = 0; i < heights.length; i++) {
+            while (!pq.isEmpty() && pq.peek()[0] < heights[i]) {
+                // 堆顶的 heights[a] 可以跳到 heights[i]
+                ans[pq.poll()[1]] = i;
+            }
+            for (int[] q : qs[i]) {
+                pq.offer(q); // 后面再回答
+            }
+        }
+        return ans;
+    }
+}
+
+作者：灵茶山艾府
+链接：https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/solutions/2533058/chi-xian-zui-xiao-dui-pythonjavacgo-by-e-9ewj/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+```java
+class Solution { // 离线 + 单调栈二分
+    public int[] leftmostBuildingQueries(int[] heights, int[][] queries) {
+        int n = heights.length;
+        int[] ans = new int[queries.length];
+        List<int[]>[] qs = new ArrayList[n];
+        Arrays.setAll(qs, i -> new ArrayList<>());
+
+        for (int i = 0; i < queries.length; i++) {
+            int a = queries[i][0];
+            int b = queries[i][1];
+            if (a > b) {
+                int tmp = a;
+                a = b;
+                b = tmp; // 保证 a <= b
+            }
+            if (a == b || heights[a] < heights[b]) {
+                ans[i] = b; // a 直接跳到 b
+            } else {
+                qs[b].add(new int[]{heights[a], i}); // 离线询问
+            }
+        }
+
+        int[] st = new int[n];
+        int top = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            for (int[] q : qs[i]) {
+                ans[q[1]] = binarySearch(heights, st, top, q[0]);
+            }
+            while (top > 0 && heights[i] >= heights[st[top - 1]]) {
+                top--;
+            }
+            st[top++] = i;
+        }
+        return ans;
+    }
+
+    // 返回 st 中最后一个 > x 的高度的下标
+    // 如果不存在，返回 -1
+    // https://www.bilibili.com/video/BV1AP41137w7/
+    private int binarySearch(int[] heights, int[] st, int right, int x) {
+        int left = -1; // 开区间 (left, right)
+        while (left + 1 < right) { // 开区间不为空
+            int mid = (left + right) >>> 1;
+            if (heights[st[mid]] > x) {
+                left = mid; // 范围缩小到 (mid, right)
+            } else {
+                right = mid; // 范围缩小到 (left, mid)
+            }
+        }
+        return left < 0 ? -1 : st[left];
+    }
+}
+
+作者：灵茶山艾府
+链接：https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/solutions/2533058/chi-xian-zui-xiao-dui-pythonjavacgo-by-e-9ewj/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+```java
+class Solution { // 在线 + 线段树
+    public int[] leftmostBuildingQueries(int[] heights, int[][] queries) {
+        int n = heights.length;
+        mx = new int[2 << (Integer.SIZE - Integer.numberOfLeadingZeros(n))];
+        build(1, 0, n - 1, heights);
+
+        int[] ans = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int a = queries[i][0];
+            int b = queries[i][1];
+            if (a > b) {
+                int tmp = a;
+                a = b;
+                b = tmp; // 保证 a <= b
+            }
+            if (a == b || heights[a] < heights[b]) {
+                ans[i] = b; // a 直接跳到 b
+            } else {
+                // 线段树二分，找 [b+1,n-1] 中的第一个 > heights[a] 的位置
+                ans[i] = query(1, 0, n - 1, b + 1, heights[a]);
+            }
+        }
+        return ans;
+    }
+
+    private int[] mx;
+
+    // 用 heights 初始化线段树，维护区间最大值
+    private void build(int o, int l, int r, int[] heights) {
+        if (l == r) {
+            mx[o] = heights[l];
+            return;
+        }
+        int m = (l + r) / 2;
+        build(o * 2, l, m, heights);
+        build(o * 2 + 1, m + 1, r, heights);
+        mx[o] = Math.max(mx[o * 2], mx[o * 2 + 1]);
+    }
+
+    // 返回 [L,n-1] 中第一个 > v 的值的下标
+    // 如果不存在，返回 -1
+    private int query(int o, int l, int r, int L, int v) {
+        if (mx[o] <= v) { // 区间最大值 <= v
+            return -1; // 没有 > v 的数
+        }
+        if (l == r) { // 找到了
+            return l;
+        }
+        int m = (l + r) / 2;
+        if (L <= m) {
+            int pos = query(o * 2, l, m, L, v); // 递归左子树
+            if (pos >= 0) { // 找到了
+                return pos;
+            }
+        }
+        return query(o * 2 + 1, m + 1, r, L, v); // 递归右子树
+    }
+}
+
+作者：灵茶山艾府
+链接：https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/solutions/2533058/chi-xian-zui-xiao-dui-pythonjavacgo-by-e-9ewj/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+

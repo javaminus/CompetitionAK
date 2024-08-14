@@ -1,7 +1,18 @@
+package com.lanqiao.game16;
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
+/**
+ * @author Minus
+ * @date 2024/8/11 0:20
+ *
+ * 蓝桥杯强者赛16
+ */
 public class Main {
     private final static int INF = Integer.MAX_VALUE;
     private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
@@ -126,51 +137,96 @@ public class Main {
     }
 
     static Read sc = new Read();
-    private static final int Mod = (int) 1e9 + 7;
-    public static void main(String[] args) throws IOException {  // 网格图用dfs你也是疯了，直接建队列，bfs呀！！！
+    private static int Mod = (int) 1e9 + 7;
+    public static void main(String[] args) throws IOException {
         int T = 1;
         while (T-- > 0) {
-            solve();
+            // solve();
         }
         sc.bw.flush();
         sc.bw.close();
     }
-    static String[] ss;
 
-    private static void solve() throws IOException {
+
+    // https://www.lanqiao.cn/problems/19767/learning/?contest_id=199
+    private static void solveA() throws IOException {
         int n = sc.nextInt();
-        ss = sc.nextLine().split(" ");
-        int[] nums = new int[n];
+        String[] ss = sc.nextLine().split(" ");
+        long[][] nums = new long[n][2];
         for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
+            nums[i][0] = Long.parseLong(ss[i]);
         }
-        int[][] dp = new int[n + 1][10]; // 表示以第i项结尾的末尾数字是j的数量
-        long ans = 0;
-        dp[0][1] = 1;
-        for (int i = 1; i <= n; i++) {
-            int x = nums[i - 1];
-            for (int j = 0; j < 10; j++) {
-                dp[i][j] = (dp[i][j] + dp[i - 1][j]) % Mod;
-                dp[i][j * x % 10] = (dp[i][j * x % 10] + dp[i - 1][j]) % Mod; //以a[i]结尾的序列
-                if (j * x % 10 == 6) {
-                    //以a[i]结尾的序列乘积贡献答案
-                    ans = (ans + (long) dp[i - 1][j] * power(2, n - i, Mod) % Mod) % Mod;
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i][1] = Long.parseLong(ss[i]);
+        }
+        Arrays.sort(nums, (a, b) -> Math.toIntExact(a[0] - b[0]));
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            if (i == 0 && (i + 1 < n && ((nums[i][0] + nums[i][1]) < nums[i + 1][0]))) {
+                ans++;
+            } else if (i == n - 1 && (i - 1 >= 0 && ((nums[i][0] - nums[i][1]) > nums[i - 1][0]))) {
+                ans++;
+            } else {
+                if (i > 0 && i < n - 1 && (nums[i][0] + nums[i][1] < nums[i + 1][0]) && (nums[i][0] - nums[i][1]) > nums[i - 1][0]) {
+                    ans++;
                 }
             }
         }
         sc.print(ans);
+
     }
 
-    private static long power(long a,long b,int p){ // 求 (a ^ b) % p
-        long ans = 1;
-        while (b > 0) {
-            if ((b & 1) == 1) {
-                ans = (ans * a) % p;
-            }
-            a = (a * a) % p;
-            b >>= 1;
+    // https://www.lanqiao.cn/problems/19766/learning/?contest_id=199
+    static int[] ans, degree;
+    private static void solveB() throws IOException {
+        int n = sc.nextInt();
+        int[][] nums = new int[n - 1][2];
+        for (int i = 0; i < n - 1; i++) {
+            nums[i][0] = sc.nextInt();
+            nums[i][1] = sc.nextInt();
         }
-        return ans;
+        List<Integer>[] g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        degree = new int[n];
+        for (int[] e : nums) {
+            int x = e[0] - 1, y = e[1] - 1;
+            g[x].add(y);
+            g[y].add(x);
+            degree[x]++;
+            degree[y]++;
+        }
+        ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            for (int x : g[i]) {
+                ans[i] += degree[x] - 1;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            sc.print(ans[i] + " ");
+        }
+
+    }
+
+    // https://www.lanqiao.cn/problems/19768/learning/?contest_id=199
+    private static void solveD() throws IOException {
+        int n = sc.nextInt();
+        int k = sc.nextInt();
+        long[] dp = new long[n + 1];
+        long[] prefixSum = new long[n + 1];
+        dp[0] = 1;
+        prefixSum[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            if (i >= k) {
+                dp[i] = prefixSum[i - k];
+            }
+            prefixSum[i] = (prefixSum[i - 1] + dp[i]) % Mod;
+        }
+        long ans = 0;
+        for (int i = 0; i <= n; i++) {
+            ans = (ans + dp[i]) % Mod;
+        }
+        sc.print(ans);
     }
 
 }

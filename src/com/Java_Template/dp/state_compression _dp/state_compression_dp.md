@@ -2159,3 +2159,240 @@ class Solution { // 灵神写法
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+2572\. 无平方子集计数
+--------------
+
+给你一个正整数数组 `nums` 。
+
+如果数组 `nums` 的子集中的元素乘积是一个 **无平方因子数** ，则认为该子集是一个 **无平方** 子集。
+
+**无平方因子数** 是无法被除 `1` 之外任何平方数整除的数字。
+
+返回数组 `nums` 中 **无平方** 且 **非空** 的子集数目。因为答案可能很大，返回对 `109 + 7` 取余的结果。
+
+`nums` 的 **非空子集** 是可以由删除 `nums` 中一些元素（可以不删除，但不能全部删除）得到的一个数组。如果构成两个子集时选择删除的下标不同，则认为这两个子集不同。
+
+**示例 1：**
+
+**输入：**nums = \[3,4,4,5\]
+**输出：**3
+**解释：**示例中有 3 个无平方子集：
+- 由第 0 个元素 \[3\] 组成的子集。其元素的乘积是 3 ，这是一个无平方因子数。
+- 由第 3 个元素 \[5\] 组成的子集。其元素的乘积是 5 ，这是一个无平方因子数。
+- 由第 0 个和第 3 个元素 \[3,5\] 组成的子集。其元素的乘积是 15 ，这是一个无平方因子数。
+  可以证明给定数组中不存在超过 3 个无平方子集。
+
+**示例 2：**
+
+**输入：**nums = \[1\]
+**输出：**1
+**解释：**示例中有 1 个无平方子集：
+- 由第 0 个元素 \[1\] 组成的子集。其元素的乘积是 1 ，这是一个无平方因子数。
+  可以证明给定数组中不存在超过 1 个无平方子集。
+
+**提示：**
+
+*   `1 <= nums.length <= 1000`
+*   `1 <= nums[i] <= 30`
+
+[https://leetcode.cn/problems/count-the-number-of-square-free-subsets/description/](https://leetcode.cn/problems/count-the-number-of-square-free-subsets/description/)
+
+```java
+class Solution { // 暴力回溯，WA,因为sum的值后面会特别大，直接超出long类型
+    private static int Mod = (int) 1e9 + 7;
+    int ans;
+    public int squareFreeSubsets(int[] nums) {
+        ans = 0;
+        backTrack(-1, nums, 1);
+        return ans;
+    }
+
+    private void backTrack(int index, int[] nums, long sum) {
+        // 枚举子集
+        if (index !=-1 && sum != 0 && check(sum)) {
+            ans++;
+            ans %= Mod;
+        }
+        for (int i = index + 1; i < nums.length; i++) {
+            backTrack(i, nums, sum * nums[i]);
+        }
+    }
+
+    private boolean check(long x) {
+        for (int i = 2; (long) i * i <= x; i++) {
+            if (x % ((long) i * i) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+> 使用因子优化，用hash表存储因子的出现次数
+
+```java
+import java.util.*;
+
+class Solution { // 这个回溯代码超时，看来只能用状压dp了
+//    private List<List<Integer>> allList = new ArrayList<>();
+//    private List<Integer> tmp = new ArrayList<>();
+    private static int Mod = (int) 1e9 + 7;
+    int ans;
+    HashSet<Integer> cnt = new HashSet<>();
+    public int squareFreeSubsets(int[] nums) {
+        ans = -1;
+        backTrack(nums, -1);
+        // System.out.println(allList);
+        return ans;
+    }
+
+    private void backTrack(int[] nums, int index) {
+//        if (index != -1) {
+//            allList.add(new ArrayList<>(tmp));
+//        }
+        ans++;
+        ans %= Mod;
+        next:
+        for (int i = index + 1; i < nums.length; i++) {
+            if (check(nums[i])) {
+                // 分解因子
+                Set<Integer> parseNum = parseNum(nums[i]);
+                HashSet<Integer> t = new HashSet<>();
+                for (int x : parseNum) {
+                    if (cnt.contains(x)) {
+                        continue next;
+                    }else{
+                        t.add(x);
+                    }
+                }
+                cnt.addAll(t);
+                // tmp.add(nums[i]);
+                backTrack(nums, i);
+                // tmp.remove(tmp.size() - 1);
+                for (int x : parseNum) {
+                    cnt.remove(x);
+                }
+            }
+        }
+    }
+
+    private boolean check(int x) {
+        for (int i = 2; i * i <= x; i++) {
+            if (x % (i * i) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Set<Integer> parseNum(int num) {
+        Set<Integer> set = new HashSet<>();
+        for (int i = 2; i <= num; i++) {
+            if (num % i == 0) {
+                set.add(i);
+            }
+        }
+        return set;
+    }
+}
+```
+
+```java
+// 状压dp
+class Solution { // 方法一：转换成 0-1 背包方案数
+    private static long Mod = (long) 1e9 + 7;
+    private static int[] prime = new int[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    private static int MX = 31;
+    private static int[] g = new int[MX];
+    static {
+        for (int i = 2; i < MX; i++) {
+            for (int j = 0; j < 10; j++) {
+                int p = prime[j];
+                if (i % p == 0) {
+                    if (i % (p * p) == 0) { // 有平方因子
+                        g[i] = -1;
+                        break;
+                    }
+                    g[i] |= (1 << j); // 把j加入集合
+                }
+            }
+        }
+    }
+    public int squareFreeSubsets(int[] nums) { // 枚举10个质数组成的方案数
+        int m = 1 << 10; // 10个质数
+        long[] dp = new long[m];
+        dp[0] = 1;
+        for (int x : nums) {
+            int mask = g[x];
+            if (mask >= 0) {
+                for (int j = m - 1; j >= mask; j--) {
+                    if ((j | mask) == j) { // mask是j的子集
+                        dp[j] = (dp[j] + dp[j ^ mask]) % Mod;
+                    }
+                }
+            }
+        }
+        long ans = 0;
+        for (long x : dp) {
+            ans += x;
+            ans %= Mod;
+        }
+        return (int) ((ans - 1 + Mod) % Mod);
+    }
+}
+```
+
+![1723650985313](assets/1723650985313.png)
+
+```java
+class Solution {
+    private static final int[] PRIMES = new int[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    private static final int MOD = (int) 1e9 + 7, MX = 30, N_PRIMES = PRIMES.length, M = 1 << N_PRIMES;
+    private static final int[] SF_TO_MASK = new int[MX + 1]; // SF_TO_MASK[i] 为 i 的质因子集合（用二进制表示）
+
+    static {
+        for (int i = 2; i <= MX; ++i)
+            for (int j = 0; j < N_PRIMES; ++j) {
+                int p = PRIMES[j];
+                if (i % p == 0) {
+                    if (i % (p * p) == 0) { // 有平方因子
+                        SF_TO_MASK[i] = -1;
+                        break;
+                    }
+                    SF_TO_MASK[i] |= 1 << j; // 把 j 加到集合中
+                }
+            }
+    }
+
+    public int squareFreeSubsets(int[] nums) {
+        var cnt = new int[MX + 1];
+        int pow2 = 1;
+        for (int x : nums)
+            if (x == 1) pow2 = pow2 * 2 % MOD;
+            else ++cnt[x];
+
+        var f = new long[M]; // f[j] 表示恰好组成质数集合 j 的方案数
+        f[0] = pow2; // 用 1 组成空质数集合的方案数
+        for (int x = 2; x <= MX; ++x) {
+            int mask = SF_TO_MASK[x], c = cnt[x];
+            if (mask > 0 && c > 0) {
+                int other = (M - 1) ^ mask, j = other; // mask 的补集 other
+                do { // 枚举 other 的子集 j
+                    f[j | mask] = (f[j | mask] + f[j] * cnt[x]) % MOD; // 不选 mask + 选 mask
+                    j = (j - 1) & other;
+                } while (j != other);
+            }
+        }
+        var ans = -1L; // 去掉空集（nums 的空子集）
+        for (var v : f) ans += v;
+        return (int) (ans % MOD);
+    }
+}
+
+作者：灵茶山艾府
+链接：https://leetcode.cn/problems/count-the-number-of-square-free-subsets/solutions/2121032/liang-chong-xie-fa-01bei-bao-zi-ji-zhuan-3ooi/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
