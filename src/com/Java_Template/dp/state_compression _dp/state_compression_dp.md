@@ -2396,3 +2396,278 @@ class Solution {
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+# §9.5 其他状压 DP
+
+698\. 划分为k个相等的子集
+----------------
+
+给定一个整数数组  `nums` 和一个正整数 `k`，找出是否有可能把这个数组分成 `k` 个非空子集，其总和都相等。
+
+**示例 1：**
+
+**输入：** nums = \[4, 3, 2, 3, 5, 2, 1\], k = 4
+**输出：** True
+**说明：** 有可能将其分成 4 个子集（5），（1,4），（2,3），（2,3）等于总和。
+
+**示例 2:**
+
+**输入:** nums = \[1,2,3,4\], k = 3
+**输出:** false
+
+**提示：**
+
+*   `1 <= k <= len(nums) <= 16`
+*   `0 < nums[i] < 10000`
+*   每个元素的频率在 `[1,4]` 范围内
+
+[https://leetcode.cn/problems/partition-to-k-equal-sum-subsets/description/](https://leetcode.cn/problems/partition-to-k-equal-sum-subsets/description/)
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public boolean canPartitionKSubsets(int[] nums, int k) {
+        int n = nums.length;
+        int mask = 1 << n;
+        int sum = 0;
+        for (int x : nums) {
+            sum += x;
+        }
+        if (sum % k != 0) {
+            return false;
+        }
+        int ave = sum / k;
+        int[] dp = new int[mask]; // dp[s]表示状态为s时的和
+        Arrays.fill(dp, -1);
+        dp[0] = 0;
+        for (int s = 0; s < mask; s++) {
+            for (int i = 0; i < n; i++) {
+                // dp[i] = (dp[prev] + nums[i]) % ave
+                if (((s >> i) & 1) == 1) {
+                    int prev = s - (1 << i);
+                    if (dp[prev] >= 0 && dp[prev] + nums[i] <= ave) { // 全靠这个dp[prev] + nums[i] <= ave
+                        dp[s] = (dp[prev] + nums[i]) % ave; // 这里的取Mod太巧妙了
+                    }
+                }
+            }
+        }
+        return dp[mask - 1] == 0;
+    }
+}
+```
+
+1411\. 给 N x 3 网格图涂色的方案数
+------------------------
+
+你有一个 `n x 3` 的网格图 `grid` ，你需要用 **红，黄，绿** 三种颜色之一给每一个格子上色，且确保相邻格子颜色不同（也就是有相同水平边或者垂直边的格子颜色不同）。
+
+给你网格图的行数 `n` 。
+
+请你返回给 `grid` 涂色的方案数。由于答案可能会非常大，请你返回答案对 `10^9 + 7` 取余的结果。
+
+**示例 1：**
+
+**输入：**n = 1
+**输出：**12
+**解释：**总共有 12 种可行的方法：
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/04/12/e1.png)
+
+**示例 2：**
+
+**输入：**n = 2
+**输出：**54
+
+**示例 3：**
+
+**输入：**n = 3
+**输出：**246
+
+**示例 4：**
+
+**输入：**n = 7
+**输出：**106494
+
+**示例 5：**
+
+**输入：**n = 5000
+**输出：**30228214
+
+**提示：**
+
+*   `n == grid.length`
+*   `grid[i].length == 3`
+*   `1 <= n <= 5000`
+
+[https://leetcode.cn/problems/number-of-ways-to-paint-n-3-grid/](https://leetcode.cn/problems/number-of-ways-to-paint-n-3-grid/)
+
+```java
+import java.util.HashMap;
+
+class Solution { // 暴力写法，超时
+    private static int Mod = (int) 1e9 + 7;
+    int n;
+    HashMap<int[],Integer> memo;
+    public int numOfWays(int n) {
+        memo = new HashMap<>();
+        this.n = n;
+        return dfs(new int[]{-1, -1, -1, 0});
+    }
+
+    private int dfs(int[] pre) {
+        int index = pre[3]; // pre3是index
+        if (index == n) {
+            return 1;
+        }
+        if (memo.containsKey(pre)) {
+            return memo.get(pre);
+        }
+        int res = 0;
+        for (int i = 0; i < 3; i++) {
+            if (pre[0] == i) {
+                continue;
+            }
+            for (int j = 0; j < 3; j++) {
+                if (pre[1] == j || j == i) {
+                    continue;
+                }
+                for (int k = 0; k < 3; k++) {
+                    if (pre[2] == k || k == j) {
+                        continue;
+                    }
+                    res += dfs(new int[]{i, j, k, index + 1});
+                    res %= Mod;
+                }
+            }
+        }
+        memo.put(pre, res);
+        return res;
+    }
+}
+```
+
+> 将目光聚集在行上
+
+```java
+import java.util.ArrayList;
+
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int numOfWays(int n) {
+        // 预处理所有满足条件的type
+        ArrayList<Integer> types = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                for (int k = 0; k < 3; k++) {
+                    if (i != j && j != k) {
+                        types.add(i * 9 + j * 3 + k); // 转换成三进制
+                    }
+                }
+            }
+        }
+        int typeCnt = types.size();
+        // 预处理出所有可以作为相邻行的 type 对
+        int[][] related = new int[typeCnt][typeCnt];
+        for (int i = 0; i < typeCnt; i++) {
+            int x1 = types.get(i) / 9, x2 = types.get(i) / 3 % 3, x3 = types.get(i) % 3;
+            for (int j = 0; j < typeCnt; j++) {
+                int y1 = types.get(j) / 9, y2 = types.get(j) / 3 % 3, y3 = types.get(j) % 3;
+                if (x1 != y1 && x2 != y2 && x3 != y3) {
+                    related[i][j] = 1;
+                }
+            }
+        }
+        int[][] dp = new int[n + 1][typeCnt];
+        // 边界情况，第一行可以使用任何 type
+        for (int i = 0; i < typeCnt; ++i) {
+            dp[1][i] = 1;
+        }
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < typeCnt; j++) {
+                for (int k = 0; k < typeCnt; k++) {
+                    // f[i][j] 等于所有 f[i - 1][k] 的和
+                    // 其中 k 和 j 可以作为相邻的行
+                    if (related[k][j] != 0) {
+                        dp[i][j] += dp[i - 1][k];
+                        dp[i][j] %= Mod;
+                    }
+                }
+            }
+        }
+        // 最终所有的 f[n][...] 之和即为答案
+        int ans = 0;
+        for (int i = 0; i < typeCnt; i++) {
+            ans += dp[n][i];
+            ans %= Mod;
+        }
+        return ans;
+    }
+}
+```
+
+```java
+class Solution { // 数学
+    private static int Mod = (int) 1e9 + 7;
+    public int numOfWays(int n) {
+        long f0 = 6, f1 = 6;
+        for (int i = 2; i <= n; i++) {
+            long newF0 = (f0 * 2 + f1 * 2) % Mod;
+            long newF1 = (f0 * 2 + f1 * 3) % Mod;
+            f0 = newF0;
+            f1 = newF1;
+        }
+        return (int) ((f0 + f1) % Mod);
+    }
+}
+```
+
+```java
+// 矩阵快速幂优化
+class Solution {
+    private static int Mod = (int) 1e9 + 7;
+    public int numOfWays(int n) {
+        long[][] a = {{6, 6}};
+        long[][] b = {{2, 2}, {2, 3}};
+        long[][] ans = multiply(a, power(b, n - 1));
+        return (int) ((ans[0][0] + ans[0][1]) % Mod);
+    }
+
+    // 矩阵相乘
+    // a的列数一定要等于b的行数
+    public static long[][] multiply(long[][] a, long[][] b) {
+        int n = a.length;
+        int m = b[0].length;
+        int k = a[0].length;
+        long[][] ans = new long[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int c = 0; c < k; c++) {
+                    ans[i][j] += a[i][c] * b[c][j] % Mod;
+                    ans[i][j] %= Mod;
+                }
+            }
+        }
+        return ans;
+    }
+
+    // 矩阵快速幂
+    // 要求矩阵m是正方形矩阵
+    public static long[][] power(long[][] matrix, int p) {
+        int n = matrix.length;
+        long[][] ans = new long[n][n];
+        // 对角线全是1、剩下数字都是0的正方形矩阵，称为单位矩阵
+        // 相当于正方形矩阵中的1，矩阵a * 单位矩阵 = 矩阵a
+        for (int i = 0; i < n; i++) {
+            ans[i][i] = 1;
+        }
+        while (p != 0) {
+            if ((p & 1) == 1) {
+                ans = multiply(ans, matrix);
+            }
+            matrix = multiply(matrix, matrix);
+            p >>= 1;
+        }
+        return ans;
+    }
+}
+```
+

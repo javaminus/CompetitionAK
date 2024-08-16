@@ -1989,3 +1989,343 @@ class Solution {
 }
 ```
 
+3117\. 划分数组得到最小的值之和
+-------------------
+
+给你两个数组 `nums` 和 `andValues`，长度分别为 `n` 和 `m`。
+
+数组的 **值** 等于该数组的 **最后一个** 元素。
+
+你需要将 `nums` 划分为 `m` 个 **不相交的连续**
+
+子数组
+
+，对于第 `ith` 个子数组 `[li, ri]`，子数组元素的按位 `AND` 运算结果等于 `andValues[i]`，换句话说，对所有的 `1 <= i <= m`，`nums[li] & nums[li + 1] & ... & nums[ri] == andValues[i]` ，其中 `&` 表示按位 `AND` 运算符。
+
+返回将 `nums` 划分为 `m` 个子数组所能得到的可能的 **最小** 子数组 **值** 之和。如果无法完成这样的划分，则返回 `-1` 。
+
+**示例 1：**
+
+**输入：** nums = \[1,4,3,3,2\], andValues = \[0,3,3,2\]
+
+**输出：** 12
+
+**解释：**
+
+唯一可能的划分方法为：
+
+1.  `[1,4]` 因为 `1 & 4 == 0`
+2.  `[3]` 因为单元素子数组的按位 `AND` 结果就是该元素本身
+3.  `[3]` 因为单元素子数组的按位 `AND` 结果就是该元素本身
+4.  `[2]` 因为单元素子数组的按位 `AND` 结果就是该元素本身
+
+这些子数组的值之和为 `4 + 3 + 3 + 2 = 12`
+
+**示例 2：**
+
+**输入：** nums = \[2,3,5,7,7,7,5\], andValues = \[0,7,5\]
+
+**输出：** 17
+
+**解释：**
+
+划分 `nums` 的三种方式为：
+
+1.  `[[2,3,5],[7,7,7],[5]]` 其中子数组的值之和为 `5 + 7 + 5 = 17`
+2.  `[[2,3,5,7],[7,7],[5]]` 其中子数组的值之和为 `7 + 7 + 5 = 19`
+3.  `[[2,3,5,7,7],[7],[5]]` 其中子数组的值之和为 `7 + 7 + 5 = 19`
+
+子数组值之和的最小可能值为 `17`
+
+**示例 3：**
+
+**输入：** nums = \[1,2,3,4\], andValues = \[2\]
+
+**输出：** \-1
+
+**解释：**
+
+整个数组 `nums` 的按位 `AND` 结果为 `0`。由于无法将 `nums` 划分为单个子数组使得元素的按位 `AND` 结果为 `2`，因此返回 `-1`。
+
+**提示：**
+
+*   `1 <= n == nums.length <= 104`
+*   `1 <= m == andValues.length <= min(n, 10)`
+*   `1 <= nums[i] < 105`
+*   `0 <= andValues[j] < 105`
+
+[https://leetcode.cn/problems/minimum-sum-of-values-by-dividing-array/description/?envType=daily-question&envId=2024-08-16](https://leetcode.cn/problems/minimum-sum-of-values-by-dividing-array/description/?envType=daily-question&envId=2024-08-16)
+
+```java
+import java.util.Arrays;
+import java.util.HashMap;
+
+class Solution { // 超时
+    private static int INF = Integer.MAX_VALUE / 2;
+    int n, m;
+    int[] nums, andValues;
+    HashMap<String, Integer> memo = new HashMap<>();
+    public int minimumValueSum(int[] nums, int[] andValues) {
+        this.nums = nums;
+        this.andValues = andValues;
+        n = nums.length;
+        m = andValues.length;
+        int res = dfs(0, 0, (1 << 18) - 1, 0);
+        return res == INF ? -1 : res;
+    }
+
+    private int dfs(int i, int j, int sum, int last) { // 表示到达位置i,前
+        if (n - 1 - i < m - 1 - j) {
+            return INF;
+        }
+        if (sum < andValues[j]) { // 加上这句话，超级剪枝还是超时
+            return INF;
+        }
+        if (i == n || j == m) {
+            return i == n && j == m ? last : INF;
+        }
+        String key = getKey(i, j, sum, last);
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        int res = INF;
+        if ((sum & nums[i]) == andValues[j]) {
+            res = Math.min(res, dfs(i + 1, j + 1, (1 << 18) - 1, nums[i] + last));
+        }
+        res = Math.min(res, dfs(i + 1, j, sum & nums[i], last));
+        memo.put(key, res);
+        return res;
+    }
+
+    private String getKey(int i, int j, int sum, int last) {
+        return i + "_" + j + "_" + sum + "_" + last;
+    }
+
+}
+```
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    private static int INF = Integer.MAX_VALUE / 2;
+    int n, m;
+    int[] nums, andValues;
+    HashMap<String, Integer> memo = new HashMap<>();
+    public int minimumValueSum(int[] nums, int[] andValues) {
+        this.nums = nums;
+        this.andValues = andValues;
+        n = nums.length;
+        m = andValues.length;
+        int res = dfs(0, 0, (1 << 18) - 1, 0);
+        return res == INF ? -1 : res;
+    }
+
+    private int dfs(int i, int j, int sum, int last) { // 表示到达位置i,前
+        
+        if (n - 1 - i < m - 1 - j) {
+            return INF;
+        }
+        if (i == n || j == m) {
+            return i == n && j == m ? last : INF;
+        }
+        if (sum <= andValues[j]) {
+            return INF;
+        }
+        String key = getKey(i, j, sum, last);
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        int res = INF;
+        if ((sum & nums[i]) == andValues[j]) {
+            res = Math.min(res, dfs(i + 1, j + 1, (1 << 18) - 1, nums[i] + last));
+        }
+        res = Math.min(res, dfs(i + 1, j, sum & nums[i], last));
+        memo.put(key, res);
+        return res;
+    }
+
+    private String getKey(int i, int j, int sum, int last) {
+        return i + "_" + j + "_" + sum; // 这里降维，但是报错了
+    }
+
+}
+```
+
+```java
+import java.util.HashMap;
+
+class Solution { // AC 不把结果存入last中 873ms
+    private static int INF = Integer.MAX_VALUE / 2;
+    int n, m;
+    int[] nums, andValues;
+    HashMap<String, Integer> memo = new HashMap<>();
+    public int minimumValueSum(int[] nums, int[] andValues) {
+        this.nums = nums;
+        this.andValues = andValues;
+        n = nums.length;
+        m = andValues.length;
+        int res = dfs(0, 0, (1 << 18) - 1);
+        return res == INF ? -1 : res;
+    }
+
+    private int dfs(int i, int j, int sum) { // 表示到达位置i,前
+        if (n - 1 - i < m - 1 - j) {
+            return INF;
+        }
+        if (i == n || j == m) {
+            return i == n && j == m ? 0 : INF;
+        }
+        if (sum < andValues[j]) {
+            return INF;
+        }
+        String key = getKey(i, j, sum);
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        int res = INF;
+        if ((sum & nums[i]) == andValues[j]) {
+            res = Math.min(res, dfs(i + 1, j + 1, (1 << 18) - 1)) + nums[i];
+        }
+        res = Math.min(res, dfs(i + 1, j, sum & nums[i]));
+        memo.put(key, res);
+        return res;
+    }
+
+    private String getKey(int i, int j, int sum) {
+        return i + "_" + j + "_" + sum;
+    }
+
+}
+```
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution { // AC 使用Long存储 207ms 哈希表是真的垃圾
+    public int minimumValueSum(int[] nums, int[] andValues) {
+        HashMap<Long, Integer> memo = new HashMap<>();
+        int ans = dfs(0, 0, -1, nums, andValues, memo);
+        return ans < Integer.MAX_VALUE / 2 ? ans : -1;
+    }
+
+    private int dfs(int i, int j, int and, int[] nums, int[] andValues, Map<Long,Integer> memo) {
+        int n = nums.length;
+        int m = andValues.length;
+        if (m - j > n - i) { // 剩余元素不足
+            return Integer.MAX_VALUE / 2;
+        }
+        if (j == m) { // 分了m段
+            return i == n ? 0 : Integer.MAX_VALUE / 2;
+        }
+        and &= nums[i];
+        if (and < andValues[j]) { // 剪枝：无法等于 andValues[j]
+            return Integer.MAX_VALUE / 2;
+        }
+        long mask = (long) i << 36 | (long) j << 32 | and; // 三个状态压缩成一个 long
+        if (memo.containsKey(mask)) {
+            return memo.get(mask);
+        }
+        int res = dfs(i + 1, j, and, nums, andValues, memo); // 不划分
+        if (and == andValues[j]) { // 划分，nums[i]是这一段的最后一个数
+            res = Math.min(res, dfs(i + 1, j + 1, -1, nums, andValues, memo) + nums[i]);
+        }
+        memo.put(mask, res);
+        return res;
+    }
+}
+```
+
+> 这题的最优解是用单调栈优化dp
+
+```java
+class Solution {
+  int inf = 0x3f3f3f3f;
+
+    public int minimumValueSum(int[] nums, int[] andValues) {
+        // 利用动态规划求解
+        // 定义状态 dp[i][k+1] 代表从0-k范围内的子数组切割成i段时的最小和
+        // 那么可以得出递推公式 dp[i+1][]+1]= nums[j]+min(dp[i][k]) 且满足nums[k]&nums[k+1]&。。。& nums[j]=andValues[i];
+        // 因此可以求出k的一个取值范围[l,r]
+        // 由于dp[i+1]至于dp[i]的状态相关，所以可以减小一个维度
+        int n = nums.length;
+        int[] dp = new int[n + 1];
+        // 因为此时划分的子区间的个数为0，长度只要大于1就是不合理的方案
+        Arrays.fill(dp, 1, n + 1, inf);
+        // 因为nums的最大值为100000，最多可以形成17种子数组与和值（会进行去重处理），所以长度为18
+        int[] and = new int[18];
+        // 用于记录处理每个i时，k的左区间l
+        int[] left = new int[18];
+        // 用数组模拟单调栈
+        int[] q = new int[n + 1];
+        int[] nDp = new int[n + 1];
+        for (int target : andValues) {
+            nDp[0] = inf;
+            // 用于记录and和left的长度
+            int an = 0;
+            // 用于记录q的左右范围
+            int ql = 0, qr = 0;
+            // 处理到的dp[i]的索引
+            int qi = 0;
+            for (int i = 0; i < n; i++) {
+                // 当前处理到i
+                int x = nums[i];
+                // 遍历先前的子数组的与和，将其与上x，则此时所有的子数组都是从i从右往左了
+                for (int j = 0; j < an; j++) {
+                    and[j] &= x;
+                }
+                // 此时对应的最后一个子数组与和就是自己本身（单个元素）
+                and[an] = x;
+                // 自然对应的与和的左端点是i了（注意还没有进行去重，去重以后，如果前面已经出现过 and[an]的与和的子数组的情况下，left也会更新成对应的）
+                left[an++] = i;
+                // 进行去重处理,且删除小于target的and值，因为任何数和小于target的值与运算后一定不可能等于target
+                // 因为and数组是单调递增的（与运算的特点）
+                int last = -1;
+                int r = 0;
+                for (int j = 0; j < an; j++) {
+                    if (and[j] >= target && and[j] != last) {
+                        last = and[r] = and[j];
+                        left[r++]=left[j];
+                    }
+                }
+                // 此时重新记录去重后的and的长度
+                an = r;
+                if (an > 0 && and[0] == target) {
+                    // 首先要有大于等于target的数，且最小的那个与和要等于target，否则因为单调递增，后续更不可能等于target了
+                    int right = i;
+                    if (an > 1) {
+                        // 与和为target的k的范围自然是left[0]到下一个更大与和前的一个元素了
+                        right = left[1] - 1;
+                    }
+                    // 此时处理单调递增栈，用于找出left[0]到right这个范围内的最小值
+                    // 之所以可以复用前一个结果的单调栈，是因为在target不变时，不断右移i的时候，k的区间范围left[0]到right也在右移（可能不动）
+                    // ，因为原先的范围是处理到i-1时的单调栈，此时多增加一个i的数进行与操作，只可能使得target的值减小或者不变，如果减小的情况下，自然就需要右移范围才可以了
+
+                    // 采用模板来处理单调栈
+                    // 右边入栈
+                    while (qi <= right) {
+                        while (qr > ql && dp[qi] <= dp[q[qr-1]]) {
+                            qr--;
+                        }
+                        q[qr++] = qi++;
+                    }
+                    // 左边出栈
+                    while (qr > ql && q[ql] < left[0]) {
+                        ql++;
+                    }
+                    // 此时栈顶就是最小值了
+                    nDp[i+1] = dp[q[ql]] + x;
+                } else {
+                    nDp[i+1] = inf;
+                }
+            }
+            int[] tmp = dp;
+            dp = nDp;
+            nDp=tmp;
+        }
+        return dp[n] < inf ? dp[n] : -1;
+    }
+}
+```
+

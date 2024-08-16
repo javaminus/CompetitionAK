@@ -1,9 +1,12 @@
-import java.awt.image.BandedSampleModel;
+package com.codeforces.round966_div3;
+
+/**
+ * @author Minus
+ * @date 2024/8/15 16:03
+ */
 import java.io.*;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -130,21 +133,46 @@ public class Main {
 
     static Read sc = new Read();
     private static final int Mod = (int) 1e9 + 7;
-    private static int T = 1;
     public static void main(String[] args) throws IOException {
         int T = sc.nextInt();
         while (T-- > 0) {
-            solve();
+            // solve();
         }
         sc.bw.flush();
         sc.bw.close();
     }
     static String[] ss;
 
-    private static void solve() throws IOException {
-
-
+    private static void solveF() throws IOException {
+        int n = sc.nextInt();
+        int k = sc.nextInt();
+        int[] dp = new int[k + 1];
+        int[] g = new int[k + 1];
+        Arrays.fill(dp, INF);
+        dp[0] = 0;
+        for (int i = 0; i < n; i++) {
+            int a = sc.nextInt(), b = sc.nextInt();
+            Arrays.fill(g, INF);
+            g[0] = 0;
+            int cnt = 0, cost = 0;
+            while (cnt < k && (a > 0 || b > 0)) {
+                if (a < b) {
+                    int tmp = a;
+                    a = b;
+                    b = tmp;
+                }
+                cnt += 1;
+                cost += b;
+                a -= 1;
+                g[cnt] = cost;
+            }
+            for (int j = k; j >= 0; j--) {
+                for (int p = 0; p <= k - j; p++) {
+                    dp[j + p] = Math.min(dp[j + p], dp[j] + g[p]);
+                }
+            }
+        }
+        sc.println(dp[k] == INF ? -1 : dp[k]);
     }
-
 
 }
