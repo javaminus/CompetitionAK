@@ -1,3 +1,122 @@
+> **不是所有的线段树题目都可以动态开点。**‌
+>
+> 线段树是一种高效处理区间查询和修改的数据结构，适用于满足加法性质的问题，如最大值、最小值、区间和等。然而，对于不满足加法性质的问题，如区间众数、区间最长连续等，线段树并不适用。动态开点线段树是线段树的一种应用，它允许在运行时动态地创建节点，这对于处理某些特定问题非常有用。但是，这并不意味着所有线段树题目都可以使用动态开点方法解决。实际上，动态开点线段树更多地被视为线段树合并和[主席树](https://www.baidu.com/s?sa=re_dqa_generate&wd=%E4%B8%BB%E5%B8%AD%E6%A0%91&rsv_pq=9e6f166c000b32cb&oq=%E6%89%80%E6%9C%89%E7%9A%84%E7%BA%BF%E6%AE%B5%E6%A0%91%E9%A2%98%E7%9B%AE%E9%83%BD%E5%8F%AF%E4%BB%A5%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9%E5%90%97&rsv_t=579e9sSVLqOuRNzqPIB4yaM4jc3QkZbcCi3WxElCFbqkjKD3ZnrW9i/ZRoifjDSps+7W&tn=baiduhome_pg&ie=utf-8)的前置知识，而不是一种通用的解决方案。
+>
+> 因此，是否可以使用动态开点线段树解决特定问题，需要根据问题的具体性质和需求来判断。在处理问题时，应首先分析问题是否满足线段树的应用条件，即是否满足加法性质，然后再考虑是否需要动态开点的功能。对于不满足加法性质的问题，或者不需要动态调整的问题，使用传统的静态线段树可能更为合适‌
+
+# 【模板】
+
+## [静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+	// 快读已经删除
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nums[i] = Integer.parseInt(ss[i - 1]); // 下标从1开始
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            int q = Integer.parseInt(ss[0]);
+            if (q == 1) {
+                int x = Integer.parseInt(ss[1]);
+                int y = Integer.parseInt(ss[2]);
+                int z = Integer.parseInt(ss[3]);
+                update(1, x, y, z);
+            }else {
+                int x = Integer.parseInt(ss[1]);
+                int y = Integer.parseInt(ss[2]);
+                sc.println(query(1, x, y));
+            }
+        }
+    }
+
+    static final int N = 100010;
+    static int[] nums = new int[N + 2];
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        long val, add;
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val = nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        nodes[p].val = nodes[p * 2].val + nodes[p * 2 + 1].val;
+    }
+
+    static void pushdown(int p) {
+        if (nodes[p].add != 0) {
+            nodes[p * 2].val += nodes[p].add * (nodes[p * 2].r - nodes[p * 2].l + 1);
+            nodes[p * 2 + 1].val += nodes[p].add * (nodes[p * 2 + 1].r - nodes[p * 2 + 1].l + 1);
+            nodes[p * 2].add += nodes[p].add;
+            nodes[p * 2 + 1].add += nodes[p].add;
+            nodes[p].add = 0;
+        }
+    }
+
+    static void update(int p, int x, int y, int z) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].val += (long) z * (nodes[p].r - nodes[p].l + 1);
+            nodes[p].add += z;
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) update(p * 2, x, y, z);
+        if (y > mid) update(p * 2 + 1, x, y, z);
+        nodes[p].val = nodes[p * 2].val + nodes[p * 2 + 1].val;
+    }
+
+    static long query(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) return nodes[p].val;
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        long ans = 0;
+        if (x <= mid) ans += query(p * 2, x, y);
+        if (y > mid) ans += query(p * 2 + 1, x, y);
+        return ans;
+    }
+}
+```
+
+
+
+# 【问题】
+
 732\. 我的日程安排表 III（动态开点线段树+懒标记）
 -----------------
 
@@ -37,10 +156,10 @@ myCalendarThree.book(25, 55); // 返回 3
 class MyCalendarThree {
     int N = (int) 1e9; // 设定上限为1e9
     static class Node {
-        Node leftNode, rightNode; // 代表当前节点的左右子节点leftSon,rightSon
-        int val, add; // val表示节点的预订次数，add表示懒惰传播时要加到子节点的值
+        Node leftNode, rightNode; 
+        int val, add;
     }
-    Node root = new Node(); // 线段树的根节点
+    Node root = new Node(); 
 
     // 更新线段树的方法
     void update(Node node, int leftChild, int rightChild, int left, int right, int delta) {
@@ -49,22 +168,20 @@ class MyCalendarThree {
             node.add += delta; // 标识当前节点需要懒惰传播的值
             return;
         }
-        pushdown(node); // 把当前节点的更新值传播到子节点
-        int mid = leftChild + (rightChild - leftChild) / 2; // 计算中间点，无符号右移一位相当于除以2
-        // 递归向下更新
+        pushdown(node); 
+        int mid = leftChild + (rightChild - leftChild) / 2;
         if (left <= mid) update(node.leftNode, leftChild, mid, left, right, delta);
         if (right > mid) update(node.rightNode, mid + 1, rightChild, left, right, delta);
-        pushup(node); // 更新完成后，维护当前节点的值
+        pushup(node); 
     }
 
     // 查询线段树的方法
     int query(Node node, int leftChild, int rightChild, int left, int right) {
         if (leftChild >= left && rightChild <= right) {
-            return node.val; // 如果当前节点完全覆盖查询区间，直接返回节点值
+            return node.val; 
         }
-        pushdown(node); // 先下推延迟标记
-        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0; // 初始化答案为0
-        // 查询左右子树，并更新答案
+        pushdown(node); 
+        int mid = leftChild + (rightChild - leftChild) / 2, ans = 0; 
         if (left <= mid) ans = query(node.leftNode, leftChild, mid, left, right);
         if (right > mid) ans = Math.max(query(node.rightNode, mid + 1, rightChild, left, right), ans);
         return ans;
@@ -73,14 +190,12 @@ class MyCalendarThree {
     // 下推延迟更新的方法
     void pushdown(Node node) {
         if (node.leftNode == null) {
-            node.leftNode = new Node(); // 创建左子节点
+            node.leftNode = new Node(); 
         }
         if (node.rightNode == null) {
-            node.rightNode = new Node(); // 创建右子节点
+            node.rightNode = new Node(); 
         }
-        // 如果有延迟更新，则更新子节点
         if (node.add > 0) {
-            // 这里是否可以改成 if (node.add != 0)
             int add = node.add;
             node.leftNode.add += add;
             node.rightNode.add += add;
@@ -92,7 +207,7 @@ class MyCalendarThree {
 
     // 更新当前节点值的方法
     void pushup(Node node) {
-        node.val = Math.max(node.leftNode.val, node.rightNode.val); // 取最大值更新当前节点
+        node.val = Math.max(node.leftNode.val, node.rightNode.val);
     }
 
     // 构造方法
@@ -2208,3 +2323,4 @@ class Solution { // 在线 + 线段树
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+# 

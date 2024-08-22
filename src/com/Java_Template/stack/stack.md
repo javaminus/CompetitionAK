@@ -108,3 +108,61 @@ class Solution { // 看不懂，烦，，，，，
 
 ```
 
+316\. 去除重复字母(经典模板题)
+------------
+
+给你一个字符串 `s` ，请你去除字符串中重复的字母，使得每个字母只出现一次。需保证 **返回结果的**
+
+**字典序最小**（要求不能打乱其他字符的相对位置）。
+
+**示例 1：**
+
+**输入：**`s = "bcabc"`
+**输出`：`**`"abc"`
+
+**示例 2：**
+
+**输入：**`s = "cbacdcbc"`
+**输出：**`"acdb"`
+
+**提示：**
+
+*   `1 <= s.length <= 104`
+*   `s` 由小写英文字母组成
+
+**注意：**该题与 1081 [https://leetcode-cn.com/problems/smallest-subsequence-of-distinct-characters](https://leetcode-cn.com/problems/smallest-subsequence-of-distinct-characters) 相同
+
+[https://leetcode.cn/problems/remove-duplicate-letters/description/](https://leetcode.cn/problems/remove-duplicate-letters/description/)
+
+```java
+import java.util.Stack;
+
+class Solution {
+    public String removeDuplicateLetters(String s) {
+        char[] cs = s.toCharArray();
+        int[] cnt = new int[26];
+        for (char c : cs) {
+            cnt[c - 'a']++;
+        }
+        Stack<Character> stack = new Stack<>();
+        boolean[] inStack = new boolean[26]; // 表示元素已经出现在ans中了
+        for (char c : cs) {
+            cnt[c - 'a']--;
+            if (inStack[c - 'a']) {
+                continue;
+            }
+            while (!stack.isEmpty() && stack.peek() > c && cnt[stack.peek() - 'a'] > 0) {
+                inStack[stack.pop() - 'a'] = false;
+            }
+            stack.push(c);
+            inStack[c - 'a'] = true;
+        }
+        StringBuilder ans = new StringBuilder();
+        while (!stack.isEmpty()) {
+            ans.append(stack.pop());
+        }
+        return ans.reverse().toString();
+    }
+}
+```
+

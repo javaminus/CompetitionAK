@@ -3,6 +3,7 @@ package com.leetcode.weekly_contest_411;
 /**
  * @author Minus
  * @date 2024/8/18 23:02
+ * 模板题
  */
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -213,38 +214,45 @@ class Solution {
         return new String(ans);
     }
 
+    int k,m,n;
+    int[] pow10;
+    char[] ans;
+    boolean[][] visited;
     public String largestPalindrome_3(int n, int k) {
-        int[] pow10 = new int[n];
+        m = (n + 1) / 2;
+        this.n = n;
+        this.k = k;
+        pow10 = new int[n]; // pow10就是 [1,10,100,1000,10000,,,,,]
         pow10[0] = 1;
         for (int i = 1; i < n; i++) {
             pow10[i] = pow10[i - 1] * 10 % k;
         }
-
-        char[] ans = new char[n];
-        int m = (n + 1) / 2;
-        boolean[][] vis = new boolean[m + 1][k];
-        dfs(0, 0, n, k, m, pow10, ans, vis);
+        ans = new char[n];
+        visited = new boolean[m + 1][k];
+        dfs(0, 0);
         return new String(ans);
     }
-    private boolean dfs(int i, int j, int n, int k, int m, int[] pow10, char[] ans, boolean[][] vis) {
+    // 把「当前从右到左填到第 i 位」和「已填入的数字模 k 的值为 j」作为状态 (i,j)。
+    private boolean dfs(int i, int j) {
         if (i == m) {
             return j == 0;
         }
-        vis[i][j] = true;
-        for (int d = 9; d >= 0; d--) { // 贪心：从大到小枚举
+        visited[i][j] =true;
+        for (int d = 9; d >= 0; d--) { // 贪心，从大到小枚举
             int j2;
-            if (n % 2 == 1 && i == m - 1) { // 正中间
+            if (n % 2 > 0 && i == m - 1) { // 正中间
                 j2 = (j + d * pow10[i]) % k;
-            } else {
-                j2 = (j + d * (pow10[i] + pow10[n - 1 - i])) % k;
+            }else{
+                j2 = (j + d * (pow10[i] + pow10[n - i - 1])) % k;
             }
-            if (!vis[i + 1][j2] && dfs(i + 1, j2, n, k, m, pow10, ans, vis)) {
-                ans[i] = ans[n - 1 - i] = (char) ('0' + d);
+            if (!visited[i + 1][j2] && dfs(i + 1, j2)) {
+                ans[i] = ans[n - i - 1] = (char) ('0' + d);
                 return true;
             }
         }
         return false;
     }
+
 
 
     // https://leetcode.cn/problems/count-substrings-that-satisfy-k-constraint-ii/description/
@@ -253,40 +261,44 @@ class Solution {
     // 本质上是枚举[l, r]内的滑窗右端点，分界点左侧的右端点窗口包含l，用滑动窗口优化；
     // 分界点右侧整个窗口都在[l, r]区间内部，暴力求和用前缀和优化。确实不好想。
     public long[] countKConstraintSubstrings(String s, int k, int[][] queries) {
-        char[] cs = s.toCharArray();
+        // 滑动窗口 + 前缀和 + 二分查找
         int n = s.length();
+        char[] cs = s.toCharArray();
         int[] left = new int[n];
         long[] prefixSum = new long[n + 1];
         int[] cnt = new int[2];
-        int l = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0, l = 0; i < n; i++) {
             cnt[cs[i] & 1]++;
             while (cnt[0] > k && cnt[1] > k) {
                 cnt[cs[l++] & 1]--;
             }
             left[i] = l;
-            // 计算 i - left[i] + 1 的前缀和
             prefixSum[i + 1] = prefixSum[i] + i - l + 1;
         }
         int m = queries.length;
         long[] ans = new long[m];
         for (int i = 0; i < m; i++) {
             int ql = queries[i][0], qr = queries[i][1];
-            int j = binarySearch(left, ql, qr, ql);
-            ans[i] = prefixSum[qr + 1] - prefixSum[j] + (long) (j - ql + 1) * (j - ql) / 2;
+            if (left[qr] <= ql) {
+                ans[i] = (long) (qr - ql + 1) * (qr - ql + 2) / 2;
+            }else{
+                int j = binarySearch(left, ql, qr, ql); // 寻找left数组里面左边为ql的r值
+                ans[i] = (long) (j - ql + 1) * (j - ql + 2) / 2 + prefixSum[qr + 1] - prefixSum[j + 1];
+            }
         }
         return ans;
     }
-    private int binarySearch(int[] nums, int left, int right,int target) {
+
+    private int binarySearch(int[] nums, int left, int right, int target) {
         while (left <= right) {
             int mid = left + (right - left) / 2;
-            if (nums[mid] < target) {
-                left = mid + 1;
-            }else {
+            if (nums[mid] > target) {
                 right = mid - 1;
+            }else{
+                left = mid + 1;
             }
         }
-        return right + 1;
+        return left - 1;
     }
 
 

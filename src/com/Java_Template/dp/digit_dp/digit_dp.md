@@ -800,7 +800,7 @@ class Solution {
 }
 ```
 
-3007\. 价值和小于等于 K 的最大数字
+3007\. 价值和小于等于 K 的最大数字(二分答案 + 数位dp)
 ----------------------
 
 ![1715603388455](F:\leetcode\src\com\Java_Template\dp\digit_dp\digit_dp.assets\1715603388455.png)

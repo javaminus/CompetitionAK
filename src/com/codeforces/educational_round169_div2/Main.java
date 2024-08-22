@@ -1,4 +1,4 @@
-package com.codeforces.round169_div2;
+package com.codeforces.educational_round169_div2;
 
 /**
  * @author Minus
