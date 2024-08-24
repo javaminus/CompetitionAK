@@ -6,6 +6,8 @@
 
 # 【模板】
 
+> 注意：pushdown里面是累加还是直接赋值
+
 ## [静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
 
 ```java
@@ -109,6 +111,476 @@ public class Main {
         if (x <= mid) ans += query(p * 2, x, y);
         if (y > mid) ans += query(p * 2 + 1, x, y);
         return ans;
+    }
+}
+```
+
+## [静态线段树 + 区间开关灯](https://www.luogu.com.cn/problem/P3870)
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            int left = Integer.parseInt(ss[1]);
+            int right = Integer.parseInt(ss[2]);
+            if (ops == 0) {
+                update(1, left, right);
+            }else{
+                sc.println(query(1, left, right));
+            }
+        }
+    }
+
+    static final int N = 100010;
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        long val0, val1, add; // val0表示关着的灯的数量， val1表示开着的灯数量
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val0++;
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        nodes[p].val0 = nodes[p * 2].val0 + nodes[p * 2 + 1].val0;
+    }
+
+    static void pushdown(int p) {
+        if (nodes[p].add == 0) {
+            return;
+        }
+        // 交换
+        long tmp = nodes[p*2].val0;
+        nodes[p * 2].val0 = nodes[p * 2].val1;
+        nodes[p * 2].val1 = tmp;
+        tmp = nodes[p * 2 + 1].val0;
+        nodes[p * 2 + 1].val0 = nodes[p * 2 + 1].val1;
+        nodes[p * 2 + 1].val1 = tmp;
+        // 开关灯就相当于 ^ 一下
+        nodes[p * 2].add ^= 1;
+        nodes[p * 2 + 1].add ^= 1;
+        nodes[p].add = 0;
+    }
+
+    static void update(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].add ^= 1;
+            long tmp = nodes[p].val0;
+            nodes[p].val0 = nodes[p].val1;
+            nodes[p].val1 = tmp;
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) update(p * 2, x, y);
+        if (y > mid) update(p * 2 + 1, x, y);
+        nodes[p].val0 = nodes[p * 2].val0 + nodes[p * 2 + 1].val0;
+        nodes[p].val1 = nodes[p * 2].val1 + nodes[p * 2 + 1].val1;
+    }
+
+    static long query(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) return nodes[p].val1;
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        long ans = 0;
+        if (x <= mid) ans += query(p * 2, x, y);
+        if (y > mid) ans += query(p * 2 + 1, x, y);
+        return ans;
+    }
+}
+```
+
+## [静态线段树 + 等差数列修改区间](https://www.luogu.com.cn/problem/P1438)
+
+> 本题正解很明显就是：**线段树**
+>
+> **是的，你没有看错，就只有线段树。**
+>
+> 很显然我们直接按照线段树板题写就可以了，维护题目需要维护的，注意到只有单点查询，所以我们根本不需要维护区间和，**对于区间来讲，我们只用维护修改操作**，修改操作只需要 s,d（首项和公差）。
+>
+> 考虑该操作如何向下传递（pushdown）:
+>
+> 1. 对于左区间来讲，s,d 没有改变，直接赋值。
+> 2. 对于右区间来讲，只有 Sright=Sfather+len∗d，其中 len 是左区间长度。
+>
+> 此外我们发现：对于同一段区间，修改操作是可以叠加的。
+>
+> **好的，我们做完了**，甚至不需要 pushup 操作。
+>
+> 是的，就是这么简单，当区间变成一个点时，我们发现对于这个点的修改就是加上 s。
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nums[i] = Integer.parseInt(ss[i - 1]);
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            if (ops == 1) {
+                int left = Integer.parseInt(ss[1]);
+                int right = Integer.parseInt(ss[2]);
+                int s = Integer.parseInt(ss[3]); // 首项
+                int d = Integer.parseInt(ss[4]); // 公差
+                update(1, left, right, s, d);
+            }else{
+                int x = Integer.parseInt(ss[1]);
+                sc.println(query(1, x));
+            }
+        }
+    }
+
+    static final int N = 100010;
+    static Node[] nodes = new Node[4 * N + 2];
+    static int[] nums = new int[N];
+
+    static class Node {
+        int l, r;
+        long val, add, s, d; // 首项：s 公差：d
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val = nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+    }
+
+    static void pushdown(int p) {
+        if (nodes[p].add == 0) {
+            return;
+        }
+        nodes[p * 2].s += nodes[p].s; // 必须是+=，因为是懒加载，所有不能用覆盖
+        nodes[p * 2].d += nodes[p].d;
+        nodes[p * 2].add = 1;
+        nodes[p * 2 + 1].s += nodes[p].s + (nodes[p * 2 + 1].l - nodes[p * 2].l) * nodes[p].d;
+        nodes[p * 2 + 1].d += nodes[p].d;
+        nodes[p * 2 + 1].add = 1;
+        nodes[p].add = 0;
+        nodes[p].d = nodes[p].s = 0;
+    }
+
+    static void update(int p, int x, int y, int s, int d) { // 这里的节点p不是真正意义上的数组编号，而是二叉树节点编号
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].add = 1;
+            nodes[p].s += s + (long) (nodes[p].l - x) * d;
+            nodes[p].d += d; // 为了向上归并时，上一行元素的公差就比下一行的公差大d
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) update(p * 2, x, y, s, d);
+        if (y > mid) update(p * 2 + 1, x, y, s, d);
+        // 不需要区间合并！！！都没有区间上的提问
+    }
+
+    static long query(int p, int x) {
+        if (nodes[p].l == nodes[p].r) { // 单点查询
+            nodes[p].val += nodes[p].s;
+            nodes[p].s = nodes[p].d = 0;
+            return nodes[p].val;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) return query(p * 2, x);
+        else return query(p * 2 + 1, x);
+    }
+}
+```
+
+## [静态线段树 + 区间修改（累加+赋值） + 区间最大值](https://www.luogu.com.cn/problem/P1438)
+
+> 评测机卡java  9/10  最后1e6过不去
+>
+> 这题有一个坑，最开始我只用了
+>
+> ```java
+> static class Node {
+>         int l, r;
+>         long val, add; // add中 1表示原地赋值，2表示需要累加的值
+>         Node(int l, int r) {
+>             this.l = l;
+>             this.r = r;
+>         }
+>     }
+> ```
+>
+> 但是有一个问题，就是懒加载节点时，我们如果一个前面堆积着操作1，但是需要用这个节点我们上一次操作是操作2，这时前面的所有操作都会变成操作2
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    static boolean flag = true;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nums[i] = Integer.parseInt(ss[i - 1]);
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            int left = Integer.parseInt(ss[1]);
+            int right = Integer.parseInt(ss[2]);
+            if (ops == 1 || ops == 2) {
+                int val = Integer.parseInt(ss[3]);
+                update(1, left, right, val, ops);
+            } else {
+                sc.println(query(1, left, right));
+            }
+        }
+    }
+
+    static final int N = 1000010;
+    static Node[] nodes = new Node[4 * N + 2];
+    static long[] nums = new long[N];
+
+    static class Node {
+        int l, r;
+        long val, tag1, tag2; // tag1表示原地赋值，tag2表示需要累加的值
+        boolean isUsedOps1; // 表示是否有操作一需要下放
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val = nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        nodes[p].val = Math.max(nodes[p * 2].val, nodes[p * 2 + 1].val);
+    }
+
+    static void pushdown(int p) {
+        if (nodes[p].isUsedOps1) { // 有赋值操作需要下放
+            nodes[p * 2].tag1 = nodes[p * 2 + 1].tag1 = nodes[p].tag1;
+            nodes[p * 2].tag2 = nodes[p * 2 + 1].tag2 = nodes[p].tag2;
+            nodes[p * 2].val = nodes[p * 2 + 1].val = nodes[p].tag1 + nodes[p].tag2;
+            nodes[p * 2].isUsedOps1 = nodes[p * 2 + 1].isUsedOps1 = true;
+        }else{ // 操作二
+            nodes[p * 2].tag2 += nodes[p].tag2;
+            nodes[p * 2 + 1].tag2 += nodes[p].tag2;
+            nodes[p * 2].val += nodes[p].tag2;
+            nodes[p * 2 + 1].val += nodes[p].tag2;
+        }
+        nodes[p].isUsedOps1 = false;
+        nodes[p].tag1 = nodes[p].tag2 = 0;
+    }
+
+    static void update(int p, int pl, int pr, int x, int ops) { // 这里的节点p不是真正意义上的数组编号，而是二叉树节点编号
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            if (ops == 1) {
+                nodes[p].val = x;
+                nodes[p].tag1 = x;
+                nodes[p].tag2 = 0;
+                nodes[p].isUsedOps1 = true;
+            } else if (ops == 2) {
+                nodes[p].val += x;
+                nodes[p].tag2 += x;
+            }
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (pl <= mid) update(p * 2, pl, pr, x, ops);
+        if (pr > mid) update(p * 2 + 1, pl, pr, x, ops);
+        // 给定区间[l,r]，求区间内的最大值。  归并过程
+        nodes[p].val = Math.max(nodes[p * 2].val, nodes[p * 2 + 1].val);
+    }
+
+    static long query(int p, int pl, int pr) {
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            return nodes[p].val;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        long ans = Long.MIN_VALUE;
+        if (pl <= mid) ans = Math.max(ans, query(p * 2, pl, pr));
+        if (pr > mid) ans = Math.max(ans, query(p * 2 + 1, pl, pr));
+        return ans;
+    }
+}
+```
+
+## [静态线段树 + 区间修改（乘法+加法） + 区间和](https://www.luogu.com.cn/problem/P3373)
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int q = sc.nextInt();
+        Mod = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nums[i] = Integer.parseInt(ss[i - 1]);
+        }
+        build(1, 1, n);
+        for (int i = 0; i < q; i++) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            int left = Integer.parseInt(ss[1]);
+            int right = Integer.parseInt(ss[2]);
+            if (ops == 1 || ops == 2) {
+                int val = Integer.parseInt(ss[3]);
+                update(1, left, right, val, ops);
+            } else {
+                sc.println(query(1, left, right));
+            }
+        }
+    }
+
+    static final int N = 1000010;
+    static Node[] nodes = new Node[4 * N + 2];
+    static long[] nums = new long[N];
+
+    static class Node {
+        int l, r;
+        long val, tag1, tag2; // tag1表示累乘，tag2表示累加
+
+        Node(int l, int r) {
+            this.tag2 = 1;
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val = nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        nodes[p].val = (nodes[p * 2].val + nodes[p * 2 + 1].val) % Mod;
+    }
+
+    static void pushdown(int p) {
+        // 根据我们规定的优先度，儿子的值=此刻儿子的值*爸爸的乘法lazy_tag+儿子的区间长度*爸爸的加法lazy_tag
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        nodes[p * 2].val = (nodes[p * 2].val * nodes[p].tag2 + nodes[p].tag1 * (mid - nodes[p].l + 1)) % Mod; // 要中间节点
+        nodes[p * 2 + 1].val = (nodes[p * 2 + 1].val * nodes[p].tag2 + nodes[p].tag1 * (nodes[p].r - mid)) % Mod; // 不要中间节点
+        // 维护lazy_tag
+        nodes[p * 2].tag2 = (nodes[p * 2].tag2 * nodes[p].tag2) % Mod;
+        nodes[p * 2 + 1].tag2 = (nodes[p * 2 + 1].tag2 * nodes[p].tag2) % Mod;
+        nodes[p * 2].tag1 = (nodes[p * 2].tag1 * nodes[p].tag2 + nodes[p].tag1) % Mod;
+        nodes[p * 2 + 1].tag1 = (nodes[p * 2 + 1].tag1 * nodes[p ].tag2 + nodes[p].tag1) % Mod;
+        // 重置父节点
+        nodes[p].tag2 = 1;
+        nodes[p].tag1 = 0;
+    }
+
+    static void update(int p, int pl, int pr, int x, int ops) { // 这里的节点p不是真正意义上的数组编号，而是二叉树节点编号
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            if (ops == 1) { // 乘法
+                nodes[p].val = nodes[p].val * x % Mod;
+                nodes[p].tag2 = (nodes[p].tag2 * x) % Mod;
+                nodes[p].tag1 = (nodes[p].tag1 * x) % Mod;
+            } else if (ops == 2) { // 加法
+                nodes[p].val = (nodes[p].val + (long) x * (nodes[p].r - nodes[p].l + 1)) % Mod;
+                nodes[p].tag1 = (nodes[p].tag1 + x) % Mod;
+            }
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (pl <= mid) update(p * 2, pl, pr, x, ops);
+        if (pr > mid) update(p * 2 + 1, pl, pr, x, ops);
+        // 给定区间[l,r]，求区间内的最大值。  归并过程
+        nodes[p].val = (nodes[p * 2].val + nodes[p * 2 + 1].val) % Mod;
+    }
+
+    static long query(int p, int pl, int pr) {
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            return nodes[p].val;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        long ans = 0;
+        if (pl <= mid) ans += query(p * 2, pl, pr);
+        if (pr > mid) ans += query(p * 2 + 1, pl, pr);
+        return ans % Mod;
     }
 }
 ```

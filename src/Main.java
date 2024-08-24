@@ -121,34 +121,8 @@ public class Main {
         }
     }
 
-    private static int binarySearch1(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] >= target) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return right + 1;
-    }
-
-    private static int binarySearch2(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > target) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left - 1;
-    }
-
     static Read sc = new Read();
-    private static final int Mod = (int) 1e9 + 7;
+    private static int Mod = (int) 1e9 + 7;
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
@@ -163,40 +137,41 @@ public class Main {
 
     private static String[] ss;
     private static String s;
+    static boolean flag = true;
 
     private static void solve() throws IOException {
         int n = sc.nextInt();
-        int m = sc.nextInt();
+        int q = sc.nextInt();
+        Mod = sc.nextInt();
         ss = sc.nextLine().split(" ");
         for (int i = 1; i <= n; i++) {
-            nums[i] = Integer.parseInt(ss[i - 1]); // 下标从1开始
+            nums[i] = Integer.parseInt(ss[i - 1]);
         }
         build(1, 1, n);
-        for (int i = 0; i < m; i++) {
+        for (int i = 0; i < q; i++) {
             ss = sc.nextLine().split(" ");
-            int q = Integer.parseInt(ss[0]);
-            if (q == 1) {
-                int x = Integer.parseInt(ss[1]);
-                int y = Integer.parseInt(ss[2]);
-                int z = Integer.parseInt(ss[3]);
-                update(1, x, y, z);
-            }else {
-                int x = Integer.parseInt(ss[1]);
-                int y = Integer.parseInt(ss[2]);
-                sc.println(query(1, x, y));
+            int ops = Integer.parseInt(ss[0]);
+            int left = Integer.parseInt(ss[1]);
+            int right = Integer.parseInt(ss[2]);
+            if (ops == 1 || ops == 2) {
+                int val = Integer.parseInt(ss[3]);
+                update(1, left, right, val, ops);
+            } else {
+                sc.println(query(1, left, right));
             }
         }
     }
 
-    static final int N = 100010;
-    static int[] nums = new int[N + 2];
+    static final int N = 1000010;
     static Node[] nodes = new Node[4 * N + 2];
+    static long[] nums = new long[N];
 
     static class Node {
         int l, r;
-        long val, add;
+        long val, tag1, tag2; // tag1表示累乘，tag2表示累加
 
         Node(int l, int r) {
+            this.tag2 = 1;
             this.l = l;
             this.r = r;
         }
@@ -211,39 +186,53 @@ public class Main {
         int mid = (l + r) >> 1;
         build(p * 2, l, mid);
         build(p * 2 + 1, mid + 1, r);
-        nodes[p].val = nodes[p * 2].val + nodes[p * 2 + 1].val;
+        nodes[p].val = (nodes[p * 2].val + nodes[p * 2 + 1].val) % Mod;
     }
 
     static void pushdown(int p) {
-        if (nodes[p].add != 0) {
-            nodes[p * 2].val += nodes[p].add * (nodes[p * 2].r - nodes[p * 2].l + 1);
-            nodes[p * 2 + 1].val += nodes[p].add * (nodes[p * 2 + 1].r - nodes[p * 2 + 1].l + 1);
-            nodes[p * 2].add += nodes[p].add;
-            nodes[p * 2 + 1].add += nodes[p].add;
-            nodes[p].add = 0;
-        }
+        // 根据我们规定的优先度，儿子的值=此刻儿子的值*爸爸的乘法lazy_tag+儿子的区间长度*爸爸的加法lazy_tag
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        nodes[p * 2].val = (nodes[p * 2].val * nodes[p].tag2 + nodes[p].tag1 * (mid - nodes[p].l + 1)) % Mod; // 要中间节点
+        nodes[p * 2 + 1].val = (nodes[p * 2 + 1].val * nodes[p].tag2 + nodes[p].tag1 * (nodes[p].r - mid)) % Mod; // 不要中间节点
+        // 维护lazy_tag
+        nodes[p * 2].tag2 = (nodes[p * 2].tag2 * nodes[p].tag2) % Mod;
+        nodes[p * 2 + 1].tag2 = (nodes[p * 2 + 1].tag2 * nodes[p].tag2) % Mod;
+        nodes[p * 2].tag1 = (nodes[p * 2].tag1 * nodes[p].tag2 + nodes[p].tag1) % Mod;
+        nodes[p * 2 + 1].tag1 = (nodes[p * 2 + 1].tag1 * nodes[p ].tag2 + nodes[p].tag1) % Mod;
+        // 重置父节点
+        nodes[p].tag2 = 1;
+        nodes[p].tag1 = 0;
     }
 
-    static void update(int p, int x, int y, int z) {
-        if (x <= nodes[p].l && y >= nodes[p].r) {
-            nodes[p].val += (long) z * (nodes[p].r - nodes[p].l + 1);
-            nodes[p].add += z;
+    static void update(int p, int pl, int pr, int x, int ops) { // 这里的节点p不是真正意义上的数组编号，而是二叉树节点编号
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            if (ops == 1) { // 乘法
+                nodes[p].val = nodes[p].val * x % Mod;
+                nodes[p].tag2 = (nodes[p].tag2 * x) % Mod;
+                nodes[p].tag1 = (nodes[p].tag1 * x) % Mod;
+            } else if (ops == 2) { // 加法
+                nodes[p].val = (nodes[p].val + (long) x * (nodes[p].r - nodes[p].l + 1)) % Mod;
+                nodes[p].tag1 = (nodes[p].tag1 + x) % Mod;
+            }
             return;
         }
         pushdown(p);
         int mid = (nodes[p].l + nodes[p].r) >> 1;
-        if (x <= mid) update(p * 2, x, y, z);
-        if (y > mid) update(p * 2 + 1, x, y, z);
-        nodes[p].val = nodes[p * 2].val + nodes[p * 2 + 1].val;
+        if (pl <= mid) update(p * 2, pl, pr, x, ops);
+        if (pr > mid) update(p * 2 + 1, pl, pr, x, ops);
+        // 给定区间[l,r]，求区间内的最大值。  归并过程
+        nodes[p].val = (nodes[p * 2].val + nodes[p * 2 + 1].val) % Mod;
     }
 
-    static long query(int p, int x, int y) {
-        if (x <= nodes[p].l && y >= nodes[p].r) return nodes[p].val;
+    static long query(int p, int pl, int pr) {
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            return nodes[p].val;
+        }
         pushdown(p);
         int mid = (nodes[p].l + nodes[p].r) >> 1;
         long ans = 0;
-        if (x <= mid) ans += query(p * 2, x, y);
-        if (y > mid) ans += query(p * 2 + 1, x, y);
-        return ans;
+        if (pl <= mid) ans += query(p * 2, pl, pr);
+        if (pr > mid) ans += query(p * 2 + 1, pl, pr);
+        return ans % Mod;
     }
 }
