@@ -373,3 +373,54 @@ public class Main {
 }
 ```
 
+## [【模板】求一棵树到达关键节点的最少节点数目](https://atcoder.jp/contests/abc368/tasks/abc368_d)
+
+![1724773113301](assets/1724773113301.png)
+
+```java
+class Main{
+        private static String[] ss;
+    private static String s;
+
+    private static List<Integer>[] g;
+    static int maxN = 200010;
+    private static int[] vs = new int[maxN];
+
+    // https://atcoder.jp/contests/abc368/tasks/abc368_d  树：求一棵树到达关键节点的最少节点数目
+    private static void solveD() throws IOException {
+        int n = sc.nextInt();
+        int k = sc.nextInt(), x = 0, y = 0;
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            ss = sc.nextLine().split(" ");
+            x = Integer.parseInt(ss[0]) - 1;
+            y = Integer.parseInt(ss[1]) - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < k; i++) {
+            x = Integer.parseInt(ss[i]) - 1;
+            vs[x]++;
+        }
+        dfs(x, -1);
+        int ans = 0;
+        for (int i = 0; i <= n; i++) {
+            if (vs[i] > 0) {
+                ans++;
+            }
+        }
+        sc.println(ans);
+    }
+    private static void dfs(int x, int fa) { // 核心
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x);
+                vs[x] += vs[y];
+            }
+        }
+    }
+}
+```
+
