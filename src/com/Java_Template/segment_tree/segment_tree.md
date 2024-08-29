@@ -6,6 +6,10 @@
 
 # 【模板】
 
+> pushup就是一个向上归并的过程，涉及区间查询就需要pushup
+>
+> pushdwn是向下懒加载，涉及区间更新就需要pushdown
+
 > 注意：pushdown里面是累加还是直接赋值
 
 ## [静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
@@ -582,6 +586,384 @@ public class Main {
         if (pr > mid) ans += query(p * 2 + 1, pl, pr);
         return ans % Mod;
     }
+}
+```
+
+## [静态线段树 + 单点修改+（区间里面连续区间，有负数）最大值查询](https://www.luogu.com.cn/problem/P4513)
+
+```java
+class Main{ // 又卡我java内存
+    private static String[] ss;
+    private static String s;
+    static boolean flag = true;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        for (int i = 1; i <= n; i++) {
+            nums[i] = sc.nextInt();
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            if (ops == 1) {
+                int left = Integer.parseInt(ss[1]);
+                int right = Integer.parseInt(ss[2]);
+                if (left > right) {
+                    int tmp = left;
+                    left = right;
+                    right = tmp;
+                }
+                sc.println(query(1, left, right).ans);
+            } else if (ops == 2) {
+                int x = Integer.parseInt(ss[1]);
+                int y = Integer.parseInt(ss[2]);
+                update(1, x, y);
+            }
+        }
+    }
+
+    static final int N = 500010;
+    static Node[] nodes = new Node[4 * N + 2];
+    static long[] nums = new long[N];
+
+    static class Node {
+        int l, r;
+        long sum, leftMax, rightMax, ans; // sum就是区间和，就是（val）,leftMax:左端点开始最大值；rightMax:右端点开始最大值；ans:区间最大值
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].leftMax= nodes[p].rightMax= nodes[p].ans = nodes[p].sum = nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        pushup(p);
+    }
+
+    static void pushup(int p) {
+        nodes[p].sum = nodes[p * 2].sum + nodes[p * 2 + 1].sum;
+        nodes[p].leftMax = Math.max(nodes[p * 2].leftMax, nodes[p * 2].sum + nodes[p * 2 + 1].leftMax);
+        nodes[p].rightMax = Math.max(nodes[p * 2 + 1].rightMax, nodes[p * 2 + 1].sum + nodes[p * 2].rightMax);
+        nodes[p].ans = Math.max(nodes[p * 2].rightMax + nodes[p*2+1].leftMax, Math.max(nodes[p * 2].ans, nodes[p * 2 + 1].ans));
+    }
+
+    static void update(int p, int x, int y) { // 这里的节点p不是真正意义上的数组编号，而是二叉树节点编号
+//        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+//            nodes[p].sum = nodes[p].leftMax = nodes[p].rightMax = nodes[p].ans = s; // 单点更新
+//            return;
+//        }
+        if (nodes[p].l == nodes[p].r) {
+            nodes[p].sum = nodes[p].leftMax = nodes[p].rightMax = nodes[p].ans = y; // 单点更新
+            return;
+        }
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        if (x <= mid) update(p * 2, x, y);
+        else update(p * 2 + 1, x, y);
+        // 给定区间[l,r]，求区间内的最大值。  归并过程
+        pushup(p);
+    }
+
+    static Node query(int p, int pl, int pr) {
+        if (pl <= nodes[p].l && pr >= nodes[p].r) {
+            return nodes[p];
+        }
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (pr <= mid) { // 全在左边
+            return query(p * 2, pl, pr);
+        } else if (pl > mid) { // 全在右边
+            return query(p * 2 + 1, pl, pr);
+        }else{
+            //否则就左右儿子都访问，然后合并区间
+            Node node = new Node(0, 0), a = query(p * 2, pl, pr), b = query(p * 2 + 1, pl, pr);
+            node.leftMax = Math.max(a.leftMax, a.sum + b.leftMax);
+            node.rightMax = Math.max(b.rightMax, b.sum + a.rightMax);
+            node.ans = Math.max(a.rightMax + b.leftMax, Math.max(a.ans, b.ans));
+            return node;
+        }
+    }
+}
+```
+
+## [静态线段树 + 区间修改+区间查询（平均数+方差）](https://www.luogu.com.cn/problem/P1471)
+
+> 方差不用开方！！！
+>
+> nodes[p]对应的区间长度就是nodes[p].r - nodes[p].l + 1
+
+```java
+public class Main {
+    static Read sc = new Read();
+    private static int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            //solveClapper();
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    static boolean flag = true;
+
+    static final int N = 100010;
+    static double[] nums = new double[N + 2];
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        double sum, pow2, add; // 区间和， 区间平方和， 懒标记
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].sum = nums[l];
+            nodes[p].pow2 = nums[l] * nums[l];
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        pushup(p);
+    }
+
+    static void pushup(int p) {
+        nodes[p].sum = nodes[p * 2].sum + nodes[p * 2 + 1].sum;
+        nodes[p].pow2 = nodes[p * 2].pow2 + nodes[p * 2 + 1].pow2;
+    }
+
+    static void pushdown(int p) {
+        double add = nodes[p].add;
+        if (add != 0) {
+            nodes[p * 2].pow2 += 2 * add * nodes[p * 2].sum + add * add * (nodes[p * 2].r - nodes[p * 2].l + 1);
+            nodes[p * 2 + 1].pow2 += 2 * add * nodes[p * 2 + 1].sum + add * add * (nodes[p * 2 + 1].r - nodes[p * 2 + 1].l + 1);
+            nodes[p * 2].sum += add * (nodes[p * 2].r - nodes[p * 2].l + 1);
+            nodes[p * 2 + 1].sum += add * (nodes[p * 2 + 1].r - nodes[p * 2 + 1].l + 1);
+            nodes[p * 2].add += add;
+            nodes[p * 2 + 1].add += add;
+            nodes[p].add = 0;
+        }
+    }
+
+    static void update(int p, int x, int y, double z) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].pow2 += 2 * z * nodes[p].sum + z * z * (nodes[p].r - nodes[p].l + 1);
+            nodes[p].sum +=  z * (nodes[p].r - nodes[p].l + 1);
+            nodes[p].add += z;
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        if (x <= mid) update(p * 2, x, y, z);
+        if (y > mid) update(p * 2 + 1, x, y, z);
+        pushup(p);
+    }
+
+    static double query(int p, int x, int y, int ops) {
+        if (x <= nodes[p].l && y >= nodes[p].r){
+            if (ops == 2) {
+                // 返回总数
+                return nodes[p].sum;
+            }else{
+                // 返回方差的平方
+                return nodes[p].pow2;
+            }
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        double ans = 0;
+        if (x <= mid) ans += query(p * 2, x, y, ops);
+        if (y > mid) ans += query(p * 2 + 1, x, y, ops);
+        return ans;
+    }
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i + 1] = Double.parseDouble(ss[i]);
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            int ops = sc.nextInt();
+            if (ops == 1) {
+                int x = sc.nextInt();
+                int y = sc.nextInt();
+                double z = sc.nextDouble();
+                update(1, x, y, z);
+            }else{
+                int x = sc.nextInt();
+                int y = sc.nextInt();
+                double ave = query(1, x, y, 2) / (y - x + 1);
+                DecimalFormat format = new DecimalFormat("0.0000");
+                if (ops == 2) {
+                    sc.println(format.format(ave));
+                }else{
+                    double pow2 = query(1, x, y, 3) / (y - x + 1);
+                    sc.println(format.format(pow2 - ave * ave));
+                }
+            }
+        }
+    }
+
+}
+```
+
+## [静态线段树 + 单点修改+（区间最长01交替字串）](https://www.luogu.com.cn/problem/P4513)
+
+```java
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    static boolean flag = true;
+
+    static final int N = 200010;
+    static long[] nums = new long[N + 2];
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        long leftMax, rightMax, sum;
+
+        Node(int l, int r) {
+            leftMax = rightMax = sum = 1;
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].sum = 1;
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        pushup(p);
+    }
+
+    static void pushup(int p) {
+        nodes[p].sum = Math.max(nodes[p * 2].sum, nodes[p * 2 + 1].sum);
+        nodes[p].leftMax = nodes[p * 2].leftMax;
+        nodes[p].rightMax = nodes[p * 2 + 1].rightMax;
+        if (nums[nodes[p * 2].r] != nums[nodes[p * 2 + 1].l]) {
+            nodes[p].sum = Math.max(nodes[p].sum, nodes[p * 2].rightMax + nodes[p * 2 + 1].leftMax);
+            if (nodes[p * 2].leftMax == nodes[p * 2].r - nodes[p * 2].l + 1) {
+                nodes[p].leftMax += nodes[p * 2 + 1].leftMax;
+            }
+            if (nodes[p * 2 + 1].rightMax == nodes[p * 2 + 1].r - nodes[p * 2 + 1].l + 1) {
+                nodes[p].rightMax += nodes[p * 2].rightMax;
+            }
+        }
+    }
+
+    static void update(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nums[nodes[p].l] ^= 1;
+            return;
+        }
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        if (x <= mid) update(p * 2, x, y);
+        if (y > mid) update(p * 2 + 1, x, y);
+        pushup(p);
+    }
+
+    static long query(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r){
+            return nodes[p].sum;
+        }
+        int mid = (nodes[p].l + nodes[p].r) / 2;
+        long ans = 0;
+        if (x <= mid) ans += query(p * 2, x, y);
+        if (y > mid) ans += query(p * 2 + 1, x, y);
+        return ans;
+    }
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        for (int i = 0; i < n; i++) {
+            nums[i + 1] = 0;
+        }
+        build(1, 1, n);
+        for (int i = 0; i < m; i++) {
+            int x = sc.nextInt();
+            update(1, x, x);
+            sc.println(query(1, 1, n));
+        }
+    }
+
+    private static void solve1() throws IOException { // 对拍器
+        int n = 10000;
+        int m = 100;
+        build(1, 1, n);
+        Random random = new Random();
+        for (int i = 0; i < m; i++) {
+            int x = random.nextInt(n) + 1;
+            update(1, x, x);
+            long segans = query(1, 1, n);
+            long ans = 1;
+            long pre = nums[1];
+            long cnt = 1;
+            for (int j = 2; j <= n; j++) {
+                if ((nums[j] ^ pre) == 1) {
+                    cnt++;
+                    pre ^= 1;
+                }else{
+                    ans = Math.max(ans, cnt);
+                    cnt = 1;
+                    pre = nums[j];
+                }
+            }
+            ans = Math.max(ans, cnt);
+            if (segans != ans) {
+                for (int j = 1; j <= n; j++) {
+                    sc.print(nums[j]+",");
+                }
+                sc.println(" ");
+                sc.println("segans:       "+segans);
+                sc.println("ans:          " + ans);
+                sc.println("--------------------" + i);
+                return;
+            }
+        }
+    }
+
+
+
 }
 ```
 

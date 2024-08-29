@@ -1,5 +1,86 @@
 ![img.png](img.png)
 
+# 【模板】
+
+## [离散化 + 树状数组 + 逆序对板子](https://www.luogu.com.cn/problem/P1908)
+
+```java
+public class Main{
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    static boolean flag = true;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        // 离散化
+        int[] tmp = new int[n];
+        System.arraycopy(nums, 0, tmp, 0, n);
+        Arrays.sort(tmp);
+        for (int i = 0; i < n; i++) {
+            nums[i] = Arrays.binarySearch(tmp, nums[i]) + 1;
+        }
+        long ans = 0;
+        BIT bit = new BIT(n);
+        for (int i = n - 1; i >= 0; i--) {
+            ans += bit.query(nums[i] - 1);
+            bit.update(nums[i]);
+        }
+        sc.println(ans);
+    }
+
+    static class BIT{
+        private int maxN;
+        private int[] treeArray;
+
+        public BIT(int maxN) {
+            this.maxN = maxN;
+            treeArray = new int[maxN + 1];
+        }
+
+        public int lowBit(int x) {
+            return x & (-x);
+        }
+
+        public void update(int x) {
+            while (x <= maxN) {
+                treeArray[x]++;
+                x += lowBit(x);
+            }
+        }
+
+        public int query(int x) {
+            int res = 0;
+            while (x >= 1) {
+                res += treeArray[x];
+                x -= lowBit(x);
+            }
+            return res;
+        }
+    }
+}
+```
+
+
+
+
+
+# 【问题】
+
 ## 307\. 区域和检索 - 数组可修改
 
 给你一个数组 `nums` ，请你完成两类查询。

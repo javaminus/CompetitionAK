@@ -1,8 +1,10 @@
+package com.bat_interview.alibaba_cloud;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
+// 阿里云笔试
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
     private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
@@ -121,42 +123,6 @@ public class Main {
             return;
         }
     }
-
-    private static int binarySearch1(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] >= target) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return right + 1;
-    }
-
-    private static int binarySearch2(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > target) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left - 1;
-    }
-
-    static class Pair<T, U> {
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
-        }
-    }
-
     static Read sc = new Read();
     private static final int Mod = (int) 1e9 + 7;
     private static int T = 1;
@@ -173,6 +139,7 @@ public class Main {
 
     private static String[] ss;
     private static String s;
+    // https://kamacoder.com/problempage.php?pid=1243
     private static void solve() throws IOException {
         int a = sc.nextInt(), b = sc.nextInt(), k = sc.nextInt();
         LinkedList<Character> list = new LinkedList<>();
