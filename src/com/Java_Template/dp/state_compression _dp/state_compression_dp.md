@@ -2671,3 +2671,127 @@ class Solution {
 }
 ```
 
+3276\. 选择矩阵中单元格的最大得分
+--------------------
+
+给你一个由正整数构成的二维矩阵 `grid`。
+
+你需要从矩阵中选择 **一个或多个** 单元格，选中的单元格应满足以下条件：
+
+*   所选单元格中的任意两个单元格都不会处于矩阵的 **同一行**。
+*   所选单元格的值 **互不相同**。
+
+你的得分为所选单元格值的**总和**。
+
+返回你能获得的 **最大** 得分。
+
+**示例 1：**
+
+**输入：** grid = \[\[1,2,3\],\[4,3,2\],\[1,1,1\]\]
+
+**输出：** 8
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/07/29/grid1drawio.png)
+
+选择上图中用彩色标记的单元格，对应的值分别为 1、3 和 4 。
+
+**示例 2：**
+
+**输入：** grid = \[\[8,7,6\],\[8,3,2\]\]
+
+**输出：** 15
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/07/29/grid8_8drawio.png)
+
+选择上图中用彩色标记的单元格，对应的值分别为 7 和 8 。
+
+**提示：**
+
+*   `1 <= grid.length, grid[i].length <= 10`
+*   `1 <= grid[i][j] <= 100`
+
+[https://leetcode.cn/problems/select-cells-in-grid-with-maximum-score/description/](https://leetcode.cn/problems/select-cells-in-grid-with-maximum-score/description/)
+
+![1725176264773](assets/1725176264773.png)
+
+```java
+// 暴力回溯超时
+import java.util.BitSet;
+import java.util.List;
+
+class Solution {
+    int m, n;
+    List<List<Integer>> grid;
+    public int maxScore(List<List<Integer>> grid) {
+        this.grid = grid;
+        m = grid.size();
+        n = grid.get(0).size();
+        backTrack(-1, 0);
+        return ans;
+    }
+
+    BitSet set = new BitSet(); // 这里还使用BitSet哈哈哈
+    int ans = 0;
+    private void backTrack(int index, int sum) {
+        ans = Math.max(ans, sum);
+        for (int i = index + 1; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (!set.get(grid.get(i).get(j))) {
+                    set.set(grid.get(i).get(j));
+                    backTrack(i, sum + grid.get(i).get(j));
+                    set.clear(grid.get(i).get(j));
+                }
+            }
+        }
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public int maxScore(List<List<Integer>> grid) {
+        int m = grid.size(), n = grid.get(0).size();
+        int[][] g = new int[m][n];
+        int mx = 0;
+        for (int i = 0; i < m; i++) { // 个人喜欢操作数组
+            for (int j = 0; j < n; j++) {
+                g[i][j] = grid.get(i).get(j);
+                mx = Math.max(mx, g[i][j]);
+            }
+        }
+        int[] f = new int[mx + 1]; // f[i]表示元素i在哪几行的状态
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                f[g[i][j]] |= (1 << i);
+            }
+        }
+        int[][] dp = new int[mx + 1][1 << m]; // dp[x][s]表示在考虑前x个数字，选择行的状态为s的最大结果
+        for (int i = 0; i < mx + 1; i++) {
+            Arrays.fill(dp[i], Integer.MIN_VALUE / 2);
+        }
+        dp[0][0] = 0;
+        int ans = Integer.MIN_VALUE / 2;
+        for (int x = 1; x < mx + 1; x++) { // 思考放与不妨x
+            for (int s = 0; s < 1 << m; s++) {
+                dp[x][s] = Math.max(dp[x][s], dp[x - 1][s]); // 不放入x
+                // 尝试选择第i行的x
+                for (int i = 0; i < m; i++) {
+                    if ((((f[x] >> i) & 1) == 1) && (((s >> i) & 1) == 1)) {
+                        dp[x][s] = Math.max(dp[x][s], dp[x - 1][s ^ (1 << i)] + x);
+                    }
+                }
+                ans = Math.max(ans, dp[x][s]);
+            }
+        }
+        return ans;
+    }
+}
+```
+

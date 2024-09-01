@@ -75,6 +75,96 @@ public class Main{
 }
 ```
 
+## [去重离散化 + 树状数组 + 前后缀最值](https://www.luogu.com.cn/problem/P1637)
+
+```java
+public class Main {
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n]; // nums中有相同元素，如何离散化？
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        // 离散化
+        int[] tmp = new int[n];
+        System.arraycopy(nums, 0, tmp, 0, n);
+        int k = 0;
+        Arrays.sort(tmp);
+        for (int i = 1; i < n; i++) { // 去重
+            if (tmp[i] == tmp[i - 1]) {
+                k++;
+            }
+            tmp[i - k] = tmp[i];
+        }
+        for (int i = 0; i < n; i++) {
+            nums[i] = Arrays.binarySearch(tmp, nums[i]) + 1;
+        }
+        BIT bit1 = new BIT(n);
+        BIT bit2 = new BIT(n);
+        int[] suffix = new int[n];
+        for (int i = n - 1; i >= 0; i--) {
+            suffix[i] = n - 1 - i - bit2.query(nums[i]); // 妙
+            bit2.update(nums[i]);
+        }
+        long ans = 0;
+        for (int i = 0; i < n; i++) {
+            int c = bit1.query(nums[i] - 1);
+            bit1.update(nums[i]);
+            ans += (long) suffix[i] * c;
+        }
+        sc.println(ans);
+    }
+
+    static class BIT{
+        private int maxN;
+        private int[] treeArray;
+
+        public BIT(int maxN) {
+            this.maxN = maxN;
+            treeArray = new int[maxN + 1];
+        }
+
+        public int lowBit(int x) {
+            return x & (-x);
+        }
+
+        public void update(int x) {
+            while (x <= maxN) {
+                treeArray[x]++;
+                x += lowBit(x);
+            }
+        }
+
+        public int query(int x) {
+            int res = 0;
+            while (x >= 1) {
+                res += treeArray[x];
+                x -= lowBit(x);
+            }
+            return res;
+        }
+    }
+}
+```
+
 
 
 

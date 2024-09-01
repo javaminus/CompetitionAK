@@ -12,7 +12,7 @@
 
 > 注意：pushdown里面是累加还是直接赋值
 
-## [静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
+## [1、静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
 
 ```java
 import java.io.*;
@@ -119,7 +119,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 区间开关灯](https://www.luogu.com.cn/problem/P3870)
+## [2、静态线段树 + 区间开关灯](https://www.luogu.com.cn/problem/P3870)
 
 ```java
 import java.io.*;
@@ -227,7 +227,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 等差数列修改区间](https://www.luogu.com.cn/problem/P1438)
+## [3、静态线段树 + 等差数列修改区间](https://www.luogu.com.cn/problem/P1438)
 
 > 本题正解很明显就是：**线段树**
 >
@@ -343,7 +343,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 区间修改（累加+赋值） + 区间最大值](https://www.luogu.com.cn/problem/P1438)
+## [4、静态线段树 + 区间修改（累加+赋值） + 区间最大值](https://www.luogu.com.cn/problem/P1438)
 
 > 评测机卡java  9/10  最后1e6过不去
 >
@@ -482,7 +482,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 区间修改（乘法+加法） + 区间和](https://www.luogu.com.cn/problem/P3373)
+## [5、静态线段树 + 区间修改（乘法+加法） + 区间和](https://www.luogu.com.cn/problem/P3373)
 
 ```java
 import java.io.*;
@@ -589,7 +589,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 单点修改+（区间里面连续区间，有负数）最大值查询](https://www.luogu.com.cn/problem/P4513)
+## [6、静态线段树 + 单点修改+（区间里面连续区间，有负数）最大值查询](https://www.luogu.com.cn/problem/P4513)
 
 ```java
 class Main{ // 又卡我java内存
@@ -693,7 +693,7 @@ class Main{ // 又卡我java内存
 }
 ```
 
-## [静态线段树 + 区间修改+区间查询（平均数+方差）](https://www.luogu.com.cn/problem/P1471)
+## [7、静态线段树 + 区间修改+区间查询（平均数+方差）](https://www.luogu.com.cn/problem/P1471)
 
 > 方差不用开方！！！
 >
@@ -830,7 +830,7 @@ public class Main {
 }
 ```
 
-## [静态线段树 + 单点修改+（区间最长01交替字串）](https://www.luogu.com.cn/problem/P4513)
+## [8、静态线段树 + 单点修改+（区间最长01交替字串）](https://www.luogu.com.cn/problem/P4513)
 
 ```java
 public class Main {
@@ -964,6 +964,386 @@ public class Main {
 
 
 
+}
+```
+
+## [9、静态线段树 + 区间修改+区间查询（状态压缩）](https://www.luogu.com.cn/problem/P1558)
+
+> 30种不同的颜料用（1<<i）来表示状态
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+
+    static final int N = 100010;
+    static int[] nums = new int[N + 2];
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        long val, add;
+
+        Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].val = (1 << 1); // 一号色是1左移一位，而不是1
+            nums[l] = (1 << 1); // 对拍一下
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        pushup(p);
+    }
+
+    static void pushdown(int p) {
+        long add = nodes[p].add;
+        if (add != 0) {
+            nodes[p * 2].val = (1L << add);
+            nodes[p * 2 + 1].val = (1L << add);
+            nodes[p * 2].add = add;
+            nodes[p * 2 + 1].add = add;
+            nodes[p].add = 0;
+        }
+    }
+
+    static void pushup(int p) {
+        nodes[p].val = nodes[p * 2].val | nodes[p * 2 + 1].val;
+    }
+
+    static void update(int p, int x, int y, int z) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].val = (1L << z);
+            nodes[p].add = z;
+            return;
+        }
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) update(p * 2, x, y, z);
+        if (y > mid) update(p * 2 + 1, x, y, z);
+        pushup(p);
+    }
+
+    static long query(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) return nodes[p].val;
+        pushdown(p);
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        long ans = 0;
+        if (x <= mid) ans |= query(p * 2, x, y);
+        if (y > mid) ans |= query(p * 2 + 1, x, y);
+        return ans;
+    }
+    private static void solve() throws IOException {
+        int L = sc.nextInt(), T = sc.nextInt(), O = sc.nextInt();
+        build(1, 1, L);
+        while (O-- > 0) {
+            ss = sc.nextLine().split(" ");
+            int l = Integer.parseInt(ss[1]);
+            int r = Integer.parseInt(ss[2]);
+            if (l > r) {
+                int tmp = l;
+                l = r;
+                r = tmp;
+            }
+            if (ss[0].equals("C")) {
+                update(1, l, r, Integer.parseInt(ss[3]));
+            }else{
+                sc.println(Long.bitCount(query(1, l, r)));
+            }
+        }
+    }
+
+    private static void solve1() throws IOException { // 对拍
+        int L = 100000, T = 30, O = 10000;
+        build(1, 1, L);
+        Random random = new Random();
+        while (O-- > 0) {
+            int ops = random.nextInt(2);
+            if (ops == 1) {
+                int l = random.nextInt(L) + 1;
+                int r = Math.min(L, random.nextInt(L) + l);
+                int x = random.nextInt(T) + 1;
+                update(1, l, r, x);
+                for (int i = l; i <= r; i++) {
+                    nums[i] = (1 << x);
+                }
+            } else {
+                int l = random.nextInt(L) + 1;
+                int r = Math.min(L, random.nextInt(L) + l);
+                long ans1 = Long.bitCount(query(1, l, r));
+                long cnt = 0;
+                for (int i = l; i <= r; i++) {
+                    cnt |= nums[i];
+                }
+                long ans2 = Long.bitCount(cnt);
+                if (ans1 != ans2) {
+                    System.out.println("ans1: " + ans1);
+                    System.out.println("ans2: " + ans2);
+                    System.out.println("L: " + l + "  R: " + r);
+                    for (int i = 1; i <= L; i++) {
+                        System.out.print(nums[i] + " ");
+                    }
+                    return;
+                }
+            }
+        }
+    }
+}
+```
+
+## [10、静态线段树 + 单点修改+区间查询（区间字符串）](https://www.luogu.com.cn/problem/P1558)
+
+> 调试了四个多小时，我真的会疯。  （java引用与赋值）
+>
+>  // ans = node; // 这里是引用地址呀，大哥！！！调了四个小时
+>      ans.isValid = true;
+>   // ans.cs = node.cs; 这也是错的
+>       for (int i = 0; i < n; i++) {
+>                ans.cs[i] = node.cs[i];
+>         }
+
+```java
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+
+    static final int N = 100010;
+    static int[] nums = new int[N + 2];
+    static Node[] nodes = new Node[4 * N + 2];
+
+    static class Node {
+        int l, r;
+        char[] cs;
+        boolean isValid;
+        Node(int l, int r) {
+            cs = new char[n];
+            Arrays.fill(cs, '?');
+            isValid = true;
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    static void build(int p, int l, int r) throws IOException { // 对于一个区间（编号为p），他的左儿子为2p，右儿子为2p+1
+        nodes[p] = new Node(l, r);
+        if (l == r) {
+            nodes[p].cs = sc.next().toCharArray();
+            // strs[l] = new String(nodes[p].cs); 对拍用
+            return;
+        }
+        int mid = (l + r) >> 1;
+        build(p * 2, l, mid);
+        build(p * 2 + 1, mid + 1, r);
+        pushup(p);
+    }
+
+    static void pushup(int p) {
+        for (int i = 0; i < nodes[p].cs.length; i++) {
+            if (nodes[p * 2].isValid && nodes[p * 2 + 1].isValid) {
+                if (nodes[p * 2].cs[i] == '?' && nodes[p * 2 + 1].cs[i] == '?') {
+                    nodes[p].cs[i] = '?';
+                } else if (nodes[p * 2].cs[i] == '?') {
+                    nodes[p].cs[i] = nodes[p * 2 + 1].cs[i];
+                } else if (nodes[p * 2 + 1].cs[i] == '?') {
+                    nodes[p].cs[i] = nodes[p * 2].cs[i];
+                } else if(nodes[p * 2].cs[i] == nodes[p * 2 + 1].cs[i]){
+                    nodes[p].cs[i] = nodes[p * 2].cs[i];
+                }else{
+                    nodes[p].isValid = false;
+                    return;
+                }
+            } else {
+                nodes[p].isValid = false;
+                return;
+            }
+        }
+        nodes[p].isValid = true;
+    }
+
+    static void update(int p, int x, int y, char[] z) {
+        if (x <= nodes[p].l && y >= nodes[p].r) {
+            nodes[p].cs = z;
+            return;
+        }
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        if (x <= mid) update(p * 2, x, y, z);
+        if (y > mid) update(p * 2 + 1, x, y, z);
+        pushup(p);
+    }
+
+    static Node query(int p, int x, int y) {
+        if (x <= nodes[p].l && y >= nodes[p].r) return nodes[p];
+        int mid = (nodes[p].l + nodes[p].r) >> 1;
+        Node ans = new Node(-1, -1);
+        if (x <= mid){
+            Node node = query(p * 2, x, y);
+            if (!node.isValid) {
+                ans.isValid = false;
+                return ans;
+            }else{
+                // ans = node; // 这里是引用地址呀，大哥！！！调了四个小时
+                ans.isValid = true;
+                // ans.cs = node.cs; 这也是错的
+                for (int i = 0; i < n; i++) {
+                    ans.cs[i] = node.cs[i];
+                }
+            }
+        }
+        if (y > mid){
+            Node node = query(p * 2 + 1, x, y);
+            if (!node.isValid) {
+                ans.isValid = false;
+                return ans;
+            }else{
+                char[] cs1 = ans.cs;
+                char[] cs2 = node.cs;
+                for (int i = 0; i < cs1.length; i++) {
+                    if (cs1[i] == '?' && cs2[i] == '?') {
+                        ans.cs[i] = '?';
+                    } else if (cs1[i] == '?') {
+                        ans.cs[i] = cs2[i];
+                    } else if (cs2[i] == '?' || cs1[i] == cs2[i]) {
+
+                    }  else {
+                        ans.isValid = false;
+                        return ans;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+    static int n;
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        int m = sc.nextInt(), q = sc.nextInt();
+        build(1, 1, m);
+        int ans = 0;
+        while (q-- > 0) {
+            ss = sc.nextLine().split(" ");
+            if (Integer.parseInt(ss[0]) == 0) {
+                Node node = query(1, Integer.parseInt(ss[1]), Integer.parseInt(ss[2]));
+                if (node.isValid) {
+                    int cnt = 1;
+                    for (int i = 0; i < node.cs.length; i++) {
+                        if (node.cs[i] == '?') {
+                            cnt *= 2;
+                        }
+                    }
+                    ans ^= cnt;
+                }
+            }else{
+                update(1, Integer.parseInt(ss[1]), Integer.parseInt(ss[1]), ss[2].toCharArray());
+            }
+        }
+        sc.println(ans);
+    }
+
+    static String[] strs;
+    private static void solve1() throws IOException {
+        n = sc.nextInt(); // 字符串的长度
+        int m = sc.nextInt(), q = sc.nextInt();
+        strs = new String[m + 1];
+        build(1, 1, m);
+        int ans = 0;
+        int ans1 = 0;
+        while (q-- > 0) {
+            ss = sc.nextLine().split(" ");
+            if (Integer.parseInt(ss[0]) == 0) {
+                int l = Integer.parseInt(ss[1]);
+                int r = Integer.parseInt(ss[2]);
+                Node node = query(1, l, r);
+
+                int cnt = 0;
+                if (node.isValid) {
+                    cnt = 1;
+                    for (int i = 0; i < node.cs.length; i++) {
+                        if (node.cs[i] == '?') {
+                            cnt *= 2;
+                        }
+                    }
+                }
+
+                int cnt1 = 0;
+                char[] pp = strs[l].toCharArray();
+                boolean ff = true;
+                for (int i = l+1; i <= r && ff; i++) {
+                    for (int j = 0; j < n; j++) {
+                        if (pp[j] == '?' && strs[i].charAt(j) == '?') {
+                            pp[j] = '?';
+                        } else if (pp[j] == '?') {
+                            pp[j] = strs[i].charAt(j);
+                        } else if (strs[i].charAt(j) == '?' || strs[i].charAt(j) == pp[j]) {
+
+                        }else{
+                            ff = false;
+                            break;
+                        }
+                    }
+                }
+                if (!ff) {
+                }else{
+                    cnt1 = 1;
+                    for (int i = 0; i < n; i++) {
+                        if (pp[i] == '?') {
+                            cnt1 *= 2;
+                        }
+                    }
+                }
+                if (cnt != cnt1) {
+                    System.out.println(Arrays.toString(strs));
+                    System.out.println(new String(pp));
+                    System.out.println("cnt:  " + cnt);
+                    System.out.println("bf:  "+cnt1);
+                    return;
+                }
+                ans1 ^= cnt1;
+                ans ^= cnt;
+            }else{
+                int l = Integer.parseInt(ss[1]);
+                String str = ss[2];
+                update(1, Integer.parseInt(ss[1]), Integer.parseInt(ss[1]), ss[2].toCharArray());
+                strs[l] = str;
+            }
+        }
+        System.out.println(ans);
+        System.out.println(ans1);
+    }
 }
 ```
 

@@ -1,7 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -173,61 +172,31 @@ public class Main {
 
     private static String[] ss;
     private static String s;
+    private static List<Integer>[] g;
+
     private static void solve() throws IOException {
-        int a = sc.nextInt(), b = sc.nextInt(), k = sc.nextInt();
-        LinkedList<Character> list = new LinkedList<>();
-        int cnt = 0;
-        while (b-- > 0) {
-            list.add('b');
-            cnt++;
-            if (b > 0 && cnt == k) {
-                list.add('a');
-                a--;
-                cnt = 0;
-            }
+        int n = sc.nextInt(), d = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            ss = sc.nextLine().split(" ");
+            int x = Integer.parseInt(ss[0]) - 1, y = Integer.parseInt(ss[1]) - 1;
+            g[x].add(y);
+            g[y].add(x);
         }
-        int aa1 = a;
-        for (int i = 0; i < Math.min(aa1, k); i++) {
-            list.add('a');
-            a--;
-        }
-        if (a < 0) {
-            sc.print(-1);
-            return;
-        }
-        int id = list.size() - 1;
-        while (id >= 0 && a > 0) {
-            if (list.get(id) == 'b') {
-                if (id - 1 >= 0 && list.get(id - 1) == 'b') {
-                    int id1 = id;
-                    int a1 = a;
-                    for (int i = 0; i < Math.min(k, a1); i++) {
-                        list.add(id1++, 'a');
-                        a--;
-                    }
-                } else if (id - 1 >= 0 &&list.get(id - 1) != 'b') {
-                    int id1 = id;
-                    int a1 = a;
-                    for (int i = 0; i < Math.min(k - 1, a1); i++) {
-                        list.add(id1++, 'a');
-                        a--;
-                    }
-                }
-            }
-            id--;
-        }
-        if (a <= k) {
-            for (int i = 0; i < a; i++) {
-                list.add(i, 'a');
-            }
-        } else{
-            sc.print(-1);
-            return;
-        }
-        for (Character c : list) {
-            sc.print(c);
-        }
+        sc.println(dfs(0, -1, d) - 1); //减去初始点
     }
 
-
+    private static int dfs(int x, int fa, int d) {
+        if (d < 0) {
+            return 0;
+        }
+        int res = 1;
+        for (int y : g[x]) {
+            if (y != fa) {
+                res += dfs(y, x, d - 1);
+            }
+        }
+        return res;
+    }
 }

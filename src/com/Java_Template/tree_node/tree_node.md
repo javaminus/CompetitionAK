@@ -1,4 +1,4 @@
-## [小红的树上删边](https://ac.nowcoder.com/acm/contest/80743/D)
+## [【模板】树上删边（使每个连通块大小为偶数）](https://ac.nowcoder.com/acm/contest/80743/D)
 
 ![img.png](img.png)
 
@@ -59,7 +59,7 @@ public class Main {
     }
 }
 ```
-# 树上倍增和LCA(树上祖先)
+## 【模板】树上倍增和LCA(树上祖先)
 
 > LCA问题
 >
@@ -71,8 +71,7 @@ public class Main {
 >
 > 3）树链剖分
 
-1483\. 树节点的第 K 个祖先（树上倍增）（链式前向星建图模板）
-------------------
+**1483\. 树节点的第 K 个祖先（树上倍增）（链式前向星建图模板）**
 
 给你一棵树，树上有 `n` 个节点，按从 `0` 到 `n-1` 编号。树以父节点数组的形式给出，其中 `parent[i]` 是节点 `i` 的父节点。树的根节点是编号为 `0` 的节点。
 
@@ -423,4 +422,56 @@ class Main{
     }
 }
 ```
+
+# 【洛谷模板题】
+
+![img](assets/wxtmbb.png) 
+
+## [【模板】树的遍历dfs + 统计到root距离为d的节点数目](https://www.luogu.com.cn/problem/P5908)
+
+```java
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static List<Integer>[] g;
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), d = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            ss = sc.nextLine().split(" ");
+            int x = Integer.parseInt(ss[0]) - 1, y = Integer.parseInt(ss[1]) - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        sc.println(dfs(0, -1, d) - 1); //减去初始点
+    }
+
+    private static int dfs(int x, int fa, int d) {
+        if (d < 0) {
+            return 0;
+        }
+        int res = 1;
+        for (int y : g[x]) {
+            if (y != fa) {
+                res += dfs(y, x, d - 1);
+            }
+        }
+        return res;
+    }
+}
+```
+
+
 
