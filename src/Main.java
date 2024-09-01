@@ -1,6 +1,9 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -161,7 +164,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -172,31 +175,38 @@ public class Main {
 
     private static String[] ss;
     private static String s;
-    private static List<Integer>[] g;
 
     private static void solve() throws IOException {
-        int n = sc.nextInt(), d = sc.nextInt();
-        g = new List[n];
-        Arrays.setAll(g, e -> new ArrayList<>());
-        for (int i = 0; i < n - 1; i++) {
-            ss = sc.nextLine().split(" ");
-            int x = Integer.parseInt(ss[0]) - 1, y = Integer.parseInt(ss[1]) - 1;
-            g[x].add(y);
-            g[y].add(x);
+        int n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        long[] nums = new long[n];
+        long sum = 0L;
+        for (int i = 0; i < n; i++) {
+            nums[i] = Long.parseLong(ss[i]) % Mod;
+            sum += nums[i];
+            sum %= Mod;
         }
-        sc.println(dfs(0, -1, d) - 1); //减去初始点
+        long p = 0;
+        for (int i = 0; i < n; i++) {
+            p += (nums[i] * ((sum - nums[i] + Mod) % Mod) % Mod);
+            p %= Mod;
+        }
+        long q = (long) n * (n - 1) % Mod;
+        sc.println(p * power(q, Mod - 2) % Mod);
     }
 
-    private static int dfs(int x, int fa, int d) {
-        if (d < 0) {
-            return 0;
-        }
-        int res = 1;
-        for (int y : g[x]) {
-            if (y != fa) {
-                res += dfs(y, x, d - 1);
+    private static long power(long a, long b) { // 求 (a ^ b) % p
+        long ans = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                ans = (ans * a) % Mod;
             }
+            a = (a * a) % Mod;
+            b >>= 1;
         }
-        return res;
+        return ans;
     }
+
+
+
 }
