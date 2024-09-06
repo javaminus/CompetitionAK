@@ -1,3 +1,101 @@
+## [【模板】dijkstra找左上角到达右下角经过最少1，可以上下左右](https://kamacoder.com/problempage.php?pid=1245)
+
+> 允许上下左右移动
+
+```java
+public class Main {
+    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int n, m;
+    static int[][] grid;
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        m = sc.nextInt();
+        grid = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            for (int j = 0; j < m; j++) {
+                grid[i][j] = Integer.parseInt(ss[j]);
+            }
+        }
+        int[][] dist = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dist[i], n + m - 1);
+        }
+        boolean[][] visited = new boolean[n][m];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+        dist[0][0] = grid[0][0];
+        visited[0][0] = true;
+        pq.offer(new int[]{0, 0, dist[0][0]});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int x = poll[0], y = poll[1];
+            for (int[] dir : dirs) {
+                int nx = x + dir[0], ny = y + dir[1];
+                if (nx >= 0 && nx < n && ny >= 0 && ny < m) {
+                    if (dist[nx][ny] > dist[x][y] + grid[nx][ny]) {
+                        dist[nx][ny] = dist[x][y] + grid[nx][ny];
+                        if (!visited[nx][ny]) {
+                            pq.offer(new int[]{nx, ny, dist[nx][ny]});
+                            visited[nx][ny] = true;
+                        }
+                    }
+                }
+            }
+        }
+        sc.println(dist[n - 1][m - 1]);
+    }
+}
+```
+
+> 只能往右或则往下
+
+```java
+private static void solve() throws IOException {
+        n = sc.nextInt();
+        m = sc.nextInt();
+        grid = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            for (int j = 0; j < m; j++) {
+                grid[i][j] = Integer.parseInt(ss[j]);
+            }
+        }
+        int[][] dp = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], n + m - 1);
+        }
+        dp[0][0] = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (i > 0) {
+                    dp[i][j] = Math.min(dp[i][j], dp[i - 1][j]);
+                }
+                if (j > 0) {
+                    dp[i][j] = Math.min(dp[i][j], dp[i][j - 1]);
+                }
+                dp[i][j] += grid[i][j];
+            }
+        }
+        sc.println(dp[n - 1][m - 1]);
+ }
+```
+
+
+
 ## 【模板】dijkstraPlus找到距离节点k最远的点，并且打印路径
 
 ```java
@@ -53,8 +151,6 @@ class Solution {
     }
 }
 ```
-
-
 
 743\. 网络延迟时间
 ------------

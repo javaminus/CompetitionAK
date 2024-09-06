@@ -427,7 +427,7 @@ class Main{
 
 ![img](assets/wxtmbb.png) 
 
-## [【模板】树的遍历dfs + 统计到root距离为d的节点数目](https://www.luogu.com.cn/problem/P5908)
+## [【模板】树的遍历dfs + 统计到root距离不超过d的节点数目](https://www.luogu.com.cn/problem/P5908)
 
 ```java
 public class Main {
@@ -469,6 +469,55 @@ public class Main {
             }
         }
         return res;
+    }
+}
+```
+
+## [【模板】树的直径(上的核心路径，求任意点到核心路径的最长距离最小)](https://www.luogu.com.cn/problem/P1099)
+
+> 两次dfs求图的直径，从点1出发最远点为x, 然后从点x出发最远点为y。那么路径x-y就图的直径
+>
+> 然后用长度为s的滑动窗口在直径上面滑动，枚举端点到x-y的最远距离
+
+```java
+public class Main{
+	private static void solve() throws IOException {
+        int n = sc.nextInt(), s = sc.nextInt();
+        g = new List[n + 1];
+        fas = new int[n + 1];
+        dist = new int[n + 1];
+        visited = new boolean[n + 1];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int i = 0; i < n - 1; i++) {
+            ss = sc.nextLine().split(" ");
+            int x = Integer.parseInt(ss[0]), y = Integer.parseInt(ss[1]), z = Integer.parseInt(ss[2]);
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        k = 0;
+        dfs(1, 0); // acm里面下标一般从1开始
+        dist[k] = 0;
+        dfs(k, 0);
+        int root = k;
+        int ans = Integer.MAX_VALUE;
+        for (int i = root, j = root; i != 0; i = fas[i]) {
+            while (dist[j] - dist[i] > s) {
+                j = fas[j];
+            }
+            ans = Math.min(ans, Math.max(dist[root] - dist[j], dist[i]));
+        }
+        for (int i = root; i != 0; i = fas[i]) {
+            visited[i] = true;
+        }
+        for (int i = root; i != 0; i = fas[i]) {
+            k = i;
+            dist[k] = 0;
+            dfs(i, fas[i]);
+        }
+        for (int i = 1; i <= n; i++) {
+            ans = Math.max(ans, dist[i]);
+        }
+        sc.println(ans);
     }
 }
 ```

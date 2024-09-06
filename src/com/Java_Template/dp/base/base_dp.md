@@ -1,3 +1,44 @@
+## [【模板】3177. 求出最长好子序列 II](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/) 
+
+> 这题是进阶线性dp最好的模板
+>
+> 题意：找到一个最长的子序列，其中相邻的不同元素最多为k个。
+>
+> - `1 <= nums.length <= 5 * 103`
+> - `1 <= nums[i] <= 109`
+> - `0 <= k <= min(50, nums.length)`
+>
+> 如果是暴力dp，我们需要保存多个状态。dfs（当前遍历到的元素下标，剩余可以使用的不同相邻元素，上一个元素 ），返回值就是选择的序列长度。这样时间复杂度是O(5000 * k * (不同元素个数<=5000) ) = 1.25e9，这肯定超时了。
+>
+> 优化：我们发现k特别的小，我们可以遍历以元素x结尾还可以使用k次不同。
+>
+> x==nums[i]: dp(nums[i],  k) = max( dp(nums[i],  k) + 1,  dp(y, k - 1) + 1)  ,其中y != nums[i]，这里可以用哈希表优化，见代码。
+
+```java
+import java.util.HashMap;
+
+class Solution {
+    public int maximumLength(int[] nums, int k) {
+        // dp[i][j]表示以i结尾的剩余j个不同下标可用的最长子序列
+        HashMap<Integer, int[]> fs = new HashMap<>();
+        int[] mx = new int[k + 1];
+        for (int x : nums) {
+            int[] f = fs.computeIfAbsent(x, e -> new int[k + 1]); // 取出以x结尾的序列
+            for (int i = k; i >= 0; i--) {
+                f[i]++;
+                if (i > 0) {
+                    f[i] = Math.max(f[i], mx[i - 1] + 1);
+                }
+                mx[i] = Math.max(mx[i], f[i]);
+            }
+        }
+        return mx[k];
+    }
+}
+```
+
+
+
 1553\. 吃掉 N 个橘子的最少天数
 --------------------
 

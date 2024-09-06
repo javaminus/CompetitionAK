@@ -1,12 +1,10 @@
+package com.nowcoder.mouth100;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
-public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-
-    static class Read {
+public class Main { private final static int INF = Integer.MAX_VALUE / 2;private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};static class Read {
         BufferedReader bf;
         StringTokenizer st;
         BufferedWriter bw;
@@ -119,9 +117,7 @@ public class Main {
             bw.newLine();
             return;
         }
-    }
-
-    private static int binarySearch1(int[] nums, int target) {
+    }private static int binarySearch1(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
@@ -132,9 +128,7 @@ public class Main {
             }
         }
         return right + 1;
-    }
-
-    private static int binarySearch2(int[] nums, int target) {
+    }private static int binarySearch2(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
@@ -145,9 +139,7 @@ public class Main {
             }
         }
         return left - 1;
-    }
-
-    static class Pair<T, U> {
+    }static class Pair<T, U> {
         T fir;
         U sec;
         public Pair(T fir, U sec) {
@@ -163,7 +155,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         // int T = sc.nextInt();
         while (T-- > 0) {
-            solve();
+            // solve();
             // sc.bw.flush();
         }
         sc.bw.flush();
@@ -174,11 +166,68 @@ public class Main {
     private static String s;
     private static char[] cs;
     private static List<Integer>[] g;
-    private static int n;
 
+    // https://ac.nowcoder.com/acm/contest/88878/D  太粗心了，-10写成10
+    private static void solveD() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt();
+        int x = sc.nextInt(), y = sc.nextInt();
+        char[][] cs = new char[n][m];
+        for (int i = 0; i < n; i++) {
+            cs[i] = sc.next().toCharArray();
+        }
+        boolean[][] visited = new boolean[n][m];
+        boolean[][] visitedC = new boolean[n][m];
+        visited[x - 1][y - 1] = true;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+        pq.offer(new int[]{x - 1, y - 1, 0, x - 1, y - 1});
+        while (!pq.isEmpty()) {
+            int[] poll = pq.poll();
+            int i = poll[0], j = poll[1], ci = poll[3], cj = poll[4];
+            for (int[] d : dirs) {
+                int newI = i + d[0], newJ = j + d[1], newCi = ci, newCj = cj;
+                if (ci != -10 && cj != -10) {
+                    newCi = ci - d[0];
+                    newCj = cj - d[1];
+                }
+                if (newI >= 0 && newJ >= 0 && newI < n && newJ < m && ((newCi >= 0 && newCj >= 0 && newCi < n && newCj < m) || (newCi == -10 && newCj == -10))) {
+                    if (newCi != -10 && newCj != -10) {
+                        if (cs[newI][newJ] == '#' || cs[newCi][newCj] == '#' || visited[newI][newJ]) {
+                            continue;
+                        }
+                        if (cs[newI][newJ] == '@' && cs[newCi][newCj] == '@') {
+                            sc.println(poll[2] + 1);
+                            return;
+                        } else if (cs[newI][newJ] == '@') {
+                            pq.offer(new int[]{newCi, newCj, poll[2] + 1, -10, -10});
+                            visited[newCi][newCj] = true;
+                        } else if (cs[newCi][newCj] == '@') {
+                            pq.offer(new int[]{newI, newJ, poll[2] + 1, -10, -10});
+                            visited[newI][newJ] = true;
+                        } else {
+                            pq.offer(new int[]{newI, newJ, poll[2] + 1, newCi, newCj});
+                            visited[newI][newJ] = true;
+                        }
+                    } else {
+                        if (cs[newI][newJ] == '#' || visitedC[newI][newJ]) {
+                            continue;
+                        }
+                        if (cs[newI][newJ] == '@') {
+                            sc.println(poll[2] + 1);
+                            return;
+                        } else {
+                            pq.offer(new int[]{newI, newJ, poll[2] + 1, -10, -10});
+                            visitedC[newI][newJ] = true;
+                        }
+                    }
+                }
+            }
+        }
+        sc.println(-1);
+    }
 
-    private static void solve() throws IOException {
-        n = sc.nextInt();
+    // https://ac.nowcoder.com/acm/contest/88878/E 堆的应用，又给我上一课
+    private static void solveE() throws IOException {
+        int n = sc.nextInt();
         ss = sc.nextLine().split(" ");
         TreeSet<Integer> set = new TreeSet<>();
         for (int i = 0; i < n; i++) {
@@ -201,6 +250,5 @@ public class Main {
         }
         sc.println(ans);
     }
-
 
 }
