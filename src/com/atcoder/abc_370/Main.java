@@ -1,11 +1,125 @@
+package com.atcoder.abc_370;
+
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
+    // https://atcoder.jp/contests/abc370/tasks/abc370_c 简单问题，简单处理，别想太复杂了
+    private static void solveC() throws IOException { // O(n^3)的时间复杂度
+        char[] s = sc.next().toCharArray(), t = sc.next().toCharArray();
+        ArrayList<String> ans = new ArrayList<>();
+        int n = s.length;
+        char[] nxt = new char[n];
+        while (!Arrays.equals(s, t)) {
+            Arrays.fill(nxt, 'z');
+            for (int i = 0; i < n; i++) {
+                if (s[i] != t[i]) {
+                    char[] tmp = s.clone();
+                    tmp[i] = t[i];
+                    if (compare(tmp, nxt)) {
+                        nxt = tmp;
+                    }
+                }
+            }
+            ans.add(new String(nxt));
+            s = nxt.clone();
+        }
+        sc.println(ans.size());
+        for (int i = 0; i < ans.size(); i++) {
+            sc.println(ans.get(i));
+        }
+    }
+
+    private static boolean compare(char[] s, char[] t) {
+        for (int i = 0; i < s.length; i++) {
+            if (s[i] < t[i]) {
+                return true;
+            } else if (s[i] > t[i]) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private static void solveC2() throws IOException {
+        char[] s = sc.next().toCharArray(), t = sc.next().toCharArray();
+        ArrayList<String> ans = new ArrayList<>();
+        int n = s.length;
+        ArrayList<Integer> diff = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (s[i] > t[i]) {
+                diff.add(i);
+            }
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            if (s[i] < t[i]) {
+                diff.add(i);
+            }
+        }
+        for (int id : diff) {
+            s[id] = t[id];
+            ans.add(new String(s));
+        }
+        sc.println(ans.size());
+        for (int i = 0; i < ans.size(); i++) {
+            sc.println(ans.get(i));
+        }
+    }
+
+    // https://atcoder.jp/contests/abc370/tasks/abc370_d
+    private static void solve() throws IOException {
+        int m = sc.nextInt(), n = sc.nextInt(), q = sc.nextInt();
+        TreeSet<Integer>[] g1 = new TreeSet[m];
+        TreeSet<Integer>[] g2 = new TreeSet[n];
+        Arrays.setAll(g1, e -> new TreeSet<>());
+        Arrays.setAll(g2, e -> new TreeSet<>());
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                g1[i].add(j);
+                g2[j].add(i);
+            }
+        }
+        while (q-- > 0) {
+            int i = sc.nextInt() - 1, j = sc.nextInt() - 1;
+            int left = -1, right = -1, top = -1, bottom = -1;
+            if (g1[i].floor(j) != null) {
+                left = g1[i].floor(j);
+            }
+            if (g1[i].ceiling(j) != null) {
+                right = g1[i].ceiling(j);
+            }
+            if (g2[j].ceiling(i) != null) {
+                bottom = g2[j].ceiling(i);
+            }
+            if (g2[j].floor(i) != null) {
+                top = g2[j].floor(i);
+            }
+            if (left != -1) {
+                g1[i].remove(left);
+                g2[left].remove(i);
+            }
+            if (right != -1) {
+                g1[i].remove(right);
+                g2[right].remove(i);
+            }
+            if (bottom != -1) {
+                g2[j].remove(bottom);
+                g1[bottom].remove(j);
+            }
+            if (top != -1) {
+                g2[j].remove(top);
+                g1[top].remove(j);
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            ans += g1[i].size();
+        }
+        sc.println(ans);
+    }
+
+
     private final static int INF = Integer.MAX_VALUE / 2;
     private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
@@ -153,6 +267,7 @@ public class Main {
     static class Pair<T, U> {
         T fir;
         U sec;
+
         public Pair(T fir, U sec) {
             this.fir = fir;
             this.sec = sec;
@@ -166,7 +281,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         // int T = sc.nextInt();
         while (T-- > 0) {
-            solve();
+            // solve();
             // sc.bw.flush();
         }
         sc.bw.flush();
@@ -178,43 +293,6 @@ public class Main {
     private static char[] cs;
     private static List<Integer>[] g;
     private static int n;
-
-
-    private static void solve() throws IOException {
-        int n = sc.nextInt(), m = sc.nextInt(), q = sc.nextInt();
-        int[] nums = new int[n];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-        }
-        int[] cnt = new int[1 << n];
-        for (int i = 0; i < m; i++) {
-            int mask = Integer.parseInt(sc.next(), 2); // 读入的数字转为10进制数字
-            cnt[mask]++;
-        }
-        int[] dp = new int[1 << n];
-        for (int i = 1; i < (1 << n); i++) {
-            int x = i & (-i);
-            dp[i] = dp[i - x] + nums[n - (32 - Integer.numberOfLeadingZeros(x))];
-        }
-        int[][] ans = new int[101][1 << n];
-        int u = (1 << n) - 1;
-        for (int x = 0; x < (1 << n); x++) {
-            for (int y = 0; y < (1 << n); y++) {
-                if (dp[u - (x ^ y)] <= 100) {
-                    ans[dp[u - (x ^ y)]][x] += cnt[y];
-                }
-            }
-            for (int y = 0; y < 100; y++) {
-                ans[y + 1][x] += ans[y][x];
-            }
-        }
-        while (q-- > 0) {
-            int mask = Integer.parseInt(sc.next(), 2);
-            int k = sc.nextInt();
-            sc.println(ans[k][mask]);
-        }
-    }
 
 
 }

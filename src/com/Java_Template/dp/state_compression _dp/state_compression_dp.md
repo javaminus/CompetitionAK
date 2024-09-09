@@ -1094,6 +1094,211 @@ class Solution { // 状压dp 70ms,纯暴力，没有贪心思想
 > 这种技巧常用于需要枚举一个集合所有子集的场景，特别是在动态规划、状态压缩等算法中非常有用。
 >
 
+3283\. 吃掉所有兵需要的最多移动次数
+---------------------
+
+给你一个 `50 x 50` 的国际象棋棋盘，棋盘上有 **一个** 马和一些兵。给你两个整数 `kx` 和 `ky` ，其中 `(kx, ky)` 表示马所在的位置，同时还有一个二维数组 `positions` ，其中 `positions[i] = [xi, yi]` 表示第 `i` 个兵在棋盘上的位置。
+
+Alice 和 Bob 玩一个回合制游戏，Alice 先手。玩家的一次操作中，可以执行以下操作：
+
+*   玩家选择一个仍然在棋盘上的兵，然后移动马，通过 **最少** 的 **步数** 吃掉这个兵。**注意** ，玩家可以选择 **任意** 一个兵，**不一定** 要选择从马的位置出发 **最少** 移动步数的兵。
+*   在马吃兵的过程中，马 **可能** 会经过一些其他兵的位置，但这些兵 **不会** 被吃掉。**只有** 选中的兵在这个回合中被吃掉。
+
+Alice 的目标是 **最大化** 两名玩家的 **总** 移动次数，直到棋盘上不再存在兵，而 Bob 的目标是 **最小化** 总移动次数。
+
+假设两名玩家都采用 **最优** 策略，请你返回 Alice 可以达到的 **最大** 总移动次数。
+
+在一次 **移动** 中，如下图所示，马有 8 个可以移动到的位置，每个移动位置都是沿着坐标轴的一个方向前进 2 格，然后沿着垂直的方向前进 1 格。
+
+![](https://assets.leetcode.com/uploads/2024/08/01/chess_knight.jpg)
+
+**示例 1：**
+
+**输入：**kx = 1, ky = 1, positions = \[\[0,0\]\]
+
+**输出：**4
+
+**解释：**
+
+![](https://assets.leetcode.com/uploads/2024/08/16/gif3.gif)
+
+马需要移动 4 步吃掉 `(0, 0)` 处的兵。
+
+**示例 2：**
+
+**输入：**kx = 0, ky = 2, positions = \[\[1,1\],\[2,2\],\[3,3\]\]
+
+**输出：**8
+
+**解释：**
+
+**![](https://assets.leetcode.com/uploads/2024/08/16/gif4.gif)**
+
+*   Alice 选择 `(2, 2)` 处的兵，移动马吃掉它需要 2 步：`(0, 2) -> (1, 4) -> (2, 2)` 。
+*   Bob 选择 `(3, 3)` 处的兵，移动马吃掉它需要 2 步：`(2, 2) -> (4, 1) -> (3, 3)` 。
+*   Alice 选择 `(1, 1)` 处的兵，移动马吃掉它需要 4 步：`(3, 3) -> (4, 1) -> (2, 2) -> (0, 3) -> (1, 1)` 。
+
+**示例 3：**
+
+**输入：**kx = 0, ky = 0, positions = \[\[1,2\],\[2,4\]\]
+
+**输出：**3
+
+**解释：**
+
+*   Alice 选择 `(2, 4)` 处的兵，移动马吃掉它需要 2 步：`(0, 0) -> (1, 2) -> (2, 4)` 。注意，`(1, 2)` 处的兵不会被吃掉。
+*   Bob 选择 `(1, 2)` 处的兵，移动马吃掉它需要 1 步：`(2, 4) -> (1, 2)` 。
+
+**提示：**
+
+*   `0 <= kx, ky <= 49`
+*   `1 <= positions.length <= 15`
+*   `positions[i].length == 2`
+*   `0 <= positions[i][0], positions[i][1] <= 49`
+*   `positions[i]` 两两互不相同。
+*   输入保证对于所有 `0 <= i < positions.length` ，都有 `positions[i] != [kx, ky]` 。
+
+[https://leetcode.cn/problems/maximum-number-of-moves-to-kill-all-pawns/description/](https://leetcode.cn/problems/maximum-number-of-moves-to-kill-all-pawns/description/)
+
+```java
+import java.util.ArrayDeque;
+import java.util.Arrays;
+
+class Solution { // 递归
+    private static int[][] dirs = new int[][]{{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
+    public int maxMoves(int kx, int ky, int[][] positions) {
+        int n = positions.length;
+        int[][][] dist = new int[n][50][50];
+        for (int i = 0; i < n; i++) {
+            int[][] d = dist[i];
+            for (int j = 0; j < 50; j++) {
+                Arrays.fill(d[j], -1);
+            }
+            int x = positions[i][0], y = positions[i][1];
+            d[x][y] = 0;
+            ArrayDeque<int[]> deque = new ArrayDeque<>();
+            deque.offerLast(new int[]{x, y});
+            int step = 1;
+            while (!deque.isEmpty()) {
+                int size = deque.size();
+                for (int j = 0; j < size; j++) {
+                    int[] poll = deque.pollFirst();
+                    for (int[] dir : dirs) {
+                        int nx = poll[0] + dir[0], ny = poll[1] + dir[1];
+                        if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50 && d[nx][ny] == -1) {
+                            d[nx][ny] = step;
+                            deque.offerLast(new int[]{nx, ny});
+                        }
+                    }
+                }
+                step++;
+            }
+        }
+        int[][] memo = new int[n + 1][1 << n];
+        for (int i = 0; i < n + 1; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+        return dfs(n, (1 << n) - 1, kx, ky, dist, positions, memo);
+    }
+
+    private int dfs(int i, int mask, int kx, int ky, int[][][] dist, int[][] position, int[][] memo) { // 定义状态为 dfs(i,mask)，表示当前马在第 i 个兵的位置，且剩余没有被吃掉的兵的集合为 mask 的情况下
+        if (mask == 0) {
+            return 0;
+        }
+        if (memo[i][mask] != -1) {
+            return memo[i][mask];
+        }
+        int n = position.length;
+        int x = i < n ? position[i][0] : kx;
+        int y = i < n ? position[i][1] : ky;
+        int res = 0;
+        int u = (1 << n) - 1;
+        // Alice操作
+        if ((Integer.bitCount(mask ^ u) & 1) == 0) {
+            for (int j = 0; j < n; j++) {
+                if (((mask >> j) & 1) == 1) {
+                    res = Math.max(res, dfs(j, mask ^ (1 << j), kx, ky, dist, position, memo) + dist[j][x][y]);
+                }
+            }
+        }// Bob操作
+        else{
+            res = Integer.MAX_VALUE;
+            for (int j = 0; j < n; j++) {
+                if (((mask >> j) & 1) == 1) {
+                    res = Math.min(res, dfs(j, mask ^ (1 << j), kx, ky, dist, position, memo) + dist[j][x][y]);
+                }
+            }
+        }
+        return memo[i][mask] = res;
+    }
+}
+```
+
+```java
+import java.util.ArrayDeque;
+import java.util.Arrays;
+
+class Solution { // 递推
+    private static int[][] dirs = new int[][]{{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
+    public int maxMoves(int kx, int ky, int[][] positions) {
+        int n = positions.length;
+        int[][][] dist = new int[n][50][50];
+        for (int i = 0; i < n; i++) {
+            int[][] d = dist[i];
+            for (int j = 0; j < 50; j++) {
+                Arrays.fill(d[j], -1);
+            }
+            int x = positions[i][0], y = positions[i][1];
+            d[x][y] = 0;
+            ArrayDeque<int[]> deque = new ArrayDeque<>();
+            deque.offerLast(new int[]{x, y});
+            int step = 1;
+            while (!deque.isEmpty()) {
+                int size = deque.size();
+                for (int j = 0; j < size; j++) {
+                    int[] poll = deque.pollFirst();
+                    for (int[] dir : dirs) {
+                        int nx = poll[0] + dir[0], ny = poll[1] + dir[1];
+                        if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50 && d[nx][ny] == -1) {
+                            d[nx][ny] = step;
+                            deque.offerLast(new int[]{nx, ny});
+                        }
+                    }
+                }
+                step++;
+            }
+        }
+        int u = (1 << n) - 1;
+        int[][] dp = new int[1 << n][n + 1];
+        for (int s = 1; s < (1 << n); s++) {
+            for (int i = 0; i <= n; i++) {
+                int x = i < n ? positions[i][0] : kx;
+                int y = i < n ? positions[i][1] : ky;
+                // Alice操作
+                if ((Integer.bitCount(s ^ u) & 1) == 0) {
+                    for (int j = 0; j < n; j++) {
+                        if (((s >> j) & 1) == 1) {
+                            dp[s][i] = Math.max(dp[s][i],  dp[s ^ (1 << j)][j] + dist[j][x][y]);
+                        }
+                    }
+                }// Bob操作
+                else{
+                    dp[s][i] = Integer.MAX_VALUE;
+                    for (int j = 0; j < n; j++) {
+                        if (((s >> j) & 1) == 1) {
+                            dp[s][i] = Math.min(dp[s][i], dp[s ^ (1 << j)][j] + dist[j][x][y]);
+                        }
+                    }
+                }
+            }
+        }
+        return dp[u][n];
+    }
+}
+```
+
+
+
 # §9.3 旅行商问题（TSP）
 
 # 本质上就是排列型 ②

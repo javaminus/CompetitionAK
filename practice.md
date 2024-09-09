@@ -371,5 +371,238 @@ public class Main{
 }
 ```
 
+## 2024/9/7
+
+[D. Polycarp's phone book ](https://codeforces.com/problemset/problem/858/D)
+
+```java
+public class Main{ // 策略1：统计整个列表中每个字符串的所有子字符串的出现频率，接下来对于每个字符串，只需查看是否所有出现频率都来自于当前字符串。
+	private static void solve() throws IOException { // 实现了一坨狗屎，见代码块二
+        n = sc.nextInt();
+        HashMap<String, Integer> map = new HashMap<>();
+        HashMap<String, Integer>[] maps = new HashMap[n];
+        ss = new String[n];
+        for (int i = 0; i < n; i++) {
+            HashMap<String, Integer> tmp = new HashMap<>();
+            s = sc.next();
+            ss[i] = s;
+            for (int j = 0; j < 9; j++) {
+                for (int k = j; k < 9; k++) {
+                    String s1 = s.substring(j, k + 1);
+                    map.put(s1, map.getOrDefault(s1, 0) + 1);
+                    tmp.put(s1, tmp.getOrDefault(s1, 0) + 1);
+                }
+            }
+            maps[i] = tmp;
+        }
+        next:
+        for (int i = 0; i < n; i++) {
+            s = ss[i];
+            for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
+                map.merge(entry.getKey(), -entry.getValue(), Integer::sum);
+            }
+            for (int j = 1; j < 10; j++) {
+                for (int k = 0; k + j < 10; k++) {
+                    String s1 = s.substring(k, j + k);
+                    Integer v = map.get(s1);
+                    if (v == 0) {
+                        sc.println(s1);
+                        for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
+                            map.merge(entry.getKey(), entry.getValue(), Integer::sum);
+                        }
+                        continue next;
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+```java
+public class Main {
+    static class Pair<T, U> { // 重写hashCode与equals方法
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Pair)) return false;
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(fir, pair.fir) && Objects.equals(sec, pair.sec);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fir, sec);
+        }
+    }
+
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        HashMap<Pair<Integer, Integer>, Integer> map = new HashMap<>(); // p<子字符串， 长度>，id
+        ss = new String[n];
+        for (int i = 0; i < n; i++) {
+            ss[i] = sc.next();
+            for (int j = 0; j < 9; j++) {
+                int cur = 0;
+                for (int k = j; k < 9; k++) {
+                    cur = cur * 10 + ss[i].charAt(k) - '0';
+                    Pair<Integer, Integer> pair = new Pair<>(cur, k - j);
+                    if (!map.containsKey(pair)) {
+                        map.put(pair, i);
+                    } else if (map.get(pair) != i) {
+                        map.put(pair, -1);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            int str_len = 10, start = 0;
+            for (int j = 0; j < 9; j++) {
+                int cur = 0;
+                for (int k = j; k < 9; k++) {
+                    cur = cur * 10 + ss[i].charAt(k) - '0';
+                    if (map.getOrDefault(new Pair<>(cur, k - j), -1) == i) {
+                        if (k - j < str_len) {
+                            str_len = k - j;
+                            start = j;
+                        }
+                    }
+                }
+            }
+            sc.println(ss[i].substring(start, start + str_len + 1));
+        }
+    }
+}
+```
+
+## 2024/9/9
+
+[B. ZgukistringZ ](https://codeforces.com/problemset/problem/551/B)
+
+```java
+	private static void solve() throws IOException {
+        String a = sc.next(), b = sc.next(), c = sc.next();
+        int[] cntA = new int[26], cntB = new int[26], cntC = new int[26];
+        for (int i = 0; i < a.length(); i++) {
+            cntA[a.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < b.length(); i++) {
+            cntB[b.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < c.length(); i++) {
+            cntC[c.charAt(i) - 'a']++;
+        }
+        int x = 0, y = 0;
+        boolean fl = true;
+        for (int i = 0; i * b.length() < a.length(); i++) {
+            int cnt = a.length();
+            for (int j = 0; j < 26; j++) {
+                if (cntA[j] < cntB[j] * i) {
+                    fl = false;
+                    break;
+                }
+                if (cntC[j] > 0) {
+                    cnt = Math.min(cnt, (cntA[j] - cntB[j] * i) / cntC[j]);
+                }
+            }
+            if (!fl) { // 剪枝
+                break;
+            }
+            if (i + cnt > x + y) {
+                x = i;
+                y = cnt;
+            }
+        }
+        StringBuilder ans = new StringBuilder();
+        for (int i = 0; i < x; i++) {
+            ans.append(b);
+        }
+        for (int i = 0; i < y; i++) {
+            ans.append(c);
+        }
+        for (int i = 0; i < 26; i++) {
+            for (int j = 0; j < cntA[i] - cntB[i] * x - cntC[i] * y; j++) {
+                ans.append((char) ('a' + i));
+            }
+        }
+        sc.println(String.valueOf(ans));
+    }
+```
+
+[D. The Wu ](https://codeforces.com/problemset/problem/1017/D)
+
+**提示 1：** 题中可能的字符串数量也不多，需要考虑的权值也不多。
+
+**提示 2：** 考虑预处理后直接查询。任意两个字符串之间计算的权值如何？计算完这件事后可以怎么统计权值小于等于 $x$ 的总字符串数量？
+
+首先，本题可能的字符串数量最多仅为 $2^{12}=4096$ 个，考虑的权值也只有 $101$ 种，所以适合进行预处理。我们先统计题目种给的不同种类的字符串的出现频率。
+
+接下来，为了预处理，我们应当计算任意两个字符串之间的权值。由于这样的字符串对有 $2^n\times 2^n=2^{2n}$ 对，因此我们要以足够低的时间复杂度查到答案。
+
+首先，可以枚举每一位看是否相同，进而确定总权值，这样做的时间复杂度为 $\mathcal{O}(n)​$ 。
+
+实际上也没必要这么做，我们可以考虑相同的位置集合为 $i_1,i_2,\dots,i_k$ ，则这些字符可以用一个 $2^n$ 以内的数 $msk$ 表示。
+
+考虑 $msk$ 对应的权值，我们考虑其最低位， $msk$ 去掉最低位是 $nmsk$ ，则 $msk$ 的权值等于 $nmsk$ 的权值加上最低位的权值，可以 $\mathcal{O}(1)$ 转移得到。
+
+因此我们可以用 $\mathcal{O}(2^n)$ 的复杂度快速计算每种相同位置集对应的总权值，接下来 $\mathcal{O}(1)$ 查询。
+
+接下来，我们在得到了任意两个字符串形成对的权值后，怎么查询与 $s$ 形成对权值不超过 $k$ 的字符串个数呢？
+
+在我们的预处理下，我们可以得到 $s$ 与所有可能字符串形成的权值，也可以得到它们出现的频率。于是将这些字符串用权值替代，我们相当于求权值不超过 $k$ 的元素出现的频率和。
+
+这件事可以通过二分解决，也可以直接预处理一个前缀和，记 $ans[s][k]$ 表示字符串为 $s$ 时，权值不超过 $k$ 的元素的频率和，则 $ans[s][k+1]=ans[s][k]+权值恰为 k+1 的字符串数量$ 。
+
+时间复杂度为 $\mathcal{O}(2^{2n}+2^nM+q)$ 。
+
+```java
+	private static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt(), q = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[] cnt = new int[1 << n];
+        for (int i = 0; i < m; i++) {
+            int mask = Integer.parseInt(sc.next(), 2); // 读入的数字转为10进制数字
+            cnt[mask]++;
+        }
+        int[] dp = new int[1 << n];
+        for (int i = 1; i < (1 << n); i++) {
+            int x = i & (-i);
+            dp[i] = dp[i - x] + nums[n - (32 - Integer.numberOfLeadingZeros(x))];
+        }
+        int[][] ans = new int[101][1 << n];
+        int u = (1 << n) - 1;
+        for (int x = 0; x < (1 << n); x++) {
+            for (int y = 0; y < (1 << n); y++) {
+                if (dp[u - (x ^ y)] <= 100) {
+                    ans[dp[u - (x ^ y)]][x] += cnt[y];
+                }
+            }
+            for (int y = 0; y < 100; y++) {
+                ans[y + 1][x] += ans[y][x];
+            }
+        }
+        while (q-- > 0) {
+            int mask = Integer.parseInt(sc.next(), 2);
+            int k = sc.nextInt();
+            sc.println(ans[k][mask]);
+        }
+    }
+```
+
+
+
+
+
 
 
