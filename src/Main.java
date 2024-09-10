@@ -1,9 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -181,38 +178,37 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        int n = sc.nextInt(), m = sc.nextInt(), q = sc.nextInt();
+        int n = sc.nextInt(), t = sc.nextInt();
         int[] nums = new int[n];
-        ss = sc.nextLine().split(" ");
+        int[] ts = new int[n];
         for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
+            nums[i] = sc.nextInt();
+            ts[i] = sc.nextInt();
         }
-        int[] cnt = new int[1 << n];
-        for (int i = 0; i < m; i++) {
-            int mask = Integer.parseInt(sc.next(), 2); // 读入的数字转为10进制数字
-            cnt[mask]++;
+        int ans = 0, tot = 0;
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
+        Integer[] order = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            order[i] = i;
         }
-        int[] dp = new int[1 << n];
-        for (int i = 1; i < (1 << n); i++) {
-            int x = i & (-i);
-            dp[i] = dp[i - x] + nums[n - (32 - Integer.numberOfLeadingZeros(x))];
-        }
-        int[][] ans = new int[101][1 << n];
-        int u = (1 << n) - 1;
-        for (int x = 0; x < (1 << n); x++) {
-            for (int y = 0; y < (1 << n); y++) {
-                if (dp[u - (x ^ y)] <= 100) {
-                    ans[dp[u - (x ^ y)]][x] += cnt[y];
-                }
+        Arrays.sort(order, (a, b) -> nums[b] - nums[a]);
+        for (int i : order) {
+            pq.add(ts[i]);
+            tot += ts[i];
+            if (tot > t) {
+                tot -= pq.poll();
             }
-            for (int y = 0; y < 100; y++) {
-                ans[y + 1][x] += ans[y][x];
-            }
+            ans = Math.max(ans, Math.min(pq.size(), nums[i]));
         }
-        while (q-- > 0) {
-            int mask = Integer.parseInt(sc.next(), 2);
-            int k = sc.nextInt();
-            sc.println(ans[k][mask]);
+        sc.println(ans);
+        sc.println(ans);
+        int cnt = 0;
+        Arrays.sort(order, (a, b) -> ts[a] - ts[b]);
+        for (int i : order) {
+            if (nums[i] >= ans && cnt < ans) {
+                cnt++;
+                sc.println((i + 1) + " ");
+            }
         }
     }
 

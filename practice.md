@@ -1,54 +1,479 @@
-## [2024/9/2](https://codeforces.com/problemset/problem/117/B)
 
-[B. Very Interesting Game ](https://codeforces.com/problemset/problem/117/B)
+
+## 2024/9/10
+
+[D. Too Easy Problems ](https://codeforces.com/problemset/problem/913/D)
+
+**提示 1：** 如果我们选择做 $k$ 个题，那么其中那些 $a_i\lt k$ 的题都应该不做。
+
+**提示 2：** 如果我们枚举做的题数，我们应该如何选取我们要做的题。
+
+**提示 3：** 请用尽可能简单的数据结构完成上述过程。
+
+首先，如果做了 $k$ 个题，那么做 $a_i\lt k$ 的题是吃力不讨好的：一方面浪费了时间，一方面又没有带来分数，我们可以直接不做这题，不影响最后最优化结果。
+
+因此，如果我们确定选取 $k$ 个题，我们一定选取 $a_i\geq k$ 的那部分。而为了总用时能在限制内，我们挑选其中用时最少的 $k$ 个题，看时间限制是否超过即可。
+
+上面我们已经完成了思路的解释，同时我们已经知道对于一个可行的 $k$ 如何找到 “最优” 方案。
+
+接下来只需找到最大的 $k$ ，考虑如何实现比较容易。
+
+我们考虑枚举 $k$ ，由于可选集随着 $k$ 的减小而增大，维护一个有序结构（因为这里要取最小的若干个数字）是增的操作更方便，因此考虑按照 $k$ 从高到低逆序遍历。
+
+接下来，我们本来应该考虑的问题是最小的 $k$ 个元素是否和超过了 $t$ ，但这个求和需要更多数据结构，我们反向考虑：元素和不超过 $t$ 的元素最多有多少个？
+
+这样我们就只需要用一个大顶堆维护最小的若干个元素，使得其和不超过 $t$ ，一旦超过，退出最大元素即可。
+
+假设堆中有 $m$ 个元素，则此时的 $k$ 对应的最多元素个数是 $\min(m, k)$ 。综上，只需要使用堆即可。
+
+时间复杂度为 $\mathcal{O}(n\log n)$ 。
+
+```java
+private static void solve() throws IOException {
+        int n = sc.nextInt(), t = sc.nextInt();
+        int[] nums = new int[n];
+        int[] ts = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = sc.nextInt();
+            ts[i] = sc.nextInt();
+        }
+        int ans = 0, tot = 0;
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
+        Integer[] order = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            order[i] = i;
+        }
+        Arrays.sort(order, (a, b) -> nums[b] - nums[a]);
+        for (int i : order) {
+            pq.add(ts[i]);
+            tot += ts[i];
+            if (tot > t) {
+                tot -= pq.poll();
+            }
+            ans = Math.max(ans, Math.min(pq.size(), nums[i]));
+        }
+        sc.println(ans);
+        sc.println(ans);
+        int cnt = 0;
+        Arrays.sort(order, (a, b) -> ts[a] - ts[b]);
+        for (int i : order) {
+            if (nums[i] >= ans && cnt < ans) {
+                cnt++;
+                sc.println((i + 1) + " ");
+            }
+        }
+    }
+```
+
+
+
+## 2024/9/9
+
+[B. ZgukistringZ ](https://codeforces.com/problemset/problem/551/B)
+
+```java
+	private static void solve() throws IOException {
+        String a = sc.next(), b = sc.next(), c = sc.next();
+        int[] cntA = new int[26], cntB = new int[26], cntC = new int[26];
+        for (int i = 0; i < a.length(); i++) {
+            cntA[a.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < b.length(); i++) {
+            cntB[b.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < c.length(); i++) {
+            cntC[c.charAt(i) - 'a']++;
+        }
+        int x = 0, y = 0;
+        boolean fl = true;
+        for (int i = 0; i * b.length() < a.length(); i++) {
+            int cnt = a.length();
+            for (int j = 0; j < 26; j++) {
+                if (cntA[j] < cntB[j] * i) {
+                    fl = false;
+                    break;
+                }
+                if (cntC[j] > 0) {
+                    cnt = Math.min(cnt, (cntA[j] - cntB[j] * i) / cntC[j]);
+                }
+            }
+            if (!fl) { // 剪枝
+                break;
+            }
+            if (i + cnt > x + y) {
+                x = i;
+                y = cnt;
+            }
+        }
+        StringBuilder ans = new StringBuilder();
+        for (int i = 0; i < x; i++) {
+            ans.append(b);
+        }
+        for (int i = 0; i < y; i++) {
+            ans.append(c);
+        }
+        for (int i = 0; i < 26; i++) {
+            for (int j = 0; j < cntA[i] - cntB[i] * x - cntC[i] * y; j++) {
+                ans.append((char) ('a' + i));
+            }
+        }
+        sc.println(String.valueOf(ans));
+    }
+```
+
+[D. The Wu ](https://codeforces.com/problemset/problem/1017/D)
+
+**提示 1：** 题中可能的字符串数量也不多，需要考虑的权值也不多。
+
+**提示 2：** 考虑预处理后直接查询。任意两个字符串之间计算的权值如何？计算完这件事后可以怎么统计权值小于等于 $x$ 的总字符串数量？
+
+首先，本题可能的字符串数量最多仅为 $2^{12}=4096$ 个，考虑的权值也只有 $101$ 种，所以适合进行预处理。我们先统计题目种给的不同种类的字符串的出现频率。
+
+接下来，为了预处理，我们应当计算任意两个字符串之间的权值。由于这样的字符串对有 $2^n\times 2^n=2^{2n}$ 对，因此我们要以足够低的时间复杂度查到答案。
+
+首先，可以枚举每一位看是否相同，进而确定总权值，这样做的时间复杂度为 $\mathcal{O}(n)$ 。
+
+实际上也没必要这么做，我们可以考虑相同的位置集合为 $i_1,i_2,\dots,i_k$ ，则这些字符可以用一个 $2^n$ 以内的数 $msk$ 表示。
+
+考虑 $msk$ 对应的权值，我们考虑其最低位， $msk$ 去掉最低位是 $nmsk$ ，则 $msk$ 的权值等于 $nmsk$ 的权值加上最低位的权值，可以 $\mathcal{O}(1)$ 转移得到。
+
+因此我们可以用 $\mathcal{O}(2^n)$ 的复杂度快速计算每种相同位置集对应的总权值，接下来 $\mathcal{O}(1)$ 查询。
+
+接下来，我们在得到了任意两个字符串形成对的权值后，怎么查询与 $s$ 形成对权值不超过 $k$ 的字符串个数呢？
+
+在我们的预处理下，我们可以得到 $s$ 与所有可能字符串形成的权值，也可以得到它们出现的频率。于是将这些字符串用权值替代，我们相当于求权值不超过 $k$ 的元素出现的频率和。
+
+这件事可以通过二分解决，也可以直接预处理一个前缀和，记 $ans[s][k]$ 表示字符串为 $s$ 时，权值不超过 $k$ 的元素的频率和，则 $ans[s][k+1]=ans[s][k]+权值恰为 k+1 的字符串数量$ 。
+
+时间复杂度为 $\mathcal{O}(2^{2n}+2^nM+q)$ 。
+
+```java
+	private static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt(), q = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[] cnt = new int[1 << n];
+        for (int i = 0; i < m; i++) {
+            int mask = Integer.parseInt(sc.next(), 2); // 读入的数字转为10进制数字
+            cnt[mask]++;
+        }
+        int[] dp = new int[1 << n];
+        for (int i = 1; i < (1 << n); i++) {
+            int x = i & (-i);
+            dp[i] = dp[i - x] + nums[n - (32 - Integer.numberOfLeadingZeros(x))];
+        }
+        int[][] ans = new int[101][1 << n];
+        int u = (1 << n) - 1;
+        for (int x = 0; x < (1 << n); x++) {
+            for (int y = 0; y < (1 << n); y++) {
+                if (dp[u - (x ^ y)] <= 100) {
+                    ans[dp[u - (x ^ y)]][x] += cnt[y];
+                }
+            }
+            for (int y = 0; y < 100; y++) {
+                ans[y + 1][x] += ans[y][x];
+            }
+        }
+        while (q-- > 0) {
+            int mask = Integer.parseInt(sc.next(), 2);
+            int k = sc.nextInt();
+            sc.println(ans[k][mask]);
+        }
+    }
+```
+
+## 2024/9/7
+
+[D. Polycarp's phone book ](https://codeforces.com/problemset/problem/858/D)
+
+```java
+public class Main{ // 策略1：统计整个列表中每个字符串的所有子字符串的出现频率，接下来对于每个字符串，只需查看是否所有出现频率都来自于当前字符串。
+	private static void solve() throws IOException { // 实现了一坨狗屎，见代码块二
+        n = sc.nextInt();
+        HashMap<String, Integer> map = new HashMap<>();
+        HashMap<String, Integer>[] maps = new HashMap[n];
+        ss = new String[n];
+        for (int i = 0; i < n; i++) {
+            HashMap<String, Integer> tmp = new HashMap<>();
+            s = sc.next();
+            ss[i] = s;
+            for (int j = 0; j < 9; j++) {
+                for (int k = j; k < 9; k++) {
+                    String s1 = s.substring(j, k + 1);
+                    map.put(s1, map.getOrDefault(s1, 0) + 1);
+                    tmp.put(s1, tmp.getOrDefault(s1, 0) + 1);
+                }
+            }
+            maps[i] = tmp;
+        }
+        next:
+        for (int i = 0; i < n; i++) {
+            s = ss[i];
+            for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
+                map.merge(entry.getKey(), -entry.getValue(), Integer::sum);
+            }
+            for (int j = 1; j < 10; j++) {
+                for (int k = 0; k + j < 10; k++) {
+                    String s1 = s.substring(k, j + k);
+                    Integer v = map.get(s1);
+                    if (v == 0) {
+                        sc.println(s1);
+                        for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
+                            map.merge(entry.getKey(), entry.getValue(), Integer::sum);
+                        }
+                        continue next;
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+```java
+public class Main {
+    static class Pair<T, U> { // 重写hashCode与equals方法
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Pair)) return false;
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(fir, pair.fir) && Objects.equals(sec, pair.sec);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fir, sec);
+        }
+    }
+
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        HashMap<Pair<Integer, Integer>, Integer> map = new HashMap<>(); // p<子字符串， 长度>，id
+        ss = new String[n];
+        for (int i = 0; i < n; i++) {
+            ss[i] = sc.next();
+            for (int j = 0; j < 9; j++) {
+                int cur = 0;
+                for (int k = j; k < 9; k++) {
+                    cur = cur * 10 + ss[i].charAt(k) - '0';
+                    Pair<Integer, Integer> pair = new Pair<>(cur, k - j);
+                    if (!map.containsKey(pair)) {
+                        map.put(pair, i);
+                    } else if (map.get(pair) != i) {
+                        map.put(pair, -1);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            int str_len = 10, start = 0;
+            for (int j = 0; j < 9; j++) {
+                int cur = 0;
+                for (int k = j; k < 9; k++) {
+                    cur = cur * 10 + ss[i].charAt(k) - '0';
+                    if (map.getOrDefault(new Pair<>(cur, k - j), -1) == i) {
+                        if (k - j < str_len) {
+                            str_len = k - j;
+                            start = j;
+                        }
+                    }
+                }
+            }
+            sc.println(ss[i].substring(start, start + str_len + 1));
+        }
+    }
+}
+```
+
+## 2024/9/6
+
+[B. Anton and Lines ](https://codeforces.com/problemset/problem/593/B)
+
+**提示 1：** 我们只需考虑两条直线在 $(x_1,x_2)$ 区间内长成啥样就行。
+
+**提示 2：** 在区间内两条直线要相交需要满足什么条件？
+
+首先，我们把我们的注意力聚焦到区间 $(x_1,x_2)$ ，我们只看直线被截取的这一个线段。
+
+这样，这边的两条线段如果要相交，即两条线段必须交叉穿过，则 **两条线段在 $x_1$ 和 $x_2$ 两端的大小关系会发生反转** ，即其中一条直线在 $x_1$ 处更大，另一条直线在 $x_2$ 处更大。
+
+于是，为了判断是否有交点，只需判断两侧的大小排序关系是否一致即可。
+
+为此，我们可以用二元组 $(f(x_1),f(x_2))$ 表示直线，并将其排序，如果第二个维度仍然满足非降序，则无交点，否则有交点。
+
+时间复杂度为 $\mathcal{O}(n\log n)$ 。
 
 ```java
 public class Main{
     private static void solve() throws IOException {
-        int a = sc.nextInt(), b = sc.nextInt(), k = sc.nextInt();
-        int p = (int) 1e9 % k;
-        // a*p
-        long x = 0;
-        for (int i = 0; i <= Math.min(k, a); i++) {
-            x = (long) i * p % k;
-            if ((k - x) % k > b) {
-                s = Integer.toString(i);
-                StringBuilder ans = new StringBuilder();
-                for (int j = 0; j < 9 - s.length(); j++) {
-                    ans.append('0');
-                }
-                ans.append(s);
-                sc.println("1 " + ans);
+        n = sc.nextInt();
+        long x1 = sc.nextLong(), x2 = sc.nextLong();
+        long[][] pairs = new long[n][2];
+        for (int i = 0; i < n; i++) {
+            int k = sc.nextInt(), b = sc.nextInt();
+            pairs[i][0] = k * x1 + b;
+            pairs[i][1] = k * x2 + b;
+        }
+        Arrays.sort(pairs, (a, b) -> a[0] == b[0] ? Long.compare(a[1], b[1]) : Long.compare(a[0], b[0]));
+        for (int i = 1; i < n; i++) {
+            if (pairs[i][1] < pairs[i - 1][1]) {
+                sc.println("YES");
                 return;
             }
         }
-        sc.println(2);
+        sc.println("NO");
     }
 }
 ```
 
-[C. Lucky Days ](https://codeforces.com/problemset/problem/1055/C)
+## 2024/9/5
+
+[D. k-Interesting Pairs Of Integers ](https://codeforces.com/problemset/problem/769/D)
+
+> 给你一个数组，问有多少对数二进制位数不同个数恰好为k
+>
+> 提示：二进制个数不同为k：nums[i] ^ nums[j] == k
 
 ```java
-public class Main{ // 斐蜀定理
+public class Main{ // 解法一
     private static void solve() throws IOException {
+        int n = sc.nextInt(), k = sc.nextInt();
+        int[] nums = new int[n];
+        int[] cnt = new int[10001];
         ss = sc.nextLine().split(" ");
-        int la = Integer.parseInt(ss[0]), ra = Integer.parseInt(ss[1]), ta = Integer.parseInt(ss[2]);
-        ss = sc.nextLine().split(" ");
-        int lb = Integer.parseInt(ss[0]), rb = Integer.parseInt(ss[1]), tb = Integer.parseInt(ss[2]);
-        int lenA = ra - la + 1, lenB = rb - lb + 1, d = gcd(ta, tb);
-        int x = la - lb; // 相对起点距离
-        x = (x % d + d) % d;
-        int ans = Math.max(0, Math.max(Math.min(x + lenA, lenB) - x, Math.min(x - d + lenA, lenB)));
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            cnt[nums[i]]++;
+        }
+        long ans = 0L;
+        if (k == 0) {
+            for (int i = 0; i < 10001; i++) {
+                ans += (long) cnt[i] * (cnt[i] - 1) / 2;
+            }
+        }else{
+            for (int i = 0; i < 10001; i++) {
+                for (int j = i + 1; j < 10001; j++) {
+                    // 看其异或二进制是否满足有k个1
+                    if (Integer.bitCount(i ^ j) == k) {
+                        ans += (long) cnt[i] * cnt[j];
+                    }
+                }
+            }
+        }
         sc.println(ans);
     }
-
-    private static int gcd(int a, int b) {
-        return b == 0 ? a : gcd(b, a % b);
-    }
-
 }
 ```
+
+**提示 1：** 注意值域很小，而数字我们只在乎出现的频率，因此 $n$ 对我们来说就没啥用了。
+
+**提示 2：** 统计完每个数字的频率后，应该怎么找异或呢？
+
+首先，本题 $n$ 比值域还大不少，而我们统计的对不在乎数字的顺序，只在乎其数值，因此应当选择直接统计数字出现的频率。
+
+接下来，我们相当于只有 $10^4$ 个项。如果此时有可能可以直接使用 $\mathcal{O}(M^2)$ 直接枚举两项，看其异或二进制是否满足有 $k$ 个 $1$ ，再进行对应的统计。
+
+但本题还有更快的做法。 $10^4$ 以内的数二进制表示不超过 $14$ 位，因此异或后的结果也不超过 $14$ 位。而 $14$ 位中，选取 $k$ 个变成 $1$ 总共有 $C_{14}^k$ 种选法，最大值为 $C_{14}^7=3432$ 数量相当少。
+
+因此我们先得到可能的目标数值，再枚举我们选择的一个数和目标数值，进而用两者的异或得到另一个数，这样，时间复杂度就变成了 $\mathcal{O}(n+MC_{\lceil\log M\rceil}^{k})$ 。
+
+注意，部分做法可能需要考虑 $k=0$ 的特殊情况。
+
+```java
+public class Main{ // 解法二 枚举值域y, 因为 y<<n
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), k = sc.nextInt();
+        int[] nums = new int[n];
+        int[] cnt = new int[1 << 14];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            cnt[nums[i]]++;
+        }
+        long ans = 0L;
+        if (k == 0) {
+            for (int i = 0; i < (1 << 14); i++) {
+                ans += (long) cnt[i] * (cnt[i] - 1) / 2;
+            }
+        }else{
+            ArrayList<Integer> vals = new ArrayList<>();
+            for (int i = 0; i < (1 << 14); i++) {
+                if (Integer.bitCount(i) == k) {
+                    vals.add(i);
+                }
+            }
+            for (int i = 0; i < (1 << 14); i++) {
+                for (int x : vals) {
+                    ans += (long) cnt[i] * cnt[x ^ i];
+                }
+            }
+            ans /= 2;
+        }
+        sc.println(ans);
+    }
+}
+```
+
+[D. Queue ](https://codeforces.com/problemset/problem/353/D)
+
+**提示 1：** 我们只需要考虑 M / F 怎么移动，不需要同时考虑，因为一个走完了，另一个也到位了。
+
+**提示 2：** 不妨考虑 F，其每次执行交换操作实际上发生了什么？
+
+**提示 3：** 如何处理 “堵车” 的情况。
+
+再次印证了分数和难度不完全正相关这件事。
+
+首先，我们只需考虑 F 什么时候到最前面，因为 F 如果都到了最前面，那 M 也都在最后面了，就已经满足了要求。（只考虑 M 什么时候到最后面逻辑也是一样的）
+
+接下来考虑交换操作做了什么。你会发现，交换操作相当于 F 前面少了个 M 。因此每个 F 要经过几次交换只跟前面有几个 M 有关。
+
+答案是否也是只跟 F 前面有几个 M 有关呢？这件事是否定的。因为可能发生 “堵车” 。看到第二个样例，即使一个 F 前面还有 M ，仍然可能因为两个 F 连续，导致不得不多等一轮。
+
+而如果不堵，两个 F 会同时到达目标，因此在堵的情况下，后面的 F 会需要比前面更多的时间到达目标位置，因此后面的 F 答案应至少为当前的答案 $+1$ 。
+
+于是，只需结合我们上述两个分析即可。考虑前面 M 的数量是 $cnt$ ，当前答案是 $ans$ ，则新的一个 F 对应的结果为 $\max(ans+1,cnt)$ 。
+
+注意，如果当前考虑 F 是在开头连续的一段，则无需移动，即无需进行上述答案的更新。
+
+时间复杂度为 $\mathcal{O}(n)$ 。 
+
+就是MF 与MFMF 是一样的
+
+```java
+public class Main{
+	private static void solve() throws IOException {
+        cs = sc.next().toCharArray();
+        int n = cs.length, cntM = 0;
+        long ans = 0L;
+        for (int i = 0; i < n; i++) {
+            if (cs[i] == 'M') {
+                cntM++;
+            } else if (cntM > 0) { // cs[i] == 'F', 如果前面是F拥堵，就是ans+1; 如果前面是M，就是cntM
+                ans = Math.max(ans + 1, cntM);
+            }
+        }
+        sc.println(ans);
+    }
+}
+```
+
+## 2024/9/4
+
+[A. Jzzhu and Chocolate ](https://codeforces.com/problemset/problem/449/A)
+
+[B. Obsessive String ](https://codeforces.com/problemset/problem/494/B)
 
 ## 2024/9/3
 
@@ -192,415 +617,57 @@ public class Main {
 }
 ```
 
-## 2024/9/4
+## [2024/9/2](https://codeforces.com/problemset/problem/117/B)
 
-[A. Jzzhu and Chocolate ](https://codeforces.com/problemset/problem/449/A)
-
-[B. Obsessive String ](https://codeforces.com/problemset/problem/494/B)
-
-## 2024/9/5
-
-[D. k-Interesting Pairs Of Integers ](https://codeforces.com/problemset/problem/769/D)
-
-> 给你一个数组，问有多少对数二进制位数不同个数恰好为k
->
-> 提示：二进制个数不同为k：nums[i] ^ nums[j] == k
-
-```java
-public class Main{ // 解法一
-    private static void solve() throws IOException {
-        int n = sc.nextInt(), k = sc.nextInt();
-        int[] nums = new int[n];
-        int[] cnt = new int[10001];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-            cnt[nums[i]]++;
-        }
-        long ans = 0L;
-        if (k == 0) {
-            for (int i = 0; i < 10001; i++) {
-                ans += (long) cnt[i] * (cnt[i] - 1) / 2;
-            }
-        }else{
-            for (int i = 0; i < 10001; i++) {
-                for (int j = i + 1; j < 10001; j++) {
-                    // 看其异或二进制是否满足有k个1
-                    if (Integer.bitCount(i ^ j) == k) {
-                        ans += (long) cnt[i] * cnt[j];
-                    }
-                }
-            }
-        }
-        sc.println(ans);
-    }
-}
-```
-
-**提示 1：** 注意值域很小，而数字我们只在乎出现的频率，因此 $n$ 对我们来说就没啥用了。
-
-**提示 2：** 统计完每个数字的频率后，应该怎么找异或呢？
-
-首先，本题 $n$ 比值域还大不少，而我们统计的对不在乎数字的顺序，只在乎其数值，因此应当选择直接统计数字出现的频率。
-
-接下来，我们相当于只有 $10^4$ 个项。如果此时有可能可以直接使用 $\mathcal{O}(M^2)$ 直接枚举两项，看其异或二进制是否满足有 $k$ 个 $1$ ，再进行对应的统计。
-
-但本题还有更快的做法。 $10^4$ 以内的数二进制表示不超过 $14$ 位，因此异或后的结果也不超过 $14$ 位。而 $14$ 位中，选取 $k$ 个变成 $1$ 总共有 $C_{14}^k$ 种选法，最大值为 $C_{14}^7=3432$ 数量相当少。
-
-因此我们先得到可能的目标数值，再枚举我们选择的一个数和目标数值，进而用两者的异或得到另一个数，这样，时间复杂度就变成了 $\mathcal{O}(n+MC_{\lceil\log M\rceil}^{k})$ 。
-
-注意，部分做法可能需要考虑 $k=0$ 的特殊情况。
-
-```java
-public class Main{ // 解法二 枚举值域y, 因为 y<<n
-    private static void solve() throws IOException {
-        int n = sc.nextInt(), k = sc.nextInt();
-        int[] nums = new int[n];
-        int[] cnt = new int[1 << 14];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-            cnt[nums[i]]++;
-        }
-        long ans = 0L;
-        if (k == 0) {
-            for (int i = 0; i < (1 << 14); i++) {
-                ans += (long) cnt[i] * (cnt[i] - 1) / 2;
-            }
-        }else{
-            ArrayList<Integer> vals = new ArrayList<>();
-            for (int i = 0; i < (1 << 14); i++) {
-                if (Integer.bitCount(i) == k) {
-                    vals.add(i);
-                }
-            }
-            for (int i = 0; i < (1 << 14); i++) {
-                for (int x : vals) {
-                    ans += (long) cnt[i] * cnt[x ^ i];
-                }
-            }
-            ans /= 2;
-        }
-        sc.println(ans);
-    }
-}
-```
-
-[D. Queue ](https://codeforces.com/problemset/problem/353/D)
-
-**提示 1：** 我们只需要考虑 M / F 怎么移动，不需要同时考虑，因为一个走完了，另一个也到位了。
-
-**提示 2：** 不妨考虑 F，其每次执行交换操作实际上发生了什么？
-
-**提示 3：** 如何处理 “堵车” 的情况。
-
-再次印证了分数和难度不完全正相关这件事。
-
-首先，我们只需考虑 F 什么时候到最前面，因为 F 如果都到了最前面，那 M 也都在最后面了，就已经满足了要求。（只考虑 M 什么时候到最后面逻辑也是一样的）
-
-接下来考虑交换操作做了什么。你会发现，交换操作相当于 F 前面少了个 M 。因此每个 F 要经过几次交换只跟前面有几个 M 有关。
-
-答案是否也是只跟 F 前面有几个 M 有关呢？这件事是否定的。因为可能发生 “堵车” 。看到第二个样例，即使一个 F 前面还有 M ，仍然可能因为两个 F 连续，导致不得不多等一轮。
-
-而如果不堵，两个 F 会同时到达目标，因此在堵的情况下，后面的 F 会需要比前面更多的时间到达目标位置，因此后面的 F 答案应至少为当前的答案 $+1$ 。
-
-于是，只需结合我们上述两个分析即可。考虑前面 M 的数量是 $cnt$ ，当前答案是 $ans$ ，则新的一个 F 对应的结果为 $\max(ans+1,cnt)$ 。
-
-注意，如果当前考虑 F 是在开头连续的一段，则无需移动，即无需进行上述答案的更新。
-
-时间复杂度为 $\mathcal{O}(n)$ 。 
-
-就是MF 与MFMF 是一样的
-
-```java
-public class Main{
-	private static void solve() throws IOException {
-        cs = sc.next().toCharArray();
-        int n = cs.length, cntM = 0;
-        long ans = 0L;
-        for (int i = 0; i < n; i++) {
-            if (cs[i] == 'M') {
-                cntM++;
-            } else if (cntM > 0) { // cs[i] == 'F', 如果前面是F拥堵，就是ans+1; 如果前面是M，就是cntM
-                ans = Math.max(ans + 1, cntM);
-            }
-        }
-        sc.println(ans);
-    }
-}
-```
-
-## 2024/9/6
-
-[B. Anton and Lines ](https://codeforces.com/problemset/problem/593/B)
-
-**提示 1：** 我们只需考虑两条直线在 $(x_1,x_2)$ 区间内长成啥样就行。
-
-**提示 2：** 在区间内两条直线要相交需要满足什么条件？
-
-首先，我们把我们的注意力聚焦到区间 $(x_1,x_2)$ ，我们只看直线被截取的这一个线段。
-
-这样，这边的两条线段如果要相交，即两条线段必须交叉穿过，则 **两条线段在 $x_1$ 和 $x_2$ 两端的大小关系会发生反转** ，即其中一条直线在 $x_1$ 处更大，另一条直线在 $x_2$ 处更大。
-
-于是，为了判断是否有交点，只需判断两侧的大小排序关系是否一致即可。
-
-为此，我们可以用二元组 $(f(x_1),f(x_2))$ 表示直线，并将其排序，如果第二个维度仍然满足非降序，则无交点，否则有交点。
-
-时间复杂度为 $\mathcal{O}(n\log n)$ 。
+[B. Very Interesting Game ](https://codeforces.com/problemset/problem/117/B)
 
 ```java
 public class Main{
     private static void solve() throws IOException {
-        n = sc.nextInt();
-        long x1 = sc.nextLong(), x2 = sc.nextLong();
-        long[][] pairs = new long[n][2];
-        for (int i = 0; i < n; i++) {
-            int k = sc.nextInt(), b = sc.nextInt();
-            pairs[i][0] = k * x1 + b;
-            pairs[i][1] = k * x2 + b;
-        }
-        Arrays.sort(pairs, (a, b) -> a[0] == b[0] ? Long.compare(a[1], b[1]) : Long.compare(a[0], b[0]));
-        for (int i = 1; i < n; i++) {
-            if (pairs[i][1] < pairs[i - 1][1]) {
-                sc.println("YES");
+        int a = sc.nextInt(), b = sc.nextInt(), k = sc.nextInt();
+        int p = (int) 1e9 % k;
+        // a*p
+        long x = 0;
+        for (int i = 0; i <= Math.min(k, a); i++) {
+            x = (long) i * p % k;
+            if ((k - x) % k > b) {
+                s = Integer.toString(i);
+                StringBuilder ans = new StringBuilder();
+                for (int j = 0; j < 9 - s.length(); j++) {
+                    ans.append('0');
+                }
+                ans.append(s);
+                sc.println("1 " + ans);
                 return;
             }
         }
-        sc.println("NO");
+        sc.println(2);
     }
 }
 ```
 
-## 2024/9/7
-
-[D. Polycarp's phone book ](https://codeforces.com/problemset/problem/858/D)
+[C. Lucky Days ](https://codeforces.com/problemset/problem/1055/C)
 
 ```java
-public class Main{ // 策略1：统计整个列表中每个字符串的所有子字符串的出现频率，接下来对于每个字符串，只需查看是否所有出现频率都来自于当前字符串。
-	private static void solve() throws IOException { // 实现了一坨狗屎，见代码块二
-        n = sc.nextInt();
-        HashMap<String, Integer> map = new HashMap<>();
-        HashMap<String, Integer>[] maps = new HashMap[n];
-        ss = new String[n];
-        for (int i = 0; i < n; i++) {
-            HashMap<String, Integer> tmp = new HashMap<>();
-            s = sc.next();
-            ss[i] = s;
-            for (int j = 0; j < 9; j++) {
-                for (int k = j; k < 9; k++) {
-                    String s1 = s.substring(j, k + 1);
-                    map.put(s1, map.getOrDefault(s1, 0) + 1);
-                    tmp.put(s1, tmp.getOrDefault(s1, 0) + 1);
-                }
-            }
-            maps[i] = tmp;
-        }
-        next:
-        for (int i = 0; i < n; i++) {
-            s = ss[i];
-            for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
-                map.merge(entry.getKey(), -entry.getValue(), Integer::sum);
-            }
-            for (int j = 1; j < 10; j++) {
-                for (int k = 0; k + j < 10; k++) {
-                    String s1 = s.substring(k, j + k);
-                    Integer v = map.get(s1);
-                    if (v == 0) {
-                        sc.println(s1);
-                        for (Map.Entry<String, Integer> entry : maps[i].entrySet()) {
-                            map.merge(entry.getKey(), entry.getValue(), Integer::sum);
-                        }
-                        continue next;
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-```java
-public class Main {
-    static class Pair<T, U> { // 重写hashCode与equals方法
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Pair)) return false;
-            Pair<?, ?> pair = (Pair<?, ?>) o;
-            return Objects.equals(fir, pair.fir) && Objects.equals(sec, pair.sec);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(fir, sec);
-        }
-    }
-
+public class Main{ // 斐蜀定理
     private static void solve() throws IOException {
-        n = sc.nextInt();
-        HashMap<Pair<Integer, Integer>, Integer> map = new HashMap<>(); // p<子字符串， 长度>，id
-        ss = new String[n];
-        for (int i = 0; i < n; i++) {
-            ss[i] = sc.next();
-            for (int j = 0; j < 9; j++) {
-                int cur = 0;
-                for (int k = j; k < 9; k++) {
-                    cur = cur * 10 + ss[i].charAt(k) - '0';
-                    Pair<Integer, Integer> pair = new Pair<>(cur, k - j);
-                    if (!map.containsKey(pair)) {
-                        map.put(pair, i);
-                    } else if (map.get(pair) != i) {
-                        map.put(pair, -1);
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < n; i++) {
-            int str_len = 10, start = 0;
-            for (int j = 0; j < 9; j++) {
-                int cur = 0;
-                for (int k = j; k < 9; k++) {
-                    cur = cur * 10 + ss[i].charAt(k) - '0';
-                    if (map.getOrDefault(new Pair<>(cur, k - j), -1) == i) {
-                        if (k - j < str_len) {
-                            str_len = k - j;
-                            start = j;
-                        }
-                    }
-                }
-            }
-            sc.println(ss[i].substring(start, start + str_len + 1));
-        }
+        ss = sc.nextLine().split(" ");
+        int la = Integer.parseInt(ss[0]), ra = Integer.parseInt(ss[1]), ta = Integer.parseInt(ss[2]);
+        ss = sc.nextLine().split(" ");
+        int lb = Integer.parseInt(ss[0]), rb = Integer.parseInt(ss[1]), tb = Integer.parseInt(ss[2]);
+        int lenA = ra - la + 1, lenB = rb - lb + 1, d = gcd(ta, tb);
+        int x = la - lb; // 相对起点距离
+        x = (x % d + d) % d;
+        int ans = Math.max(0, Math.max(Math.min(x + lenA, lenB) - x, Math.min(x - d + lenA, lenB)));
+        sc.println(ans);
     }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
 }
 ```
-
-## 2024/9/9
-
-[B. ZgukistringZ ](https://codeforces.com/problemset/problem/551/B)
-
-```java
-	private static void solve() throws IOException {
-        String a = sc.next(), b = sc.next(), c = sc.next();
-        int[] cntA = new int[26], cntB = new int[26], cntC = new int[26];
-        for (int i = 0; i < a.length(); i++) {
-            cntA[a.charAt(i) - 'a']++;
-        }
-        for (int i = 0; i < b.length(); i++) {
-            cntB[b.charAt(i) - 'a']++;
-        }
-        for (int i = 0; i < c.length(); i++) {
-            cntC[c.charAt(i) - 'a']++;
-        }
-        int x = 0, y = 0;
-        boolean fl = true;
-        for (int i = 0; i * b.length() < a.length(); i++) {
-            int cnt = a.length();
-            for (int j = 0; j < 26; j++) {
-                if (cntA[j] < cntB[j] * i) {
-                    fl = false;
-                    break;
-                }
-                if (cntC[j] > 0) {
-                    cnt = Math.min(cnt, (cntA[j] - cntB[j] * i) / cntC[j]);
-                }
-            }
-            if (!fl) { // 剪枝
-                break;
-            }
-            if (i + cnt > x + y) {
-                x = i;
-                y = cnt;
-            }
-        }
-        StringBuilder ans = new StringBuilder();
-        for (int i = 0; i < x; i++) {
-            ans.append(b);
-        }
-        for (int i = 0; i < y; i++) {
-            ans.append(c);
-        }
-        for (int i = 0; i < 26; i++) {
-            for (int j = 0; j < cntA[i] - cntB[i] * x - cntC[i] * y; j++) {
-                ans.append((char) ('a' + i));
-            }
-        }
-        sc.println(String.valueOf(ans));
-    }
-```
-
-[D. The Wu ](https://codeforces.com/problemset/problem/1017/D)
-
-**提示 1：** 题中可能的字符串数量也不多，需要考虑的权值也不多。
-
-**提示 2：** 考虑预处理后直接查询。任意两个字符串之间计算的权值如何？计算完这件事后可以怎么统计权值小于等于 $x$ 的总字符串数量？
-
-首先，本题可能的字符串数量最多仅为 $2^{12}=4096$ 个，考虑的权值也只有 $101$ 种，所以适合进行预处理。我们先统计题目种给的不同种类的字符串的出现频率。
-
-接下来，为了预处理，我们应当计算任意两个字符串之间的权值。由于这样的字符串对有 $2^n\times 2^n=2^{2n}$ 对，因此我们要以足够低的时间复杂度查到答案。
-
-首先，可以枚举每一位看是否相同，进而确定总权值，这样做的时间复杂度为 $\mathcal{O}(n)​$ 。
-
-实际上也没必要这么做，我们可以考虑相同的位置集合为 $i_1,i_2,\dots,i_k$ ，则这些字符可以用一个 $2^n$ 以内的数 $msk$ 表示。
-
-考虑 $msk$ 对应的权值，我们考虑其最低位， $msk$ 去掉最低位是 $nmsk$ ，则 $msk$ 的权值等于 $nmsk$ 的权值加上最低位的权值，可以 $\mathcal{O}(1)$ 转移得到。
-
-因此我们可以用 $\mathcal{O}(2^n)$ 的复杂度快速计算每种相同位置集对应的总权值，接下来 $\mathcal{O}(1)$ 查询。
-
-接下来，我们在得到了任意两个字符串形成对的权值后，怎么查询与 $s$ 形成对权值不超过 $k$ 的字符串个数呢？
-
-在我们的预处理下，我们可以得到 $s$ 与所有可能字符串形成的权值，也可以得到它们出现的频率。于是将这些字符串用权值替代，我们相当于求权值不超过 $k$ 的元素出现的频率和。
-
-这件事可以通过二分解决，也可以直接预处理一个前缀和，记 $ans[s][k]$ 表示字符串为 $s$ 时，权值不超过 $k$ 的元素的频率和，则 $ans[s][k+1]=ans[s][k]+权值恰为 k+1 的字符串数量$ 。
-
-时间复杂度为 $\mathcal{O}(2^{2n}+2^nM+q)$ 。
-
-```java
-	private static void solve() throws IOException {
-        int n = sc.nextInt(), m = sc.nextInt(), q = sc.nextInt();
-        int[] nums = new int[n];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-        }
-        int[] cnt = new int[1 << n];
-        for (int i = 0; i < m; i++) {
-            int mask = Integer.parseInt(sc.next(), 2); // 读入的数字转为10进制数字
-            cnt[mask]++;
-        }
-        int[] dp = new int[1 << n];
-        for (int i = 1; i < (1 << n); i++) {
-            int x = i & (-i);
-            dp[i] = dp[i - x] + nums[n - (32 - Integer.numberOfLeadingZeros(x))];
-        }
-        int[][] ans = new int[101][1 << n];
-        int u = (1 << n) - 1;
-        for (int x = 0; x < (1 << n); x++) {
-            for (int y = 0; y < (1 << n); y++) {
-                if (dp[u - (x ^ y)] <= 100) {
-                    ans[dp[u - (x ^ y)]][x] += cnt[y];
-                }
-            }
-            for (int y = 0; y < 100; y++) {
-                ans[y + 1][x] += ans[y][x];
-            }
-        }
-        while (q-- > 0) {
-            int mask = Integer.parseInt(sc.next(), 2);
-            int k = sc.nextInt();
-            sc.println(ans[k][mask]);
-        }
-    }
-```
-
-
 
 
 
