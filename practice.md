@@ -1,3 +1,103 @@
+## 2024/9/11
+
+[B. Processing Queries ](https://codeforces.com/problemset/problem/644/B)
+
+**提示 1：** 每项工作是否被执行只跟对应工作的开始时间有关，一旦执行就是顺序排队。
+
+**提示 2：** 要判断的是每项工作开始时，排队的有几项工作。可以模拟这个队伍。
+
+首先，一旦工作加入了执行列表，其真实结束时间可以立即确定：如果加入时，前面完全没有任何工作，则其结束时间为 $t_i+d_i$ ；否则，结束时间为上一份工作结束的时间加上 $d_i$ 。
+
+因此，本题的关键仅在于如何判断这项工作是否是执行的。
+
+考虑维护目前的工作队列，此时新来了一项工作，对应信息为 $t,d$ ，则当前工作队列中，结束时间在 $t$ 之前的都可以退出队列。
+
+而剩余的工作中，第一项是正在执行的，后续的项时正在排队的，因此，只要此时的队列长度不超过 $b$ ，我们就可以加入新的工作。
+
+发现我们判断队列和计算用时的时候只需要用到工作的实际结束时间，因此队列中只需存储这件事即可。
+
+时间复杂度为 $\mathcal{O}(n)$ 。
+
+```java
+public class Main{    
+	private static void solve() throws IOException {
+        int n = sc.nextInt(), b = sc.nextInt();
+        Deque<Long> deque = new LinkedList<>();
+        while (n-- > 0) {
+            long start = sc.nextLong(), x = sc.nextLong();
+            while (!deque.isEmpty() && deque.peekFirst() <= start) {
+                deque.pollFirst();
+            }
+            if (deque.size() > b) {
+                sc.print(-1 + " ");
+            }else{
+                if (!deque.isEmpty()) {
+                    start = Math.max(start, deque.peekLast());
+                }
+                sc.print((start + x) + " ");
+                deque.offerLast(start + x);
+            }
+        }
+    }
+}
+```
+
+[B. Sereja and Periods ](https://codeforces.com/problemset/problem/314/B)
+
+**提示 1：** 先简化问题：这个 $d$ 是最没用的变量，我们直接统计出现 $c$ 字符串多少次，再除以 $d$ 就是答案了。
+
+**提示 2：** 假设我们目前到了 $w$ 字符串的某个位置，而匹配到了 $c$ 的第 $i$ 个位置，如何找下一个匹配。
+
+**提示 3：** 既然字符串的循环节是 $a$ ，我们一步走一个 $a$ 。
+
+这题貌似看起来比较麻烦（至少不那么好写），但经过分析后，可以得出比较容易的实现。
+
+首先，这里的 $d$ 几乎没有意义。我只需要计算 $[a,b]$ 中出现几次 $c$ ，再用次数除以 $d$ 就是答案了。所以接下来我们只看 $[a,b]$ 中出现了几次 $c$ 。
+
+假设我们在 $i$ 位置已经匹配到了 $c$ 的第 $j$ 位，那么如果 $c$ 的下一位是 $x$ ，我们怎么找下一个匹配呢？我们显然贪心地找 $a$ 中最靠前的下一个匹配，因为这会给我们后续更多的选择权。
+
+于是，按照这样的策略， $c$ 中的每个字符都有贪心的最靠前的选法。
+
+而我们总共是 $b$ 个 $a$ 拼在一起，总长度达到了 $10^9$ ，而答案也可能达到这个数量级，因此不能一个字符一个字符找，那怎么办呢？
+
+我们一个 $a$ 一个 $a$ 走。
+
+考虑当前 $c$ 需要匹配的第一个位置是 $i$ ，看接下来 $a$ 字符串能进一步匹配到哪个位置，其中又增加了几次字符串的计数。这件事只需要我们遍历 $a$ 字符串，一旦对应就直接贪心匹配，一旦到结尾就计数结果加一。
+
+这样我们对于每一个 $c$ 需要匹配的位置 $i$ ，都可以找到对应新增的次数以及新的需要匹配的位置。这样，预处理结束后，可以直接模拟 $b$ 轮匹配以得到答案。（当然，这 $b$ 轮一定存在长度不超过 $c$ 的循环节，但我们这里就可以不处理了；也可以通过倍增进行加速）
+
+时间复杂度为 $\mathcal{O}(b+|a||c|)$ 。
+
+```java
+public class Main{       
+	private static void solve() throws IOException {
+        int sn = sc.nextInt(), tn = sc.nextInt();
+        String s = sc.next(), t = sc.next();
+        int m = t.length();
+        int[] toIdx = new int[m];
+        int[] cnt = new int[m];
+        Arrays.setAll(toIdx, i -> i);
+        for (int i = 0; i < m; i++) {
+            for (char ch : s.toCharArray()) {
+                if (ch == t.charAt(toIdx[i])) {
+                    toIdx[i]++;
+                    if (toIdx[i] == m) {
+                        cnt[i]++;
+                        toIdx[i] = 0;
+                    }
+                }
+            }
+        }
+        int idx = 0, cur = 0;
+        while (sn-- > 0) {
+            cur += cnt[idx];
+            idx = toIdx[idx];
+        }
+        sc.println(cur / tn);
+    }
+}
+```
+
 
 
 ## 2024/9/10
