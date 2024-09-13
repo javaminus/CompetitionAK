@@ -481,6 +481,25 @@ public class Main {
 
 ```java
 public class Main{
+    private static List<int[]>[] g;
+    private static int[] fas;
+    private static int[] dist;
+    private static int k;
+    static boolean[] visited;
+    private static void dfs(int x, int fa) {
+        fas[x] = fa;
+        for (int[] y : g[x]) {
+            if (y[0] != fa && !visited[y[0]]) {
+                dist[y[0]] = dist[x] + y[1];
+                if (dist[y[0]] > dist[k]) {
+                    k = y[0];
+                    dist[k] = dist[y[0]];
+                }
+                dfs(y[0], x);
+            }
+        }
+    }
+    
 	private static void solve() throws IOException {
         int n = sc.nextInt(), s = sc.nextInt();
         g = new List[n + 1];
@@ -518,6 +537,85 @@ public class Main{
             ans = Math.max(ans, dist[i]);
         }
         sc.println(ans);
+    }
+}
+```
+
+## [【模板】任意节点到其他点的距离](https://www.luogu.com.cn/problem/P1099)
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
+
+public class Main {
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int n;
+
+    private static int[] size, ans;
+
+
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        size = new int[n];
+        ans = new int[n];
+        dfs(0, -1, 0);
+        reRoot(0, -1);
+        int mnId = -1, mnV = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            if (mnV > ans[i]) {
+                mnV = ans[i];
+                mnId = i;
+            }
+        }
+        sc.println((mnId + 1) + " " + mnV);
+    }
+
+    private static void dfs(int x, int fa, int depth) {
+        ans[0] += depth;
+        size[x] = 1;
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x, depth + 1);
+                size[x] += size[y];
+            }
+        }
+    }
+
+    private static void reRoot(int x, int fa) {
+        for (int y : g[x]) {
+            if (y != fa) {
+                ans[y] = ans[x] + g.length - 2 * size[y];
+                reRoot(y, x);
+            }
+        }
     }
 }
 ```

@@ -1,3 +1,135 @@
+## 2024/9/12
+
+[E. Elections ](https://codeforces.com/problemset/problem/1267/E)
+
+**提示 1：** 我们只需要满足一个人的拿票比最后一个人多，于是只需要枚举这个人。
+
+**提示 2：** 考虑两个人，我们要让一个人的选票比另一个人多，我们应该如何开启最多的投票站。
+
+本题只需要让一个人的拿票比别人多，我们可以枚举这个人是谁，再看选哪个人最好。
+
+考虑某个人 $i$ 的时候，其他人都不重要了，因此只需考虑两个人的情况下如何使得你选的这个人得票更多。
+
+设你选的人的得票情况是 $a$ ，最后一个人的得票情况是 $b$ ，则要求 $\sum a_i\geq\sum b_i$ 。
+
+移项后，有 $\sum (a_i-b_i)\geq 0$ ，因此只需关于 $a_i-b_i$ 逆序排序，取最大的若干个投票站且保证总和非负即可。
+
+时间复杂度为 $\mathcal{O}(nm\log m)$ 。
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt();
+        int[][] grid = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            ss = sc.nextLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = Integer.parseInt(ss[j]);
+            }
+        }
+        int ans = Integer.MAX_VALUE;
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < n - 1; i++) { // 枚举前n个人
+            int[][] diff = new int[m][2];
+            int sum = 0;
+            for (int j = 0; j < m; j++) {
+                diff[j][0] = grid[j][i] - grid[j][n - 1];
+                diff[j][1] = j;
+                sum += diff[j][0];
+            }
+            Arrays.sort(diff, (a, b) -> a[0] - b[0]);
+            for (int j = 0; j < m; j++) {
+                if (sum >= 0) {
+                    if (j < ans) {
+                        ans = j;
+                        list.clear();
+                        for (int k = 0; k < j; k++) {
+                            list.add(diff[k][1]);
+                        }
+                    }
+                }
+                sum -= diff[j][0];
+            }
+        }
+        if (ans == Integer.MAX_VALUE) {
+            sc.println(m);
+            for (int i = 1; i <= m; i++) {
+                sc.print(i + " ");
+            }
+        }else{
+            sc.println(ans);
+            for (int x : list) {
+                sc.print((x + 1) + " ");
+            }
+        }
+    }
+}
+```
+
+[D. TV Shows ](https://codeforces.com/problemset/problem/1061/D)
+
+**提示 1：** 假设有一台电视，前后有两个阶段 $[l_1,r_1],[l_2,l_2]$ 都被使用了，那么重新租和直接保留两者的差别是什么？
+
+**提示 2：** 可以把保留电视视为一种省钱的机会，即一种优惠券。
+
+首先，考虑只有两个不交的时间段的情况。假设有先后两个区间 $[l_1,r_1],[l_2,l_2]$ 。
+
+首先有基础成本 $(r_1-l_1+r_2-l_2)\times y$ 以及最开始租电视的成本 $x$ ，而如果我们选择保留电视，则中间需要支付的额外成本为 $(l_2-r_1-1)\times y$ ，否则，需要支付的额外成本为 $x$ ，我们可以选择其中较小者。
+
+因此，保留电视相当于给了我们一种选择，让我们以可能比 $x$ 更低的价格租到电视。而其初始闲置时间越靠后，其带来的成本越低，省钱越多。相当于一个优惠券，每个优惠券记录其 $r_1+1$ 的数值，到 $l_2$ 时刻可以以 $(l_2-r_1-1)\times y$ 租到电视。
+
+考虑原题的情况。每当一台电视用完，我们都可以把它转换为一张优惠券。此时如果新来了一个时段——
+
+- 如果此时没有优惠券，则只能直接租电视。
+
+- 如果此时有优惠券，则我们应当选择其中租金最便宜的，即 $r$ 最大、最晚结束使用的电视，看其和 $x$ 哪个更优。
+
+    - 因为考虑此时的所有优惠券，如果其中有被使用的，一定是其中 $r$ 最大的若干个被使用。
+
+    - 而使用顺序与最终的结果无关。其中优惠力度最低的优惠券可以与最后一次使用匹配，如果不比 $x$ 省钱，则这个优惠券不会被使用。
+
+    - 为了达成力度最低优惠券和最后一次使用的贪心判断，我们应当从力度最高的优惠券开始使用。
+
+从实现的角度来看，首先，我们需要对所有的电视时段进行排序；同时，我们需要维护当前可以使用的 “优惠券”，而 “优惠券” 的生效来源于电视的停止使用。
+
+因此我们可以维护两个堆，一个小顶堆，维护目前尚未结束使用的电视，这样在顺序遍历 $l$ 时，可以快速取出所有当前已经结束使用的电视。一个大顶堆，方便找出最晚结束使用的电视，即优惠力度最大的一个优惠券。
+
+时间复杂度为 $\mathcal{O}(n\log n)$ 。
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        long x = sc.nextLong(), y = sc.nextLong();
+        int[][] nums = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            nums[i][0] = sc.nextInt();
+            nums[i][1] = sc.nextInt();
+        }
+        Arrays.sort(nums, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        PriorityQueue<Integer> pq1 = new PriorityQueue<>((a, b) -> a - b); // 小根堆
+        PriorityQueue<Integer> pq2 = new PriorityQueue<>((a, b) -> b - a);
+        long ans = 0L;
+        for (int i = 0; i < n; i++) {
+            while (!pq1.isEmpty() && pq1.peek() < nums[i][0]) {
+                pq2.offer(pq1.poll());
+            }
+            long add = x + (long) (nums[i][1] - nums[i][0]) * y;
+            if (!pq2.isEmpty()) {
+                Integer poll = pq2.poll();
+                add = Math.min(add, (nums[i][1] - poll) * y);
+            }
+            pq1.offer(nums[i][1]);
+            ans += add;
+            ans %= Mod;
+        }
+        sc.print(ans);
+    }
+}
+```
+
+
+
 ## 2024/9/11
 
 [B. Processing Queries ](https://codeforces.com/problemset/problem/644/B)
