@@ -1,60 +1,186 @@
-import java.util.*;
 import java.io.*;
+import java.math.BigInteger;
+import java.util.*;
 
 public class Main {
-    static final int N = 500005;
-    static int n, m, R, dn, depth[], dp[][];
-    static List<Integer> g[];
+    private final static int INF = Integer.MAX_VALUE / 2;
+    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-    static int get(int x, int y) {
-        return depth[x] < depth[y] ? x : y;
-    }
+    static class Read {
+        BufferedReader bf;
+        StringTokenizer st;
+        BufferedWriter bw;
 
-    static void dfs(int x, int fa) {
-        depth[x] = ++dn;
-        dp[0][depth[x]] = fa;
-        for (int y : g[x]) if (y != fa) dfs(y, x);
-    }
-
-    static int lca(int u, int v) {
-        if (u == v) return u;
-        if ((u = depth[u]) > (v = depth[v])) {
-            int temp = u;
-            u = v;
-            v = temp;
+        public Read() {
+            bf = new BufferedReader(new InputStreamReader(System.in));
+            st = new StringTokenizer("");
+            bw = new BufferedWriter(new OutputStreamWriter(System.out));
         }
-        int d = (int) (Math.log(v - u++) / Math.log(2));
-        return get(dp[d][u], dp[d][v - (1 << d) + 1]);
+
+        public String nextLine() throws IOException {
+            return bf.readLine();
+        }
+
+        public String next() throws IOException {
+            while (!st.hasMoreTokens()) {
+                st = new StringTokenizer(bf.readLine());
+            }
+            return st.nextToken();
+        }
+
+        public char nextChar() throws IOException {
+            return next().charAt(0);
+        }
+
+        public int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+
+        public double nextDouble() throws IOException {
+            return Double.parseDouble(next());
+        }
+
+        public float nextFloat() throws IOException {
+            return Float.parseFloat(next());
+        }
+
+        public byte nextByte() throws IOException {
+            return Byte.parseByte(next());
+        }
+
+        public short nextShort() throws IOException {
+            return Short.parseShort(next());
+        }
+
+        public BigInteger nextBigInteger() throws IOException {
+            return new BigInteger(next());
+        }
+
+        public void println(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(String a) throws IOException {
+            bw.write(a);
+            bw.newLine();
+            return;
+        }
+
+        public void print(String a) throws IOException {
+            bw.write(a);
+            return;
+        }
+
+        public void println(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void print(BigInteger a) throws IOException {
+            bw.write(a.toString());
+            return;
+        }
+
+        public void print(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
     }
+
+    private static int binarySearch1(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] >= target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return right + 1;
+    }
+
+    private static int binarySearch2(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left - 1;
+    }
+
+    static class Pair<T, U> {
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
+        }
+    }
+
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        PrintWriter pw = new PrintWriter(System.out);
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        n = Integer.parseInt(st.nextToken());
-        m = Integer.parseInt(st.nextToken());
-        R = Integer.parseInt(st.nextToken());
-        g = new ArrayList[n + 1];
-        for (int i = 1; i <= n; i++) g[i] = new ArrayList<>();
-        for (int i = 2, u, v; i <= n; i++) {
-            st = new StringTokenizer(br.readLine());
-            u = Integer.parseInt(st.nextToken());
-            v = Integer.parseInt(st.nextToken());
-            g[u].add(v);
-            g[v].add(u);
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
         }
-        depth = new int[n + 1];
-        dp = new int[19][n + 1];
-        dfs(R, 0);
-        for (int i = 1; i <= 18; i++)
-            for (int j = 1; j + (1 << i) - 1 <= n; j++)
-                dp[i][j] = get(dp[i - 1][j], dp[i - 1][j + (1 << i - 1)]);
-        for (int i = 1, u, v; i <= m; i++) {
-            st = new StringTokenizer(br.readLine());
-            u = Integer.parseInt(st.nextToken());
-            v = Integer.parseInt(st.nextToken());
-            pw.println(lca(u, v));
-        }
-        pw.close();
+        sc.bw.flush();
+        sc.bw.close();
     }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int n;
+
+
+    private static void solve() throws IOException {
+
+
+    }
+
+
 }

@@ -1,3 +1,206 @@
+## 2024/9/17
+
+[C. Ryouko's Memory Note ](https://codeforces.com/problemset/problem/433/C)
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[m];
+        for (int i = 0; i < m; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        long sum = 0, res = 0;
+        List<Integer>[] g = new List[n + 1];
+        long[] cur = new long[n + 1];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 1; i < m; i++) {
+            int v = Math.abs(nums[i] - nums[i - 1]);
+            sum += v;
+            if (nums[i] != nums[i - 1]) {
+                cur[nums[i]] += v;
+                cur[nums[i - 1]] += v;
+                g[nums[i]].add(nums[i - 1]);
+                g[nums[i - 1]].add(nums[i]);
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            if (!g[i].isEmpty()) {
+                Collections.sort(g[i]);
+                int mid = g[i].get(g[i].size() / 2); // 将i全部变成mid
+                long cur_sum = 0;
+                for (int x : g[i]) {
+                    cur_sum += Math.abs(x - mid);
+                }
+                res = Math.max(res, cur[i] - cur_sum);
+            }
+        }
+        sc.println(sum - res);
+    }
+}
+```
+
+
+
+## 2024/9/16
+
+[C. Little Artem and Dance ](https://codeforces.com/problemset/problem/641/C)
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), q = sc.nextInt();
+        int oddMove = 0, evenMove = 0, swap = 0;
+        while (q-- > 0) {
+            int t = sc.nextInt();
+            if (t == 1) {
+                int x = sc.nextInt() % n;
+                oddMove += x;
+                evenMove += x;
+                swap ^= (x & 1); // 如果移动距离是奇数，则swap变化
+            }else{
+                if (swap == 1) {
+                    evenMove++;
+                    oddMove--;
+                } else {
+                    evenMove--;
+                    oddMove++;
+                }
+                swap ^= 1;
+            }
+            oddMove %= n;
+            evenMove %= n;
+        }
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            if ((i & 1) == 1) {
+                ans[(i + evenMove + n) % n] = i + 1;
+            }else{
+                ans[(i + oddMove + n) % n] = i + 1;
+            }
+        }
+        for (int x : ans) {
+            sc.print(x + " ");
+        }
+    }
+}
+```
+
+## 2024/9/14
+
+[C. Alyona and the Tree ](https://codeforces.com/problemset/problem/682/C)
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        nodes = new int[n + 1];
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nodes[i] = Integer.parseInt(ss[i - 1]);
+        }
+        g = new List[n + 1];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int x = 2; x <= n; x++) {
+            int y = sc.nextInt();
+            int z = sc.nextInt();
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        dfs(1, 0, 0);
+        sc.println(n - ans);
+    }
+
+    private static void dfs(int x, int fa, long dis) {
+        ans++;
+        for (int[] y : g[x]) {
+            if (y[0] != fa) {
+                long dis0 = dis;
+                dis += y[1];
+                if (dis < 0) {
+                    dis = 0; // 维护距离最大值
+                }
+                if (dis <= nodes[y[0]]) {
+                    dfs(y[0], x, dis);
+                }
+                dis = dis0;
+            }
+        }
+    }
+}
+```
+
+
+
+
+
+## 2024/9/13
+
+[C. Alyona and the Tree ](https://codeforces.com/problemset/problem/682/C)
+
+**提示 1：** 题目中表面上是对 $v$ 加了限制，实际上是对 $u$ 进行了限制。具体是什么限制？
+
+**提示 2：** 在一个节点 $u$ 不满足要求的情况下，整个子树都应该被删掉。
+
+题目中给的条件是，任何一个点 $v$ 到其子树内节点 $u$ 的距离都不超过 $a_u$ 。但是子树是在动的，所以这个定义并不容易直接考虑。
+
+反过来考虑，一旦有一个节点 $u$ 到任何一个祖先节点 $v$ 的距离超过了 $a_u$ ，那这个节点就不能要了。
+
+因为祖先节点是固定的，所以这个刻画是更好处理的。
+
+而一旦这个节点不要了，这个节点对应的子树也就都不能要了。
+
+接下来唯一一件事就是，求出 $u$ 到其祖先的最远距离。
+
+而这件事跟最大子段和的求法极其类似。考虑其父节点到祖先的对应的最远距离，则该节点如果到达父节点的祖先，则距离最大值为 “父节点的计算结果” 加上该点到父节点的距离；否则，答案就是到父节点的距离。使用这个 DP 关系即可。
+
+而这个 DP 关系可以在从 $1$ 开始进行 DFS 的时候直接使用，而一旦遇到不合法的位置不往下 DFS 即可，我们直接考虑所有 DFS 过程中不经过的点的个数，即为答案。
+
+时间复杂度为 $\mathcal{O}(n)$ 。
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        nodes = new int[n + 1];
+        ss = sc.nextLine().split(" ");
+        for (int i = 1; i <= n; i++) {
+            nodes[i] = Integer.parseInt(ss[i - 1]);
+        }
+        g = new List[n + 1];
+        Arrays.setAll(g, e -> new ArrayList<int[]>());
+        for (int x = 2; x <= n; x++) {
+            int y = sc.nextInt();
+            int z = sc.nextInt();
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        dfs(1, 0, 0);
+        sc.println(n - ans);
+    }
+
+    private static void dfs(int x, int fa, long dis) {
+        ans++;
+        for (int[] y : g[x]) {
+            if (y[0] != fa) {
+                long dis0 = dis;
+                dis += y[1];
+                if (dis < 0) {
+                    dis = 0; // 维护距离最大值
+                }
+                if (dis <= nodes[y[0]]) {
+                    dfs(y[0], x, dis);
+                }
+                dis = dis0;
+            }
+        }
+    }
+}
+```
+
+
+
 ## 2024/9/12
 
 [E. Elections ](https://codeforces.com/problemset/problem/1267/E)

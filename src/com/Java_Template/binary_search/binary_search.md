@@ -1,3 +1,76 @@
+3288\. 最长上升路径的长度【模板：二维LIS】
+----------------
+
+给你一个长度为 `n` 的二维整数数组 `coordinates` 和一个整数 `k` ，其中 `0 <= k < n` 。
+
+`coordinates[i] = [xi, yi]` 表示二维平面里一个点 `(xi, yi)` 。
+
+如果一个点序列 `(x1, y1)`, `(x2, y2)`, `(x3, y3)`, ..., `(xm, ym)` 满足以下条件，那么我们称它是一个长度为 `m` 的 **上升序列** ：
+
+*   对于所有满足 `1 <= i < m` 的 `i` 都有 `xi < xi + 1` 且 `yi < yi + 1` 。
+*   对于所有 `1 <= i <= m` 的 `i` 对应的点 `(xi, yi)` 都在给定的坐标数组里。
+
+请你返回包含坐标 `coordinates[k]` 的 **最长上升路径** 的长度。
+
+**示例 1：**
+
+**输入：**coordinates = \[\[3,1\],\[2,2\],\[4,1\],\[0,0\],\[5,3\]\], k = 1
+
+**输出：**3
+
+**解释：**
+
+`(0, 0)` ，`(2, 2)` ，`(5, 3)` 是包含坐标 `(2, 2)` 的最长上升路径。
+
+**示例 2：**
+
+**输入：**coordinates = \[\[2,1\],\[7,0\],\[5,6\]\], k = 2
+
+**输出：**2
+
+**解释：**
+
+`(2, 1)` ，`(5, 6)` 是包含坐标 `(5, 6)` 的最长上升路径。
+
+**提示：**
+
+*   `1 <= n == coordinates.length <= 105`
+*   `coordinates[i].length == 2`
+*   `0 <= coordinates[i][0], coordinates[i][1] <= 109`
+*   `coordinates` 中的元素 **互不相同** 。
+*   `0 <= k <= n - 1`
+
+[https://leetcode.cn/problems/length-of-the-longest-increasing-path/description/](https://leetcode.cn/problems/length-of-the-longest-increasing-path/description/)
+
+> ⚠**注意**：对于 x 相同的点，要按照 y **从大到小**排序。这可以保证在计算 LIS 时，对于相同的 x，我们至多选一个 y。 
+
+```java
+class Solution {
+    public int maxPathLength(int[][] coordinates, int k) {
+        int kx = coordinates[k][0], ky = coordinates[k][1];
+        Arrays.sort(coordinates, (a, b) -> a[0] != b[0] ? a[0] - b[0] : b[1] - a[1]);
+        List<Integer> g = new ArrayList<>();
+        for (int[] p : coordinates) {
+            int x = p[0], y = p[1];
+            if (x < kx && y < ky || x > kx & y > ky) {
+                int j = Collections.binarySearch(g, y); // g 没有重复元素，可以用 binarySearch
+                if (j < 0) {
+                    j = -j - 1; // 这是 Collections.binarySearch(g, y);的返回值导致，如果没有找到元素，返回（ -插入的点 - 1），插入点：比当前元素大的下一个元素位置
+                }
+                if (j < g.size()) {
+                    g.set(j, y);
+                }else{
+                    g.add(y);
+                }
+            }
+        }
+        return g.size() + 1;
+    }
+}
+```
+
+
+
 2576\. 求出最多标记下标
 ---------------
 

@@ -1,3 +1,146 @@
+3287\. 求出数组中最大序列值
+-----------------
+
+给你一个整数数组 `nums` 和一个 **正** 整数 `k` 。
+
+定义长度为 `2 * x` 的序列 `seq` 的 **值** 为：
+
+*   `(seq[0] OR seq[1] OR ... OR seq[x - 1]) XOR (seq[x] OR seq[x + 1] OR ... OR seq[2 * x - 1])`.
+
+请你求出 `nums` 中所有长度为 `2 * k` 的
+
+子序列
+
+的 **最大值** 。
+
+**示例 1：**
+
+**输入：**nums = \[2,6,7\], k = 1
+
+**输出：**5
+
+**解释：**
+
+子序列 `[2, 7]` 的值最大，为 `2 XOR 7 = 5` 。
+
+**示例 2：**
+
+**输入：**nums = \[4,2,5,6,7\], k = 2
+
+**输出：**2
+
+**解释：**
+
+子序列 `[4, 5, 6, 7]` 的值最大，为 `(4 OR 5) XOR (6 OR 7) = 2` 。
+
+**提示：**
+
+*   `2 <= nums.length <= 400`
+*   `1 <= nums[i] < 27`
+*   `1 <= k <= nums.length / 2`
+
+[https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/description/](https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/description/)
+
+> 看到从中间划分，一般就是枚举中间
+>
+> 看到子序列，直接想dp，没什么贪心可以想的
+>
+> 要求选K个数，那么就是背包容量为k
+
+```java
+class Solution {
+    public int maxValue(int[] nums, int k) {
+        int n = nums.length;
+        int mx = 1 << 7;
+        boolean[][][] f = new boolean[n + 1][k + 1][mx]; // 表示从前i(不包括i)个数选出j个数，结果是否为k
+        f[0][0][0] = true;
+        boolean[][][] g = new boolean[n + 1][k + 1][mx]; // 表示从i(包括i)到n - 1选出j个数，结果是否为k
+        g[n][0][0] = true;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= k; j++) {
+                for (int x = 0; x < mx; x++) {
+                    if (f[i][j][x]) {
+                        f[i + 1][j][x] = true;
+                        if (j < k) {
+                            f[i + 1][j + 1][x | nums[i]] = true;
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = n; i > 0; i--) {
+            for (int j = 0; j <= k; j++) {
+                for (int x = 0; x < mx; x++) {
+                    if (g[i][j][x]) {
+                        g[i - 1][j][x] = true;
+                        if (j < k) {
+                            g[i - 1][j + 1][x | nums[i - 1]] = true;
+                        }
+                    }
+                }
+            }
+        }
+        // 枚举中间的元素
+        int ans = 0;
+        for (int i = k; i + k <= n; i++) {
+            for (int x = 0; x < mx; x++) {
+                for (int y = 0; y < mx; y++) {
+                    if (f[i][k][x] && g[i][k][y]) {
+                        ans = Math.max(ans, x ^ y);
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+
+## [B.Cidoai的平均数对（平均值01背包）](https://ac.nowcoder.com/acm/contest/88880/B)
+
+![1726289139228](assets/1726289139228.png)
+
+![1726289113199](assets/1726289113199.png)
+
+```java
+public class Main{ // 平均值不要想着总数/数量，对于每一个物品想它的正负贡献就好了
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        k = sc.nextInt();
+        nums = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            nums[i][0] = sc.nextInt();
+            nums[i][1] = sc.nextInt();
+        }
+        int sum = 0, target = 0;
+        ArrayList<int[]> list = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (nums[i][1] <= k) {
+                sum += nums[i][0];
+                target += k - nums[i][1];
+            }else{
+                list.add(new int[]{nums[i][0], nums[i][1]});
+            }
+        }
+        int[] dp = new int[target + 1];
+        Arrays.fill(dp, sum);
+        for (int[] pair : list) {
+            int a = pair[0], b = pair[1] -k;
+            for (int i = target; i >= b; i--) {
+                dp[i] = Math.max(dp[i], dp[i - b] + a);
+            }
+        }
+        sc.println(dp[target]);
+    }
+}
+```
+
+ 
+
+
+
 3180\. 执行操作可获得的最大总奖励 I
 ----------------------
 

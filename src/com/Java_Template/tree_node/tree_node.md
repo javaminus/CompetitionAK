@@ -1,4 +1,84 @@
-## [【模板】树上删边（使每个连通块大小为偶数）](https://ac.nowcoder.com/acm/contest/80743/D)
+#### [【树上有多少个点到节点 u 的路径异或值恰好为 k  】](https://mp.weixin.qq.com/s?__biz=MzkyNTQ3NDAzNw==&mid=2247490257&idx=2&sn=8b686c9b474499a227c3590f333332fe&chksm=c0a7222b168354a7c9f057d565998a9bb377012ea8df89115443cf1c6d71fd7a3d14e38666cc&xtrack=1&scene=0&subscene=7&sessionid=1726323210&clicktime=1726323228&enterid=1726323228&ascene=7&fasttmpl_type=0&fasttmpl_fullversion=7382228-zh_CN-zip&fasttmpl_flag=0&realreporttime=1726323228091&devicetype=android-33&version=28002f51&nettype=ctnet&lang=zh_CN&session_us=gh_50e7adb43fb4&exportkey=n_ChQIAhIQHjYDjF3tppw%2BIK2gkYxAuhLxAQIE97dBBAEAAAAAAJEDDHaGxagAAAAOpnltbLcz9gKNyK89dVj0jGN34AU3VM6feKVbYAKd5mF2rfawUDKJoiLY9R8JRuPqheRZPULBBUJqaQMbbvNuIOv6gYZQQQ3V74Ofsdd%2FRAe3HJC%2Bwh%2FPVKyz0j4LTOISqlbzzH%2BrWGtaiOXQZKp8DceLzQ5QXbOm3bfaKnRi1ec0zQ9bmMiXnHc9TuF2W6dZDeD24ny0SFc3oA9IU%2BJN%2BmaMxj3LiUBkutqSFtoii8G43c3ypGenD332Lf08jevGvEmA6qxSrphLmfP5BF3qtooTB5zd42deyco%3D&pass_ticket=j0cA4l9Q2SjPbDLVd0jkteEb%2BvRppCOCcnApbxDnw2UmvlzCDMivRF1p%2F17hHlTT&wx_header=3)
+
+**题目描述：**
+
+小红有一棵由 n 个节点、 n - 1 条无向边构成的树，每条边的权值为 wi。
+
+定义树上两个点 (u,v) 的权值为，从 u 到 v 的简单路径上，全部边权的异或和，特别的，当 u 和 v 为同一个点时，权值为 0 。
+
+小红会提出 q 次询问，每次询问要求计算有多少个点到节点 u 的权值恰好为 k 。
+
+树是指这样的一张图，其上的任意两个点都连通，且不存在环。
+
+简单路径是指两个节点之间的一条路径，其不包含任何重复的节点。也就是说，在简单路径上，每个节点只能出现一次。
+
+**输入描述**
+
+第一行输入两个整数 n,q( 1≤n , q≤)，分别表示节点总数和询问次数。
+
+此后 n-1 行，第 i 行输入三个整数 ui , vi 和 wi（ 1≤ui , vi≤n ; ui≠vi ; 0≤w≤ ）表示树上第 i 条边连接节点 ui 和 vi 且边权为 wi 。保证树联通，没有重边。
+
+此后 q 行，每行输入两个整数 u,k(1≤u≤n,0≤k≤)代表被询问的节点和限定。
+
+**输出描述**
+
+对于每一个询问，在一行上输出一个整数，代表到节点 u 的权值恰好为 k 的节点数量。
+
+**思路与代码：**
+
+u到v路径的异或和=u到root路径的异或和 xor v到root路径的异或和
+
+然后就和第一题一样了，计算每个点到root的异或和并统计数量
+
+```
+#include<cstdio>
+#include<iostream>
+#include<map>
+#include<vector>
+using namespace std;
+map<long long,int>count;
+long long d[200005];
+long long ans=0;
+vector<pair<int,long long> >g[100005];
+void dfs(int u)
+{
+    for (auto x:g[u])
+    {
+        if (d[x.first]!=-1) continue;
+        d[x.first]=d[u]^x.second;
+        count[d[x.first]]++;
+        dfs(x.first);
+    }
+}
+int main()
+{
+    int n,q;
+    cin>>n>>q;
+    for (int i=2; i<=n; i++) d[i]=-1;
+    for (int i=1; i<n; i++)
+    {
+        int u,v;
+        long long w;
+        cin>>u>>v>>w;
+        g[u].push_back(make_pair(v,w));
+        g[v].push_back(make_pair(u,w));
+    }
+    dfs(1);
+    count[0]=1;
+    while (q--)
+    {
+        int u;
+        long long k;
+        cin>>u>>k;
+        cout<<count[d[u]^k]<<endl;
+    }
+    return 0;
+}
+```
+
+
+
+#### [【模板】树上删边（使每个连通块大小为偶数）](https://ac.nowcoder.com/acm/contest/80743/D)
 
 ![img.png](img.png)
 
@@ -59,7 +139,7 @@ public class Main {
     }
 }
 ```
-## 【模板】树上倍增和LCA(树上祖先)
+#### 【模板】树上倍增和LCA(树上祖先)
 
 > LCA问题
 >
@@ -71,7 +151,7 @@ public class Main {
 >
 > 3）树链剖分
 
-**1483\. 树节点的第 K 个祖先（树上倍增）（链式前向星建图模板）**
+**1483\. 树节点的第 K 个祖先（树上倍增）**
 
 给你一棵树，树上有 `n` 个节点，按从 `0` 到 `n-1` 编号。树以父节点数组的形式给出，其中 `parent[i]` 是节点 `i` 的父节点。树的根节点是编号为 `0` 的节点。
 
@@ -113,9 +193,49 @@ treeAncestor.getKthAncestor(6, 3);  // 返回 -1 因为不存在满足要求的�
 > 链式前向星建图，方法一比较万能
 
 ```java
+class TreeAncestor { // 推荐模板，理解
+    private int[][] dp;
+
+    public TreeAncestor(int n, int[] parent) {
+        int m = 32 - Integer.numberOfLeadingZeros(n);
+        dp = new int[n][m]; // dp[x][j]表示节点x的2^j个祖先节点，如果x没有祖先，则dp[x][j] = -1
+        for (int i = 0; i < n; i++) {
+            dp[i][0] = parent[i];
+        }
+        for (int i = 0; i < m - 1; i++) {
+            for (int x = 0; x < n; x++) {
+                int p = dp[x][i];
+                dp[x][i + 1] = p < 0 ? -1 : dp[p][i];
+            }
+        }
+    }
+
+    public int getKthAncestor(int node, int k) {
+        int m = 32 - Integer.numberOfLeadingZeros(k); // k的二进制长度
+        for (int i = 0; i < m; i++) {
+            // k的二进制从低到高位是1
+            if (((k >> i) & 1) == 1) {
+                node = dp[node][i];
+                if (node < 0) {
+                    break; // 没有祖先节点
+                }
+            }
+        }
+        return node;
+    }
+}
+
+/**
+ * Your TreeAncestor object will be instantiated and called as such:
+ * TreeAncestor obj = new TreeAncestor(n, parent);
+ * int param_1 = obj.getKthAncestor(node,k);
+ */
+```
+
+```java
 import java.util.Arrays;
 
-class TreeAncestor {
+class TreeAncestor { // 不需要理解，别看
     private static int MAXN = 50001;
     private static int power;
     private static int cnt;
@@ -186,7 +306,7 @@ class TreeAncestor {
  */
 ```
 
-## 【模板】最近公共祖先（LCA）
+#### 【模板】最近公共祖先（LCA）
 
 > ## 题目描述
 >
@@ -258,14 +378,191 @@ class TreeAncestor {
 >
 > 故输出依次为 $4, 4, 1, 4, 4$。
 >
->
 > 2021/10/4 数据更新 @fstqwq：应要求加了两组数据卡掉了暴力跳。
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class TreeAncestor{
+    private int[] depth;
+    private int[][] dp;
+    private List<Integer>[] g;
+
+    public TreeAncestor(int[][] edges) {
+        int n = edges.length + 1; // 树的节点个数 == 边 + 1
+        int m = 32 - Integer.numberOfLeadingZeros(n); // 最多m层
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        depth = new int[n];
+        dp = new int[n][m];
+        dfs(0, -1);
+
+        for (int i = 0; i < m - 1; i++) {
+            for (int x = 0; x < n; x++) {
+                int p = dp[x][i];
+                dp[x][i + 1] = p < 0 ? -1 : dp[p][i];
+            }
+        }
+    }
+
+    private void dfs(int x, int fa) { // 初始化父亲节点，获取每个节点的深度
+        dp[x][0] = fa;
+        for (int y : g[x]) {
+            if (y != fa) {
+                depth[y] = depth[x] + 1;
+                dfs(y, x);
+            }
+        }
+    }
+
+    public int getKthAncestor(int node, int k) { // 获取node的第k个祖先
+        int m = 32 - Integer.numberOfLeadingZeros(k);
+        for (int i = 0; i < m; i++) {
+            if (((k >> i) & 1) == 1) {
+                node = dp[node][i];
+                if (node < 0) {
+                    break;
+                }
+            }
+        }
+        return node;
+    }
+
+    public int getLCA(int x, int y) {
+        if (depth[x] > depth[y]) {
+            int tmp = y;
+            y = x;
+            x = tmp;
+        }
+        // 使y和x在同一深度
+        y = getKthAncestor(y, depth[y] - depth[x]);
+        if (y == x) {
+            return x;
+        }
+        for (int i = dp[x].length - 1; i >= 0; i--) {
+            int px = dp[x][i], py = dp[y][i];
+            if (px != py) {
+                x = px;
+                y = py;
+            }
+        }
+        return dp[x][0];
+    }
+}
+```
+
+```java
+import java.io.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
+
+public class Main { // 完整代码
+    private static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt(), s = sc.nextInt();
+        int[][] edges = new int[n - 1][2];
+        for (int i = 0; i < n - 1; i++) {
+            edges[i][0] = sc.nextInt() - 1;
+            edges[i][1] = sc.nextInt() - 1;
+        }
+        TreeAncestor treeAncestor = new TreeAncestor(edges, s - 1);
+        while (m-- > 0) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            sc.println(treeAncestor.getLCA(x, y) + 1);
+        }
+    }
+
+
+     static class TreeAncestor{
+        private int[] depth;
+        private int[][] dp;
+        private List<Integer>[] g;
+
+        public TreeAncestor(int[][] edges, int root) {
+            int n = edges.length + 1; // 树的节点个数 == 边 + 1
+            int m = 32 - Integer.numberOfLeadingZeros(n); // 最多m层
+            g = new List[n];
+            Arrays.setAll(g, e -> new ArrayList<Integer>());
+            for (int[] edge : edges) {
+                int x = edge[0], y = edge[1];
+                g[x].add(y);
+                g[y].add(x);
+            }
+            depth = new int[n];
+            dp = new int[n][m];
+            dfs(root, -1);
+
+            for (int i = 0; i < m - 1; i++) {
+                for (int x = 0; x < n; x++) {
+                    int p = dp[x][i];
+                    dp[x][i + 1] = p < 0 ? -1 : dp[p][i];
+                }
+            }
+        }
+
+        private void dfs(int x, int fa) { // 初始化父亲节点，获取每个节点的深度
+            dp[x][0] = fa;
+            for (int y : g[x]) {
+                if (y != fa) {
+                    depth[y] = depth[x] + 1;
+                    dfs(y, x);
+                }
+            }
+        }
+
+        public int getKthAncestor(int node, int k) { // 获取node的第k个祖先
+            int m = 32 - Integer.numberOfLeadingZeros(k);
+            for (int i = 0; i < m; i++) {
+                if (((k >> i) & 1) == 1) {
+                    node = dp[node][i];
+                    if (node < 0) {
+                        break;
+                    }
+                }
+            }
+            return node;
+        }
+
+        public int getLCA(int x, int y) {
+            if (depth[x] > depth[y]) {
+                int tmp = y;
+                y = x;
+                x = tmp;
+            }
+            // 使y和x在同一深度
+            y = getKthAncestor(y, depth[y] - depth[x]);
+            if (y == x) {
+                return x;
+            }
+            for (int i = dp[x].length - 1; i >= 0; i--) {
+                int px = dp[x][i], py = dp[y][i];
+                if (px != py) {
+                    x = px;
+                    y = py;
+                }
+            }
+            return dp[x][0];
+        }
+    }
+}
+```
+
+
 
 ```java
 import java.io.*;
 import java.util.Arrays;
 
-public class Main {
+public class Main { // 不要看，跳过
     public static int MAXN = 500001;
 
     public static int LIMIT = 20;
@@ -372,7 +669,7 @@ public class Main {
 }
 ```
 
-## [【模板】求一棵树到达关键节点的最少节点数目](https://atcoder.jp/contests/abc368/tasks/abc368_d)
+#### [【模板】求一棵树到达关键节点的最少节点数目](https://atcoder.jp/contests/abc368/tasks/abc368_d)
 
 ![1724773113301](assets/1724773113301.png)
 
@@ -423,11 +720,11 @@ class Main{
 }
 ```
 
-# 【洛谷模板题】
+
 
 ![img](assets/wxtmbb.png) 
 
-## [【模板】树的遍历dfs + 统计到root距离不超过d的节点数目](https://www.luogu.com.cn/problem/P5908)
+#### [【模板】树的遍历dfs + 统计到root距离不超过d的节点数目](https://www.luogu.com.cn/problem/P5908)
 
 ```java
 public class Main {
@@ -473,7 +770,7 @@ public class Main {
 }
 ```
 
-## [【模板】树的直径(上的核心路径，求任意点到核心路径的最长距离最小)](https://www.luogu.com.cn/problem/P1099)
+#### [【模板】树的直径(上的核心路径，求任意点到核心路径的最长距离最小)](https://www.luogu.com.cn/problem/P1099)
 
 > 两次dfs求图的直径，从点1出发最远点为x, 然后从点x出发最远点为y。那么路径x-y就图的直径
 >
@@ -541,7 +838,7 @@ public class Main{
 }
 ```
 
-## [【模板】任意节点到其他点的距离](https://www.luogu.com.cn/problem/P1099)
+#### [【模板】任意节点到其他点的距离](https://www.luogu.com.cn/problem/P1099)
 
 ```java
 import java.io.*;
@@ -619,6 +916,120 @@ public class Main {
     }
 }
 ```
+
+#### [【模板】树上差分](https://www.luogu.com.cn/problem/P3128)
+
+```java
+ private static void solve() throws IOException { // LCA + 树上差分
+        int n = sc.nextInt(), k = sc.nextInt();
+        int[][] edges = new int[n - 1][2];
+        for (int i = 0; i < n - 1; i++) {
+            edges[i][0] = sc.nextInt() - 1;
+            edges[i][1] = sc.nextInt() - 1;
+        }
+        TreeAncestor treeAncestor = new TreeAncestor(edges,0);
+        diff = new int[n];
+        while (k-- > 0) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            diff[x]++;
+            diff[y]++;
+            int lca = treeAncestor.getLCA(x, y);
+            diff[lca]--;
+            if (treeAncestor.dp[lca][0] != -1) {
+                diff[treeAncestor.dp[lca][0]]--; // 祖先节点的父亲节点--，防止向父节点扩展
+            }
+        }
+        dfs(0, -1, treeAncestor.g, diff);
+        sc.println(ans);
+    }
+
+    static int ans = 0;
+    static int[] diff;
+    private static void dfs(int x, int fa,List<Integer>[] g, int[] diff) { // 树上差分
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x, g, diff);
+                diff[x] += diff[y];
+            }
+        }
+        ans = Math.max(ans, diff[x]);
+    }
+
+
+     static class TreeAncestor{ // LCA
+        private int[] depth;
+        private int[][] dp;
+        private List<Integer>[] g;
+
+        public TreeAncestor(int[][] edges, int root) {
+            int n = edges.length + 1; // 树的节点个数 == 边 + 1
+            int m = 32 - Integer.numberOfLeadingZeros(n); // 最多m层
+            g = new List[n];
+            Arrays.setAll(g, e -> new ArrayList<Integer>());
+            for (int[] edge : edges) {
+                int x = edge[0], y = edge[1];
+                g[x].add(y);
+                g[y].add(x);
+            }
+            depth = new int[n];
+            dp = new int[n][m];
+            dfs(root, -1);
+
+            for (int i = 0; i < m - 1; i++) {
+                for (int x = 0; x < n; x++) {
+                    int p = dp[x][i];
+                    dp[x][i + 1] = p < 0 ? -1 : dp[p][i];
+                }
+            }
+        }
+
+        private void dfs(int x, int fa) { // 初始化父亲节点，获取每个节点的深度
+            dp[x][0] = fa;
+            for (int y : g[x]) {
+                if (y != fa) {
+                    depth[y] = depth[x] + 1;
+                    dfs(y, x);
+                }
+            }
+        }
+
+        public int getKthAncestor(int node, int k) { // 获取node的第k个祖先
+            int m = 32 - Integer.numberOfLeadingZeros(k);
+            for (int i = 0; i < m; i++) {
+                if (((k >> i) & 1) == 1) {
+                    node = dp[node][i];
+                    if (node < 0) {
+                        break;
+                    }
+                }
+            }
+            return node;
+        }
+
+        public int getLCA(int x, int y) {
+            if (depth[x] > depth[y]) {
+                int tmp = y;
+                y = x;
+                x = tmp;
+            }
+            // 使y和x在同一深度
+            y = getKthAncestor(y, depth[y] - depth[x]);
+            if (y == x) {
+                return x;
+            }
+            for (int i = dp[x].length - 1; i >= 0; i--) {
+                int px = dp[x][i], py = dp[y][i];
+                if (px != py) {
+                    x = px;
+                    y = py;
+                }
+            }
+            return dp[x][0];
+        }
+    }
+```
+
+
 
 
 
