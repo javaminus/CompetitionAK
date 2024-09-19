@@ -1,3 +1,105 @@
+## 2024/9/19
+
+[B. Nearest Fraction ](https://codeforces.com/problemset/problem/281/B)
+
+```java
+public class Main{
+    private static void solve() throws IOException {
+        long x = sc.nextInt(), y = sc.nextInt(), n = sc.nextInt();
+        long g = gcd(x, y);
+        x /= g;
+        y /= g;
+        if (n >= y) {
+            sc.println(x + "/" + y);
+            return;
+        }
+        double target = (double) x / y, ans = target;
+        long a0 = 0, b0 = 0;
+        for (int b = (int) n; b >= 0; b--) {
+            int c = (int) (target * b);
+            for (int a = c + 1; a >= Math.max(0, c - 1); a--) {
+                if (Math.abs((double) a / b - target) - ans < 0.000000000000001) {
+                    ans = Math.abs((double) a / b - target);
+                    a0 = a;
+                    b0 = b;
+                }
+            }
+        }
+        sc.println(a0 + "/" + b0);
+    }
+
+	private static long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+
+
+## 2024/9/18
+
+[D. Santa's Bot ](D. Santa's Bot )
+
+```java
+import java.util.*;
+
+public class Main {
+    static final int Mod = 998244353;
+    static final int M = 1000000;
+    static long[] f = new long[M + 1];
+    static long[] g = new long[M + 1];
+    static int[] cnt = new int[M + 1];
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int n = sc.nextInt();
+        f[0] = 1;
+        for (int i = 1; i <= M; i++) {
+            f[i] = f[i - 1] * i % Mod;
+        }
+
+        g[M] = quickPow(f[M], Mod - 2, Mod);
+        for (int i = M; i >= 1; i--) {
+            g[i - 1] = g[i] * i % Mod;
+        }
+
+        List<List<Integer>> pools = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int k = sc.nextInt();
+            List<Integer> pool = new ArrayList<>();
+            for (int j = 0; j < k; j++) {
+                int x = sc.nextInt();
+                pool.add(x);
+                cnt[x]++;
+            }
+            pools.add(pool);
+        }
+
+        long ans = 0;
+        for (List<Integer> pool : pools) {
+            int k = pool.size();
+            for (int v : pool) {
+                ans = (ans + cnt[v] * inv(k) % Mod) % Mod;
+            }
+        }
+
+        System.out.println(ans * inv(n) % Mod * inv(n) % Mod);
+    }
+
+    static long quickPow(long base, long power, long mod) {
+        if (power == 0) return 1 % mod;
+        long cur = quickPow(base, power / 2, mod);
+        return (power % 2 == 1) ? base * cur % mod * cur % mod : cur * cur % mod;
+    }
+
+    static long inv(int x) {
+        return f[x - 1] * g[x] % Mod;
+    }
+}
+```
+
+
+
 ## 2024/9/17
 
 [C. Ryouko's Memory Note ](https://codeforces.com/problemset/problem/433/C)

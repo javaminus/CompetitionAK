@@ -1,6 +1,8 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -161,7 +163,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -174,13 +176,46 @@ public class Main {
     private static String s;
     private static char[] cs;
     private static List<Integer>[] g;
-    private static int n;
+    private static int n, t;
 
 
     private static void solve() throws IOException {
+        n = sc.nextInt();
+        t = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
 
-
+        int left = 0, right = n - 1;
+        memo = new long[n][n];
+        while (left <= right) {
+            for (int i = 0; i < n; i++) {
+                Arrays.fill(memo[i], -1);
+            }
+            int mid = left + (right - left) / 2;
+            if (dfs(0, 0, nums, mid) <= t) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        sc.println(right + 1);
     }
 
-
+    static long[][] memo;
+    private static long dfs(int i, int pre, int[] nums, int k) {
+        if (i == nums.length) {
+            return 0;
+        }
+        if (memo[i][pre] != -1) {
+            return memo[i][pre];
+        }
+        long res = dfs(i + 1, i, nums, k) + nums[i];
+        if (i - pre <= k) {
+            res = Math.min(res, dfs(i + 1, pre, nums, k));
+        }
+        return memo[i][pre] = res;
+    }
 }
