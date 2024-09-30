@@ -128,4 +128,53 @@ public class problemImpl implements problem {
         }
         return ans;
     }
+
+
+    // 3306. 元音辅音字符串计数 II
+    static HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+    static {
+        map.put('a', 0);
+        map.put('e', 1);
+        map.put('i', 2);
+        map.put('o', 3);
+        map.put('u', 4);
+    }
+    @Override
+    public long countOfSubstrings(String word, int k) {
+        char[] cs = word.toCharArray();
+        return f(cs, k) - f(cs, k + 1);
+    }
+
+    private long f(char[] cs, int k) { // 至少每个元音出现一次，且辅音出现大于k次
+        int n = cs.length;
+        int[] cnt = new int[5];
+        int cntfu = 0;
+        long ans = 0L;
+        int left = 0;
+        for (int right = 0; right < n; right++) {
+            if (map.containsKey(cs[right])) {
+                cnt[map.get(cs[right])]++;
+            }else{
+                cntfu++;
+            }
+            while (left <= right && judge(cnt) && cntfu >= k) {
+                if (map.containsKey(cs[left])) {
+                    cnt[map.get(cs[left])]--;
+                }else{
+                    cntfu--;
+                }
+                left++;
+            }
+            ans += left;
+        }
+        return ans;
+    }
+    private boolean judge(int[] cnt) {
+        for (int i = 0; i < 5; i++) {
+            if (cnt[i] <= 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -70,4 +70,30 @@ public class ProblemImpl implements problem {
     public boolean rotateString(String s, String goal) {
         return s.length() == goal.length() && (s + s).contains(goal);
     }
+
+    // 2565. 最少得分子序列
+    public int minimumScore(String s, String t) {
+        int m = s.length(), n = t.length();
+        int[] suf = new int[m + 1];
+        suf[m] = n;
+        int j = n - 1;
+        for (int i = m - 1; i >= 0; i--) {
+            if (s.charAt(i) == t.charAt(j)) {
+                j--;
+            }
+            if (j < 0) {
+                return 0;
+            }
+            suf[i] = j + 1;
+        }
+        int ans = suf[0];
+        j = 0;
+        for (int i = 0; i < m; i++) {
+            if (s.charAt(i) == t.charAt(j)) {
+                j++;
+                ans = Math.min(ans, suf[i + 1] - j);
+            }
+        }
+        return ans;
+    }
 }
