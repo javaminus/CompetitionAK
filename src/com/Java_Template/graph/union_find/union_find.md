@@ -1,3 +1,142 @@
+## 【并查集究极模板题】
+
+## [177. 学习语言 ](https://kamacoder.com/problempage.php?pid=1255)
+
+![1727798260714](assets/1727798260714.png)
+
+> 知识点一：将并查集的p数组初始化为-1，在find过程加入
+>
+> ```java
+> if(p[x] < 0) return x;
+> ```
+>
+> 知识点二：有n个人，每个人都有自己会的语言，按照语言合并，这里其实和人数无关。
+
+```java
+	private static String[] ss; // 超时代码，我淦！将List[] g换成动态数组不超时List<List<Integer>> g
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int m, n;
+ 
+    private static int[] p;
+ 
+ 
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        m = sc.nextInt();
+        g = new List[n]; // n个人
+        int ans = 0;
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            int k = Integer.parseInt(ss[0]);
+            if (k == 0) {
+                ans++; // 这个人什么语言都不会，必须学一门语言
+                continue;
+            }
+            for (int j = 1; j <= k; j++) {
+                g[i].add(Integer.parseInt(ss[j])); // 表示第i个人会第ss[j]的语言
+            }
+        }
+        p = new int[m + 1];
+        Arrays.fill(p, -1);
+        for (List<Integer> list : g) {
+            if (list.isEmpty()) {
+                continue;
+            }
+            int x = list.get(0);
+            for (int i = 1; i < list.size(); i++) {
+                union(x, list.get(i));
+            }
+        }
+ 
+        HashSet<Integer> set = new HashSet<>();
+        for (List<Integer> list : g) {
+            if (!list.isEmpty()) {
+                int root = find(list.get(0));
+                set.add(root);
+            }
+        }
+        sc.println(ans + (set.isEmpty() ? 0 : set.size() - 1));
+    }
+ 
+    private static int find(int x) {
+        if (p[x] < 0) { // 如果有节点的父亲为-1， 返回x;
+            return x;
+        }
+        if (p[x] != x) {
+            p[x] = find(p[x]);
+        }
+        return p[x];
+    }
+ 
+    private static void union(int x, int y) {
+        p[find(x)] = find(y);
+    }
+ 
+```
+
+```java
+private static void solve() throws IOException {
+        n = sc.nextInt();
+        m = sc.nextInt();
+        g = new List[n]; // n个人
+        ArrayList<List<Integer>> g = new ArrayList<>();
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            int k = Integer.parseInt(ss[0]);
+            if (k == 0) {
+                ans++; // 这个人什么语言都不会，必须学一门语言
+                continue;
+            }
+            ArrayList<Integer> list = new ArrayList<>();
+            for (int j = 1; j <= k; j++) {
+                list.add(Integer.parseInt(ss[j])); // 表示第i个人会第ss[j]的语言
+            }
+            g.add(list);
+        }
+        p = new int[m + 1];
+        Arrays.fill(p, -1);
+        for (List<Integer> list : g) {
+            if (list.isEmpty()) {
+                continue;
+            }
+            int x = list.get(0);
+            for (int i = 1; i < list.size(); i++) {
+                union(x, list.get(i));
+            }
+        }
+ 
+        HashSet<Integer> set = new HashSet<>();
+        for (List<Integer> list : g) {
+            if (!list.isEmpty()) {
+                int root = find(list.get(0));
+                set.add(root);
+            }
+        }
+        sc.println(ans + (set.isEmpty() ? 0 : set.size() - 1));
+    }
+ 
+    private static int find(int x) {
+        if (p[x] < 0) { // 如果有节点的父亲为-1， 返回x;
+            return x;
+        }
+        if (p[x] != x) {
+            p[x] = find(p[x]);
+        }
+        return p[x];
+    }
+ 
+    private static void union(int x, int y) {
+        p[find(x)] = find(y);
+    }
+ 
+```
+
+
+
 684\. 冗余连接
 ----------
 

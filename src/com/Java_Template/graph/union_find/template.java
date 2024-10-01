@@ -5,15 +5,15 @@ package com.Java_Template.graph.union_find;
  */
 public class template {
 
-    public void union(int[] parent, int index1, int index2) {
-        parent[find(parent, index1)] = find(parent, index2);
+    public void union(int[] p, int x, int y) {
+        p[find(p, x)] = find(p, y);
     }
 
-    public int find(int[] parent, int index) {
-        if (parent[index] != index) {
-            parent[index] = find(parent, parent[index]);
+    public int find(int[] p, int x) {
+        if (p[x] != x) {
+            p[x] = find(p, p[x]);
         }
-        return parent[index];
+        return p[x];
     }
 
 }
