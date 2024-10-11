@@ -1,24 +1,35 @@
-class Solution {
-    public int minSpeedOnTime(int[] dist, double hour) {
-        int n = dist.length;
-        int left = 1, right = (int) 1e7 + 10;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (judge(dist, mid, hour)) {
-                right = mid - 1;
-            }else {
-                left = mid + 1;
-            }
-        }
-        return right + 1 >= (int) 1e7 + 10 ? -1 : right + 1;
-    }
+import java.util.ArrayList;
+import java.util.List;
 
-    private boolean judge(int[] dist, double speed, double hour) {
-        double ans = 0;
-        for (int i = 0; i < dist.length - 1; i++) {
-            // ans += (dist[i] + speed - 1) / speed;
-            ans += Math.ceil(dist[i] / speed);
+class Solution {
+    List<Integer>[] g;
+    public int minTime(int n, int[][] edges, List<Boolean> hasApple) {
+        g = new ArrayList[n];
+        for(int i = 0; i < n; i++){
+            g[i] = new ArrayList<>();
         }
-        return ans + (dist[dist.length - 1] / speed) <= hour;
+        for(int[] e : edges){
+            int start = e[0];
+            int end = e[1];
+            g[start].add(end);
+            g[end].add(start);
+        }
+        return dfs(0, -1, hasApple);
+    }
+    // 从当前节点为根开始收集苹果，最少花费多少秒
+    // 参数father表示当前结点是从哪个结点递归来的，防止递归循环
+    int dfs(int x, int fa, List<Boolean> hasApple){
+        int res = 0;
+        for(int y : g[x]){
+            if(y == fa){
+                continue;
+            }
+            res += dfs(y, x, hasApple);
+        }
+        // bug1：如果不添加这个if判断，退出根节点的递归会加+2
+        if(fa == -1){
+            return res;
+        }
+        return (!hasApple.get(x) && res == 0) ? 0 : res + 2;
     }
 }
