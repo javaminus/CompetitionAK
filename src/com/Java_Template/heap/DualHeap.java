@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-public class DualHeap {
+public class DualHeap { // 中位数对顶堆模板
     // 大根堆，维护较小的一半元素
     private PriorityQueue<Integer> small;
     // 小根堆，维护较大的一半元素

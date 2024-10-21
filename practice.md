@@ -1,3 +1,86 @@
+## 2024/10/15
+
+[480. 滑动窗口中位数](https://leetcode.cn/problems/sliding-window-median/) 
+
+## 2024/10/14
+
+[1871. 跳跃游戏 VII](https://leetcode.cn/problems/jump-game-vii/) （前缀和优化dp）
+
+[887. 鸡蛋掉落](https://leetcode.cn/problems/super-egg-drop/) 
+
+## 2024/10/13
+
+[1884. 鸡蛋掉落-两枚鸡蛋](https://leetcode.cn/problems/egg-drop-with-2-eggs-and-n-floors/) 
+
+## 2024/10/12
+
+[【图上dp + dijkastra转移】](https://ac.nowcoder.com/acm/contest/91355/D)
+
+```java
+private static void solve() throws IOException {
+        ss = sc.nextLine().split(" ");
+        int n = Integer.parseInt(ss[0]), m = Integer.parseInt(ss[1]), k = Integer.parseInt(ss[2]);
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < m; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        long[][] dp = new long[n][k + 1]; // 到达第i个节点，连续赶路j次的最低成本
+        boolean[][] vis = new boolean[n][k + 1];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], Long.MAX_VALUE / 2);
+        }
+        PriorityQueue<long[]> pq = new PriorityQueue<>((a, b) -> Long.compare(a[0], b[0]));
+        if (k != 0) { // 在起点休息一次
+            dp[0][1] = 1;
+            pq.offer(new long[]{1, 0, 1}); // 到达当前节点的消耗， 当前节点的编号， 当前连续赶路次数
+        }
+        dp[0][0] = nums[0];
+        pq.offer(new long[]{nums[0], 0, 0});
+        while (!pq.isEmpty()) {
+            long[] poll = pq.poll();
+            long cost = poll[0];
+            int i = (int) poll[1], j = (int) poll[2];
+            if (vis[i][j]) {
+                continue;
+            }
+            vis[i][j] = true;
+            for (int y : g[i]) {
+                if (dp[y][0] > nums[y] + cost) {
+                    dp[y][0] = nums[y] + cost;
+                    pq.offer(new long[]{dp[y][0], y, 0});
+                }
+                if (j + 1 <= k && dp[y][j + 1] > cost + 1) {
+                    dp[y][j + 1] = cost + 1;
+                    pq.offer(new long[]{dp[y][j + 1], y, j + 1});
+                }
+            }
+        }
+        long ans = Long.MAX_VALUE;
+        for (int i = 0; i <= k; i++) {
+            ans = Math.min(ans, dp[n - 1][i]);
+        }
+        sc.println(ans);
+    }
+```
+
+
+
+## 2024/10/11
+
+[3164. 优质数对的总数 II](https://leetcode.cn/problems/find-the-number-of-good-pairs-ii/) (分解因子)
+
+[1871. 跳跃游戏 VII](https://leetcode.cn/problems/jump-game-vii/) （前缀和优化dp）
+
+[1443. 收集树上所有苹果的最少时间](https://leetcode.cn/problems/minimum-time-to-collect-all-apples-in-a-tree/)
+
 ## 2024/9/20
 
 [B. Longtail Hedgehog ](https://codeforces.com/problemset/problem/615/B)[树形dp]

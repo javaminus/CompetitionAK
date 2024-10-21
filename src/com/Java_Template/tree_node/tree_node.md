@@ -1029,7 +1029,169 @@ public class Main {
     }
 ```
 
+#### [【模板】树上时间戳](https://leetcode.cn/problems/minimum-score-after-removals-on-a-tree/description/)
 
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    List<Integer>[] g;
+    int[] nums, xor, in, out;
+    int clock = 0;
+    public int minimumScore(int[] nums, int[][] edges) {
+        int n = nums.length;
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1];
+            g[x].add(y);
+            g[y].add(x);
+        }
+        this.nums = nums;
+        xor = new int[n];
+        in = new int[n];
+        out = new int[n];
+        dfs(0, -1);
+        int ans = Integer.MAX_VALUE;
+        // 枚举删除哪两条边
+        // 代码实现时，由于不知道 edges[i] 两个点的父子关系，枚举边的写法需要额外的判断。我们可以改为枚举不是根的两个点，删除这两个点及其父节点形成的边，这样代码更简洁，效率也略优于枚举边的写法。
+        for (int i = 2, x, y, z; i < n; i++) {
+            for (int j = 1; j < i; j++) {
+                // i是j的祖先
+                if (in[i] < in[j] && in[j] <= out[i]) {
+                    x = xor[j];
+                    y = xor[i] ^ x;
+                    z = xor[0] ^ xor[i];
+                } else if (in[j] < in[i] && in[i] <= out[j]) { // j是i的祖先
+                    x = xor[i];
+                    y = xor[j] ^ x;
+                    z = xor[0] ^ xor[j];
+                }else{ // 删除的两条边分别属于两颗不相交的子树
+                    x = xor[i];
+                    y = xor[j];
+                    z = xor[0] ^ x ^ y;
+                }
+                ans = Math.min(ans, Math.max(Math.max(x, y), z) - Math.min(Math.min(x, y), z));
+                if (ans == 0) return 0; // 提前退出
+            }
+        }
+        return ans;
+    }
+
+    private void dfs(int x, int fa) { // 求出每个以x为根节点的子树（包括x）的异或值
+        in[x] = ++clock;
+        xor[x] = nums[x];
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x);
+                xor[x] ^= xor[y];
+            }
+        }
+        out[x] = clock;
+    }
+}
+```
+
+#### [【模板】树上时间戳 + 马拉车](https://leetcode.cn/problems/check-if-dfs-strings-are-palindromes/) 
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    private int time = 0;
+
+    public boolean[] findAnswer(int[] parent, String s) {
+        int n = parent.length;
+        List<Integer>[] g = new ArrayList[n];
+        Arrays.setAll(g, i -> new ArrayList<>());
+        for (int i = 1; i < n; i++) {
+            int p = parent[i];
+            // 由于 i 是递增的，所以 g[p] 必然是有序的，下面无需排序
+            g[p].add(i);
+        }
+
+        // dfsStr 是后序遍历整棵树得到的字符串
+        char[] dfsStr = new char[n];
+        // nodes[i] 表示子树 i 的后序遍历的开始时间戳和结束时间戳+1（左闭右开区间）
+        int[][] nodes = new int[n][2];
+        dfs(0, g, s.toCharArray(), dfsStr, nodes);
+
+        // Manacher 模板
+        // 将 dfsStr 改造为 t，这样就不需要讨论 n 的奇偶性，因为新串 t 的每个回文子串都是奇回文串（都有回文中心）
+        // dfsStr 和 t 的下标转换关系：
+        // (dfsStr_i+1)*2 = ti
+        // ti/2-1 = dfsStr_i
+        // ti 为偶数，对应奇回文串（从 2 开始）
+        // ti 为奇数，对应偶回文串（从 3 开始）
+        char[] t = new char[n * 2 + 3];
+        Arrays.fill(t, '#');
+        t[0] = '^';
+        for (int i = 0; i < n; i++) {
+            t[i * 2 + 2] = dfsStr[i];
+        }
+        t[n * 2 + 2] = '$';
+
+        // 定义一个奇回文串的回文半径=(长度+1)/2，即保留回文中心，去掉一侧后的剩余字符串的长度
+        // halfLen[i] 表示在 t 上的以 t[i] 为回文中心的最长回文子串的回文半径
+        // 即 [i-halfLen[i]+1,i+halfLen[i]-1] 是 t 上的一个回文子串
+        int[] halfLen = new int[t.length - 2];
+        halfLen[1] = 1;
+        // boxR 表示当前右边界下标最大的回文子串的右边界下标+1
+        // boxM 为该回文子串的中心位置，二者的关系为 r=mid+halfLen[mid]
+        int boxM = 0;
+        int boxR = 0;
+        for (int i = 2; i < halfLen.length; i++) { // 循环的起止位置对应着原串的首尾字符
+            int hl = 1;
+            if (i < boxR) {
+                // 记 i 关于 boxM 的对称位置 i'=boxM*2-i
+                // 若以 i' 为中心的最长回文子串范围超出了以 boxM 为中心的回文串的范围（即 i+halfLen[i'] >= boxR）
+                // 则 halfLen[i] 应先初始化为已知的回文半径 boxR-i，然后再继续暴力匹配
+                // 否则 halfLen[i] 与 halfLen[i'] 相等
+                hl = Math.min(halfLen[boxM * 2 - i], boxR - i);
+            }
+            // 暴力扩展
+            // 算法的复杂度取决于这部分执行的次数
+            // 由于扩展之后 boxR 必然会更新（右移），且扩展的的次数就是 boxR 右移的次数
+            // 因此算法的复杂度 = O(len(t)) = O(n)
+            while (t[i - hl] == t[i + hl]) {
+                hl++;
+                boxM = i;
+                boxR = i + hl;
+            }
+            halfLen[i] = hl;
+        }
+
+        // t 中回文子串的长度为 hl*2-1
+        // 由于其中 # 的数量总是比字母的数量多 1
+        // 因此其在 dfsStr 中对应的回文子串的长度为 hl-1
+        // 这一结论可用在下面的判断回文串中
+
+        boolean[] ans = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            // 判断左闭右开区间 [l,r) 是否为回文串  0<=l<r<=n
+            // 根据下标转换关系得到 dfsStr 的 [l,r) 子串在 t 中对应的回文中心下标为 l+r+1
+            // 需要满足 halfLen[l + r + 1] - 1 >= r - l，即 halfLen[l + r + 1] > r - l
+            int l = nodes[i][0];
+            int r = nodes[i][1];
+            ans[i] = halfLen[l + r + 1] > r - l;
+        }
+        return ans;
+    }
+
+    private void dfs(int x, List<Integer>[] g, char[] s, char[] dfsStr, int[][] nodes) {
+        nodes[x][0] = time;
+        for (int y : g[x]) {
+            dfs(y, g, s, dfsStr, nodes);
+        }
+        dfsStr[time++] = s[x]; // 后序遍历
+        nodes[x][1] = time;
+    }
+}
+```
 
 
 

@@ -136,7 +136,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -151,33 +151,30 @@ public class Main {
     private static List<Integer>[] g;
     private static int m, n;
 
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        s = sc.next();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            char c = s.charAt(i);
-            int num = 0;
-            while (c >= '0' && c <= '9') {
-                if (c == '1') {
-                    num = num * 10 + 1;
-                }else{
-                    num = num * 10 + (c - '0');
-                }
-                i++;
-                c = s.charAt(i);
-            }
-            if (num == 0) {
-                sb.append(c);
-            }else{
-                for (int j = 0; j < num; j++) {
-                    sb.append(c);
+    static int N = (int) 1e5 + 1;
+    static long[][] dp = new long[3][N];
+    static {
+        dp[0][1] = 9; // 装饰第一间房子
+        for (int i = 1; i < N - 1; i++) {
+            for (int j = 0; j < 3; j++) {
+                dp[j][i + 1] += dp[j][i] * (j + 1) % Mod;
+                dp[j][i + 1] %= Mod;
+                if (j < 2) {
+                    dp[j + 1][i + 1] += dp[j][i] * (9 - j) % Mod;
+                    dp[j + 1][i + 1] %= Mod;
                 }
             }
         }
-        sc.println(sb.toString());
 
+    }
+
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        if (n < 3) {
+            sc.println(0);
+        }else{
+            sc.println(dp[2][n]);
+        }
     }
 
 
