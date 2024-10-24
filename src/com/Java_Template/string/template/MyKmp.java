@@ -1,9 +1,13 @@
 package com.Java_Template.string.template;
 
+/**
+ *
+ * https://www.bilibili.com/video/BV1Ag411o7US/?spm_id_from=333.999.0.0&vd_source=607514df4428a309d5130d87a0423d0c
+ */
 public class MyKmp {
     private static int[] getNext(String pattern) { // 求next数组
         int n = pattern.length();
-        int[] next = new int[n];
+        int[] next = new int[n]; // next[0] = 0
         for (int i = 1, j = 0; i < n; i++) {
             while (j > 0 && pattern.charAt(i) != pattern.charAt(j)) {
                 j = next[j - 1];
@@ -20,13 +24,13 @@ public class MyKmp {
         int n = s.length();
         for (int i = 0, j = 0; i < n; i++) {
             while (j > 0 && s.charAt(i) != pattern.charAt(j)) {
-                j = next[j - 1]; //下一个匹配位为next数组的第j-1位
+                j = next[j - 1]; // 下一个匹配位为next数组的第j-1位
             }
             if (s.charAt(i) == pattern.charAt(j)) {
-                j++; //主串通过i进行加1，模式串通过j加1
+                j++; // 主串通过i进行加1，模式串通过j加1
             }
             if (j == pattern.length()) {
-                return i - j + 1; //返回匹配位置
+                return i - j + 1; // 返回匹配位置
             }
         }
         return -1;
@@ -55,6 +59,7 @@ public class MyKmp {
         printNext("ABCDABD");
         printNext("ABABAA");
         printNext("ABAABCAC");
+        printNext("ABCABCABC");
     }
 
     /*起始位置为：11

@@ -8,6 +8,8 @@ import java.util.List;
 /**
  * @author Minus
  * @date 2024/2/11 13:10
+ *
+ * 不推荐
  */
 public class KMP{
     private void getPrefixTable(char[] pattern, int[] prefixTable){

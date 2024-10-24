@@ -1,7 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -136,7 +135,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -151,31 +150,55 @@ public class Main {
     private static List<Integer>[] g;
     private static int m, n;
 
-    static int N = (int) 1e5 + 1;
-    static long[][] dp = new long[3][N];
-    static {
-        dp[0][1] = 9; // 装饰第一间房子
-        for (int i = 1; i < N - 1; i++) {
-            for (int j = 0; j < 3; j++) {
-                dp[j][i + 1] += dp[j][i] * (j + 1) % Mod;
-                dp[j][i + 1] %= Mod;
-                if (j < 2) {
-                    dp[j + 1][i + 1] += dp[j][i] * (9 - j) % Mod;
-                    dp[j + 1][i + 1] %= Mod;
+    /**
+     * 找到路径上面的所有点dfs，再将路径上的所有点加入set，然后使用路径上面每个点向非路径点出发，求得所有的路径和
+     */
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        int q = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<Integer>());
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        int u = sc.nextInt() - 1, v = sc.nextInt() - 1;
+        dfs(u, -1, v);
+        set.add(u);
+        ans = 0;
+        for (int x : set) {
+            dfs1(x, -1, 0);
+        }
+        sc.println(ans);
+    }
+
+    static int ans;
+    private static void dfs1(int x, int fa, int depth) {
+        for (int y : g[x]) {
+            if (y != fa && !set.contains(y)) {
+                dfs1(y, x, depth + 1);
+                ans += depth + 1;
+            }
+        }
+    }
+
+
+
+    static HashSet<Integer> set = new HashSet<>();
+    private static boolean dfs(int x, int fa, int target) {
+        if (x == target) {
+            return true;
+        }
+        for (int y : g[x]) {
+            if (y != fa) {
+                if (dfs(y, x, target)) {
+                    set.add(y);
+                    return true;
                 }
             }
         }
-
+        return false;
     }
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        if (n < 3) {
-            sc.println(0);
-        }else{
-            sc.println(dp[2][n]);
-        }
-    }
-
 
 }

@@ -1,3 +1,21 @@
+## 2024/10/24
+
+[214. 最短回文串](https://leetcode.cn/problems/shortest-palindrome/) 
+
+[1960. 两个回文子字符串长度的最大乘积](https://leetcode.cn/problems/maximum-product-of-the-length-of-two-palindromic-substrings/) 
+
+## 2024/10/23
+
+[小红的字符串重排 ](https://ac.nowcoder.com/acm/contest/92662/E)
+
+[2412. 完成所有交易的初始最少钱数](https://leetcode.cn/problems/minimum-money-required-before-transactions/) 
+
+## 2024/10/22
+
+[502. IPO](https://leetcode.cn/problems/ipo/) 
+
+[373. 查找和最小的 K 对数字](https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/) 
+
 ## 2024/10/15
 
 [480. 滑动窗口中位数](https://leetcode.cn/problems/sliding-window-median/) 
