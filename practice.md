@@ -1,12 +1,16 @@
-## 2024/10/27
+## 2024/10/29
+
+[3331. 修改后子树的大小](https://leetcode.cn/problems/find-subtree-sizes-after-changes/) 
+
+[D - Many Segments 2 ](https://atcoder.jp/contests/abc377/tasks/abc377_d)
+
+[E - Permute K times 2 ](https://atcoder.jp/contests/abc377/tasks/abc377_e)
+
+## 2024/10/28
 
 [685. 冗余连接 II](https://leetcode.cn/problems/redundant-connection-ii/) 
 
 [乌鸦-构造套路题](https://ac.nowcoder.com/acm/contest/92972/G)
-
-[3331. 修改后子树的大小](https://leetcode.cn/problems/find-subtree-sizes-after-changes/) 
-
-
 
 ## 2024/10/27
 
