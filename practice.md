@@ -1,8 +1,34 @@
+## 2024/10/27
+
+[685. 冗余连接 II](https://leetcode.cn/problems/redundant-connection-ii/) 
+
+[乌鸦-构造套路题](https://ac.nowcoder.com/acm/contest/92972/G)
+
+[3331. 修改后子树的大小](https://leetcode.cn/problems/find-subtree-sizes-after-changes/) 
+
+
+
+## 2024/10/27
+
+[状压dp练习题](https://ac.nowcoder.com/acm/contest/92972/D) 
+
+## 2024/10/25
+
+[3181. 执行操作可获得的最大总奖励 II](https://leetcode.cn/problems/maximum-total-reward-using-operations-ii/) 
+
+> java流操作：Arrays.stream(nums).distinct().sorted.toArray();
+
 ## 2024/10/24
 
 [214. 最短回文串](https://leetcode.cn/problems/shortest-palindrome/) 
 
 [1960. 两个回文子字符串长度的最大乘积](https://leetcode.cn/problems/maximum-product-of-the-length-of-two-palindromic-substrings/) 
+
+[整数对](https://www.lanqiao.cn/problems/19952/learning/?contest_id=214)
+
+> 贡献法：nums[k]出现在nums[i...j]，那么i的取值是[0, k], j 的取值是[k, n - 1]
+>
+> ![1729780115611](assets/1729780115611.png)
 
 ## 2024/10/23
 

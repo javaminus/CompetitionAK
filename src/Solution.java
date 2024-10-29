@@ -1,61 +1,47 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class Solution {
-    public long maxProduct(String s) {
-        int n = s.length();
-        char[] t = new char[n * 2 + 3];
-        Arrays.fill(t, '#');
-        t[0] = '^';
-        for (int i = 0; i < n; i++) {
-            t[i * 2 + 2] = s.charAt(i);
-        }
-        t[n * 2 + 2] = '$';
-        int[] halfLen = new int[t.length - 2];
-        halfLen[1] = 1;
-        int boxM = 0, boxR = 0, maxI = 0;
-        for (int i = 2; i < halfLen.length; i++) {
-            int hl = 1;
-            if (i < boxR) {
-                hl = Math.min(halfLen[boxM * 2 - i], boxR - i);
-            }
-            while (t[i - hl] == t[i + hl]) {
-                hl++;
-                boxM = i;
-                boxR = i + hl;
-            }
-            halfLen[i] = hl;
-            if (hl > halfLen[maxI]) {
-                maxI = i;
-            }
-        }
-
-        int[] startPL = new int[n]; // 表示以 s[i] 为首字母的最长奇回文子串的长度
-        int[] endPL = new int[n]; // 表示以 s[i] 为尾字母的最长奇回文子串的长度
-        for (int i = 2; i < t.length - 2; i += 2) {
-            int hl = halfLen[i];
-            int left = (i - hl) / 2;
-            int right = (i + hl) / 2 - 2;
-            startPL[left] = Math.max(startPL[left], hl - 1);
-            endPL[right] = Math.max(endPL[right], hl - 1);
-        }
-
+    public int[] findSubtreeSizes(int[] parent, String s) {
+        int n = parent.length;
+        List<Integer>[] g = new ArrayList[n];
+        Arrays.setAll(g, i -> new ArrayList<>());
         for (int i = 1; i < n; i++) {
-            startPL[i] = Math.max(startPL[i], startPL[i - 1] - 2);
+            g[parent[i]].add(i);
         }
-        for (int i = n - 2; i >= 0; i--) {
-            startPL[i] = Math.max(startPL[i], startPL[i + 1]);
-        }
-        for (int i = n - 2; i >= 0; i--) {
-            endPL[i] = Math.max(endPL[i], endPL[i + 1] - 2);
-        }
-        for (int i = 1; i < n; i++) {
-            endPL[i] = Math.max(endPL[i], endPL[i - 1]);
-        }
-
-        long ans = 0;
-        for (int i = 1; i < n; i++) {
-            ans = Math.max(ans, (long) endPL[i - 1] * startPL[i]);
-        }
-        return ans;
+        int[] ancestor = new int[26];
+        Arrays.fill(ancestor, -1);
+        dfs(0, g, s.toCharArray(), ancestor);
+        int[] nodes = new int[n];
+        dfs1(0, g, nodes);
+        return nodes;
     }
+
+    private int dfs1(int x, List<Integer>[] g, int[] nodes) {
+        nodes[x] = 1;
+        for (int y : g[x]) {
+            if (y != -1) {
+                nodes[x] += dfs1(y, g, nodes);
+            }
+        }
+        return nodes[x];
+    }
+    private void dfs(int x, List<Integer>[] g, char[] s, int[] ancestor) {
+        int sx = s[x] - 'a';
+        int old = ancestor[sx];
+        ancestor[sx] = x;
+        for (int i = g[x].size() - 1; i >= 0; i--) {
+            int y = g[x].get(i);
+            int anc = ancestor[s[y] - 'a'];
+            if (anc != -1) {
+                g[anc].add(y);
+                g[x].set(i, -1); // -1 表示删除 y
+            }
+            dfs(y, g, s, ancestor);
+        }
+        ancestor[sx] = old;
+    }
+
+
 }

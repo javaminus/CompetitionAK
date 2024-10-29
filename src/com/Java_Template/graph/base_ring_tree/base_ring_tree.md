@@ -331,7 +331,7 @@ class Solution { // 注意题目给出的图可能不是连通的，可能有多
         }
         int[] ans = new int[n];
         for (int i = 0; i < n; i++) { // 万一图没有连通？
-            if (indegree[i] <= 0) { // 表面当前节点已经被访问
+            if (indegree[i] <= 0) { // 表示当前节点已经被访问
                 continue;
             }
             ArrayList<Integer> ring = new ArrayList<>(); // 记录环上的点
