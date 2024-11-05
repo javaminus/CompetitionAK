@@ -1,5 +1,186 @@
 ## 【并查集究极模板题】
 
+## [小苯的蓄水池（hard） ](https://ac.nowcoder.com/acm/contest/93847/E)
+
+- 方法一：并查集
+
+```java
+    private static int[] p;
+    private static long[] s_cnt, s_water;
+
+
+    /**
+     * 使用并查集做合并操作，祖先节点就是当前节点的最右节点
+     */
+    private static void solve() throws IOException {
+        ss = sc.nextLine().split(" ");
+        int n = Integer.parseInt(ss[0]), m = Integer.parseInt(ss[1]);
+        p = new int[n];
+        s_cnt = new long[n];
+        s_water = new long[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            p[i] = i;
+            s_cnt[i] = 1;
+            s_water[i] = Integer.parseInt(ss[i]);
+        }
+        while (m-- > 0) {
+            ss = sc.nextLine().split(" ");
+            int op = Integer.parseInt(ss[0]);
+            if (op == 1) {
+                int l = Integer.parseInt(ss[1]) - 1, r = Integer.parseInt(ss[2]) - 1;
+                for (int i = l; i < r; i++) {
+                    union(i, i + 1);
+                    i = find(i) - 1;
+                }
+            }else{
+                int x = Integer.parseInt(ss[1]) - 1;
+                int fx = find(x);
+                sc.println((double) s_water[fx] / s_cnt[fx]);
+            }
+        }
+    }
+
+    private static int find(int x) {
+        if (p[x] != x) {
+            p[x] = find(p[x]);
+        }
+        return p[x];
+    }
+
+    private static void union(int x, int y) {
+        int fx = find(x);
+        int fy = find(y);
+        if (fx == fy) {
+            return;
+        }
+        if (fx < fy) {
+            int tmp = fx;
+            fx = fy;
+            fy = tmp;
+        }
+        s_cnt[fx] += s_cnt[fy];
+        s_water[fx] += s_water[fy];
+        p[fy] = fx;
+    }
+```
+
+- 方法二：红黑树
+
+```java
+private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        TreeMap<Integer, Integer> right = new TreeMap<>(); // 每个点的右边界
+        long[] nums = new long[n];
+        long[] prefixSum = new long[n + 1];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Long.parseLong(ss[i]);
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
+            right.put(i, i);
+        }
+        while (m-- > 0) {
+            ss = sc.nextLine().split(" ");
+            int op = Integer.parseInt(ss[0]);
+            if (op == 1) {
+                int l = Integer.parseInt(ss[1]) - 1, r = Integer.parseInt(ss[2]) - 1;
+                Integer ll = right.floorKey(l), rr = right.floorKey(r);
+                rr = right.get(rr);
+                right.put(ll, rr);
+                while (right.higherKey(ll) != null && right.higherKey(ll) <= rr) {
+                    right.remove(right.higherKey(ll));
+                }
+            }else{
+                int x = Integer.parseInt(ss[1]) - 1;
+                int l = right.floorKey(x), r = right.get(l);
+                sc.println((double) (prefixSum[r + 1] - prefixSum[l]) / (r - l + 1));
+            }
+        }
+    }
+```
+
+
+
+## [E - K-th Largest Connected Components ](https://atcoder.jp/contests/abc372/tasks/abc372_e)
+
+```java
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        int q = sc.nextInt();
+        UnionFind unionFind = new UnionFind(n + 1);
+        while (q-- > 0) {
+            ss = sc.nextLine().split(" ");
+            int ops = Integer.parseInt(ss[0]);
+            int x = Integer.parseInt(ss[1]), y = Integer.parseInt(ss[2]);
+            if (ops == 1) {
+                unionFind.union(x, y);
+            }else{
+                int root = unionFind.find(x);
+                if (unionFind.pqs[root].size() < y) {
+                    sc.println(-1);
+                }else{
+                    ArrayList<Integer> list = new ArrayList<>();
+                    while (!unionFind.pqs[root].isEmpty()) {
+                        list.add(unionFind.pqs[root].poll());
+                    }
+                    sc.println(list.get(list.size() - y));
+                    unionFind.pqs[root].addAll(list);
+                }
+            }
+        }
+
+    }
+
+    static class UnionFind {
+        private int[] parent;
+        private PriorityQueue<Integer>[] pqs; // 小根堆
+        int MX = 10;
+
+        public UnionFind(int n) {
+            parent = new int[n];
+            pqs = new PriorityQueue[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = -1;
+                pqs[i] = new PriorityQueue<>((a, b) -> a - b);
+                pqs[i].add(i);
+            }
+        }
+
+        public int find(int x) {
+            if (parent[x] < 0) {
+                return x;
+            } else {
+                parent[x] = find(parent[x]);
+                return parent[x];
+            }
+        }
+
+        public void union(int x, int y) {
+            x = find(x);
+            y = find(y);
+            if (x == y) {
+                return;
+            }
+            if (parent[x] > parent[y]) {
+                int tmp = x;
+                x = y;
+                y = tmp;
+            }
+            parent[x] += parent[y];
+            parent[y] = x;
+            while (!pqs[y].isEmpty()) {
+                pqs[x].offer(pqs[y].poll());
+                if (pqs[x].size() > MX) {
+                    pqs[x].poll();
+                }
+            }
+        }
+    }
+```
+
+
+
 ## [177. 学习语言 ](https://kamacoder.com/problempage.php?pid=1255)
 
 ![1727798260714](assets/1727798260714.png)

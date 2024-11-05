@@ -2370,3 +2370,71 @@ class Solution {
 }
 ```
 
+## [E - 3 Team Division 【超级模板题】](https://atcoder.jp/contests/abc375/tasks/abc375_e)
+
+```java
+	private static int N = 501;
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        int[] a = new int[n]; // 组数
+        int[] b = new int[n]; // 权重
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            ss = sc.nextLine().split(" ");
+            a[i] = Integer.parseInt(ss[0]);
+            b[i] = Integer.parseInt(ss[1]);
+            sum += b[i];
+        }
+        if (sum % 3 != 0) {
+            sc.println(-1);
+            return;
+        }
+        int ave = sum / 3;
+        int[][] dp = new int[N][N];
+        for (int i = 0; i < N; i++) {
+            Arrays.fill(dp[i], N);
+        }
+        dp[0][0] = 0; // 表示不放任何东西进入，第一个盒子权重为0，第二个盒子权重为0的调换次数为0
+        for (int i = 0; i < n; i++) {
+            int[][] tmp = new int[N][N];
+            for (int j = 0; j < N; j++) {
+                Arrays.fill(tmp[j], INF);
+            }
+            int w = b[i];
+            for (int j = 0; j < N; j++) {
+                for (int k = 0; k < N; k++) {
+                    if (a[i] == 1) {
+                        if (j + w < N) {
+                            tmp[j + w][k] = Math.min(tmp[j + w][k], dp[j][k]);
+                        }
+                        if (k + w < N) {
+                            tmp[j][k + w] = Math.min(tmp[j][k + w], dp[j][k] + 1);
+                        }
+                        tmp[j][k] = Math.min(tmp[j][k], dp[j][k] + 1);
+                    } else if (a[i] == 2) {
+                        if (j + w < N) {
+                            tmp[j + w][k] = Math.min(tmp[j + w][k], dp[j][k] + 1);
+                        }
+                        if (k + w < N) {
+                            tmp[j][k + w] = Math.min(tmp[j][k + w], dp[j][k]);
+                        }
+                        tmp[j][k] = Math.min(tmp[j][k], dp[j][k] + 1);
+                    }else{
+                        if (j + w < N) {
+                            tmp[j + w][k] = Math.min(tmp[j + w][k], dp[j][k] + 1);
+                        }
+                        if (k + w < N) {
+                            tmp[j][k + w] = Math.min(tmp[j][k + w], dp[j][k] + 1);
+                        }
+                        tmp[j][k] = Math.min(tmp[j][k], dp[j][k]);
+                    }
+                }
+            }
+            dp = tmp;
+        }
+        sc.println(dp[ave][ave] == INF ? -1 : dp[ave][ave]);
+    }
+```
+
+
+

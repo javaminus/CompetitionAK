@@ -1,3 +1,45 @@
+## 2024/11/6
+
+
+
+## 2024/11/5
+
+[3343. 统计平衡排列的数目](https://leetcode.cn/problems/count-number-of-balanced-permutations/) 
+
+[小苯的蓄水池（hard)](https://ac.nowcoder.com/acm/contest/93847/E)
+
+[小苯的字符提前 ](https://ac.nowcoder.com/acm/contest/93847/F)
+
+## 2024/11/4
+
+## 2024/11/3
+
+[ 蓝桥派对【算法赛】 ](https://www.lanqiao.cn/problems/19978/learning/?contest_id=216)(太板了)
+
+## 2024/11/2
+
+[D - Buildings ](https://atcoder.jp/contests/abc372/tasks/abc372_d)
+
+[小H学数学 ](https://ac.nowcoder.com/acm/contest/94114/B)
+
+## 2024/11/1
+
+[D - Hidden Weights ](https://atcoder.jp/contests/abc373/tasks/abc373_d)
+
+## 2024/10/31
+
+[3165. 不包含相邻元素的子序列的最大和](https://leetcode.cn/problems/maximum-sum-of-subsequence-with-non-adjacent-elements/) 
+
+[D - Laser Marking ](https://atcoder.jp/contests/abc374/tasks/abc374_d)
+
+[E - Sensor Optimization Dilemma 2 ](https://atcoder.jp/contests/abc374/tasks/abc374_e)
+
+[E - 3 Team Division 【超级模板题】](https://atcoder.jp/contests/abc375/tasks/abc375_e)
+
+## 2024/10/30
+
+[3337. 字符串转换后的长度 II](https://leetcode.cn/problems/total-characters-in-string-after-transformations-ii/) 
+
 ## 2024/10/29
 
 [3331. 修改后子树的大小](https://leetcode.cn/problems/find-subtree-sizes-after-changes/) 
