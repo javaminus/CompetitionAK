@@ -1,14 +1,14 @@
 ## 2024/11/6
 
+[中奖编号【算法赛】 ](https://www.lanqiao.cn/problems/19979/learning/?contest_id=216)
 
+[小苯的字符提前 ](https://ac.nowcoder.com/acm/contest/93847/F)
 
 ## 2024/11/5
 
 [3343. 统计平衡排列的数目](https://leetcode.cn/problems/count-number-of-balanced-permutations/) 
 
-[小苯的蓄水池（hard)](https://ac.nowcoder.com/acm/contest/93847/E)
-
-[小苯的字符提前 ](https://ac.nowcoder.com/acm/contest/93847/F)
+[小苯的蓄水池（hard)](https://ac.nowcoder.com/acm/contest/93847/E)【两个方法】
 
 ## 2024/11/4
 
