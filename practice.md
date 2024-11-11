@@ -1,8 +1,26 @@
+## 2024/11/11
+
+[1547. 切棍子的最小成本](https://leetcode.cn/problems/minimum-cost-to-cut-a-stick/) 
+
+[3347. 执行操作后元素的最高频率 II](https://leetcode.cn/problems/maximum-frequency-of-an-element-after-performing-operations-ii/) 
+
+[3351. 好子序列的元素之和](https://leetcode.cn/problems/sum-of-good-subsequences/) 
+
+## 2024/11/8
+
+[D - Pedometer ](https://atcoder.jp/contests/abc367/tasks/abc367_d)
+
+[E - Manhattan Multifocal Ellipse ](https://atcoder.jp/contests/abc366/tasks/abc366_e)
+
+## 2024/11/7
+
 ## 2024/11/6
 
 [中奖编号【算法赛】 ](https://www.lanqiao.cn/problems/19979/learning/?contest_id=216)
 
 [小苯的字符提前 ](https://ac.nowcoder.com/acm/contest/93847/F)
+
+[2156. 查找给定哈希值的子串](https://leetcode.cn/problems/find-substring-with-given-hash-value/) 
 
 ## 2024/11/5
 

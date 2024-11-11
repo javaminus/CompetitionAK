@@ -1,7 +1,5 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -133,12 +131,40 @@ public class Main {
         }
     }
 
+    private static long qpow(long a, long b, long p) {
+        long res = 1L;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = (res * a) % p;
+            }
+            a = a * a % p;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    private static long sqrt(long N) { // 二分查找快速开方
+        long lo = 1;
+        long hi = N;
+        long ans = 0;
+        while(lo <= hi) {
+            long mid = (lo + hi) / 2;
+            if (mid <= N / mid) {
+                ans = mid;
+                lo = mid + 1;
+            }  else {
+                hi = mid - 1;
+            }
+        }
+        return ans;
+    }
+
     static Read sc = new Read();
     private static final int Mod = (int) 1e9 + 7;
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -156,55 +182,13 @@ public class Main {
 
     private static void solve() throws IOException {
         n = sc.nextInt();
-        int k = sc.nextInt();
-        s = sc.next();
-        cs = s.toCharArray();
-        int[] cnt = new int[26];
-        for (char c : cs) {
-            cnt[c - 'a']++;
-        }
-        char c = 'a';
-        int d = 0;
-        for (int i = 0; i < 26; i++) {
-            if (d + cnt[i] >= k) {
-                c = (char) (i + 'a');
-                break;
-            }
-            d += cnt[i];
-        }
-        k -= d;
-        ArrayList<Integer> idx = new ArrayList<>();
+        cs = sc.next().toCharArray();
+        long[] prefixSum = new long[n + 1];
         for (int i = 0; i < n; i++) {
-            if (cs[i] == c) {
-                idx.add(i);
-            }
+            int x = cs[i] - '0';
+            prefixSum[i + 1] = prefixSum[i] + (long) x * (i + 1);
         }
-        int[] right = new int[n];
-        for (int i = 0, j = 0; i < n; i = j) {
-            while (j < n && cs[i] == cs[j]) {
-                j++;
-            }
-            if (cs[i] == c) {
-                for (int l = i; l < j; l++) {
-                    right[l] = j;
-                }
-            }
-        }
-        System.out.println(Arrays.toString(right));
-        idx.sort((i,j)->{
-            int a = Math.min(i, j), b = Math.max(i, j);
-            if (right[a] == n) {
-                return 0;
-            }
-            if (cs[right[a]] < cs[b]) {
-                return a == i ? -1 : 1;
-            } else if (cs[right[a]] > cs[b]) {
-                return a == i ? 1 : -1;
-            }
-            return 0;
-        });
-        int id = idx.get(k - 1);
-        sc.println("" + cs[id] + s.substring(0, id) + s.substring(id + 1));
+
     }
 
 
