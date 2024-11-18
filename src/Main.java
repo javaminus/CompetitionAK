@@ -159,6 +159,39 @@ public class Main {
         return ans;
     }
 
+    private static void reverse(char[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            char tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    private static void reverse(int[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            int tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    private static void reverse(long[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            long tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
     static Read sc = new Read();
     private static final int Mod = (int) 1e9 + 7;
     private static int T = 1;
@@ -183,13 +216,25 @@ public class Main {
     private static void solve() throws IOException {
         n = sc.nextInt();
         cs = sc.next().toCharArray();
-        long[] prefixSum = new long[n + 1];
-        for (int i = 0; i < n; i++) {
-            int x = cs[i] - '0';
-            prefixSum[i + 1] = prefixSum[i] + (long) x * (i + 1);
+        reverse(cs);
+        long[] digits = new long[n];
+        long curValue = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            curValue += (long) (cs[i] - '0') * (n - i);
+            digits[i] = curValue;
         }
+        for (int i = 0; i < n - 1; i++) {
+            digits[i + 1] += digits[i] / 10;
+            digits[i] %= 10;
+        }
+        reverse(digits);
 
+        for (int i = 0; i < n; i++) {
+            sc.print(digits[i]);
+        }
     }
+
+
 
 
 }

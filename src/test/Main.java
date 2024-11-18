@@ -183,10 +183,6 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        System.out.println(5/0);
-        System.out.println(5%3);
-        System.out.println(5.0/0);
-        System.out.println(5.0%0);
 
     }
 

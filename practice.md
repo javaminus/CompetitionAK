@@ -1,3 +1,7 @@
+## 2024/11/18
+
+[E - Sum of All Substrings ](https://atcoder.jp/contests/abc379/tasks/abc379_e)
+
 ## 2024/11/11
 
 [1547. 切棍子的最小成本](https://leetcode.cn/problems/minimum-cost-to-cut-a-stick/) 
