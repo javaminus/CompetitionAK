@@ -1,3 +1,7 @@
+## 2024/11/26
+
+[3367. 移除边之后的权重最大和](https://leetcode.cn/problems/maximize-sum-of-weights-after-edge-removals/) 
+
 ## 2024/11/18
 
 [E - Sum of All Substrings ](https://atcoder.jp/contests/abc379/tasks/abc379_e)

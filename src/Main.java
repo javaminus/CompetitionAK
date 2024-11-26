@@ -214,24 +214,7 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        n = sc.nextInt();
-        cs = sc.next().toCharArray();
-        reverse(cs);
-        long[] digits = new long[n];
-        long curValue = 0;
-        for (int i = n - 1; i >= 0; i--) {
-            curValue += (long) (cs[i] - '0') * (n - i);
-            digits[i] = curValue;
-        }
-        for (int i = 0; i < n - 1; i++) {
-            digits[i + 1] += digits[i] / 10;
-            digits[i] %= 10;
-        }
-        reverse(digits);
 
-        for (int i = 0; i < n; i++) {
-            sc.print(digits[i]);
-        }
     }
 
 
