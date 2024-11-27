@@ -1,6 +1,69 @@
+# NOTICE
+
+- java里面的.clone是浅拷贝
+
+  ```java
+  int[][] mat = new int[m][n];
+  int[][] mat1 = mat.clone(); // 这里的mat1与mat里面的一维数组的地址一样。
+  // 想要深拷贝只能：
+  for(int i = 0; i < m ; i++){
+      for(int j = 0; j < n; j++){
+          mat1[i][j] = mat[i][j];
+      }
+  }                
+  ```
+
+- 如果要对一个矩阵使用回溯算法，你大概率会：
+
+  ```java
+  private int dfs(int i, int j, 状态){ // 矩阵int[][] mat;
+      if(触底返回条件){
+          return 0;
+      }
+      int res = 0;
+      for (int x = i + 1; x < m; x++) {
+          for (int y = j + 1; y < n; y++) {
+              res += Math.min((dfs(x, y, 不改变), dfs(x, y, 改变));
+          }
+      }
+      return res;
+  }
+  ```
+
+  这里有一个特别隐蔽的问题：在循环里面，我们当前是dfs(i, j)， 下一个状态是dfs(i+1, j+1);
+
+  所以这样的写法是错误的，下面给一种正确的写法：
+
+  ```java
+  private int dfs(int i, 矩阵状态){ // 矩阵int[][] mat; 使用一个状态代替行和列
+      if(合法的条件){
+          return 0;
+      }
+      if(i == m * n){
+          return Integer.MAX_VALUE; // 到达边界不合法
+      }
+      int row = i / n, col = i % n;
+      int res = dfs(i + 1, mat);
+      flip(mat, row, col);
+     	res = Math.min(res, dfs(i + 1, mat) + 1);
+      flip(mat, row, col)；
+      return res;
+  }
+  ```
+
+- 翻转相邻单元格就是上下左右四个单元格，而不是当前行列全部翻转。
+
+# DIARY
+
 ## 2024/11/26
 
 [3367. 移除边之后的权重最大和](https://leetcode.cn/problems/maximize-sum-of-weights-after-edge-removals/) 
+
+[3362. 零数组变换 III](https://leetcode.cn/problems/zero-array-transformation-iii/) 
+
+[3026. 最大好子数组和](https://leetcode.cn/problems/maximum-good-subarray-sum/) 
+
+[795. 区间子数组个数](https://leetcode.cn/problems/number-of-subarrays-with-bounded-maximum/) 
 
 ## 2024/11/18
 

@@ -1,28 +1,17 @@
-import java.util.Arrays;
-import java.util.PriorityQueue;
-
 class Solution {
-    public int maxRemoval(int[] nums, int[][] queries) {
+    public int numSubarrayBoundedMax(int[] nums, int left, int right) {
         int n = nums.length;
-        Arrays.sort(queries, (a, b) -> a[0] - b[0]);
-        int[] diff = new int[n + 1];
-        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
-        int sumD = 0;
-        int j = 0; // queries的下标
+        int i0 = -1, i1 = -1;
+        int ans = 0;
         for (int i = 0; i < n; i++) {
-            sumD += diff[i];
-            while (j < queries.length && queries[j][0] <= i) {
-                pq.offer(queries[i][1]);
-                j++;
+            if (nums[i] > right) {
+                i0 = i;
             }
-            while (sumD < nums[i] && !pq.isEmpty() && pq.peek() >= i) {
-                sumD++;
-                diff[pq.poll() + 1]--;
+            if (nums[i] >= left) {
+                i1 = i;
             }
-            if (sumD < nums[i]) {
-                return -1;
-            }
+            ans += i1 - i0;
         }
-        return pq.size();
+        return ans;
     }
 }

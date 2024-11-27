@@ -1,5 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -214,7 +215,13 @@ public class Main {
 
 
     private static void solve() throws IOException {
-
+        m = 10;
+        n = 10;
+        int[][] nums = new int[m][n];
+        int[][] nums1 = nums.clone();
+        nums1[1][2] = 10;
+        System.out.println(Arrays.deepToString(nums));
+        System.out.println(Arrays.deepToString(nums1));
     }
 
 
