@@ -55,6 +55,10 @@
 
 # DIARY
 
+## 2024/11/27
+
+[2787. 将一个数字表示成幂的和的方案数](https://leetcode.cn/problems/ways-to-express-an-integer-as-sum-of-powers/) 
+
 ## 2024/11/26
 
 [3367. 移除边之后的权重最大和](https://leetcode.cn/problems/maximize-sum-of-weights-after-edge-removals/) 
