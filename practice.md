@@ -55,6 +55,14 @@
 
 # DIARY
 
+## 2024/12/6
+
+[1754. 构造字典序最大的合并字符串](https://leetcode.cn/problems/largest-merge-of-two-strings/) 
+
+## 2024/12/5
+
+[3332. 旅客可以得到的最多点数](https://leetcode.cn/problems/maximum-points-tourist-can-earn/) 
+
 ## 2024/11/27
 
 [2787. 将一个数字表示成幂的和的方案数](https://leetcode.cn/problems/ways-to-express-an-integer-as-sum-of-powers/) 
