@@ -63,6 +63,8 @@
 
 [3381. 长度可被 K 整除的子数组的最大元素和](https://leetcode.cn/problems/maximum-subarray-sum-with-length-divisible-by-k/) 
 
+[气球谜底](https://ac.nowcoder.com/acm/contest/97443/D)
+
 ## 2024/12/7
 
 [金银珠宝的数值[dp板子题]](https://www.marscode.cn/practice/5wjnpwe0nl7plq?competition_id=7434140090463364702&problem_id=7435957508992663596)
