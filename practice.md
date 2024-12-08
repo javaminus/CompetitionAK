@@ -55,9 +55,23 @@
 
 # DIARY
 
+## 2024/12/8
+
+[3377. 使两个整数相等的数位操作](https://leetcode.cn/problems/digit-operations-to-make-two-integers-equal/) 【超级好题】
+
+[3378. 统计最小公倍数图中的连通块数目](https://leetcode.cn/problems/count-connected-components-in-lcm-graph/) 
+
+[3381. 长度可被 K 整除的子数组的最大元素和](https://leetcode.cn/problems/maximum-subarray-sum-with-length-divisible-by-k/) 
+
+## 2024/12/7
+
+[金银珠宝的数值[dp板子题]](https://www.marscode.cn/practice/5wjnpwe0nl7plq?competition_id=7434140090463364702&problem_id=7435957508992663596)
+
 ## 2024/12/6
 
 [1754. 构造字典序最大的合并字符串](https://leetcode.cn/problems/largest-merge-of-two-strings/) 
+
+[dp的究极应用](https://ac.nowcoder.com/acm/contest/97439/D)
 
 ## 2024/12/5
 

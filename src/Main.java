@@ -1,88 +1,250 @@
 import java.io.*;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
+    private final static int INF = Integer.MAX_VALUE / 2;
+    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
     static class Read {
         BufferedReader bf;
         StringTokenizer st;
         BufferedWriter bw;
+
         public Read() {
             bf = new BufferedReader(new InputStreamReader(System.in));
             st = new StringTokenizer("");
             bw = new BufferedWriter(new OutputStreamWriter(System.out));
         }
+
         public String nextLine() throws IOException {
             return bf.readLine();
         }
+
+        public String next() throws IOException {
+            while (!st.hasMoreTokens()) {
+                st = new StringTokenizer(bf.readLine());
+            }
+            return st.nextToken();
+        }
+
+        public char nextChar() throws IOException {
+            return next().charAt(0);
+        }
+
+        public int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+
+        public double nextDouble() throws IOException {
+            return Double.parseDouble(next());
+        }
+
+        public float nextFloat() throws IOException {
+            return Float.parseFloat(next());
+        }
+
+        public byte nextByte() throws IOException {
+            return Byte.parseByte(next());
+        }
+
+        public short nextShort() throws IOException {
+            return Short.parseShort(next());
+        }
+
+        public BigInteger nextBigInteger() throws IOException {
+            return new BigInteger(next());
+        }
+
+        public void println(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(String a) throws IOException {
+            bw.write(a);
+            bw.newLine();
+            return;
+        }
+
+        public void print(String a) throws IOException {
+            bw.write(a);
+            return;
+        }
+
+        public void println(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void print(BigInteger a) throws IOException {
+            bw.write(a.toString());
+            return;
+        }
+
+        public void print(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
     }
+
+    static class Pair<T, U> {
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
+        }
+    }
+
+    private static long qpow(long a, long b, long p) {
+        long res = 1L;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = (res * a) % p;
+            }
+            a = a * a % p;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    private static long sqrt(long N) { // 二分查找快速开方
+        long lo = 1;
+        long hi = N;
+        long ans = 0;
+        while(lo <= hi) {
+            long mid = (lo + hi) / 2;
+            if (mid <= N / mid) {
+                ans = mid;
+                lo = mid + 1;
+            }  else {
+                hi = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    private static void reverse(char[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            char tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    private static void reverse(int[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            int tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    private static void reverse(long[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            long tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
     static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
     private static int T = 1;
+
     public static void main(String[] args) throws IOException {
         // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
+            // sc.bw.flush();
         }
         sc.bw.flush();
         sc.bw.close();
     }
-    static int m, n;
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int m, n;
+
+
     private static void solve() throws IOException {
-        String[] ss = sc.nextLine().split(" ");
-        m = Integer.parseInt(ss[0]);
-        n = Integer.parseInt(ss[1]);
-        int[] nums1 = new int[m];
-        int[] nums2 = new int[n];
+        n = Integer.parseInt(sc.nextLine());
+        s = sc.next();
         ss = sc.nextLine().split(" ");
-        for (int i = 0; i < m; i++) {
-            nums1[i] = Integer.parseInt(ss[i]);
-        }
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums2[i] = Integer.parseInt(ss[i]);
-        }
-        int k = Integer.parseInt(sc.nextLine());
-        dfs(0, 0, nums1, nums2, k);
-        StringBuilder res = new StringBuilder();
-        for (int i = 0; i < ans.length(); i++) {
-            res.append(ans.charAt(i));
-            if (i != ans.length() - 1) {
-                res.append(" ");
-            }
-        }
-        System.out.println(res);
-    }
-
-    static StringBuilder sb = new StringBuilder();
-    private static void dfs(int i, int j, int[] nums1, int[] nums2, int k) {
-        if (sb.length() == k) {
-            exe();
-            return;
-        }
-        if (j != n) {
-            sb.append(nums2[j]);
-            dfs(i, j + 1, nums1, nums2, k);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        if (i != m) {
-            sb.append(nums1[i]);
-            dfs(i + 1, j, nums1, nums2, k);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-
-    }
-
-    static StringBuilder ans = new StringBuilder();
-    private static void exe() {
-        if (ans.length() == 0) {
-            ans = new StringBuilder(sb);
-        }else{
-            for (int i = 0; i < sb.length(); i++) {
-                if (sb.charAt(i) > ans.charAt(i)) {
-                    ans = new StringBuilder(sb);
-                } else if (sb.charAt(i) < ans.charAt(i)) {
-                    return;
+        long[] cost = Arrays.stream(ss).mapToLong(Long::parseLong).toArray();
+        char[] colors = {'0', '1', '2'};
+        int[][] permutations = new int[][]{{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+        long[][] prefixSum = new long[3][n + 1];
+        for (int c = 0; c < 3; c++) {
+            for (int i = 0; i < n; i++) {
+                prefixSum[c][i + 1] = prefixSum[c][i];
+                if (s.charAt(i) != colors[c]) {
+                    prefixSum[c][i + 1] += cost[i];
                 }
             }
         }
+        long res = Long.MAX_VALUE;
+        for (int[] perm : permutations) {
+            // 枚举中间色的开始与结束位置
+            for (int i = 0; i <= n; i++) {
+                for (int j = i; j <= n; j++) {
+                    long cost1 = prefixSum[perm[0]][i];
+                    long cost2 = prefixSum[perm[1]][j] - prefixSum[perm[1]][i];
+                    long cost3 = prefixSum[perm[2]][n] - prefixSum[perm[2]][j];
+                    long totalCost = cost1 + cost2 + cost3;
+                    if (totalCost < res) {
+                        res = totalCost;
+                    }
+                }
+            }
+        }
+        sc.println(res);
     }
 }
