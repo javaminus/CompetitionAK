@@ -55,6 +55,10 @@
 
 # DIARY
 
+## 2024/12/9
+
+[小苯的最短路 ](https://ac.nowcoder.com/acm/contest/97017/E)
+
 ## 2024/12/8
 
 [3377. 使两个整数相等的数位操作](https://leetcode.cn/problems/digit-operations-to-make-two-integers-equal/) 【超级好题】

@@ -1174,7 +1174,45 @@ class Solution {
 
 ```
 
+## [191. 小明打砖块 ](https://kamacoder.com/problempage.php?pid=1270)
 
+> 小明在玩一个消除游戏。这个消除游戏有点特别。游戏中，你会得到n个一维排列的有各自颜色的砖块。
+>
+> 消除的时候，你有三种消除方案。你可以单消一个砖块，这样你可以得到a的得分；如果两个颜色一样的砖块在一起，你可以将这两个砖块一起消除获得b的得分；如果三个颜色一样的砖块在一起，你可以将这三个砖块一起消除获得c的得分。
+>
+> 消除后，被消除的砖块自动消失，被消除砖块的左右两端的砖块将在消除之后挨在一起。
+>
+> 小明想知道在最优策略下他能得到多少得分。
 
-
+```java
+	private static void solve() throws IOException {
+        ss = sc.nextLine().split(" ");
+        int n = Integer.parseInt(ss[0]), a = Integer.parseInt(ss[1]), b = Integer.parseInt(ss[2]), c = Integer.parseInt(ss[3]);
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[][] dp = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i][i] = a;
+            for (int j = i + 1; j < n; j++) {
+                int r = Math.max(dp[i + 1][j], dp[i][j - 1]) + a;
+                for (int k = i + 1; k < j; k++) {
+                    r = Math.max(r, dp[i][k] + dp[k + 1][j]);
+                }
+                if (nums[i] == nums[j]) { // 首尾相同
+                    r = Math.max(r, dp[i + 1][j - 1] + b);
+                    for (int k = i + 1; k < j; k++) {
+                        if (nums[i] == nums[k]) {
+                            r = Math.max(r, dp[i + 1][k - 1] + dp[k + 1][j - 1] + c);
+                        }
+                    }
+                }
+                dp[i][j] = r;
+            }
+        }
+        sc.println(dp[0][n - 1]);
+    }
+```
 
