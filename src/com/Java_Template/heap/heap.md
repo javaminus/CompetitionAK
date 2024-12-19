@@ -319,3 +319,94 @@ class Solution {
 
 [https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/solutions/?envType=study-plan-v2&envId=top-interview-150](https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/solutions/?envType=study-plan-v2&envId=top-interview-150)
 
+[Cidoai的可乐 ](https://ac.nowcoder.com/acm/contest/98241/E)
+
+> 它有 n 个点，每个点都有点权 ai 和一个度数限制 di。它想将它们连成一棵树，其中一条边的边权为它的两个端点的点权较小值。它希望这棵树中，所有点的度数都不大于度数限制，且边权和最小。你需要输出这个边权和。 
+
+```java
+	 private static void solve() throws IOException {
+        n = sc.nextInt();
+        int[] a = new int[n];
+        ss = sc.nextLine().split(" ");
+        PriorityQueue<Integer> pq = new PriorityQueue<>((x, y) -> a[x] - a[y]);
+        for (int i = 0; i < n; i++) {
+            a[i] = Integer.parseInt(ss[i]);
+            pq.offer(i);
+        }
+        int[] d = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            d[i] = Integer.parseInt(ss[i]);
+        }
+        long ans = 0L;
+        for (int i = 0; i < n - 1; i++) {
+            Integer poll = pq.poll();
+            ans += a[poll];
+            d[poll]--;
+            if (d[poll] > 0) {
+                pq.add(poll);
+            }
+        }
+        sc.print(ans);
+    }
+
+```
+
+## [3266. K 次乘运算后的最终数组 II](https://leetcode.cn/problems/final-array-state-after-k-multiplication-operations-ii/description/?envType=daily-question&envId=2024-12-14)
+
+给你一个整数数组 `nums` ，一个整数 `k`  和一个整数 `multiplier` 。
+
+你需要对 `nums` 执行 `k` 次操作，每次操作中：
+
+- 找到 `nums` 中的 **最小** 值 `x` ，如果存在多个最小值，选择最 **前面** 的一个。
+- 将 `x` 替换为 `x * multiplier` 。
+
+`k` 次操作以后，你需要将 `nums` 中每一个数值对 `109 + 7` 取余。
+
+请你返回执行完 `k` 次乘运算以及取余运算之后，最终的 `nums` 数组。
+
+```java
+import java.util.PriorityQueue;
+
+class Solution { // Long.compare()学会了！！！
+    private static int Mod = (int) 1e9 + 7;
+    public int[] getFinalState(int[] nums, int k, int multiplier) {
+        if (multiplier == 1) {
+            return nums;
+        }
+        int n = nums.length;
+        int mx = 0;
+        PriorityQueue<long[]> pq = new PriorityQueue<>((a, b) -> a[0] != b[0] ? Long.compare(a[0], b[0]) : Long.compare(a[1], b[1]));
+        for (int i = 0; i < n; i++) {
+            mx = Math.max(mx, nums[i]);
+            pq.offer(new long[]{nums[i], i});
+        }
+        // 模拟，直到堆顶是mx
+        for (; k > 0 && pq.peek()[0] < mx; k--) {
+            long[] poll = pq.poll();
+            poll[0] *= multiplier;
+            pq.offer(poll);
+        }
+        for (int i = 0; i < n; i++) {
+            long[] poll = pq.poll();
+            nums[(int) poll[1]] = (int) (poll[0] % Mod * power(multiplier, k / n + (i < k % n ? 1 : 0)) % Mod);
+        }
+        return nums;
+    }
+
+    private long power(long a, long b) { // 求 (a ^ b) % p
+        int p = Mod;
+        long ans = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                ans = (ans * a) % p;
+            }
+            a = (a * a) % p;
+            b >>= 1;
+        }
+        return ans;
+    }
+
+}
+```
+

@@ -188,3 +188,51 @@ class Solution {
     }
 }
 ```
+## 【笔试】[美团春招笔试题](https://kamacoder.com/problemcontest.php?cid=1069&pid=3)
+
+![1734609310827](C:\Users\32921\AppData\Local\Temp\1734609310827.png)
+
+```java
+	private static void solve() throws IOException {
+        int n = sc.nextInt(), k = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        int[] count2 = new int[n];
+        int[] count5 = new int[n];
+        int tot2 = 0, tot5 = 0;
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            int cnt2 = 0, cnt5 = 0;
+            int x = nums[i];
+            while (x % 2 == 0) {
+                cnt2++;
+                x /= 2;
+            }
+            while (x % 5 == 0) {
+                cnt5++;
+                x /= 5;
+            }
+            count2[i] = cnt2;
+            count5[i] = cnt5;
+            tot5 += cnt5;
+            tot2 += cnt2;
+        }
+        int s2 = tot2 - k; // 表示最多可以删除s2个2
+        int s5 = tot5 - k; // 表示最多可以删除s5个5
+        long res = 0;
+        int left = 0;
+        int sum2 = 0, sum5 = 0;
+        for (int right = 0; right < n; right++) {
+            sum2 += count2[right];
+            sum5 += count5[right];
+            while (sum2 > s2 || sum5 > s5) {
+                sum2 -= count2[left];
+                sum5 -= count5[left];
+                left++;
+            }
+            res += (right - left + 1);
+        }
+        sc.println(res);
+    }
+```
+

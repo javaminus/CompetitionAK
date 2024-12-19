@@ -1,47 +1,63 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 class Solution {
-    private static final int Mod = (int) 1e9 + 7;
-    HashMap<Integer, List<Integer>> map = new HashMap<>();
+    class Pair{
+        String son;
+        Double val;
 
-    public int knightDialer(int n) {
-        map.put(1, Arrays.asList(6, 8));
-        map.put(2, Arrays.asList(7, 9));
-        map.put(3, Arrays.asList(4, 8));
-        map.put(4, Arrays.asList(3, 9, 0));
-        map.put(6, Arrays.asList(1, 7, 0));
-        map.put(7, Arrays.asList(2, 6));
-        map.put(8, Arrays.asList(1, 3));
-        map.put(9, Arrays.asList(4, 2));
-        map.put(0, Arrays.asList(4, 6));
-        int[][] memo = new int[10][n + 1];
-        for (int i = 0; i < 10; i++) {
-            Arrays.fill(memo[i], -1);
+        public Pair(String son, Double val) {
+            this.son = son;
+            this.val = val;
         }
-
-        int ans = 0;
-        for (int i = 0; i < 10; i++) {
-            ans += new Object() {
-                int dfs(int i, int k) {
-                    if (k == 0) {
-                        return 1;
-                    }
-                    if (memo[i][k] != -1) {
-                        return memo[i][k];
-                    }
-                    int res = 0;
-                    for (int j : map.getOrDefault(i, new ArrayList<>())) {
-                        res += dfs(j, k - 1);
-                        res %= Mod;
-                    }
-                    return memo[i][k] = res;
-                }
-            }.dfs(i, n - 1);
-            ans %= Mod;
+    }
+    public double maxAmount(String initialCurrency, List<List<String>> pairs1, double[] rates1, List<List<String>> pairs2, double[] rates2) {
+        Map<String, List<Pair>> g = build(pairs1, rates1);
+        HashMap<String, Double> day1Amount = new HashMap<>();
+        init(initialCurrency, 1, g, day1Amount);
+        g = build(pairs2, rates2);
+        HashSet<String> vis = new HashSet<>();
+        for (Map.Entry<String, Double> e : day1Amount.entrySet()) {
+            vis.clear();
+            dfs(e.getKey(), e.getValue(), initialCurrency, g, vis);
         }
         return ans;
+    }
+
+    private double ans;
+    private boolean dfs(String x, double curAmount, String initialCurrency, Map<String, List<Pair>> g, Set<String> vis) {
+        if (x.equals(initialCurrency)) {
+            ans = Math.max(ans, curAmount);
+            return true;
+        }
+        vis.add(x);
+        if (!g.containsKey(x)) {
+            return false;
+        }
+        for (Pair p : g.get(x)) {
+            if (!vis.contains(p.son) && dfs(p.son, curAmount * p.val, initialCurrency, g, vis)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    private void init(String x, double amount, Map<String, List<Pair>> g, Map<String, Double> day1Amount) {
+        day1Amount.put(x, amount);
+        for (Pair p : g.get(x)) {
+            if (!day1Amount.containsKey(p.son)) {
+                init(p.son, amount * p.val, g, day1Amount);
+            }
+        }
+    }
+    private Map<String, List<Pair>> build(List<List<String>> pairs, double[] rates) {
+        HashMap<String, List<Pair>> g = new HashMap<>();
+        for (int i = 0; i < pairs.size(); i++) {
+            String x = pairs.get(i).get(0), y = pairs.get(i).get(1);
+            double r = rates[i];
+            g.computeIfAbsent(x, e -> new ArrayList<>()).add(new Pair(y, r));
+            g.computeIfAbsent(y, e -> new ArrayList<>()).add(new Pair(x, 1 / r));
+        }
+        return g;
     }
 }

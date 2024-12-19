@@ -102,6 +102,43 @@ class Solution {
 
 > ## **发生在前缀/后缀之间的转移，例如从 f[i-1]转移到 f[i]，或者从 f[j] 转移到 f[i]。**
 
+## [【蓝桥】奖杯排列](https://www.lanqiao.cn/problems/20089/learning/?contest_id=228)
+
+> 2340 年 6 月 1 日，蓝桥杯决赛现场，气氛紧张刺激。选手们奋笔疾书，键盘敲得啪啪响。
+>
+> 突然，你的屏幕上弹出了一道题目，题目是这样的：组委会准备了 N 个大小不同的奖杯，每个奖杯上都刻着一个数字 A，代表奖杯的价值。组委需要从这 N 个奖杯中选出一些奖杯，使得这些奖杯的价值，按照它们在原序列中的顺序排列，能够组成一个长度大于 1、公差为 K 的等差数列。
+>
+> 现在，请你帮组委算算，有多少种不同的等差数列方案？为了避免数字过大，最终结果请对 109+7 取模。
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    private static final int MOD = 1000000007;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int k = scanner.nextInt();
+
+        long[] a = new long[n + 1];
+        for (int i = 1; i <= n; i++) {
+            a[i] = scanner.nextLong();
+        }
+
+        long res = 0;
+        Map<Long, Long> dp = new HashMap<>();
+        for (int i = 1; i <= n; i++) {
+            res = (res + dp.getOrDefault(a[i] - k, 0L)) % MOD; // 保证奖杯数量大于1
+            dp.put(a[i], (dp.getOrDefault(a[i], 0L) + dp.getOrDefault(a[i] - k, 0L) + 1) % MOD);
+        }
+        System.out.println(res);
+    }
+}
+```
+
 2140\. 解决智力问题
 -------------
 
