@@ -764,3 +764,329 @@ class Solution {
 
 ```
 
+# 【左程云博弈习题 】
+
+【公平组合游戏】
+
+```java
+package class095;
+
+// 巴什博弈(Bash Game)
+// 一共有n颗石子，两个人轮流拿，每次可以拿1~m颗石子
+// 拿到最后一颗石子的人获胜，根据n、m返回谁赢
+public class Code01_BashGame {
+
+	// 动态规划进行所有尝试
+	// 为了验证
+	public static int MAXN = 1001;
+
+	public static String[][] dp = new String[MAXN][MAXN];
+
+	public static String bashGame1(int n, int m) {
+		if (n == 0) {
+			return "后手";
+		}
+		if (dp[n][m] != null) {
+			return dp[n][m];
+		}
+		String ans = "后手";
+		for (int pick = 1; pick <= m; pick++) {
+			if (bashGame1(n - pick, m).equals("后手")) {
+				// 后续过程的赢家是后续过程的后手
+				// 那就表示此时的先手，通过这个后续过程，能赢
+				ans = "先手";
+				break;
+			}
+		}
+		dp[n][m] = ans;
+		return ans;
+	}
+
+	// 正式方法
+	public static String bashGame2(int n, int m) {
+		return n % (m + 1) != 0 ? "先手" : "后手";
+	}
+
+	// 为了验证
+	public static void main(String[] args) {
+		int V = 500; // 需要比MAXN小
+		int testTimes = 5000;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTimes; i++) {
+			int n = (int) (Math.random() * V);
+			int m = (int) (Math.random() * V) + 1;
+			String ans1 = bashGame1(n, m);
+			String ans2 = bashGame2(n, m);
+			if (!ans1.equals(ans2)) {
+				System.out.println("出错了!");
+			}
+		}
+		System.out.println("测试结束");
+	}
+
+}
+
+```
+
+```java
+package class095;
+
+// 质数次方版取石子(巴什博弈扩展)
+// 一共有n颗石子，两个人轮流拿
+// 每一轮当前选手可以拿 p的k次方 颗石子
+// 当前选手可以随意决定p和k，但要保证p是质数、k是自然数
+// 拿到最后一颗石子的人获胜
+// 根据石子数返回谁赢
+// 如果先手赢，返回"October wins!"
+// 如果后手赢，输出"Roy wins!"
+// 测试链接 : https://www.luogu.com.cn/problem/P4018
+// 请同学们务必参考如下代码中关于输入、输出的处理
+// 这是输入输出处理效率很高的写法
+// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+
+public class Code02_PrimePowerStones {
+
+	public static int t, n;
+
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StreamTokenizer in = new StreamTokenizer(br);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+		in.nextToken();
+		t = (int) in.nval;
+		for (int i = 0; i < t; i++) {
+			in.nextToken();
+			n = (int) in.nval;
+			out.println(compute(n));
+		}
+		out.flush();
+		out.close();
+		br.close();
+	}
+
+	public static String compute(int n) {
+		return n % 6 != 0 ? "October wins!" : "Roy wins!";
+	}
+
+}
+```
+
+```java
+package class095;
+
+// 尼姆博弈(Nim Game)
+// 一共有n堆石头，两人轮流进行游戏
+// 在每个玩家的回合中，玩家需要选择任何一个非空的石头堆，并从这堆石头中移除任意正数的石头数量
+// 谁先拿走最后的石头就获胜，返回最终谁会获胜
+// 测试链接 : https://www.luogu.com.cn/problem/P2197
+// 请同学们务必参考如下代码中关于输入、输出的处理
+// 这是输入输出处理效率很高的写法
+// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+
+public class Code03_NimGame {
+
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StreamTokenizer in = new StreamTokenizer(br);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+		in.nextToken();
+		int t = (int) in.nval;
+		for (int i = 0; i < t; i++) {
+			in.nextToken();
+			int n = (int) in.nval;
+			int eor = 0;
+			for (int j = 0; j < n; j++) {
+				in.nextToken();
+				eor ^= (int) in.nval;
+			}
+			if (eor != 0) {
+				out.println("Yes");
+			} else {
+				out.println("No");
+			}
+		}
+		out.flush();
+		out.close();
+		br.close();
+	}
+
+}
+
+```
+
+```java
+package class095;
+
+// 反尼姆博弈(反常游戏)
+// 一共有n堆石头，两人轮流进行游戏
+// 在每个玩家的回合中，玩家需要选择任何一个非空的石头堆，并从这堆石头中移除任意正数的石头数量
+// 谁先拿走最后的石头就失败，返回最终谁会获胜
+// 先手获胜，打印John
+// 后手获胜，打印Brother
+// 测试链接 : https://www.luogu.com.cn/problem/P4279
+// 请同学们务必参考如下代码中关于输入、输出的处理
+// 这是输入输出处理效率很高的写法
+// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+
+public class Code04_AntiNimGame {
+
+	public static int MAXN = 51;
+
+	public static int[] stones = new int[MAXN];
+
+	public static int t, n;
+
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StreamTokenizer in = new StreamTokenizer(br);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+		in.nextToken();
+		t = (int) in.nval;
+		for (int i = 0; i < t; i++) {
+			in.nextToken();
+			n = (int) in.nval;
+			for (int j = 0; j < n; j++) {
+				in.nextToken();
+				stones[j] = (int) in.nval;
+			}
+			out.println(compute());
+		}
+		out.flush();
+		out.close();
+		br.close();
+	}
+
+	public static String compute() {
+		int eor = 0, sum = 0;
+		for (int i = 0; i < n; i++) {
+			eor ^= stones[i];
+			sum += stones[i] == 1 ? 1 : 0;
+		}
+		if (sum == n) {
+			return (n & 1) == 1 ? "Brother" : "John";
+		} else {
+			return eor != 0 ? "John" : "Brother";
+		}
+	}
+
+}
+
+```
+
+```java
+package class095;
+
+// 斐波那契博弈(Fibonacci Game + Zeckendorf定理)
+// 一共有n枚石子，两位玩家定了如下规则进行游戏：
+// 先手后手轮流取石子，先手在第一轮可以取走任意的石子
+// 接下来的每一轮当前的玩家最少要取走一个石子，最多取走上一次取的数量的2倍
+// 当然，玩家取走的数量必须不大于目前场上剩余的石子数量，双方都以最优策略取石子
+// 你也看出来了，根据规律先手一定会获胜，但是先手想知道
+// 第一轮自己取走至少几颗石子就可以保证获胜了
+// 测试链接 : https://www.luogu.com.cn/problem/P6487
+// 请同学们务必参考如下代码中关于输入、输出的处理
+// 这是输入输出处理效率很高的写法
+// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+
+public class Code05_FibonacciGame {
+
+	public static long MAXN = 1000000000000000L;
+
+	public static int MAXM = 101;
+
+	public static long[] f = new long[MAXM];
+
+	public static int size;
+
+	public static void build() {
+		f[0] = 1;
+		f[1] = 2;
+		size = 1;
+		while (f[size] <= MAXN) {
+			f[size + 1] = f[size] + f[size - 1];
+			size++;
+		}
+	}
+
+	public static void main(String[] args) throws IOException {
+		build();
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StreamTokenizer in = new StreamTokenizer(br);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+		while (in.nextToken() != StreamTokenizer.TT_EOF) {
+			out.println(compute((long) in.nval));
+		}
+		out.flush();
+		out.close();
+		br.close();
+	}
+
+	public static long compute(long n) {
+		long ans = -1, find;
+		while (n != 1 && n != 2) {
+			find = bs(n);
+			if (n == find) {
+				ans = find;
+				break;
+			} else {
+				n -= find;
+			}
+		}
+		if (ans != -1) {
+			return ans;
+		} else {
+			return n;
+		}
+	}
+
+	public static long bs(long n) {
+		int l = 0;
+		int r = size;
+		int m;
+		long ans = -1;
+		while (l <= r) {
+			m = (l + r) / 2;
+			if (f[m] <= n) {
+				ans = f[m];
+				l = m + 1;
+			} else {
+				r = m - 1;
+			}
+		}
+		return ans;
+	}
+
+}
+
+```
+
+# 【【模板】SG函数】
+
