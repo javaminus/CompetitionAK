@@ -410,3 +410,76 @@ class Solution { // Long.compare()学会了！！！
 }
 ```
 
+## [855. 考场就座](https://leetcode.cn/problems/exam-room/) 
+
+> 题意：每个学生都是社恐，希望坐在离其他人最远的位置 
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
+
+// 考虑到每次 seat() 时都需要找到最大距离的座位，我们可以使用有序集合来保存座位区间。有序集合的每个元素为一个二元组 (l,r)，表示 l 和 r 之间（不包括 l 和 r）的座位可以坐学生。初始时有序集合中只有一个元素 (−1,n)，表示 (−1,n) 之间的座位可以坐学生。另外，我们使用两个哈希表 left 和 right 来维护每个有学生的座位的左右邻居学生，方便我们在 leave(p) 时合并两个座位区间。
+
+class ExamRoom {
+    int n;
+    private TreeSet<int[]> ts = new TreeSet<>((a, b) -> {
+        int d1 = getDist(a), d2 = getDist(b);
+        return d1 == d2 ? a[0] - b[0] : d2 - d1;
+    });
+    private Map<Integer, Integer> left = new HashMap<>();
+    private Map<Integer, Integer> right = new HashMap<>();
+
+    public ExamRoom(int n) {
+        this.n = n;
+        add(new int[]{-1, n});
+    }
+
+    public int seat() {
+        int[] s = ts.first();
+        int p = (s[0] + s[1]) >> 1;
+        if (s[0] == -1) {
+            p = 0;
+        } else if (s[1] == n) {
+            p = n - 1;
+        }
+        del(s);
+        add(new int[]{s[0], p});
+        add(new int[]{p, s[1]});
+        return p;
+    }
+
+    public void leave(int p) {
+        int l = left.get(p), r = right.get(p);
+        del(new int[]{l, p});
+        del(new int[] {l, p});
+        del(new int[] {p, r});
+        add(new int[] {l, r});
+    }
+
+    private void add(int[] d) {
+        ts.add(d);
+        left.put(d[1], d[0]);
+        right.put(d[0], d[1]);
+    }
+
+    private void del(int[] d) {
+        ts.remove(d);
+        left.remove(d[1]);
+        right.remove(d[0]);
+    }
+    
+    private int getDist(int[] d) {
+        int l = d[0], r = d[1];
+        return l == -1 || r == n ? r - l - 1 : (r - l) >> 1;
+    }
+}
+
+/**
+ * Your ExamRoom object will be instantiated and called as such:
+ * ExamRoom obj = new ExamRoom(n);
+ * int param_1 = obj.seat();
+ * obj.leave(p);
+ */
+```
+

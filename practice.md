@@ -1,5 +1,12 @@
 # NOTICE
 
+- 数组越界有可能是：
+
+  ```java
+  int k = sc.nextInt(); // 越界
+  long k = sc.nextLong();
+  ```
+
 - java里面的.clone是浅拷贝
 
   ```java

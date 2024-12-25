@@ -236,3 +236,64 @@ class Solution {
     }
 ```
 
+## [子序列构造](https://ac.nowcoder.com/acm/contest/99718/D)
+
+![1735106041465](C:\Users\32921\AppData\Local\Temp\1735106041465.png)
+
+```java
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        // int k = sc.nextInt();
+        long k = sc.nextLong();
+        cs = sc.next().toCharArray();
+        int l = 0, r = 0;
+        long tot = 0L;
+        int cnt0 = 0, cnt1 = 0;
+//        for (int r = 0; r < n; r++) { // 错误，只能过90%
+//            if (cs[r] == '0') {
+//                cnt0++;
+//            }else{
+//                cnt1++;
+//                tot += cnt0;
+//            }
+//            while (l < r && tot > k) {
+//                if (cs[l] == '0') {
+//                    tot -= cnt1;
+//                    cnt0--;
+//                } else {
+//                    cnt1--;
+//                }
+//                l++;
+//            }
+//            if (tot == k) {
+//                sc.print((l + 1) + " " + (r + 1));
+//                return;
+//            }
+//            
+//        }
+        while (l < n) {
+            while (r < n && tot < k) {
+                if (cs[r] == 1) {
+                    tot += cnt0;
+                    cnt1++;
+                }else{
+                    cnt0++;
+                }
+                r++;
+            }
+            if (tot == k) {
+                sc.print((l + 1) + " " + (r + 1));
+                return;
+            }
+            if (cs[l] == '0') {
+                tot -= cnt1;
+                cnt0--;
+            }else{
+                cnt1--;
+            }
+            l++;
+        }
+        sc.print(-1);
+    }
+```
+
