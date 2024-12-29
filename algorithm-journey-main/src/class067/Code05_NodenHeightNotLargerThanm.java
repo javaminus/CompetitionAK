@@ -65,7 +65,7 @@ public class Code05_NodenHeightNotLargerThanm {
 		}
 		long ans = 0;
 		// n个点，头占掉1个
-		for (int k = 0; k < n; k++) {
+		for (int k = 0; k < n; k++) { 
 			// 一共n个节点，头节点已经占用了1个名额
 			// 如果左树占用k个，那么右树就占用i-k-1个
 			ans = (ans + ((long) compute1(k, m - 1) * compute1(n - k - 1, m - 1)) % MOD) % MOD;
