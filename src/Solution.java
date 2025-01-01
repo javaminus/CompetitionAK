@@ -1,19 +1,30 @@
+import java.util.Arrays;
+
 class Solution {
-    public String lastSubstring(String s) {
-        int i = 0, j = 1, n = s.length();
-        while (j < n) {
-            int k = 0;
-            while (j + k < n && s.charAt(i + k) == s.charAt(j + k)) {
-                k++;
-            }
-            if (j + k < n && s.charAt(i + k) < s.charAt(j + k)) {
-                int t = i;
-                i = j;
-                j = Math.max(t + k + 1, i + 1);
+    public long minimumCost(int m, int n, int[] horizontalCut, int[] verticalCut) {
+        Arrays.sort(horizontalCut);
+        Arrays.sort(verticalCut);
+        long ans = 0;
+        int i = m - 2, j = n - 2, cntH = 1, cntV = 1;
+        while (i >= 0 && j >= 0) {
+            if (horizontalCut[i] > verticalCut[j]) {
+                ans += (long) horizontalCut[i] * cntV;
+                cntH++;
+                i--;
             }else{
-                j = j + k + 1;
+                ans += (long) verticalCut[j] * cntH;
+                cntV++;
+                j--;
             }
         }
-        return s.substring(i);
+        while (i >= 0) {
+            ans += (long) horizontalCut[i] * cntV;
+            i--;
+        }
+        while (j >= 0) {
+            ans += (long) verticalCut[j] * cntH;
+            j--;
+        }
+        return ans;
     }
 }
