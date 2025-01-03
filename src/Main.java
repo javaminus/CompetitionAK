@@ -1,7 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -213,46 +212,42 @@ public class Main {
     private static int m, n;
 
 
-    private static int[][] maDirs = new int[][]{{-2, 1}, {2, -1}, {-2, -1}, {2, 1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
     private static void solve() throws IOException {
-        int x1 = sc.nextInt(), y1 = sc.nextInt(), x2 = sc.nextInt(), y2 = sc.nextInt();
-        if (x1 == x2 && y1 == y2) {
-            sc.println(0);
-            return;
+        n = sc.nextInt();
+        m = sc.nextInt();
+        long[][] nums = new long[n][2];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i][0] = Integer.parseInt(ss[i]);
         }
-        // 一步
-        int d1 = Math.abs(x1 - x2);
-        int d2 = Math.abs(y1 - y2);
-        if (d1 == d2) {
-            sc.println(1);
-            return;
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i][1] = Integer.parseInt(ss[i]);
         }
-        for (int[] d : maDirs) {
-            int ni = x1 + d[0], nj = y1 + d[1];
-            if (ni == x2 && nj == y2) {
-                sc.println(1);
-                return;
+        Arrays.sort(nums, (a, b) -> Math.toIntExact(a[1] - b[1]));
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            long d = nums[i][0] + nums[i][1];
+            int j = i + 1;
+            for (; j < n; j++) {
+                if (d >= nums[j][1]) {
+                    d = Math.max(d, nums[j][0] + nums[j][1]);
+                }else{
+                    break;
+                }
             }
+            list.add(j - i);
+            i = j - 1;
         }
-        // 两步
-        for (int[] d : maDirs) {
-            int ni = x1 + d[0], nj = y1 + d[1];
-            d1 = Math.abs(ni - x2);
-            d2 = Math.abs(nj - y2);
-            if (d1 == d2) {
-                sc.println(2);
-                return;
-            }
+        Collections.sort(list, Collections.reverseOrder());
+        long ans = 0;
+        int i = 0;
+        while (m-- > 0 && i < list.size()) {
+            ans += list.get(i);
+            i++;
         }
-        // 田字两步
-        if ((x1 + y1 + x2 - y2 & 1) == 0) {
-            sc.println(2);
-            return;
-        }
-        sc.println(3);
+        sc.println(ans);
     }
-    
-    
 
 
 
