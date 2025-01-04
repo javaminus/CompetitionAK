@@ -1,255 +1,84 @@
-import java.io.*;
-import java.math.BigInteger;
 import java.util.*;
 
-public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+class TaskManager {
+    private static class Task implements Comparable<Task> {
+        int userId;
+        int taskId;
+        int priority;
 
-    static class Read {
-        BufferedReader bf;
-        StringTokenizer st;
-        BufferedWriter bw;
-
-        public Read() {
-            bf = new BufferedReader(new InputStreamReader(System.in));
-            st = new StringTokenizer("");
-            bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        public Task(int userId, int taskId, int priority) {
+            this.userId = userId;
+            this.taskId = taskId;
+            this.priority = priority;
         }
 
-        public String nextLine() throws IOException {
-            return bf.readLine();
-        }
-
-        public String next() throws IOException {
-            while (!st.hasMoreTokens()) {
-                st = new StringTokenizer(bf.readLine());
+        @Override
+        public int compareTo(Task other) {
+            if (this.priority != other.priority) {
+                return Integer.compare(other.priority, this.priority);
             }
-            return st.nextToken();
+            return Integer.compare(other.taskId, this.taskId);
         }
 
-        public char nextChar() throws IOException {
-            return next().charAt(0);
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Task)) return false;
+            Task other = (Task) obj;
+            return this.taskId == other.taskId;
         }
 
-        public int nextInt() throws IOException {
-            return Integer.parseInt(next());
-        }
-
-        public long nextLong() throws IOException {
-            return Long.parseLong(next());
-        }
-
-        public double nextDouble() throws IOException {
-            return Double.parseDouble(next());
-        }
-
-        public float nextFloat() throws IOException {
-            return Float.parseFloat(next());
-        }
-
-        public byte nextByte() throws IOException {
-            return Byte.parseByte(next());
-        }
-
-        public short nextShort() throws IOException {
-            return Short.parseShort(next());
-        }
-
-        public BigInteger nextBigInteger() throws IOException {
-            return new BigInteger(next());
-        }
-
-        public void println(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(String a) throws IOException {
-            bw.write(a);
-            bw.newLine();
-            return;
-        }
-
-        public void print(String a) throws IOException {
-            bw.write(a);
-            return;
-        }
-
-        public void println(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void print(BigInteger a) throws IOException {
-            bw.write(a.toString());
-            return;
-        }
-
-        public void print(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
+        @Override
+        public int hashCode() {
+            return Objects.hash(taskId);
         }
     }
 
-    static class Pair<T, U> {
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
+    private TreeSet<Task> taskSet;
+    private Map<Integer, Task> taskMap;
+    
+    public TaskManager(List<List<Integer>> tasks) {
+        taskSet = new TreeSet<>();
+        taskMap = new HashMap<>();
+        for (List<Integer> t : tasks) {
+            int userId = t.get(0);
+            int taskId = t.get(1);
+            int priority = t.get(2);
+            Task task = new Task(userId, taskId, priority);
+            taskSet.add(task);
+            taskMap.put(taskId, task);
         }
     }
-
-    private static long qpow(long a, long b, long p) {
-        long res = 1L;
-        while (b > 0) {
-            if ((b & 1) == 1) {
-                res = (res * a) % p;
-            }
-            a = a * a % p;
-            b >>= 1;
-        }
-        return res;
+    public void add(int userId, int taskId, int priority) {
+        Task task = new Task(userId, taskId, priority);
+        taskSet.add(task);
+        taskMap.put(taskId, task);
     }
-
-    private static long sqrt(long N) { // 二分查找快速开方
-        long lo = 1;
-        long hi = N;
-        long ans = 0;
-        while(lo <= hi) {
-            long mid = (lo + hi) / 2;
-            if (mid <= N / mid) {
-                ans = mid;
-                lo = mid + 1;
-            }  else {
-                hi = mid - 1;
-            }
-        }
-        return ans;
-    }
-
-    private static void reverse(char[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            char tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
+    
+    public void edit(int taskId, int newPriority) {
+        Task task = taskMap.get(taskId);
+        if (task != null) {
+            taskSet.remove(task);
+            task.priority = newPriority;
+            taskSet.add(task);
         }
     }
-
-    private static void reverse(int[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            int tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
+    
+    public void rmv(int taskId) {
+        Task task = taskMap.get(taskId);
+        if (task != null) {
+            taskSet.remove(task);
+            taskMap.remove(taskId);
         }
     }
-
-    private static void reverse(long[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            long tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
+    
+    public int execTop() {
+        if (taskSet.isEmpty()) {
+            return -1;
         }
+        Task topTask = taskSet.first();
+        taskSet.remove(topTask);
+        taskMap.remove(topTask.taskId);
+        return topTask.userId;
     }
-
-    static Read sc = new Read();
-    private static final int Mod = (int) 1e9 + 7;
-    private static int T = 1;
-
-    public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
-        while (T-- > 0) {
-            solve();
-            // sc.bw.flush();
-        }
-        sc.bw.flush();
-        sc.bw.close();
-    }
-
-    private static String[] ss;
-    private static String s;
-    private static char[] cs;
-    private static List<Integer>[] g;
-    private static int m, n;
-
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        m = sc.nextInt();
-        long[][] nums = new long[n][2];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i][0] = Integer.parseInt(ss[i]);
-        }
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i][1] = Integer.parseInt(ss[i]);
-        }
-        Arrays.sort(nums, (a, b) -> Math.toIntExact(a[1] - b[1]));
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            long d = nums[i][0] + nums[i][1];
-            int j = i + 1;
-            for (; j < n; j++) {
-                if (d >= nums[j][1]) {
-                    d = Math.max(d, nums[j][0] + nums[j][1]);
-                }else{
-                    break;
-                }
-            }
-            list.add(j - i);
-            i = j - 1;
-        }
-        Collections.sort(list, Collections.reverseOrder());
-        long ans = 0;
-        int i = 0;
-        while (m-- > 0 && i < list.size()) {
-            ans += list.get(i);
-            i++;
-        }
-        sc.println(ans);
-    }
-
-
-
-
 }
