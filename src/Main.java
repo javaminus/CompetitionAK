@@ -212,51 +212,55 @@ public class Main {
     private static List<Integer>[] g;
     private static int m, n;
 
-
-    private static void solve() throws IOException {
-        s = sc.next();
+    private static int idx;
+    private static int[] a, ans;
+    static void solve() throws IOException {
+        String s = sc.next();
         n = s.length();
-        if (n == 1) {
-            sc.println("11");
-        } else if (n == 2) {
-            int d = Math.max(s.charAt(0) - '0', s.charAt(1) - '0');
-            sc.println(d + Integer.toString(d));
-        }else{
-            if ((n & 1) == 1) { // 奇数
-                StringBuilder sb = new StringBuilder();
-                m = n + 1;
-                for (int i = 0; i < m; i += 2) {
-                    if ((i / 2 & 1) == 1) {
-                        sb.append("00");
-                    }else{
-                        sb.append("11");
-                    }
+        if ((n & 1) == 1) {
+            for (int i = 0; i <= n / 2; i++) {
+                if ((i & 1) == 1) {
+                    sc.print("00");
+                } else {
+                    sc.print("11");
                 }
-                sc.println(sb.toString());
-            }else{
-                StringBuilder sb = new StringBuilder();
-                int i = 0;
-                for (; i < n; i += 2) {
-                    int d = Math.max(s.charAt(i) - '0', s.charAt(i + 1) - '0');
-                    sb.append(d).append(d);
-                    if (s.charAt(i) != s.charAt(i + 1)) {
-                        i += 2;
-                        break;
-                    }
-                }
-                boolean flag = true;
-                for (; i < n; i += 2) {
-                    if (flag) {
-                        sb.append("00");
-                    }else{
-                        sb.append("11");
-                    }
-                    flag = !flag;
-                }
-                sc.println(sb.toString());
+            }
+        } else {
+            a = new int[n + 1];
+            ans = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                a[i] = s.charAt(i - 1) - '0';
+            }
+            dfs(1);
+            if (idx == 0) {
+                sc.print("11");
+            }
+            for (int i = 1; i <= idx; i++) {
+                sc.print(String.valueOf(ans[i]));
+            }
+            for (int i = idx + 1, j = 0; i <= n; i += 2, j ^= 1) {
+                sc.print(j + String.valueOf(j));
             }
         }
-
+    }
+    static void dfs(int pos) {
+        int val = a[pos] * 10 + a[pos + 1];
+        for (int i = a[pos]; i <= 9; i++) {
+            ans[pos] = ans[pos + 1] = i;
+            if (i == ans[pos - 1] || i * 11 < val) continue;
+            if (i * 11 == val) {
+                if (pos == n - 1) {
+                    idx = n;
+                    return;
+                }
+                dfs(pos + 2);
+            }
+            if (idx != 0) return;
+            if (i * 11 > val) {
+                idx = pos + 1;
+                return;
+            }
+        }
     }
 
 
