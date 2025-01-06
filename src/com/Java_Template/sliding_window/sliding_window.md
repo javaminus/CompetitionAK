@@ -297,3 +297,57 @@ class Solution {
     }
 ```
 
+## [3413. 收集连续 K 个袋子可以获得的最多硬币数量](https://leetcode.cn/problems/maximum-coins-from-k-consecutive-bags/) 
+
+在一条数轴上有无限多个袋子，每个坐标对应一个袋子。其中一些袋子里装有硬币。
+
+给你一个二维数组 `coins`，其中 `coins[i] = [li, ri, ci]` 表示从坐标 `li` 到 `ri` 的每个袋子中都有 `ci` 枚硬币。
+
+数组 `coins` 中的区间互不重叠。
+
+另给你一个整数 `k`。
+
+返回通过收集连续 `k` 个袋子可以获得的 **最多** 硬币数量。
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public long maximumCoins(int[][] coins, int k) {
+        Arrays.sort(coins, (a, b) -> a[0] - b[0]);
+        long ans1 = f(coins, k);
+        // 反转数组
+        for (int i = 0, j = coins.length - 1; i < j; i++, j--) {
+            int[] tmp = coins[i];
+            coins[i] = coins[j];
+            coins[j] = tmp;
+        }
+        // 反转每个区间
+        for (int[] t : coins) {
+            int tmp = t[0];
+            t[0] = -t[1];
+            t[1] = -tmp;
+        }
+        return Math.max(ans1, f(coins, k));
+    }
+
+    private long f(int[][] coins, int k) {
+        long ans = 0;
+        long cover = 0;
+        int l = 0, r = 0, n = coins.length;
+        while (r < n) {
+            cover += (long) (coins[r][1] - coins[r][0] + 1) * coins[r][2];
+            int leftP = coins[r][1] - k + 1;
+            while (coins[l][1] < leftP) {
+                cover -= (long) (coins[l][1] - coins[l][0] + 1) * coins[l][2];
+                l++;
+            }
+            long unCover = Math.max(0, (long) (leftP - coins[l][0]) * coins[l][2]);
+            ans = Math.max(ans, cover - unCover);
+            r++;
+        }
+        return ans;
+    }
+}
+```
+
