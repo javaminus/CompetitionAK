@@ -685,3 +685,103 @@ class Solution { // bitSet
 }
 ```
 
+## [【滴滴春招笔试题目】](https://kamacoder.com/problempage.php?pid=1284)(时间戳的应用)
+
+![1736496569937](assets/1736496569937.png)
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main{
+    static int[] a; //第i个数ai代表编号为i的员工的技术等级
+    static List<Integer>[] g; //用邻接表建树。
+    static int time = 0; //添加时间，越大越近。
+    //TreeMap ,key放技术等级，value放Deque，Deque里放数组，[0]是节点的编号,[1]放添加时间
+    static TreeMap<Integer, Deque<int[]>> tm = new TreeMap<>();
+    static int[] res; //放结果。res[i]代表编号为i的员工 要请求的领导编号。
+
+    public static void main (String[] args) throws IOException {
+        //快读
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+        int n = Integer.parseInt(in.readLine());
+        String[] sp2 = in.readLine().split("\\ ");
+        String[] sp3 = in.readLine().split("\\ ");
+
+        res = new int[n + 1]; //放结果。res[i]代表编号为i的员工 要请求的领导编号。
+        a = new int[n + 1]; //第i个数a[i]代表编号为i的员工的技术等级
+        for (int i = 1; i <= n; i++)
+            a[i] = Integer.parseInt(sp3[i - 1]);
+
+        //用邻接表建树。给每个节点 加孩子编号。
+        g = new List[n + 1];
+        for (int i = 1; i <= n; i++) g[i] = new ArrayList<>(); //邻接表初始化
+        for (int i = 1; i <= n - 1; i++) { //用邻接表建树。给每个节点 加孩子编号。
+            int fa = Integer.parseInt(sp2[i - 1]);
+            g[fa].add(i);
+        }
+
+        //先把根节点加进 TreeMap
+        Deque<int[]> deque = new LinkedList<>();
+        deque.addLast(new int[]{n, time});
+        tm.put(a[n], deque);
+
+        dfs(n); //跑dfs，传入n。dfs过程中会填入结果进res数组里。
+
+        //输出结果。
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= n - 1; i++)
+            sb = sb.append(res[i]).append(' ');
+
+        out.println(sb.toString());
+        out.flush();
+    }
+
+    public static void dfs (int root) {
+        //先求出当前节点的结果。
+        Integer floorKey = tm.floorKey(a[root]); //找 a[root] 左侧最近的技术等级
+        Integer ceilingKey = tm.ceilingKey(a[root]); //找 a[root] 右侧最近的技术等级
+
+        if (floorKey != null && ceilingKey != null) { //左右都不为空
+            int[] lastL = tm.get(floorKey).peekLast();
+            int[] lastR = tm.get(ceilingKey).peekLast();
+
+            int distL = a[root] - floorKey; //跟左侧最近点的距离
+            int distR = ceilingKey - a[root]; //跟右侧最近点的距离。
+
+            if (distL == distR) { //左右距离相等，选择在组织架构上离他最近的那一个。
+                //[1]放的是添加时间。添加时间越大，时间越近。
+                if (lastL[1] >= lastR[1]) res[root] = lastL[0];
+                else res[root] = lastR[0];
+            }
+
+            if (distL < distR) res[root] = lastL[0]; //左边距离近
+            if (distL > distR) res[root] = lastR[0]; //右边距离近
+        }
+
+        if (floorKey != null && ceilingKey == null) //只存在 左侧最近的技术等级
+            res[root] = tm.get(floorKey).peekLast()[0]; //那就是val里最后一个里存的 节点编号。
+
+        if (floorKey == null && ceilingKey != null) //只存在 右侧最近的技术等级
+            res[root] = tm.get(ceilingKey).peekLast()[0]; //那就是val里最后一个里存的 节点编号。
+
+
+        //再下面跑dfs
+        time++; //添加时间+1
+
+        //加当前节点进 TreeMap
+        Deque<int[]> deque = tm.getOrDefault(a[root], new LinkedList<>());
+        deque.addLast(new int[]{root, time});
+        tm.put(a[root], deque);
+
+        for (int child : g[root])
+            dfs(child); //跑dfs
+
+        //dfs跑完 把当前从 TreeMap 里删除。
+        if (deque.size() == 1) tm.remove(a[root]);
+        if (deque.size()>= 2) deque.pollLast();
+    }
+}
+```
+

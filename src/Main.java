@@ -1,6 +1,5 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -215,11 +214,22 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        int[][] dp = new int[10][10];
-        Arrays.fill(dp[0], 100);
-        dp[1] = dp[0];
-        dp[1][1] = 9;
-        System.out.println(Arrays.deepToString(dp));
+        int n = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        int id = 0;
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            if (nums[i] == n) {
+                id = i;
+            }
+        }
+        for (int i = id; i >= 0; i--) {
+            if (nums[i] == n) {
+                n--;
+            }
+        }
+        sc.println(n);
     }
 
 

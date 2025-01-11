@@ -85,3 +85,62 @@ class Solution {
 
 ```
 
+## [小红的双生数](https://ac.nowcoder.com/acm/contest/99784/D)
+
+小红定义一个正整数是“双生数”，当且仅当该正整数的每个数位的相邻数位中，恰好有一个和该数位的数字相同。   现在小红拿到了一个正整数 x，她希望你求出不小于 x 的最小“双生数”。 
+
+```java
+    private static int idx;
+    private static int[] a, ans;
+    static void solve() throws IOException {
+        String s = sc.next();
+        n = s.length();
+        if ((n & 1) == 1) {
+            for (int i = 0; i <= n / 2; i++) {
+                if ((i & 1) == 1) {
+                    sc.print("00");
+                } else {
+                    sc.print("11");
+                }
+            }
+        } else {
+            a = new int[n + 1];
+            ans = new int[n + 1];
+            for (int i = 1; i <= n; i++) {
+                a[i] = s.charAt(i - 1) - '0';
+            }
+            dfs(1);
+            if (idx == 0) {
+                sc.print("11");
+            }
+            for (int i = 1; i <= idx; i++) {
+                sc.print(String.valueOf(ans[i]));
+            }
+            for (int i = idx + 1, j = 0; i <= n; i += 2, j ^= 1) {
+                sc.print(j + String.valueOf(j));
+            }
+        }
+    }
+    static void dfs(int pos) {
+        int val = a[pos] * 10 + a[pos + 1];
+        for (int i = a[pos]; i <= 9; i++) {
+            ans[pos] = ans[pos + 1] = i;
+            if (i == ans[pos - 1] || i * 11 < val) continue;
+            if (i * 11 == val) {
+                if (pos == n - 1) {
+                    idx = n;
+                    return;
+                }
+                dfs(pos + 2);
+            }
+            if (idx != 0) return;
+            if (i * 11 > val) {
+                idx = pos + 1;
+                return;
+            }
+        }
+    }
+```
+
+
+
