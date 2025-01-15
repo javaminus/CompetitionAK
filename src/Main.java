@@ -1,5 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -197,7 +198,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -215,17 +216,53 @@ public class Main {
 
     private static void solve() throws IOException {
         n = sc.nextInt();
-        ss = sc.nextLine().split(" ");
         int[] nums = new int[n];
-        int g = 0;
+        ss = sc.nextLine().split(" ");
         for (int i = 0; i < n; i++) {
             nums[i] = Integer.parseInt(ss[i]);
-            g = gcd(g, nums[i]);
         }
-        sc.print((long) n * g);
+        int ans = 0;
+        next:
+        for (int k = 1; k <= n; k++) {
+            if (n % k == 0) {
+                HashSet<Integer> set = new HashSet<>();
+                int m = 0;
+                for (int i = 0; i < k; i++) { // [0, k - 1]
+                    int x = nums[i];
+                    for (int j = 1; j * k < n; j++) {
+                        int y = nums[i + j * k];
+                        if (x != y) {
+                            if (m == 0) {
+                                for (int l = 2; l < Math.max(x, y); l++) {
+                                    if (x % l == y % l) {
+                                        set.add(l);
+                                    }
+                                }
+                                m = -1;
+                            }
+                            else{
+                                HashSet<Integer> tmp = (HashSet<Integer>) set.clone();
+                                for (int val : set) {
+                                    if (x % val != y % val) {
+                                        tmp.remove(val);
+                                    }
+                                }
+                                if (tmp.size() == 0) {
+                                    continue next;
+                                }else{
+                                    set = tmp;
+                                }
+                            }
+                        }
+                    }
+                }
+                ans++;
+            }
+        }
+        sc.println(ans);
     }
 
-    private static int gcd(int a, int b) {
-        return b == 0 ? a : gcd(b, a % b);
-    }
+
+
+
 }
