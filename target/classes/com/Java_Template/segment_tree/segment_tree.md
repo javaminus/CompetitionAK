@@ -3557,4 +3557,63 @@ class Solution { // 在线 + 线段树
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
-# 
+## [3410. 删除所有值为某个元素后的最大子数组和](https://leetcode.cn/problems/maximize-subarray-sum-after-removing-all-occurrences-of-one-element/) 
+
+给你一个数组`nums`,操作可以删除数组中值等于`x`的元素（只能一次），求能得到的最大子数组和为多少？
+
+```java
+class Solution {
+    public long maxSubarraySum(int[] nums) {
+        //本质就是53最大子数组和 枚举要删除的数字然后变成0，枚举完了再恢复
+        int n=nums.length;
+        SegmentTree st=new SegmentTree(n);
+        Map<Integer,List<Integer>> map=new HashMap<>();
+        for(int i=0;i<n;i++){
+            st.update(1,0,n-1,i,nums[i]);
+            map.computeIfAbsent(nums[i],j->new ArrayList<>()).add(i);
+        }
+        long max=st.max[1];
+        if(max<=0) return max;
+        for(var a:map.entrySet()){
+            int k=a.getKey();
+            List<Integer> v=a.getValue();
+            for(var b:v) st.update(1,0,n-1,b,0);
+            //因为这里枚举这个数变成0 所以如果全是负情况ans会是0，因此需要特判
+            max=Math.max(max,st.max[1]);
+            for(var b:v) st.update(1,0,n-1,b,k); // 恢复
+        }
+        return max;
+    }
+}
+class SegmentTree{
+    long[] max,pref,suff,sum;
+    int n;
+    public SegmentTree(int n){
+        this.n=n;
+        max=new long[4*n];
+        sum=new long[4*n];
+        pref=new long[4*n];
+        suff=new long[4*n];
+    }
+    public void maintain(int o){
+        sum[o]=sum[o*2]+sum[o*2+1];
+        max[o]=Math.max(Math.max(max[o*2],max[o*2+1]),suff[o*2]+pref[o*2+1]);
+        pref[o]=Math.max(pref[o*2],sum[o*2]+pref[o*2+1]);
+        suff[o]=Math.max(suff[o*2+1],sum[o*2+1]+suff[o*2]);
+    }
+    public void update(int o,int l,int r,int i,int val){
+        if(l==r){
+            max[o]=val*1L;
+            pref[o]=val*1L;
+            suff[o]=val*1L;
+            sum[o]=val*1L;
+            return;
+        }
+        int mid=(l+r)/2;
+        if(i<=mid) update(o*2,l,mid,i,val);
+        else update(o*2+1,mid+1,r,i,val);
+        maintain(o);
+    }
+}
+```
+

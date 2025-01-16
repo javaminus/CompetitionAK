@@ -98,6 +98,89 @@ class Solution {
 }
 ```
 
+## [3409. 最长相邻绝对差递减子序列](https://leetcode.cn/problems/longest-subsequence-with-decreasing-adjacent-difference/) 
+
+给你一个数组`nums`
+
+任务：找到一个最长的子序列
+
+条件：子序列相邻元素的绝对差构成`非递增`序列。
+
+**提示：**
+
+- `2 <= nums.length <= 104`
+- `1 <= nums[i] <= 300`
+
+> 这题虽然是周赛的第三题，标注为中等题目， 但是却是一个8分题目，状态定义不好想。
+>
+> - 由于每个数的范围为[1,  300], 定义 $dp[i][j]$ 表示以 $nums[i]$ 结尾，绝对差为 $j$ 的最大长度。这就意味着序列的倒数第二个数是 $nums[i] + j$ 或者 $nums[i] - j$ 。
+>
+>   这已经有 $O(nD)$ 个状态（其中 $D$ 为 $nums$ 的最大值与最小值的差）然后状态转移需要枚举上一个数与上上个数的差值，这样时间复杂度是 $nD^2$ 超时。
+>
+> - 定义 $dp[i][j]$ 表示以 $nums[i]$ 结尾，绝对值差至少为 $j$ 的最大长度。这样状态转移就是 $O(1)$
+
+```java
+class Solution {
+    public int longestSubsequence(int[] nums) {
+        int n = nums.length;
+        int mn = Arrays.stream(nums).min().getAsInt();
+        int mx = Arrays.stream(nums).max().getAsInt();
+        int maxD = mx - mn;
+        int[][] dp = new int[n][maxD+2];
+        int[] last = new int[mx+1];
+        Arrays.fill(last, -1);
+        int ans = 0;
+        for(int i = 0; i<n;i++){
+            int x = nums[i];
+            for(int j = maxD;j>=0;j--){
+                dp[i][j] = Math.max(dp[i][j+1], 1); // 后面往前面转移
+                if(x - j>=0 && last[x - j]>=0){
+                    dp[i][j] = Math.max(dp[i][j], dp[last[x - j]][j]+1);
+                }
+                if(x+j<=mx && last[x+j]>=0){
+                    dp[i][j] = Math.max(dp[i][j], dp[last[x+j]][j] + 1);
+                }
+                ans = Math.max(ans, dp[i][j]);
+            }
+            last[x] = i;
+        }
+        return ans;
+    }
+}
+```
+
+> 继续优化，我们可以优化掉 $last$ 数组，直接定义 $dp[i][j]$ 表示以 $i$ 结尾，相邻差至少为 $j$ 的最长子序列。
+
+```java
+class Solution {
+    public int longestSubsequence(int[] nums) {
+        int mx = Arrays.stream(nums).max().getAsInt();
+        int maxD = mx - Arrays.stream(nums).min().getAsInt();
+        int[][] f = new int[mx + 1][maxD + 1];
+
+        int ans = 0;
+        for (int x : nums) {
+            int fx = 1;
+            for (int j = maxD; j >= 0; j--) {
+                if (x - j >= 0) {
+                    fx = Math.max(fx, f[x - j][j] + 1);
+                }
+                if (x + j <= mx) {
+                    fx = Math.max(fx, f[x + j][j] + 1);
+                }
+                f[x][j] = fx;
+                ans = Math.max(ans, fx);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+> 最后，通过这个题可以学到什么呢？
+>
+> 拿到数据范围，一眼dp，这是不需要纠结的。然后就是如何去掉一个维度的优化，这里就是一个经验的积累，当 $j$ 这个维度表示固定的值不行的时候，我们可以用它表示最大为 $j$ 或则最小为 $j$ 的维度。
+
 # §7.1 一维(从后往前的dp)
 
 > ## **发生在前缀/后缀之间的转移，例如从 f[i-1]转移到 f[i]，或者从 f[j] 转移到 f[i]。**
