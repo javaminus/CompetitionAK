@@ -1,6 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -198,7 +198,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -215,51 +215,25 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        n = sc.nextInt();
-        int[] nums = new int[n];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-        }
-        int ans = 0;
-        next:
-        for (int k = 1; k <= n; k++) {
-            if (n % k == 0) {
-                HashSet<Integer> set = new HashSet<>();
-                int m = 0;
-                for (int i = 0; i < k; i++) { // [0, k - 1]
-                    int x = nums[i];
-                    for (int j = 1; j * k < n; j++) {
-                        int y = nums[i + j * k];
-                        if (x != y) {
-                            if (m == 0) {
-                                for (int l = 2; l < Math.max(x, y); l++) {
-                                    if (x % l == y % l) {
-                                        set.add(l);
-                                    }
-                                }
-                                m = -1;
-                            }
-                            else{
-                                HashSet<Integer> tmp = (HashSet<Integer>) set.clone();
-                                for (int val : set) {
-                                    if (x % val != y % val) {
-                                        tmp.remove(val);
-                                    }
-                                }
-                                if (tmp.size() == 0) {
-                                    continue next;
-                                }else{
-                                    set = tmp;
-                                }
-                            }
-                        }
-                    }
+    }
+
+    private static int win2(int a, int b, int m) {
+        int n = Math.max(a, b);
+        int[] sg = new int[n + 1]; // sg[0] = 0
+        boolean[] appear = new boolean[m + 1]; // 一次最多拿m个
+        for (int i = 1; i <= n; i++) {
+            Arrays.fill(appear, false);
+            for (int j = 1; j <= m && i - j >= 0; j++) {
+                appear[sg[i - j]] = true;
+            }
+            for (int s = 0; s <= m; s++) {
+                if (!appear[s]) {
+                    sg[i] = s;
+                    break;
                 }
-                ans++;
             }
         }
-        sc.println(ans);
+        return sg[a] ^ sg[b];
     }
 
 

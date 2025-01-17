@@ -527,7 +527,7 @@ class Solution {
         }
         return ans == Integer.MAX_VALUE ? -1 : ans;
     }
-}
+} // 发现一个问题没有，就是我们在便利ors的时候，同时也在修改ors。如果是add()、remove()这种操作，就会报错，但是set()是不会报错的。
 ```
 
 2680\. 最大或值
