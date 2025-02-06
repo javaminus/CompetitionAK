@@ -1,24 +1,31 @@
 import java.util.Arrays;
 
-// 巴什博弈(SG函数求解过程展示)
-// 一共有n颗石子，两个人轮流拿，每次可以拿1~m颗石子
-// 拿到最后一颗石子的人获胜，根据n、m返回谁赢
-// 对数器验证
 class Solution {
-    public static void main(String[] args, int m, int n) {
-        int[] sg = new int[n + 1];
-        boolean[] vis = new boolean[m + 1];
-        for (int i = 1; i <= n; i++) {
-            Arrays.fill(vis, false);
-            for (int j = 1; j <= m && i - j >= 0; j++) {
-                vis[sg[i - j]] = true;
+    public int minDeletionSize(String[] strs) {
+        int n = strs.length;
+        int m = strs[0].length();
+        int ans = 0;
+        String[] cur = new String[n];
+        for (int i = 0; i < n; i++) {
+            String[] cur2 = Arrays.copyOf(cur, n);
+            for (int j = 0; j < n; j++) {
+                cur2[j] += strs[j].charAt(i);
             }
-            for (int s = 0; s <= m; s++) {
-                if (!vis[s]) {
-                    sg[s] = s;
-                    break;
-                }
+            if (isSorted(cur2)) {
+                cur = cur2;
+            }else{
+                ans++;
             }
         }
+
+        return ans;
+    }
+
+    public boolean isSorted(String[] strs) {
+        for (int i = 0; i < strs.length - 1; ++i)
+            if (strs[i].compareTo(strs[i+1]) > 0)
+                return false;
+
+        return true;
     }
 }

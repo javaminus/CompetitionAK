@@ -683,6 +683,172 @@ class Solution {
 }
 ```
 
+## [3444. 使数组包含目标值倍数的最少增量](https://leetcode.cn/problems/minimum-increments-for-target-multiples-in-an-array/) 
+
+给你两个数组 `nums` 和 `target` 。
+
+在一次操作中，你可以将 `nums` 中的任意一个元素递增 1 。
+
+返回要使 `target` 中的每个元素在 `nums` 中 **至少** 存在一个倍数所需的 **最少操作次数** 。
+
+**示例 1：**
+
+**输入：**nums = [1,2,3], target = [4]
+
+**输出：**1
+
+**解释：**
+
+满足题目条件的最少操作次数是 1 。
+
+- 将 3 增加到 4 ，需要 1 次操作，4 是目标值 4 的倍数。
+
+**示例 2：**
+
+**输入：**nums = [8,4], target = [10,5]
+
+**输出：**2
+
+**解释：**
+
+满足题目条件的最少操作次数是 2 。
+
+- 将 8 增加到 10 ，需要 2 次操作，10 是目标值 5 和 10 的倍数。
+
+**示例 3：**
+
+**输入：**nums = [7,9,10], target = [7]
+
+**输出：**0
+
+**解释：**
+
+数组中已经包含目标值 7 的一个倍数，不需要执行任何额外操作。
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 5 * 104`
+- `1 <= target.length <= 4`
+- `target.length <= nums.length`
+- `1 <= nums[i], target[i] <= 104`
+
+> 思路打开：发现target数组长度很小，所以我们可以从target出发。
+>
+> **如果target只有一个元素，你会怎么做？**
+>
+> 显然就是枚举每个数，将其中一个数变成target的倍数的最小操作次数。
+>
+> **那么target有两个元素（x, y）呢？**
+>
+> - 第一种情况，分开考虑：使用`nums`中的两个元素，分别变成`x`和`y`
+> - 第二种情况，将使用`nums`中的一个元素，变成`lcm(x, y)`
+>
+> 不难发现，这里就应该往dp去思考了，就是`nums`中的当前元素是否变成`x`的倍数，或者是否变成`y`的倍数？
+>
+> 回到最开始，往往这种数据范围很小的`1 <= target.length <= 4`，我们可以枚举所有状态，就是枚举`target`中的哪些元素合成一个`lcm`?
+>
+> 使用一个`lcms`数组表示
+>
+> 【0】0000：四个数字都不合成`lcm`，`lcms[0] = 1`;
+>
+> 【1】0001：第一个数字合成`lcm`，`lcm[1] = nums[0]`;
+>
+> 【7】0111：前三个数字都合成`lcm`，`lcm[7] = lcm(target[0], target[1], target[2])`
+>
+> 那么在dfs中，只需要枚举如何组合`target`中的元素为对应的`lcm`。
+
+```java
+import java.util.Arrays;
+
+class Solution {
+    public int minimumIncrements(int[] nums, int[] target) {
+        int n = nums.length, m = target.length;
+        long[] lcms = new long[1 << m];
+        lcms[0] = 1;
+        for (int i = 0; i < m; i++) {
+            int mask = 1 << i;
+            for (int j = 0; j < mask; j++) {
+                lcms[mask | j] = lcm(lcms[j], target[i]);
+            }
+        }
+        long[][] memo = new long[n][1<<m];
+        for (long[] mem : memo) {
+            Arrays.fill(mem, -1);
+        }
+        return (int) dfs(n - 1, (1 << m) - 1, nums, lcms, memo);
+    }
+
+    private long dfs(int i, int j, int[] nums, long[] lcms, long[][] memo) {
+        if (j == 0) {
+            return 0;
+        }
+        if (i < 0) {
+            return Long.MAX_VALUE / 2;
+        }
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        long res = dfs(i - 1, j, nums, lcms, memo);
+        for (int sub = j; sub > 0; sub = (sub - 1) & j) {
+            long l = lcms[sub];
+            res = Math.min(res, dfs(i - 1, j ^ sub, nums, lcms, memo) + (l - nums[i] % l) % l);
+        }
+        return memo[i][j] = res;
+    }
+    
+    private long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    private long lcm(long a, long b) {
+        return a / gcd(a, b) * b;
+    }
+}
+```
+
+```java
+import java.util.Arrays;
+
+class Solution { // 改成递推
+    public int minimumIncrements(int[] nums, int[] target) {
+        int n = nums.length, m = target.length;
+        long[] lcms = new long[1 << m];
+        lcms[0] = 1;
+        for (int i = 0; i < m; i++) {
+            int mask = 1 << i;
+            for (int j = 0; j < mask; j++) {
+                lcms[mask | j] = lcm(lcms[j], target[i]);
+            }
+        }
+        long[][] memo = new long[n + 1][1 << m];
+        Arrays.fill(memo[0], Long.MAX_VALUE / 2);
+        memo[0][0] = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j < (1 << m); j++) {
+                memo[i + 1][j] = memo[i][j];
+                for (int sub = j; sub > 0; sub = (sub - 1) & j) {
+                    long l = lcms[sub];
+                    memo[i + 1][j] = Math.min(memo[i + 1][j], memo[i][j ^ sub] + (l - nums[i] % l) % l);
+                }
+            }
+        }
+        return (int) memo[n][(1 << m) - 1];
+    }
+
+    private long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    private long lcm(long a, long b) {
+        return a / gcd(a, b) * b;
+    }
+}
+```
+
+
+
 # §9.2 排列型 ② 相邻相关
 
 ![1722313753347](assets/1722313753347.png)
