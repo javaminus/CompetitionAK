@@ -1,35 +1,24 @@
 import java.util.Arrays;
 
+// 巴什博弈(SG函数求解过程展示)
+// 一共有n颗石子，两个人轮流拿，每次可以拿1~m颗石子
+// 拿到最后一颗石子的人获胜，根据n、m返回谁赢
+// 对数器验证
 class Solution {
-
-    private static int N = (int) 1e4 + 1;
-    private static int[][] C = new int[N][N]; // 组合数
-    static {
-        for (int i = 0; i <= N; i++) {
-            for (int j = 0; j <= i; j++) {
-                if (j == 0 || j == i) {
-                    C[i][j] = 1;
-                }else{
-                    C[i][j] = C[i - 1][j - 1] + C[i - 1][j];
+    public static void main(String[] args, int m, int n) {
+        int[] sg = new int[n + 1];
+        boolean[] vis = new boolean[m + 1];
+        for (int i = 1; i <= n; i++) {
+            Arrays.fill(vis, false);
+            for (int j = 1; j <= m && i - j >= 0; j++) {
+                vis[sg[i - j]] = true;
+            }
+            for (int s = 0; s <= m; s++) {
+                if (!vis[s]) {
+                    sg[s] = s;
+                    break;
                 }
             }
         }
-    }
-
-    private static long Mod = (long) 1e9 + 7;
-    public int minMaxSums(int[] nums, int k) {
-        long res = 0;
-        Arrays.sort(nums);
-        int n = nums.length;
-        for (int i = 0; i < n; i++) {
-            long sum = 0;
-            for (int j = 0; j < Math.min(k, n - 1 - i); j++) {
-                sum += C[n - 1 - i][j];
-                sum %= Mod;
-            }
-            res += sum * nums[i];
-            res %= Mod;
-        }
-        return (int) res;
     }
 }

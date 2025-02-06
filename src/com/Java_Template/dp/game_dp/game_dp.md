@@ -1,5 +1,133 @@
 
 
+# 【【模板】SG函数】
+
+> 学习sg函数是不是学了不会用？或者学了又忘？今天就带你解决这些痛点。
+>
+> **SG函数**（Sprague-Grundy函数）是博弈论中的一个核心概念，用于分析**公平组合游戏**（如Nim游戏）的胜负策略。它由数学家R.P. Sprague和P.M. Grundy独立提出，通过将复杂游戏分解为子游戏，帮助判断当前局面对先手玩家是必胜（N-position）还是必败（P-position）。
+>
+> ---
+>
+> ### **核心概念**
+> 1. **公平组合游戏的特点**：
+>    - 两名玩家交替行动。
+>    - 完全信息，无随机因素。
+>    - 无法行动的一方输。
+>
+> 2. **SG函数定义**：
+>    - 对游戏中的每个状态（局面），其SG值为其所有后续状态SG值的**最小非负整数未出现值**（mex, minimum excludant）。
+>
+>
+> ---
+>
+> ### **注意事项**
+> - SG函数仅适用于公平组合游戏（无运气因素、双方操作对称）。
+> - 对于非公平游戏（如象棋、围棋），SG函数不适用。
+>
+> 如果需要具体游戏的SG函数分析或示例代码（如动态规划实现），可以进一步说明！
+
+**巴什博弈**（Bash Game）是一个经典的博弈论问题，可以通过**SG函数**进行详细分析。以下是使用SG函数求解巴什博弈的完整过程。
+
+---
+
+### **问题描述**
+- **规则**：
+  - 有\( n \)颗石子，两名玩家轮流拿石子。
+  - 每次可以拿\( 1 \)到\( m \)颗石子。
+  - 拿到最后一颗石子的人获胜。
+- **目标**：
+  - 根据\( n \)和\( m \)，判断先手是否必胜。
+
+---
+
+![1738820519604](assets/1738820519604.png)
+
+![1738820559676](assets/1738820559676.png)
+
+---
+
+### **代码实现**
+
+```cpp
+package class096;
+
+import java.util.Arrays;
+
+// 巴什博弈(SG函数求解过程展示)
+// 一共有n颗石子，两个人轮流拿，每次可以拿1~m颗石子
+// 拿到最后一颗石子的人获胜，根据n、m返回谁赢
+// 对数器验证
+public class Code01_BashGameSG {
+
+	// 发现结论去求解，时间复杂度O(1)
+	// 充分研究了性质
+	public static String bash1(int n, int m) {
+		return n % (m + 1) != 0 ? "先手" : "后手";
+	}
+
+	// sg函数去求解，时间复杂度O(n*m)
+	// 不用研究性质
+	// 其实把sg表打印之后，也可以发现性质，也就是打表找规律
+	public static String bash2(int n, int m) {
+		int[] sg = new int[n + 1];
+		boolean[] appear = new boolean[m + 1];
+		for (int i = 1; i <= n; i++) {
+			Arrays.fill(appear, false);
+			for (int j = 1; j <= m && i - j >= 0; j++) {
+				appear[sg[i - j]] = true;
+			}
+			for (int s = 0; s <= m; s++) {
+				if (!appear[s]) {
+					sg[i] = s;
+					break;
+				}
+			}
+		}
+
+//		System.out.println("打印 n = " + n + ", m = " + m + " 的sg表");
+//		for (int i = 0; i <= n; i++) {
+//			System.out.println("sg(" + i + ") : " + sg[i]);
+//		}
+
+		return sg[n] != 0 ? "先手" : "后手";
+	}
+
+	// 为了验证
+	public static void main(String[] args) {
+		int V = 1000;
+		int testTimes = 10000;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTimes; i++) {
+			int n = (int) (Math.random() * V);
+			int m = (int) (Math.random() * V);
+			String ans1 = bash1(n, m);
+			String ans2 = bash2(n, m);
+			if (!ans1.equals(ans2)) {
+				System.out.println("出错了!");
+			}
+		}
+		System.out.println("测试结束");
+
+		int n = 100;
+		int m = 6;
+		bash2(n, m);
+	}
+
+}
+
+```
+
+---
+
+### **总结**
+- 巴什博弈的SG值具有周期性，周期为\( m+1 \)。
+- 通过计算\( SG(n) \)，可以快速判断先手是否必胜。
+- 代码实现中，使用动态规划和mex函数计算SG值，适用于任意\( n \)和\( m \)。
+
+如果有进一步问题，欢迎继续提问！
+
+# 【leetcode练习题目】
+
 1025\. 除数博弈
 -----------
 
@@ -764,554 +892,9 @@ class Solution {
 
 ```
 
-# 【左程云博弈习题 】
+# 
 
-【公平组合游戏】
 
-```java
-package class095;
 
-// 巴什博弈(Bash Game)
-// 一共有n颗石子，两个人轮流拿，每次可以拿1~m颗石子
-// 拿到最后一颗石子的人获胜，根据n、m返回谁赢
-public class Code01_BashGame {
 
-	// 动态规划进行所有尝试
-	// 为了验证
-	public static int MAXN = 1001;
-
-	public static String[][] dp = new String[MAXN][MAXN];
-
-	public static String bashGame1(int n, int m) {
-		if (n == 0) {
-			return "后手";
-		}
-		if (dp[n][m] != null) {
-			return dp[n][m];
-		}
-		String ans = "后手";
-		for (int pick = 1; pick <= m; pick++) {
-			if (bashGame1(n - pick, m).equals("后手")) {
-				// 后续过程的赢家是后续过程的后手
-				// 那就表示此时的先手，通过这个后续过程，能赢
-				ans = "先手";
-				break;
-			}
-		}
-		dp[n][m] = ans;
-		return ans;
-	}
-
-	// 正式方法
-	public static String bashGame2(int n, int m) {
-		return n % (m + 1) != 0 ? "先手" : "后手";
-	}
-
-	// 为了验证
-	public static void main(String[] args) {
-		int V = 500; // 需要比MAXN小
-		int testTimes = 5000;
-		System.out.println("测试开始");
-		for (int i = 0; i < testTimes; i++) {
-			int n = (int) (Math.random() * V);
-			int m = (int) (Math.random() * V) + 1;
-			String ans1 = bashGame1(n, m);
-			String ans2 = bashGame2(n, m);
-			if (!ans1.equals(ans2)) {
-				System.out.println("出错了!");
-			}
-		}
-		System.out.println("测试结束");
-	}
-
-}
-
-```
-
-```java
-package class095;
-
-// 质数次方版取石子(巴什博弈扩展)
-// 一共有n颗石子，两个人轮流拿
-// 每一轮当前选手可以拿 p的k次方 颗石子
-// 当前选手可以随意决定p和k，但要保证p是质数、k是自然数
-// 拿到最后一颗石子的人获胜
-// 根据石子数返回谁赢
-// 如果先手赢，返回"October wins!"
-// 如果后手赢，输出"Roy wins!"
-// 测试链接 : https://www.luogu.com.cn/problem/P4018
-// 请同学们务必参考如下代码中关于输入、输出的处理
-// 这是输入输出处理效率很高的写法
-// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-
-public class Code02_PrimePowerStones {
-
-	public static int t, n;
-
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		in.nextToken();
-		t = (int) in.nval;
-		for (int i = 0; i < t; i++) {
-			in.nextToken();
-			n = (int) in.nval;
-			out.println(compute(n));
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
-
-	public static String compute(int n) {
-		return n % 6 != 0 ? "October wins!" : "Roy wins!";
-	}
-
-}
-```
-
-```java
-package class095;
-
-// 尼姆博弈(Nim Game)
-// 一共有n堆石头，两人轮流进行游戏
-// 在每个玩家的回合中，玩家需要选择任何一个非空的石头堆，并从这堆石头中移除任意正数的石头数量
-// 谁先拿走最后的石头就获胜，返回最终谁会获胜
-// 测试链接 : https://www.luogu.com.cn/problem/P2197
-// 请同学们务必参考如下代码中关于输入、输出的处理
-// 这是输入输出处理效率很高的写法
-// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-
-public class Code03_NimGame {
-
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		in.nextToken();
-		int t = (int) in.nval;
-		for (int i = 0; i < t; i++) {
-			in.nextToken();
-			int n = (int) in.nval;
-			int eor = 0;
-			for (int j = 0; j < n; j++) {
-				in.nextToken();
-				eor ^= (int) in.nval;
-			}
-			if (eor != 0) {
-				out.println("Yes");
-			} else {
-				out.println("No");
-			}
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
-
-}
-
-```
-
-```java
-package class095;
-
-// 反尼姆博弈(反常游戏)
-// 一共有n堆石头，两人轮流进行游戏
-// 在每个玩家的回合中，玩家需要选择任何一个非空的石头堆，并从这堆石头中移除任意正数的石头数量
-// 谁先拿走最后的石头就失败，返回最终谁会获胜
-// 先手获胜，打印John
-// 后手获胜，打印Brother
-// 测试链接 : https://www.luogu.com.cn/problem/P4279
-// 请同学们务必参考如下代码中关于输入、输出的处理
-// 这是输入输出处理效率很高的写法
-// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-
-public class Code04_AntiNimGame {
-
-	public static int MAXN = 51;
-
-	public static int[] stones = new int[MAXN];
-
-	public static int t, n;
-
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		in.nextToken();
-		t = (int) in.nval;
-		for (int i = 0; i < t; i++) {
-			in.nextToken();
-			n = (int) in.nval;
-			for (int j = 0; j < n; j++) {
-				in.nextToken();
-				stones[j] = (int) in.nval;
-			}
-			out.println(compute());
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
-
-	public static String compute() {
-		int eor = 0, sum = 0;
-		for (int i = 0; i < n; i++) {
-			eor ^= stones[i];
-			sum += stones[i] == 1 ? 1 : 0;
-		}
-		if (sum == n) {
-			return (n & 1) == 1 ? "Brother" : "John";
-		} else {
-			return eor != 0 ? "John" : "Brother";
-		}
-	}
-
-}
-
-```
-
-```java
-package class095;
-
-// 斐波那契博弈(Fibonacci Game + Zeckendorf定理)
-// 一共有n枚石子，两位玩家定了如下规则进行游戏：
-// 先手后手轮流取石子，先手在第一轮可以取走任意的石子
-// 接下来的每一轮当前的玩家最少要取走一个石子，最多取走上一次取的数量的2倍
-// 当然，玩家取走的数量必须不大于目前场上剩余的石子数量，双方都以最优策略取石子
-// 你也看出来了，根据规律先手一定会获胜，但是先手想知道
-// 第一轮自己取走至少几颗石子就可以保证获胜了
-// 测试链接 : https://www.luogu.com.cn/problem/P6487
-// 请同学们务必参考如下代码中关于输入、输出的处理
-// 这是输入输出处理效率很高的写法
-// 提交以下的code，提交时请把类名改成"Main"，可以直接通过
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-
-public class Code05_FibonacciGame {
-
-	public static long MAXN = 1000000000000000L;
-
-	public static int MAXM = 101;
-
-	public static long[] f = new long[MAXM];
-
-	public static int size;
-
-	public static void build() {
-		f[0] = 1;
-		f[1] = 2;
-		size = 1;
-		while (f[size] <= MAXN) {
-			f[size + 1] = f[size] + f[size - 1];
-			size++;
-		}
-	}
-
-	public static void main(String[] args) throws IOException {
-		build();
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		while (in.nextToken() != StreamTokenizer.TT_EOF) {
-			out.println(compute((long) in.nval));
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
-
-	public static long compute(long n) {
-		long ans = -1, find;
-		while (n != 1 && n != 2) {
-			find = bs(n);
-			if (n == find) {
-				ans = find;
-				break;
-			} else {
-				n -= find;
-			}
-		}
-		if (ans != -1) {
-			return ans;
-		} else {
-			return n;
-		}
-	}
-
-	public static long bs(long n) {
-		int l = 0;
-		int r = size;
-		int m;
-		long ans = -1;
-		while (l <= r) {
-			m = (l + r) / 2;
-			if (f[m] <= n) {
-				ans = f[m];
-				l = m + 1;
-			} else {
-				r = m - 1;
-			}
-		}
-		return ans;
-	}
-
-}
-
-```
-
-# 【【模板】SG函数】
-
-```java
-package class096;
-
-import java.util.Arrays;
-
-// 两堆石头的巴什博弈
-// 有两堆石头，数量分别为a、b
-// 两个人轮流拿，每次可以选择其中一堆石头，拿1~m颗
-// 拿到最后一颗石子的人获胜，根据a、b、m返回谁赢
-// 来自真实大厂笔试，没有在线测试，对数器验证
-public class Code03_TwoStonesBashGame {
-
-	public static int MAXN = 101;
-
-	public static String[][][] dp = new String[MAXN][MAXN][MAXN];
-
-	// 动态规划方法彻底尝试
-	// 为了验证
-	public static String win1(int a, int b, int m) {
-		if (m >= Math.max(a, b)) {
-			return a != b ? "先手" : "后手";
-		}
-		if (a == b) {
-			return "后手";
-		}
-		if (dp[a][b][m] != null) {
-			return dp[a][b][m];
-		}
-		String ans = "后手";
-		for (int pick = 1; pick <= Math.min(a, m); pick++) {
-			if (win1(a - pick, b, m).equals("后手")) {
-				// 后续过程的赢家是后续过程的后手
-				// 那就表示此时的先手，通过这个后续过程，能赢
-				ans = "先手";
-			}
-			if (ans.equals("先手")) {
-				// 后续过程的赢家是后续过程的后手
-				// 那就表示此时的先手，通过这个后续过程，能赢
-				break;
-			}
-		}
-		for (int pick = 1; pick <= Math.min(b, m); pick++) {
-			if (win1(a, b - pick, m).equals("后手")) {
-				// 后续过程的赢家是后续过程的后手
-				// 那就表示此时的先手，通过这个后续过程，能赢
-				ans = "先手";
-			}
-			if (ans.equals("先手")) {
-				break;
-			}
-		}
-		dp[a][b][m] = ans;
-		return ans;
-	}
-
-	// sg定理
-	public static String win2(int a, int b, int m) {
-		int n = Math.max(a, b);
-		int[] sg = new int[n + 1];
-		boolean[] appear = new boolean[m + 1];
-		for (int i = 1; i <= n; i++) {
-			Arrays.fill(appear, false);
-			for (int j = 1; j <= m && i - j >= 0; j++) {
-				appear[sg[i - j]] = true;
-			}
-			for (int s = 0; s <= m; s++) {
-				if (!appear[s]) {
-					sg[i] = s;
-					break;
-				}
-			}
-		}
-		return (sg[a] ^ sg[b]) != 0 ? "先手" : "后手";
-	}
-
-	// 时间复杂度O(1)的最优解
-	// 其实是根据方法2中的sg表观察出来的
-	public static String win3(int a, int b, int m) {
-		return a % (m + 1) != b % (m + 1) ? "先手" : "后手";
-	}
-
-	public static void main(String[] args) {
-		System.out.println("测试开始");
-		for (int a = 0; a < MAXN; a++) {
-			for (int b = 0; b < MAXN; b++) {
-				for (int m = 1; m < MAXN; m++) {
-					String ans1 = win1(a, b, m);
-					String ans2 = win2(a, b, m);
-					String ans3 = win3(a, b, m);
-					if (!ans1.equals(ans2) || !ans1.equals(ans3)) {
-						System.out.println("出错了！");
-					}
-				}
-			}
-		}
-		System.out.println("测试结束");
-	}
-
-}
-
-```
-
-```java
-package class096;
-
-import java.util.Arrays;
-
-// 三堆石头拿取斐波那契数博弈
-// 有三堆石头，数量分别为a、b、c
-// 两个人轮流拿，每次可以选择其中一堆石头，拿取斐波那契数的石头
-// 拿到最后一颗石子的人获胜，根据a、b、c返回谁赢
-// 来自真实大厂笔试，每堆石子的数量在10^5以内
-// 没有在线测试，对数器验证
-public class Code04_ThreeStonesPickFibonacci {
-
-	// 如果MAXN变大
-	// 相应的要修改f数组
-	public static int MAXN = 201;
-
-	// MAXN以内的斐波那契数
-	public static int[] f = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144 };
-
-	public static String[][][] dp = new String[MAXN][MAXN][MAXN];
-
-	// 动态规划方法彻底尝试
-	// 为了验证
-	public static String win1(int a, int b, int c) {
-		// 假设当前的先手来行动
-		// 注意不是全局的先手，是当前的先手来行动！
-		// 当前！当前！当前！
-		if (a + b + c == 0) {
-			// 当前的先手，面对这个局面
-			// 返回当前的后手赢
-			return "后手";
-		}
-		if (dp[a][b][c] != null) {
-			return dp[a][b][c];
-		}
-		String ans = "后手"; // ans : 赢的是当前的先手，还是当前的后手
-		for (int i = 0; i < f.length; i++) {
-			if (f[i] <= a) {
-				if (win1(a - f[i], b, c).equals("后手")) {
-					// 后续过程的赢家是后续过程的后手
-					// 那就表示当前的先手，通过这个后续过程，能赢
-					ans = "先手";
-					break;
-				}
-			}
-			if (f[i] <= b) {
-				if (win1(a, b - f[i], c).equals("后手")) {
-					// 后续过程的赢家是后续过程的后手
-					// 那就表示当前的先手，通过这个后续过程，能赢
-					ans = "先手";
-					break;
-				}
-			}
-			if (f[i] <= c) {
-				if (win1(a, b, c - f[i]).equals("后手")) {
-					// 后续过程的赢家是后续过程的后手
-					// 那就表示当前的先手，通过这个后续过程，能赢
-					ans = "先手";
-					break;
-				}
-			}
-		}
-		dp[a][b][c] = ans;
-		return ans;
-	}
-
-	// sg定理
-	public static int[] sg = new int[MAXN];
-
-	public static boolean[] appear = new boolean[MAXN];
-
-	// O(10^5 * 24 * 2)
-	public static void build() {
-		for (int i = 1; i < MAXN; i++) {
-			Arrays.fill(appear, false);
-			for (int j = 0; j < f.length && i - f[j] >= 0; j++) {
-				appear[sg[i - f[j]]] = true;
-			}
-			for (int s = 0; s < MAXN; s++) {
-				if (!appear[s]) {
-					sg[i] = s;
-					break;
-				}
-			}
-		}
-	}
-
-	public static String win2(int a, int b, int c) {
-		return (sg[a] ^ sg[b] ^ sg[c]) != 0 ? "先手" : "后手";
-	}
-
-	public static void main(String[] args) {
-		build();
-		System.out.println("测试开始");
-		for (int a = 0; a < MAXN; a++) {
-			for (int b = 0; b < MAXN; b++) {
-				for (int c = 0; c < MAXN; c++) {
-					String ans1 = win1(a, b, c);
-					String ans2 = win2(a, b, c);
-					if (!ans1.equals(ans2)) {
-						System.out.println("出错了！");
-					}
-				}
-			}
-		}
-		System.out.println("测试结束");
-
-		// 试图找到简洁规律，想通过O(1)的过程就得到sg(x)
-		// 于是打印200以内的sg值，开始观察
-		// 刚开始有规律，但是在sg(138)之后开始发生异常波动
-		// 这道题在考的时候，数据量并没有大到需要O(1)的过程才能通过
-		// 那就用build方法计算sg值，不再找寻简洁规律
-		// 考试时一切根据题目数据量来决定是否继续优化
-		for (int i = 0; i < MAXN; i++) {
-			System.out.println("sg(" + i + ") : " + sg[i]);
-		}
-	}
-
-}
-
-```
 

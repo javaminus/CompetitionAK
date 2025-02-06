@@ -1193,5 +1193,59 @@ class Solution {
 }
 ```
 
+#### 【模板】树上滑窗
+
+https://leetcode.cn/problems/longest-special-path/description/
+
+```java
+import java.util.*;
+
+class Solution {
+    List<int[]>[] g;
+    int n;
+    public int[] longestSpecialPath(int[][] edges, int[] nums) {
+        n = edges.length + 1;
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int[] e : edges) {
+            int x = e[0], y = e[1], z = e[2];
+            g[x].add(new int[]{y, z});
+            g[y].add(new int[]{x, z});
+        }
+        ArrayList<Integer> dist = new ArrayList<>();
+        dist.add(0);
+        HashMap<Integer, Integer> map = new HashMap<>();
+        dfs(0, -1, 0, nums, dist, map);
+        return new int[]{mxLen, mnNum};
+    }
+    
+    int mxLen = -1, mnNum = 0;
+
+    private void dfs(int x, int fa,int topDepth, int[] nums, List<Integer> dist, Map<Integer, Integer> map) {
+        int color = nums[x];
+        int oldDepth = map.getOrDefault(color, 0);
+        topDepth = Math.max(topDepth, oldDepth);
+        int disX = dist.get(dist.size() - 1);
+        int len = disX - dist.get(topDepth);
+        int nodes = dist.size() - topDepth;
+        if (len > mxLen || len == mxLen && nodes < mnNum) {
+            mxLen = len;
+            mnNum = nodes;
+        }
+
+        map.put(color, dist.size());
+        for (int[] e : g[x]) {
+            int y = e[0];
+            if (y != fa) {
+                dist.add(disX + e[1]);
+                dfs(y, x, topDepth, nums, dist, map);
+                dist.remove(dist.size() - 1);
+            }
+        }
+        map.put(color, oldDepth);
+    }
+}
+```
+
 
 
