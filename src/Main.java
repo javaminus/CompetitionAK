@@ -1,135 +1,269 @@
+import java.io.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
+    private final static int INF = Integer.MAX_VALUE / 2;
+    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    // private final static int[][] dirs = new int[][]{{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
 
-    public static int MAXN = 1001;
+    static class Read {
+        BufferedReader bf;
+        StringTokenizer st;
+        BufferedWriter bw;
 
-    public static int[][] dp = new int[MAXN][MAXN];
+        public Read() {
+            bf = new BufferedReader(new InputStreamReader(System.in));
+            st = new StringTokenizer("");
+            bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        }
 
-    public static void build() {
-        for (int i = 0; i < MAXN; i++) {
-            for (int j = 0; j < MAXN; j++) {
-                dp[i][j] = -1;
+        public String nextLine() throws IOException {
+            return bf.readLine();
+        }
+
+        public String next() throws IOException {
+            while (!st.hasMoreTokens()) {
+                st = new StringTokenizer(bf.readLine());
             }
+            return st.nextToken();
+        }
+
+        public char nextChar() throws IOException {
+            return next().charAt(0);
+        }
+
+        public int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+
+        public double nextDouble() throws IOException {
+            return Double.parseDouble(next());
+        }
+
+        public float nextFloat() throws IOException {
+            return Float.parseFloat(next());
+        }
+
+        public byte nextByte() throws IOException {
+            return Byte.parseByte(next());
+        }
+
+        public short nextShort() throws IOException {
+            return Short.parseShort(next());
+        }
+
+        public BigInteger nextBigInteger() throws IOException {
+            return new BigInteger(next());
+        }
+
+        public void println(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(String a) throws IOException {
+            bw.write(a);
+            bw.newLine();
+            return;
+        }
+
+        public void print(String a) throws IOException {
+            bw.write(a);
+            return;
+        }
+
+        public void println(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void print(BigInteger a) throws IOException {
+            bw.write(a.toString());
+            return;
+        }
+
+        public void print(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
         }
     }
 
-    public static int sg(int a, int b) {
-        if (a == 1 && b == 1) {
-            return 0;
+    static class Pair<T, U> {
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
         }
-        if (dp[a][b] != -1) {
-            return dp[a][b];
+    }
+
+    private static long qpow(long a, long b, long p) {
+        long res = 1L;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = (res * a) % p;
+            }
+            a = a * a % p;
+            b >>= 1;
         }
-        boolean[] appear = new boolean[Math.max(a, b) + 1];
-        if (a > 1) {
-            for (int l = 1, r = a - 1; l < a; l++, r--) {
-                appear[sg(l, r)] = true;
+        return res;
+    }
+
+    private static long sqrt(long N) { // 二分查找快速开方
+        long lo = 1;
+        long hi = N;
+        long ans = 0;
+        while(lo <= hi) {
+            long mid = (lo + hi) / 2;
+            if (mid <= N / mid) {
+                ans = mid;
+                lo = mid + 1;
+            }  else {
+                hi = mid - 1;
             }
         }
-        if (b > 1) {
-            for (int l = 1, r = b - 1; l < b; l++, r--) {
-                appear[sg(l, r)] = true;
-            }
-        }
-        int ans = 0;
-        for (int s = 0; s <= Math.max(a, b); s++) {
-            if (!appear[s]) {
-                ans = s;
-                break;
-            }
-        }
-        dp[a][b] = ans;
         return ans;
     }
 
-    public static void f1() {
-        System.out.println("石子数9以内所有组合的sg值");
-        System.out.println();
-        System.out.print("    ");
-        for (int i = 1; i <= 9; i++) {
-            System.out.print(i + " ");
-        }
-        System.out.println();
-        System.out.println();
-        for (int a = 1; a <= 9; a++) {
-            System.out.print(a + "   ");
-            for (int b = 1; b < a; b++) {
-                System.out.print("X ");
-            }
-            for (int b = a; b <= 9; b++) {
-                int sg = sg(a, b);
-                System.out.print(sg + " ");
-            }
-            System.out.println();
+    private static void reverse(char[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            char tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
         }
     }
 
-    public static void f2() {
-        System.out.println("石子数9以内所有组合的sg值，但是行列都-1");
-        System.out.println();
-        System.out.print("    ");
-        for (int i = 0; i <= 8; i++) {
-            System.out.print(i + " ");
-        }
-        System.out.println();
-        System.out.println();
-        for (int a = 1; a <= 9; a++) {
-            System.out.print((a - 1) + "   ");
-            for (int b = 1; b < a; b++) {
-                System.out.print("X ");
-            }
-            for (int b = a; b <= 9; b++) {
-                int sg = sg(a, b);
-                System.out.print(sg + " ");
-            }
-            System.out.println();
+    private static void reverse(int[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            int tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
         }
     }
 
-    public static void f3() {
-        System.out.println("测试开始");
-        for (int a = 1; a < MAXN; a++) {
-            for (int b = 1; b < MAXN; b++) {
-                int sg1 = sg(a, b);
-                int sg2 = lowZero((a - 1) | (b - 1));
-                if (sg1 != sg2) {
-                    System.out.println("出错了!");
+    private static void reverse(long[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            long tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int m, n, sum;
+
+    private static List<Integer> list = new ArrayList<>();
+    static char[][] grid;
+
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        grid = new char[n][n];
+        for (int i = 0; i < n; i++) {
+            grid[i] = sc.next().toCharArray();
+        }
+        HashMap<String, Integer> map = new HashMap<>();
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '*') {
+                    sum = 1;
+                    list.clear();
+                    int b = dfs(i, j);
+                    for (int x = 0; x < list.size(); x += 2) {
+                        grid[list.get(x)][list.get(x + 1)] = '.';
+                    }
+                    if (b == 1) {
+                        String key = "" + list.get(0) + list.get(1);
+                        map.put(key, map.getOrDefault(key, 0) + sum);
+                        ans = Math.max(ans, map.get(key));
+                    }
                 }
             }
         }
-        System.out.println("测试结束");
+        sc.println(ans);
     }
 
-    // 返回status最低位的0在第几位
-    public static int lowZero(int status) {
-        int cnt = 0;
-        while (status > 0) {
-            if ((status & 1) == 0) {
-                break;
+    private static int dfs(int i, int j) {
+        int ans = 0;
+        grid[i][j] = '1';
+        for (int[] d : dirs) {
+            int ni = i + d[0], nj = j + d[1];
+            if (ni >= 0 && ni < n && nj >= 0 && nj < n) {
+                if (grid[ni][nj] == '*') {
+                    sum++;
+                    ans += dfs(ni, nj);
+                } else if (grid[ni][nj] == '.') {
+                    grid[ni][nj] = '2';
+                    list.add(ni);
+                    list.add(nj);
+                    ans++;
+                }
             }
-            status >>= 1;
-            cnt++;
         }
-        return cnt;
+        return ans;
     }
-
-    public static void main(String[] args) {
-        build();
-        f1();
-        System.out.println();
-        System.out.println();
-        f2();
-        System.out.println();
-        System.out.println();
-        f3();
-    }
-// 计算两堆石子的SG值
-// 桌上有两堆石子，石头数量分别为a、b
-// 任取一堆石子，将其移走，然后分割同一组的另一堆石子
-// 从中取出若干个石子放在被移走的位置，组成新的一堆
-// 操作完成后，组内每堆的石子数必须保证大于0
-// 显然，被分割的一堆的石子数至少要为2
-// 两个人轮流进行分割操作，如果轮到某人进行操作时，两堆石子数均为1，判此人输掉比赛
-// 计算sg[a][b]的值并找到简洁规律
-// 本文件仅为题目5打表找规律的代码
+    
 }

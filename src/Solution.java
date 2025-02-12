@@ -1,31 +1,19 @@
-import java.util.Arrays;
+import java.util.HashMap;
 
 class Solution {
-    public int minDeletionSize(String[] strs) {
-        int n = strs.length;
-        int m = strs[0].length();
-        int ans = 0;
-        String[] cur = new String[n];
-        for (int i = 0; i < n; i++) {
-            String[] cur2 = Arrays.copyOf(cur, n);
-            for (int j = 0; j < n; j++) {
-                cur2[j] += strs[j].charAt(i);
-            }
-            if (isSorted(cur2)) {
-                cur = cur2;
-            }else{
-                ans++;
+    public int maximumLength(int[] nums, int k) {
+        HashMap<Integer, int[]> dp = new HashMap<>();
+        int[] mx = new int[k + 1];
+        for (int x : nums) {
+            int[] f = dp.computeIfAbsent(x, e -> new int[k + 1]);
+            for (int i = k; i >= 0; i--) {
+                f[i]++;
+                if (i > 0) {
+                    f[i] = Math.max(f[i], mx[i - 1] + 1);
+                }
+                mx[i] = Math.max(mx[i], f[i]);
             }
         }
-
-        return ans;
-    }
-
-    public boolean isSorted(String[] strs) {
-        for (int i = 0; i < strs.length - 1; ++i)
-            if (strs[i].compareTo(strs[i+1]) > 0)
-                return false;
-
-        return true;
+        return mx[k];
     }
 }
