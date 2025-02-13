@@ -1,4 +1,103 @@
-## [【模板】3177. 求出最长好子序列 II](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/) 
+## [3448. 统计可以被最后一个数位整除的子字符串数目](https://leetcode.cn/problems/count-substrings-divisible-by-last-digit/)
+
+> 给你一个只包含数字的字符串 `s` 。
+>
+> 请你返回 `s` 的最后一位 **不是** 0 的子字符串中，可以被子字符串最后一位整除的数目。
+>
+> **子字符串** 是一个字符串里面一段连续 **非空** 的字符序列。
+>
+> **注意：**子字符串可以有前导 0 。
+>
+> **示例 1：**
+>
+> **输入：**s = "12936"
+>
+> **输出：**11
+>
+> **解释：**
+>
+> 子字符串 `"29"` ，`"129"` ，`"293"` 和 `"2936"` 不能被它们的最后一位整除，总共有 15 个子字符串，所以答案是 `15 - 4 = 11` 。
+>
+> **示例 2：**
+>
+> **输入：**s = "5701283"
+>
+> **输出：**18
+>
+> **解释：**
+>
+> 子字符串 `"01"` ，`"12"` ，`"701"` ，`"012"` ，`"128"` ，`"5701"` ，`"7012"` ，`"0128"` ，`"57012"` ，`"70128"` ，`"570128"` 和 `"701283"` 都可以被它们最后一位数字整除。除此以外，所有长度为 1 且不为 0 的子字符串也可以被它们的最后一位整除。有 6 个这样的子字符串，所以答案为 `12 + 6 = 18` 。
+>
+> **示例 3：**
+>
+> **输入：**s = "1010101010"
+>
+> **输出：**25
+>
+> **解释：**
+>
+> 只有最后一位数字为 `'1'` 的子字符串可以被它们的最后一位整除，总共有 25 个这样的字符串。
+>
+>  
+>
+> **提示：**
+>
+> - `1 <= s.length <= 105`
+> - `s` 只包含数字。
+
+```java
+class Solution {
+    public long countSubstrings(String s) { // 不做空间优化
+        long total = 0;
+        int n = s.length();
+        int[][][] dp = new int[n + 1][10][]; // dp[i][j][k]表示到达下标i，以nums[i]结尾模j余数为k的字串个数
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= 9; j++) {
+                dp[i][j] = new int[j];
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            int digit = s.charAt(i - 1) - '0';
+            for (int j = 1; j <= 9; j++) {
+                dp[i][j][digit % j] = 1;
+                for (int k = 0; k < j; k++) {
+                    dp[i][j][(k * 10 + digit) % j] += dp[i - 1][j][k];
+                }
+            }
+            if (digit > 0) {
+                total += dp[i][digit][0];
+            }
+        }
+        return total;
+    }
+}
+```
+
+```java
+class Solution { // 空间优化版本 其中dp[i][j]表示模i余j的子串个数
+    public long countSubstrings(String s) {
+        long ans = 0;
+        long[][] dp = new long[10][9];
+        for (char c : s.toCharArray()) {
+            int d = c - '0';
+            for (int i = 1; i < 10; i++) {
+                long[] f = new long[i]; // 表示模i余数分别为[0...i]的个数
+                f[d % i] = 1;
+                for (int j = 0; j < i; j++) { // 枚举余数
+                    f[(j * 10 % i + d) % i] += dp[i][j];
+                }
+                dp[i] = f;
+            }
+            ans += dp[d][0];
+        }
+        return ans;
+    }
+}
+```
+
+
+
+##  [【模板】3177. 求出最长好子序列 II](https://leetcode.cn/problems/find-the-maximum-length-of-a-good-subsequence-ii/)
 
 > 这题是进阶线性dp最好的模板
 >

@@ -1,102 +1,280 @@
 package test;
 
-import java.util.*;
+import java.io.*;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 public class Main {
-    private static int LOG;
-    private static int[][] up;
-    private static int[] depth;
+    private final static int INF = Integer.MAX_VALUE / 2;
+    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    static class Read {
+        BufferedReader bf;
+        StringTokenizer st;
+        BufferedWriter bw;
 
-        // 读取岛屿数量和查询次数
-        int n = scanner.nextInt();
-        int q = scanner.nextInt();
-
-        // 计算 log(n)
-        LOG = (int) (Math.log(n) / Math.log(2)) + 1;
-
-        // 构建图
-        List<List<Integer>> graph = new ArrayList<>();
-        for (int i = 0; i <= n; i++) {
-            graph.add(new ArrayList<>());
+        public Read() {
+            bf = new BufferedReader(new InputStreamReader(System.in));
+            st = new StringTokenizer("");
+            bw = new BufferedWriter(new OutputStreamWriter(System.out));
         }
 
-        // 读取桥梁信息
-        for (int i = 0; i < n - 1; i++) {
-            int a = scanner.nextInt();
-            int b = scanner.nextInt();
-            graph.get(a).add(b);
-            graph.get(b).add(a);
+        public String nextLine() throws IOException {
+            return bf.readLine();
         }
 
-        // 初始化深度和 up 数组
-        depth = new int[n + 1];
-        up = new int[n + 1][LOG];
-
-        // 预处理深度和父节点信息
-        dfs(graph, 1, 1);
-
-        // 处理每个查询
-        for (int i = 0; i < q; i++) {
-            int a = scanner.nextInt();
-            int b = scanner.nextInt();
-            System.out.println(distance(a, b));
+        public String next() throws IOException {
+            while (!st.hasMoreTokens()) {
+                st = new StringTokenizer(bf.readLine());
+            }
+            return st.nextToken();
         }
 
-        scanner.close();
+        public char nextChar() throws IOException {
+            return next().charAt(0);
+        }
+
+        public int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() throws IOException {
+            return Long.parseLong(next());
+        }
+
+        public double nextDouble() throws IOException {
+            return Double.parseDouble(next());
+        }
+
+        public float nextFloat() throws IOException {
+            return Float.parseFloat(next());
+        }
+
+        public byte nextByte() throws IOException {
+            return Byte.parseByte(next());
+        }
+
+        public short nextShort() throws IOException {
+            return Short.parseShort(next());
+        }
+
+        public BigInteger nextBigInteger() throws IOException {
+            return new BigInteger(next());
+        }
+
+        public void println(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(int a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(String a) throws IOException {
+            bw.write(a);
+            bw.newLine();
+            return;
+        }
+
+        public void print(String a) throws IOException {
+            bw.write(a);
+            return;
+        }
+
+        public void println(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(long a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
+
+        public void print(double a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void print(BigInteger a) throws IOException {
+            bw.write(a.toString());
+            return;
+        }
+
+        public void print(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            return;
+        }
+
+        public void println(char a) throws IOException {
+            bw.write(String.valueOf(a));
+            bw.newLine();
+            return;
+        }
     }
 
-    // 深度优先搜索预处理深度和父节点信息
-    private static void dfs(List<List<Integer>> graph, int node, int parent) {
-        depth[node] = depth[parent] + 1;
-        up[node][0] = parent;
-
-        for (int i = 1; i < LOG; i++) {
-            up[node][i] = up[up[node][i - 1]][i - 1]; // 这里应该是2^(i - 1) + 2^(i - 1)等于2^i,也就是向上面走了2^i步
+    static class Pair<T, U> {
+        T fir;
+        U sec;
+        public Pair(T fir, U sec) {
+            this.fir = fir;
+            this.sec = sec;
         }
+    }
 
-        for (int neighbor : graph.get(node)) {
-            if (neighbor != parent) {
-                dfs(graph, neighbor, node);
+    private static long qpow(long a, long b, long p) {
+        long res = 1L;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                res = (res * a) % p;
+            }
+            a = a * a % p;
+            b >>= 1;
+        }
+        return res;
+    }
+
+    private static long sqrt(long N) { // 二分查找快速开方
+        long lo = 1;
+        long hi = N;
+        long ans = 0;
+        while(lo <= hi) {
+            long mid = (lo + hi) / 2;
+            if (mid <= N / mid) {
+                ans = mid;
+                lo = mid + 1;
+            }  else {
+                hi = mid - 1;
             }
         }
+        return ans;
     }
 
-    // 计算两个节点之间的距离
-    private static int distance(int a, int b) {
-        int lca = lca(a, b);
-        return depth[a] + depth[b] - 2 * depth[lca];
-    }
-
-    // 计算两个节点的最近公共祖先（LCA）
-    private static int lca(int a, int b) {
-        if (depth[a] < depth[b]) {
-            int temp = a;
-            a = b;
-            b = temp;
+    private static void reverse(char[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            char tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
         }
+    }
 
-        // 将 a 和 b 提升到同一深度
-        for (int i = LOG - 1; i >= 0; i--) {
-            if (depth[a] - (1 << i) >= depth[b]) {
-                a = up[a][i];
+    private static void reverse(int[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            int tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    private static void reverse(long[] s) {
+        int l = 0, r = s.length - 1;
+        while (l <= r) {
+            long tmp = s[l];
+            s[l] = s[r];
+            s[r] = tmp;
+            l++;
+            r--;
+        }
+    }
+
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int m, n;
+
+
+    private static void solve() throws IOException {
+        ss = sc.nextLine().split(",");
+        cs = ss[0].substring(1, ss[0].length() - 1).toCharArray();
+        n = cs.length;
+        int k = Integer.parseInt(ss[1]);
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        int cnt = 0;
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            if (cs[i] == '1') {
+                cnt++;
+                sum++;
+            }else{
+                map.merge(cnt, 1, Integer::sum);
+                cnt = 0;
             }
         }
-
-        if (a == b) {
-            return a;
+        if (k >= sum) {
+            sc.println(0);
+            return;
         }
-
-        // 同时提升 a 和 b
-        for (int i = LOG - 1; i >= 0; i--) {
-            if (up[a][i] != up[b][i]) {
-                a = up[a][i];
-                b = up[b][i];
+        while (k > 0) {
+            Map.Entry<Integer, Integer> entry = map.pollLastEntry();
+            int key = entry.getKey(), v = entry.getValue();
+            if (key == 0) {
+                sc.println(0);
+                return;
+            }
+            if (key == 1) {
+                if (k >= v) {
+                    sc.println(0);
+                    return;
+                }else{
+                    sc.println(1);
+                    return;
+                }
+            }
+            int x1 = key / 2, x2 = key / 2;
+            if ((key & 1) == 0) {
+                x2 -= 1;
+            }
+            if (k >= v) {
+                map.merge(x1, v, Integer::sum);
+                map.merge(x2, v, Integer::sum);
+                k -= v;
+            }else{
+                sc.println(key);
+                return;
             }
         }
-
-        return up[a][0];
+        if (map.isEmpty()) {
+            sc.println(0);
+        }else{
+            sc.println(map.lastKey());
+        }
     }
+
+
+
+
 }
