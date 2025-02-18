@@ -1,5 +1,7 @@
 import java.io.*;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -197,7 +199,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -214,37 +216,43 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        ss = sc.nextLine().split("]");
-        s = ss[0].substring(1);
-        String[] ss1 = s.split(",");
-        n = ss1.length;
-        int[] nums = new int[n];
+        n = sc.nextInt();
+        int[][] grid = new int[n][n];
         for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss1[i]);
-        }
-        cs = ss[1].substring(2, ss[1].length() - 1).toCharArray();
-        int op = 0;
-        for (int i = 0; i < n; i++) {
-            if (cs[i] == 'R') {
-                op += nums[i];
-                op = op % 2;
+            ss = sc.nextLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = Integer.parseInt(ss[j]);
             }
+            Arrays.sort(grid[i]);
         }
-        int[][] dp = new int[n][2]; // 表示到第i位，余数为j的方案数
-        if (cs[0] == 'W') {
-            dp[0][0] = 1;
-        }
-        if ((nums[0] & 1) == 0) {
-            dp[0][0] += 1;
-        }else{
-            dp[0][1] = 1;
-        }
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j < 2; j++) {
-                dp[i][j] = (dp[i - 1][j] + (cs[i] == 'W' ? dp[i - 1][(j + nums[i]) % 2] : 0)) % Mod;
-            }
-        }
-        sc.println(dp[n - 1][0]);
+        tmp = new ArrayList<>();
+        tmp.add(grid[0][0]);
+        ans = 1;
+        dfs(grid, 1);
+        sc.println(ans);
     }
-    
+
+    static List<Integer> tmp;
+    static int ans;
+    private static void dfs(int[][] grid, int i) {
+        if (i == n) {
+            return;
+        }
+        ArrayList<Integer> list = new ArrayList<>();
+        int d = 0;
+        for (int j = 0; j < n; j++) {
+            if (list.size() == i + 1) {
+                break;
+            }
+            if ((d == tmp.size() || grid[i][j] >= tmp.get(d)) && (d - 1 < 0 || grid[i][j] >= tmp.get(d - 1))) {
+                list.add(grid[i][j]);
+                d++;
+            }
+        }
+        if (list.size() == i + 1) {
+            ans = i + 1;
+            tmp = list;
+            dfs(grid, i + 1);
+        }
+    }
 }
