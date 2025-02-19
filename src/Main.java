@@ -1,258 +1,89 @@
-import java.io.*;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 
 public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    // 使用两个不同的 MOD 来降低哈希碰撞概率
+    static final long MOD1 = 1000000007L;
+    static final long MOD2 = 1000000009L;
+    static final long BASE = 137L;
 
-    static class Read {
-        BufferedReader bf;
-        StringTokenizer st;
-        BufferedWriter bw;
-
-        public Read() {
-            bf = new BufferedReader(new InputStreamReader(System.in));
-            st = new StringTokenizer("");
-            bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    // 方法：判断是否能通过在字符串 S 头部添加任意多个 { 'l', 'q', 'b' }
+    // 将 S 转换为回文串
+    public static boolean canTransform(String s) {
+        int n = s.length();
+        // 预处理后缀 allowed 数组：allowedSuffix[k] 表示 S 的后 k 个字符是否均属于允许范围
+        boolean[] allowedSuffix = new boolean[n + 1];
+        allowedSuffix[0] = true;
+        for (int k = 1; k <= n; k++) {
+            char c = s.charAt(n - k);
+            allowedSuffix[k] = allowedSuffix[k - 1] && (c == 'l' || c == 'q' || c == 'b');
         }
 
-        public String nextLine() throws IOException {
-            return bf.readLine();
+        // 预处理哈希：计算 S 的前缀哈希
+        long[] f1 = new long[n + 1];
+        long[] f2 = new long[n + 1];
+        long[] p1 = new long[n + 1];
+        long[] p2 = new long[n + 1];
+        p1[0] = 1; p2[0] = 1;
+        for (int i = 0; i < n; i++) {
+            int val = s.charAt(i) - 'a' + 1;
+            f1[i+1] = (f1[i] * BASE + val) % MOD1;
+            f2[i+1] = (f2[i] * BASE + val) % MOD2;
+            p1[i+1] = (p1[i] * BASE) % MOD1;
+            p2[i+1] = (p2[i] * BASE) % MOD2;
         }
 
-        public String next() throws IOException {
-            while (!st.hasMoreTokens()) {
-                st = new StringTokenizer(bf.readLine());
+        // 构造 s 的反转字符串 sr，并计算其前缀哈希
+        String sr = new StringBuilder(s).reverse().toString();
+        long[] r1 = new long[n + 1];
+        long[] r2 = new long[n + 1];
+        for (int i = 0; i < n; i++) {
+            int val = sr.charAt(i) - 'a' + 1;
+            r1[i+1] = (r1[i] * BASE + val) % MOD1;
+            r2[i+1] = (r2[i] * BASE + val) % MOD2;
+        }
+
+        // 枚举 k 从 0 到 n，检查是否存在一种 k 能满足条件：
+        // S 的后 k 个字符全部合法，且 S 的前 (n - k) 个字符是回文串
+        // 注意：当 (n - k) = L 时，s[0...L-1] 的反转等于 sr[n-L...n-1]
+        for (int k = 0; k <= n; k++) {
+            if (!allowedSuffix[k]) {
+                continue;
             }
-            return st.nextToken();
-        }
-
-        public char nextChar() throws IOException {
-            return next().charAt(0);
-        }
-
-        public int nextInt() throws IOException {
-            return Integer.parseInt(next());
-        }
-
-        public long nextLong() throws IOException {
-            return Long.parseLong(next());
-        }
-
-        public double nextDouble() throws IOException {
-            return Double.parseDouble(next());
-        }
-
-        public float nextFloat() throws IOException {
-            return Float.parseFloat(next());
-        }
-
-        public byte nextByte() throws IOException {
-            return Byte.parseByte(next());
-        }
-
-        public short nextShort() throws IOException {
-            return Short.parseShort(next());
-        }
-
-        public BigInteger nextBigInteger() throws IOException {
-            return new BigInteger(next());
-        }
-
-        public void println(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(String a) throws IOException {
-            bw.write(a);
-            bw.newLine();
-            return;
-        }
-
-        public void print(String a) throws IOException {
-            bw.write(a);
-            return;
-        }
-
-        public void println(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void print(BigInteger a) throws IOException {
-            bw.write(a.toString());
-            return;
-        }
-
-        public void print(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-    }
-
-    static class Pair<T, U> {
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
-        }
-    }
-
-    private static long qpow(long a, long b, long p) {
-        long res = 1L;
-        while (b > 0) {
-            if ((b & 1) == 1) {
-                res = (res * a) % p;
-            }
-            a = a * a % p;
-            b >>= 1;
-        }
-        return res;
-    }
-
-    private static long sqrt(long N) { // 二分查找快速开方
-        long lo = 1;
-        long hi = N;
-        long ans = 0;
-        while(lo <= hi) {
-            long mid = (lo + hi) / 2;
-            if (mid <= N / mid) {
-                ans = mid;
-                lo = mid + 1;
-            }  else {
-                hi = mid - 1;
+            int L = n - k;  // S 的前 L 个字符需构成回文串
+            if (isPalindromeHash(f1, f2, r1, r2, p1, p2, n, L)) {
+                return true;
             }
         }
-        return ans;
+        return false;
     }
 
-    private static void reverse(char[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            char tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
+    // 辅助方法：通过哈希判断 s[0...L-1] 是否是回文串
+    // 其中 sr 为 s 的反转字符串，通过 precomputed r1, r2 得到 sr 子串的哈希
+    private static boolean isPalindromeHash(long[] f1, long[] f2, long[] r1, long[] r2,
+                                            long[] p1, long[] p2, int n, int L) {
+        // 哈希 s[0...L-1]
+        long hashS1 = f1[L];
+        long hashS2 = f2[L];
 
-    private static void reverse(int[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            int tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
+        // 从 sr 中提取 s[0...L-1] 的反转对应部分: sr segment [n - L, n - 1]
+        long hashR1 = (r1[n] - (r1[n - L] * p1[L]) % MOD1 + MOD1) % MOD1;
+        long hashR2 = (r2[n] - (r2[n - L] * p2[L]) % MOD2 + MOD2) % MOD2;
 
-    private static void reverse(long[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            long tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
+        return hashS1 == hashR1 && hashS2 == hashR2;
     }
-
-    static Read sc = new Read();
-    private static final int Mod = (int) 1e9 + 7;
-    private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
-        while (T-- > 0) {
-            solve();
-            // sc.bw.flush();
+        // 使用 BufferedReader 提高大数据量的输入效率
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        // 对每组数据进行判断
+        for (int t = 0; t < T; t++) {
+            String s = br.readLine().trim();
+            sb.append(canTransform(s) ? "Yes" : "No").append("\n");
         }
-        sc.bw.flush();
-        sc.bw.close();
-    }
-
-    private static String[] ss;
-    private static String s;
-    private static char[] cs;
-    private static List<Integer>[] g;
-    private static int m, n;
-
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        int[][] grid = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            ss = sc.nextLine().split(" ");
-            for (int j = 0; j < n; j++) {
-                grid[i][j] = Integer.parseInt(ss[j]);
-            }
-            Arrays.sort(grid[i]);
-        }
-        tmp = new ArrayList<>();
-        tmp.add(grid[0][0]);
-        ans = 1;
-        dfs(grid, 1);
-        sc.println(ans);
-    }
-
-    static List<Integer> tmp;
-    static int ans;
-    private static void dfs(int[][] grid, int i) {
-        if (i == n) {
-            return;
-        }
-        ArrayList<Integer> list = new ArrayList<>();
-        int d = 0;
-        for (int j = 0; j < n; j++) {
-            if (list.size() == i + 1) {
-                break;
-            }
-            if ((d == tmp.size() || grid[i][j] >= tmp.get(d)) && (d - 1 < 0 || grid[i][j] >= tmp.get(d - 1))) {
-                list.add(grid[i][j]);
-                d++;
-            }
-        }
-        if (list.size() == i + 1) {
-            ans = i + 1;
-            tmp = list;
-            dfs(grid, i + 1);
-        }
+        System.out.print(sb);
     }
 }

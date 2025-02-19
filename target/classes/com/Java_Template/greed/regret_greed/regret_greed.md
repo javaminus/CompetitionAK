@@ -87,7 +87,8 @@ class Solution {
 
 ## [小红的双生数](https://ac.nowcoder.com/acm/contest/99784/D)
 
-小红定义一个正整数是“双生数”，当且仅当该正整数的每个数位的相邻数位中，恰好有一个和该数位的数字相同。   现在小红拿到了一个正整数 x，她希望你求出不小于 x 的最小“双生数”。 
+> 题意：小红定义一个正整数是“双生数”，当且仅当该正整数的每个数位的相邻数位中，恰好有一个和该数位的数字相同。   现在小红拿到了一个正整数 x，她希望你求出不小于 x 的最小“双生数”。 
+>
 
 ```java
     private static int idx;
@@ -143,4 +144,66 @@ class Solution {
 ```
 
 
+
+## [1642. 可以到达的最远建筑](https://leetcode.cn/problems/furthest-building-you-can-reach/)(贪心)
+
+> 题意：有一堆建筑`height`，你有`a`个梯子，`b`个砖块，求最远可以到达的建筑下标。
+>
+> 梯子：可以从任意`height[i]` 跳到`height[i - 1]`。
+>
+> 砖块：需要往上跳多少就要垫多少砖块。
+
+```java
+class Solution {
+    public int furthestBuilding(int[] heights, int bricks, int ladders) {
+        // 尽量让梯子作用于落差最大的地方
+        int n = heights.length;
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        long sum = 0;
+        for (int i = 1; i < n; i++) {
+            int d = heights[i] - heights[i - 1];
+            if (d > 0) {
+                pq.offer(d);
+                if (pq.size() > ladders) {
+                    sum += pq.poll();
+                }
+                if (sum > bricks) {
+                    return i - 1;
+                }
+            }
+        }
+        return n - 1;
+    }
+}
+```
+
+## [630. 课程表 III](https://leetcode.cn/problems/course-schedule-iii/) （反悔贪心）
+
+> 题意：给你一个数组 `courses` ，其中 `courses[i] = [durationi, lastDayi]` 表示第 `i` 门课将会 **持续** 上 `durationi` 天课，并且必须在不晚于 `lastDayi` 的时候完成。 
+>
+> 返回你最多可以修读的课程数目。
+
+```java
+class Solution {
+    public int scheduleCourse(int[][] courses) {
+        Arrays.sort(courses, (a, b) -> a[1] - b[1]); // 按照 lastDay 从小到大排序
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a); // 最大堆
+        int day = 0; // 已消耗时间
+        for (int[] c : courses) {
+            int duration = c[0];
+            int lastDay = c[1];
+            if (day + duration <= lastDay) { // 没有超过 lastDay，直接学习
+                day += duration;
+                pq.offer(duration);
+            } else if (!pq.isEmpty() && duration < pq.peek()) { // 该课程的时间比之前的最长时间要短
+                // 反悔，撤销之前 duration 最长的课程，改为学习该课程
+                // 节省出来的时间，能在后面上完更多的课程
+                day -= pq.poll() - duration;
+                pq.offer(duration);
+            }
+        }
+        return pq.size();
+    }
+}
+```
 
