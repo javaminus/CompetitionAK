@@ -96,6 +96,14 @@ public class MyKmp {
 }
 ```
 
+## [3455. 最短匹配子字符串](https://leetcode.cn/problems/shortest-matching-substring/)（KMP + 三指针）
+
+> 题意：给你一个字符串 `s` 和一个模式字符串 `p`，其中 `p` **恰好** 包含 **两个** `'*'`  字符。
+>
+> 返回 `s` 中与 `p` 匹配的 **最短** 子字符串的长度。如果没有这样的子字符串，返回 -1。
+
+
+
 ## [马拉车](https://leetcode.cn/problems/longest-palindromic-substring/solutions/1304330/zui-chang-hui-wen-zi-chuan-by-qin-fen-de-u233/)
 
 > 马拉车算法（Manacher's Algorithm）是一种高效的字符串处理算法，其核心作用是**在给定的字符串中寻找最长的回文子串并确定其长度**。该算法由一个叫Manacher的人在1975年发明，它的主要贡献在于将寻找最长回文子串的时间复杂度降低到了线性级别，即O(N)，其中N是字符串的长度。 
