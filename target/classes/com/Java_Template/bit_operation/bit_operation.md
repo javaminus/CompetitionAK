@@ -2272,5 +2272,128 @@ class Solution {
 }
 ```
 
+## 【15届蓝桥杯省赛-最大异或节点】
 
+> 题意：小蓝有一棵树，树中包含 `N` 个结点，编号为 `0, 1, 2, · · · , N − 1` ，其中每个结点上都有一个整数` Xi` 。他可以从树中任意选择两个不直接相连的结点 a 、b并获得分数 `Xa ⊕ Xb` ，其中 ⊕ 表示按位异或操作。
+>
+> 请问小蓝可以获得的最大分数是多少？
+
+```java
+public class Main {
+    static Read sc = new Read();
+    private static final int Mod = (int) 1e9 + 7;
+    private static int T = 1;
+
+    public static void main(String[] args) throws IOException {
+        // int T = sc.nextInt();
+        while (T-- > 0) {
+            solve();
+            // sc.bw.flush();
+        }
+        sc.bw.flush();
+        sc.bw.close();
+    }
+
+    private static String[] ss;
+    private static String s;
+    private static char[] cs;
+    private static List<Integer>[] g;
+    private static int m, n;
+
+
+    // 异或题目，经典的一眼01字典树
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        ss = sc.nextLine().split(" ");
+        int[] parent = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = Integer.parseInt(ss[i]);
+        }
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n; i++) {
+            if (parent[i] != -1) {
+                g[parent[i]].add(i);
+                g[i].add(parent[i]);
+            }
+        }
+        Trie root = new Trie();
+        for (int x : nums) {
+            root.insert(x);
+        }
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            for (int x : g[i]) {
+                root.remove(nums[x]);
+            }
+            res = Math.max(res, root.query(nums[i]));
+            for (int x : g[i]) { // 恢复
+                root.insert(nums[x]);
+            }
+        }
+        sc.println(res);
+    }
+    
+    static class Trie{
+        Trie[] node;
+        int cnt;
+        public Trie(){
+            node = new Trie[2];
+            cnt = 0;
+        }
+        private void insert(int x) {
+            Trie root = this;
+            for (int i = 31; i >= 0; i--) {
+                int bit = (x >>> i) & 1;
+                if (root.node[bit] == null) {
+                    root.node[bit] = new Trie();
+                }
+                root = root.node[bit];
+                root.cnt++;
+            }
+        }
+
+        public void remove(int x) {
+            Trie root = this;
+            for (int i = 31; i >= 0; i--) {
+                int bit = (x >>> i) & 1;
+                if (root.node[bit] == null) {
+                    return;
+                }
+                root.node[bit].cnt--;
+                if (root.node[bit].cnt == 0) {
+                    root.node[bit] = null;
+                    return;
+                }
+                root = root.node[bit];
+            }
+        }
+
+        public int query(int x) {
+            Trie root = this;
+            int res = 0;
+            for (int i = 31; i >= 0; i--) {
+                int bit = (x >>> i) & 1;
+                int need = 1 - bit;
+                if (root.node[need] != null && root.node[need].cnt > 0) {
+                    res |= (1 << i);
+                    root = root.node[need];
+                }else{
+                    if (root.node[bit] != null && root.node[bit].cnt > 0) {
+                        root = root.node[bit];
+                    }else{
+                        return -1;
+                    }
+                }
+            }
+            return res;
+        }
+    }
+}
+```
 
