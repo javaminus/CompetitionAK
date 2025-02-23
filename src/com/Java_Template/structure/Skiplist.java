@@ -1,3 +1,5 @@
+package com.Java_Template.structure;
+
 class Skiplist {
     static final int LEVEL_LIMIT = 32;
     static final int FACTOR = 2;
