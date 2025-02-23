@@ -426,5 +426,80 @@ class Solution {
 }
 ```
 
+## [3463. 判断操作后字符串中的数字是否相等 II](https://leetcode.cn/problems/check-if-digits-are-equal-in-string-after-operations-ii/)
 
+> 题意：给你一个由数字组成的字符串 `s` 。重复执行以下操作，直到字符串恰好包含 **两个** 数字：
+>
+> - 从第一个数字开始，对于 `s` 中的每一对连续数字，计算这两个数字的和 **模** 10。
+> - 用计算得到的新数字依次替换 `s` 的每一个字符，并保持原本的顺序。
+>
+> 如果 `s` 最后剩下的两个数字相同，则返回 `true` 。否则，返回 `false`。
+
+```java
+class Solution {
+	// 这题分析出每一位就是乘以c(n, i)的组合数很简单，难的是如何将组合数学模10，由于10是一个合数，所以不能用费马小定理：如果mod是质数，则 a ^ (Mod) = a(% Mod) 既 a ^ (Mod - 1) = 1(% Mod)，两边再除以a，有 a ^ (Mod - 2) = 1^(-a)(% Mod)，也就是最常见的费马小定理求逆元：1/a的逆元就是pow(a, mod - 2) (% Mod)
+    // 但是这个题的Mod = 10，不是质数，所以不能使用费马小定理；还有一个定理可以求逆元，欧拉定理：如果a与Mod互质，有a ^ (Mod的欧拉函数) = 1 （% Mod）其中Mod的欧拉函数就是小于Mod的质数的个数，所以10的欧拉函数就是4，然后等式两边同时除以a，有a ^ (3) = 1/a (% Mod)，这样就有invF(mx) = pow(f(mx),3),然后使用递推式：invF(i) = invF(i + 1) * i
+    private static final int Mod = 10;
+    private static final int MX = (int) 1e5;
+    private static final int[] f = new int[MX + 1]; // i的阶乘
+    private static final int[] invF = new int[MX + 1];  // i的阶乘的逆元
+    private static final int[] p2 = new int[MX + 1]; // i中2因子的个数
+    private static final int[] p5 = new int[MX + 1]; // i中5因子的个数
+    
+    static {
+        f[0] = 1;
+        for (int i = 1; i <= MX; i++) {
+            int x = i;
+            int e2 = Integer.numberOfTrailingZeros(x); // 计算x末尾0的个数
+            x >>= e2;
+            int e5 = 0;
+            while (x % 5 == 0) {
+                e5++;
+                x /= 5;
+            }
+            f[i] = f[i - 1] * x % Mod;
+            p2[i] = p2[i - 1] + e2;
+            p5[i] = p5[i - 1] + e5;
+        }
+        invF[MX] = qpow(f[MX], 3);
+        for (int i = MX; i > 0; i--) {
+            int x = i;
+            x >>= Integer.numberOfTrailingZeros(x);
+            while (x % 5 == 0) {
+                x /= 5;
+            }
+            invF[i - 1] = invF[i] * x % Mod;
+        }
+    }
+
+    private static int qpow(int a, int b) {
+        int ans = 1;
+        while (b > 0) {
+            if ((b & 1) == 1) {
+                ans = (ans * a) % Mod;
+            }
+            b >>= 1;
+            a = (a * a) % Mod;
+        }
+        return ans;
+    }
+
+    private int comb(int n, int k) {
+        // 由于每项都 < 10，所以无需中途取模
+        return f[n] * invF[k] * invF[n - k] * qpow(2, p2[n] - p2[k] - p2[n - k]) * qpow(5, p5[n] - p5[k] - p5[n - k]) % Mod;
+    }
+    
+    public boolean hasSameDigits(String s) {
+        return solve(s.substring(0, s.length() - 1)) == solve(s.substring(1));
+    }
+
+    private int solve(String s) {
+        int res = 0;
+        for (int i = 0; i < s.length(); i++) {
+            res += comb(s.length() - 1, i) * (s.charAt(i) - '0');
+        }
+        return res % Mod;
+    }
+}
+```
 
