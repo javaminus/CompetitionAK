@@ -815,3 +815,13 @@ class Solution {
 }
 ```
 
+## [【排列计数】](https://ac.nowcoder.com/acm/contest/102303/D)
+
+![1740320740313](assets/1740320740313.png)
+
+```java
+
+```
+
+ 
+
