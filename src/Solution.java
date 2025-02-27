@@ -1,40 +1,45 @@
-import java.util.ArrayList;
-import java.util.List;
-
-class BrowserHistory {
-
-    List<String> list = new ArrayList<>();
-    int cur = 0, size = 0;
-    public BrowserHistory(String homepage) {
-        list.add(homepage);
-        size++;
+class TextEditor {
+    StringBuilder left = new StringBuilder();
+    StringBuilder right = new StringBuilder();
+    
+    public TextEditor() {
+        
     }
 
-    public void visit(String url) {
-        size = cur + 2;
-        if (list.size() < size) {
-            list.add(url);
-        } else {
-            list.set(cur + 1, url);
+    public void addText(String text) {
+        left.append(text);
+    }
+
+    public int deleteText(int k) {
+        k = Math.min(k, left.length());
+        left.setLength(left.length() - k);
+        return k;
+    }
+
+    public String cursorLeft(int k) {
+        while (k > 0 && left.length() > 0) {
+            right.append(left.charAt(left.length() - 1));
+            left.deleteCharAt(left.length() - 1);
+            k--;
         }
-        cur++;
+        return left.substring(Math.max(left.length() - 10, 0));
     }
 
-    public String back(int steps) {
-        cur = Math.max(0, cur - steps);
-        return list.get(cur);
-    }
-
-    public String forward(int steps) {
-        cur = Math.min(size - 1, cur + steps);
-        return list.get(cur);
+    public String cursorRight(int k) {
+        while (k > 0 && right.length() > 0) {
+            left.append(right.charAt(right.length() - 1));
+            right.deleteCharAt(right.length() - 1);
+            k--;
+        }
+        return right.substring(Math.max(left.length() - 10, 0));
     }
 }
 
 /**
- * Your BrowserHistory object will be instantiated and called as such:
- * BrowserHistory obj = new BrowserHistory(homepage);
- * obj.visit(url);
- * String param_2 = obj.back(steps);
- * String param_3 = obj.forward(steps);
+ * Your TextEditor object will be instantiated and called as such:
+ * TextEditor obj = new TextEditor();
+ * obj.addText(text);
+ * int param_2 = obj.deleteText(k);
+ * String param_3 = obj.cursorLeft(k);
+ * String param_4 = obj.cursorRight(k);
  */
