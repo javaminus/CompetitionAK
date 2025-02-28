@@ -821,7 +821,205 @@ class Solution {
 
 ```java
 
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
+    public static PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
+
+    public static int nextInt() throws IOException {
+        in.nextToken();
+        return (int) in.nval;
+    }
+
+    //如果数字太大会有精度丢失
+    public static long nextLong() throws IOException {
+        in.nextToken();
+        return (long) in.nval;
+    }
+
+    //如果数字太大会有精度丢失
+    public static double nextDouble() throws IOException {
+        in.nextToken();
+        return in.nval;
+    }
+
+    //字符串不能以数字开头，字符串不能是特殊符号，空格(| _ % ^..... )
+    public static String next() throws IOException {
+        in.nextToken();
+        return in.sval;
+    }
+    static long lcm(int a, int b) {
+        return (long)a * b / gcd(a,b);
+    }
+    static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    public static long pow(long x, int n) {
+        long ans = 1;
+        while (n > 0) {
+            if ((n & 1) == 1) {
+                ans = ans * x % MOD;
+            }
+            x = x * x % MOD;
+            n >>= 1;
+        }
+        return ans;
+    }
+
+    static final int MOD = 998244353;
+    static final int N = 200010;
+    static int[] arr = new int[N];
+    static int[] tree = new int[N];
+    static long[] fac = new long[N];
+    static {
+        fac[0] = 1;
+        for (int i = 1; i < N; i++) {
+            fac[i] = fac[i - 1] * i % MOD;
+        }
+    }
+    static void add(int n,int i){
+        while(i <= n){
+            tree[i]++;
+            i += i & -i;
+        }
+    }
+    static int query(int i){
+        int res = 0;
+        while(i > 0){
+            res += tree[i];
+            i -= i & -i;
+        }
+        return res;
+    }
+    static void solve() throws IOException {
+        int t = nextInt();
+        while (t-- > 0) {
+            int n = nextInt();
+            int pre = n;
+            boolean flag = true;
+            for (int i = 0; i < n; i++) {
+                arr[i] = nextInt();
+                if(arr[i] > pre){
+                    flag = false;
+                }
+                pre = arr[i];
+            }
+            if(flag && arr[n - 1] == 1){
+                if(arr[0] == 1){
+                    pw.println(fac[n - 1]);
+                }else{
+                    Arrays.fill(tree, 1,n+1,0);
+                    add(n,arr[0]);
+                    long ans = 1;
+                    for (int i = 1; i < n; i++) {
+                        if(arr[i] == 1){
+                            ans = ans * fac[n - i - 1] % MOD;
+                            break;
+                        }
+                        if(arr[i] < arr[i-1]){
+                            add(n,arr[i]);
+                            continue;
+                        } 
+                        
+                        int res = n - arr[i] - (query(n) - query(arr[i])); // 大于当前数字arr[i]的数字个数 - 已经被使用的大于arr[i]的数字个数
+                        ans = ans * res % MOD;
+                        add(n,arr[i] + 1);
+                    }
+                    pw.println(ans);
+                }
+            }else{
+                pw.println(0);
+            }
+        }
+    }
+    public static void main(String[] args) throws IOException{
+        solve();
+        pw.flush();
+    }
+}
 ```
 
- 
+##  【一边更新一边修改】（淘天笔试题）
+
+![1740660307025](/assets/1740660307025.png)
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class FenwickTree {
+        private int[] tree;
+        private int n;
+
+        public FenwickTree(int n) {
+            this.n = n;
+            tree = new int[n + 1];
+        }
+
+        // Increase value at index i (1-indexed) by delta.
+        public void update(int i, int delta) {
+            while (i <= n) {
+                tree[i] += delta;
+                i += i & -i;
+            }
+        }
+
+        // Query sum from 1 to i (inclusive)
+        public int query(int i) {
+            int sum = 0;
+            while (i > 0) {
+                sum += tree[i];
+                i -= i & -i;
+            }
+            return sum;
+        }
+
+        // Query sum in range [l, r]
+        public int query(int l, int r) {
+            return query(r) - query(l - 1);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        // Fast input
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        int n = Integer.parseInt(line.trim());
+        int[] a = new int[n];
+        String[] parts = br.readLine().trim().split("\\s+");
+        for (int i = 0; i < n; i++) {
+            a[i] = Integer.parseInt(parts[i]);
+        }
+
+        int[] prefix = new int[n];
+        int[] suffix = new int[n];
+        HashMap<Integer, Integer> freqPrefix = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int cnt = freqPrefix.getOrDefault(a[i], 0) + 1;
+            freqPrefix.put(a[i], cnt);
+            prefix[i] = cnt;
+        }
+        HashMap<Integer, Integer> freqSuffix = new HashMap<>();
+        for (int i = n - 1; i >= 0; i--) {
+            int cnt = freqSuffix.getOrDefault(a[i], 0) + 1;
+            freqSuffix.put(a[i], cnt);
+            suffix[i] = cnt;
+        }
+        FenwickTree bit = new FenwickTree(n); // 一个数最多出现n次
+        long answer = 0;
+        for (int j = 0; j < n; j++) { // 寻找的是前面有多少个i比当前的j出现频次多
+            if (suffix[j] < n) {
+                answer += bit.query(suffix[j] + 1, n);
+            }
+            bit.update(prefix[j], 1);
+        }
+        System.out.println(answer);
+    }
+}
+```
 

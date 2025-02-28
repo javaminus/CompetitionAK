@@ -820,8 +820,146 @@ class Solution {
 ![1740320740313](assets/1740320740313.png)
 
 ```java
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        int pre = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            if (nums[i] > pre) {
+                sc.println(0);
+                return;
+            }
+            pre = nums[i];
+        }
+        BIT bit = new BIT(n);
+        long ans = 1;
+        bit.update(nums[0], 1);
+        for (int i = 1; i < n; i++) {
+            if (nums[i] < nums[i - 1]) {
+                bit.update(nums[i], 1);
+                continue;
+            }
+            // nums[i] == nums[i - 1]
+            long res = n - nums[i] - bit.query(nums[i] + 1, n);
+            ans = res * ans % Mod;
+            bit.update(nums[i] + 1, 1);
+        }
+        sc.println(ans);
+    }
+    
+    static class BIT{
+        int[] treeArr;
+        int n;
 
+        public BIT(int n) {
+            this.n = n;
+            treeArr = new int[n + 1];
+        }
+
+        private int lowbit(int x) {
+            return x & (-x);
+        }
+        private void update(int x, int delta) {
+            while (x <= n) {
+                treeArr[x] += delta;
+                x += lowbit(x);
+            }
+        }
+
+        private int query(int x) { // 查询区间[0, x]
+            int res = 0;
+            while (x > 0) {
+                res += treeArr[x];
+                x -= lowbit(x);
+            }
+            return res;
+        }
+
+        private int query(int l, int r) {
+            return query(r) - query(l - 1);
+        }
+    }
 ```
 
- 
+##  【一边更新一边修改】（淘天笔试题）
+
+![1740660307025](/assets/1740660307025.png)
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static class FenwickTree {
+        private int[] tree;
+        private int n;
+
+        public FenwickTree(int n) {
+            this.n = n;
+            tree = new int[n + 1];
+        }
+
+        // Increase value at index i (1-indexed) by delta.
+        public void update(int i, int delta) {
+            while (i <= n) {
+                tree[i] += delta;
+                i += i & -i;
+            }
+        }
+
+        // Query sum from 1 to i (inclusive)
+        public int query(int i) {
+            int sum = 0;
+            while (i > 0) {
+                sum += tree[i];
+                i -= i & -i;
+            }
+            return sum;
+        }
+
+        // Query sum in range [l, r]
+        public int query(int l, int r) {
+            return query(r) - query(l - 1);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        // Fast input
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        int n = Integer.parseInt(line.trim());
+        int[] a = new int[n];
+        String[] parts = br.readLine().trim().split("\\s+");
+        for (int i = 0; i < n; i++) {
+            a[i] = Integer.parseInt(parts[i]);
+        }
+
+        int[] prefix = new int[n];
+        int[] suffix = new int[n];
+        HashMap<Integer, Integer> freqPrefix = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int cnt = freqPrefix.getOrDefault(a[i], 0) + 1;
+            freqPrefix.put(a[i], cnt);
+            prefix[i] = cnt;
+        }
+        HashMap<Integer, Integer> freqSuffix = new HashMap<>();
+        for (int i = n - 1; i >= 0; i--) {
+            int cnt = freqSuffix.getOrDefault(a[i], 0) + 1;
+            freqSuffix.put(a[i], cnt);
+            suffix[i] = cnt;
+        }
+        FenwickTree bit = new FenwickTree(n); // 一个数最多出现n次
+        long answer = 0;
+        for (int j = 0; j < n; j++) { // 寻找的是前面有多少个i比当前的j出现频次多
+            if (suffix[j] < n) {
+                answer += bit.query(suffix[j] + 1, n);
+            }
+            bit.update(prefix[j], 1);
+        }
+        System.out.println(answer);
+    }
+}
+```
 
