@@ -820,127 +820,67 @@ class Solution {
 ![1740320740313](assets/1740320740313.png)
 
 ```java
-
-
-import java.io.*;
-import java.util.*;
-
-public class Main {
-    public static StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-    public static PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
-
-    public static int nextInt() throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-
-    //如果数字太大会有精度丢失
-    public static long nextLong() throws IOException {
-        in.nextToken();
-        return (long) in.nval;
-    }
-
-    //如果数字太大会有精度丢失
-    public static double nextDouble() throws IOException {
-        in.nextToken();
-        return in.nval;
-    }
-
-    //字符串不能以数字开头，字符串不能是特殊符号，空格(| _ % ^..... )
-    public static String next() throws IOException {
-        in.nextToken();
-        return in.sval;
-    }
-    static long lcm(int a, int b) {
-        return (long)a * b / gcd(a,b);
-    }
-    static int gcd(int a, int b) {
-        return b == 0 ? a : gcd(b, a % b);
-    }
-
-    public static long pow(long x, int n) {
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        int pre = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+            if (nums[i] > pre) {
+                sc.println(0);
+                return;
+            }
+            pre = nums[i];
+        }
+        BIT bit = new BIT(n);
         long ans = 1;
-        while (n > 0) {
-            if ((n & 1) == 1) {
-                ans = ans * x % MOD;
+        bit.update(nums[0], 1);
+        for (int i = 1; i < n; i++) {
+            if (nums[i] < nums[i - 1]) {
+                bit.update(nums[i], 1);
+                continue;
             }
-            x = x * x % MOD;
-            n >>= 1;
+            // nums[i] == nums[i - 1]
+            long res = n - nums[i] - bit.query(nums[i] + 1, n);
+            ans = res * ans % Mod;
+            bit.update(nums[i] + 1, 1);
         }
-        return ans;
+        sc.println(ans);
     }
+    
+    static class BIT{
+        int[] treeArr;
+        int n;
 
-    static final int MOD = 998244353;
-    static final int N = 200010;
-    static int[] arr = new int[N];
-    static int[] tree = new int[N];
-    static long[] fac = new long[N];
-    static {
-        fac[0] = 1;
-        for (int i = 1; i < N; i++) {
-            fac[i] = fac[i - 1] * i % MOD;
+        public BIT(int n) {
+            this.n = n;
+            treeArr = new int[n + 1];
         }
-    }
-    static void add(int n,int i){
-        while(i <= n){
-            tree[i]++;
-            i += i & -i;
+
+        private int lowbit(int x) {
+            return x & (-x);
         }
-    }
-    static int query(int i){
-        int res = 0;
-        while(i > 0){
-            res += tree[i];
-            i -= i & -i;
-        }
-        return res;
-    }
-    static void solve() throws IOException {
-        int t = nextInt();
-        while (t-- > 0) {
-            int n = nextInt();
-            int pre = n;
-            boolean flag = true;
-            for (int i = 0; i < n; i++) {
-                arr[i] = nextInt();
-                if(arr[i] > pre){
-                    flag = false;
-                }
-                pre = arr[i];
-            }
-            if(flag && arr[n - 1] == 1){
-                if(arr[0] == 1){
-                    pw.println(fac[n - 1]);
-                }else{
-                    Arrays.fill(tree, 1,n+1,0);
-                    add(n,arr[0]);
-                    long ans = 1;
-                    for (int i = 1; i < n; i++) {
-                        if(arr[i] == 1){
-                            ans = ans * fac[n - i - 1] % MOD;
-                            break;
-                        }
-                        if(arr[i] < arr[i-1]){
-                            add(n,arr[i]);
-                            continue;
-                        } 
-                        
-                        int res = n - arr[i] - (query(n) - query(arr[i])); // 大于当前数字arr[i]的数字个数 - 已经被使用的大于arr[i]的数字个数
-                        ans = ans * res % MOD;
-                        add(n,arr[i] + 1);
-                    }
-                    pw.println(ans);
-                }
-            }else{
-                pw.println(0);
+        private void update(int x, int delta) {
+            while (x <= n) {
+                treeArr[x] += delta;
+                x += lowbit(x);
             }
         }
+
+        private int query(int x) { // 查询区间[0, x]
+            int res = 0;
+            while (x > 0) {
+                res += treeArr[x];
+                x -= lowbit(x);
+            }
+            return res;
+        }
+
+        private int query(int l, int r) {
+            return query(r) - query(l - 1);
+        }
     }
-    public static void main(String[] args) throws IOException{
-        solve();
-        pw.flush();
-    }
-}
 ```
 
 ##  【一边更新一边修改】（淘天笔试题）

@@ -1,281 +1,133 @@
 import java.io.*;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    static int n, s;
+    static int[] a;
+    static ArrayList<Integer>[] g;
+    static int[] in, out;
+    static int timer = 0;
+    // posOfValue[x] 表示生命力为 x 的结点在 Euler Tour 中的位置
+    static int[] posOfValue;
 
-    static class Read {
-        BufferedReader bf;
-        StringTokenizer st;
-        BufferedWriter bw;
-
-        public Read() {
-            bf = new BufferedReader(new InputStreamReader(System.in));
-            st = new StringTokenizer("");
-            bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] parts = br.readLine().split("\\s+");
+        n = Integer.parseInt(parts[0]);
+        s = Integer.parseInt(parts[1]);
+        a = new int[n+1];
+        parts = br.readLine().split("\\s+");
+        for (int i = 1; i <= n; i++) {
+            a[i] = Integer.parseInt(parts[i-1]);
         }
 
-        public String nextLine() throws IOException {
-            return bf.readLine();
+        // 构造树
+        g = new ArrayList[n+1];
+        for (int i = 1; i <= n; i++) {
+            g[i] = new ArrayList<>();
+        }
+        for (int i = 1; i <= n-1; i++) {
+            parts = br.readLine().split("\\s+");
+            int u = Integer.parseInt(parts[0]);
+            int v = Integer.parseInt(parts[1]);
+            g[u].add(v);
+            g[v].add(u);
         }
 
-        public String next() throws IOException {
-            while (!st.hasMoreTokens()) {
-                st = new StringTokenizer(bf.readLine());
+        in = new int[n+1];
+        out = new int[n+1];
+        posOfValue = new int[n+1]; // 注意：a的取值范围在 1~n 且各不相同
+
+        // DFS 生成 Euler Tour (以 s 为根)
+        dfs(s, -1);
+
+        // 构造数组 nodes，存放所有结点 id 按照 a[id] 的值升序排列
+        Integer[] nodes = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            nodes[i] = i+1;
+        }
+        Arrays.sort(nodes, Comparator.comparingInt(o -> a[o]));
+
+        // 初始化 BIT，大小为 n，indices 范围为 [1,n]
+        BIT bit = new BIT(n);
+
+        long ans = 0;
+
+        // 对每个结点按照生命力升序处理，保证在处理一个结点时，其子树中比其生命力小的结点已经加入 BIT
+        for (int id : nodes) {
+            int L = in[id], R = out[id];
+            // 查询 BIT，在 Euler Tour 区间 [L+1, R] 中已经出现的结点个数
+            // 注意：区间 [L+1, R] 表示 id 自身之外的子树结点
+            int count = bit.query(R) - bit.query(L);
+            // penalty 为满足：d 是 a[id] 的因子（且 d < a[id]）且该因子结点在 id 的子树中的个数
+            int penalty = 0;
+            List<Integer> divisors = getDivisors(a[id]);
+            for (int d : divisors) {
+                if(d < a[id]) {
+                    int pos = posOfValue[d];
+                    // 判断节点（生命力为 d）的 Euler Tour 位置是否在 id 的子树中
+                    if(pos > L && pos <= R) {
+                        penalty++;
+                    }
+                }
             }
-            return st.nextToken();
+            ans += (count - penalty);
+            // 将当前结点加入 BIT，便于后续查询
+            bit.update(in[id], 1);
         }
-
-        public char nextChar() throws IOException {
-            return next().charAt(0);
-        }
-
-        public int nextInt() throws IOException {
-            return Integer.parseInt(next());
-        }
-
-        public long nextLong() throws IOException {
-            return Long.parseLong(next());
-        }
-
-        public double nextDouble() throws IOException {
-            return Double.parseDouble(next());
-        }
-
-        public float nextFloat() throws IOException {
-            return Float.parseFloat(next());
-        }
-
-        public byte nextByte() throws IOException {
-            return Byte.parseByte(next());
-        }
-
-        public short nextShort() throws IOException {
-            return Short.parseShort(next());
-        }
-
-        public BigInteger nextBigInteger() throws IOException {
-            return new BigInteger(next());
-        }
-
-        public void println(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(String a) throws IOException {
-            bw.write(a);
-            bw.newLine();
-            return;
-        }
-
-        public void print(String a) throws IOException {
-            bw.write(a);
-            return;
-        }
-
-        public void println(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void print(BigInteger a) throws IOException {
-            bw.write(a.toString());
-            return;
-        }
-
-        public void print(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
+        System.out.println(ans);
     }
 
-    static class Pair<T, U> {
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
+    // 计算结点 id 的 Euler Tour 入时间和出时间
+    static void dfs(int u, int parent) {
+        in[u] = ++timer;
+        // 将该结点的生命力在 posOfValue 中记录下 Euler Tour 位置
+        posOfValue[a[u]] = in[u];
+        for (int v : g[u]) {
+            if(v == parent) continue;
+            dfs(v, u);
         }
+        out[u] = timer;
     }
 
-    private static long qpow(long a, long b, long p) {
-        long res = 1L;
-        while (b > 0) {
-            if ((b & 1) == 1) {
-                res = (res * a) % p;
+    // 获取一个数的所有除数，不包括该数本身
+    static List<Integer> getDivisors(int x) {
+        List<Integer> res = new ArrayList<>();
+        for (int i = 1; i*i <= x; i++) {
+            if(x % i == 0) {
+                res.add(i);
+                if(i * i != x) {
+                    res.add(x / i);
+                }
             }
-            a = a * a % p;
-            b >>= 1;
         }
         return res;
     }
 
-    private static long sqrt(long N) { // 二分查找快速开方
-        long lo = 1;
-        long hi = N;
-        long ans = 0;
-        while(lo <= hi) {
-            long mid = (lo + hi) / 2;
-            if (mid <= N / mid) {
-                ans = mid;
-                lo = mid + 1;
-            }  else {
-                hi = mid - 1;
-            }
-        }
-        return ans;
-    }
-
-    private static void reverse(char[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            char tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
-
-    private static void reverse(int[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            int tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
-
-    private static void reverse(long[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            long tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
-
-    static Read sc = new Read();
-    private static final int Mod = 998244353;
-    private static int T = 1;
-
-    public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
-        while (T-- > 0) {
-            solve();
-            // sc.bw.flush();
-        }
-        sc.bw.flush();
-        sc.bw.close();
-    }
-
-    private static String[] ss;
-    private static String s;
-    private static char[] cs;
-    private static List<Integer>[] g;
-    private static int m, n;
-
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        ss = sc.nextLine().split(" ");
-        int[] nums = new int[n];
-        int pre = Integer.MAX_VALUE;
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
-            if (nums[i] > pre) {
-                sc.println(0);
-                return;
-            }
-            pre = nums[i];
-        }
-        BIT bit = new BIT(n);
-        long ans = 1;
-        bit.update(nums[0], 1);
-        for (int i = 1; i < n; i++) {
-            if (nums[i] < nums[i - 1]) {
-                bit.update(nums[i], 1);
-                continue;
-            }
-            // nums[i] == nums[i - 1]
-            long res = n - nums[i] - bit.query(nums[i] + 1, n);
-            ans = res * ans % Mod;
-            bit.update(nums[i] + 1, 1);
-        }
-        sc.println(ans);
-    }
-    
-    static class BIT{
-        int[] treeArr;
+    // 树状数组（Fenwick Tree）实现，索引从 1 开始
+    static class BIT {
         int n;
+        int[] tree;
 
-        public BIT(int n) {
+        BIT(int n) {
             this.n = n;
-            treeArr = new int[n + 1];
+            tree = new int[n+1];
         }
 
-        private int lowbit(int x) {
-            return x & (-x);
-        }
-        private void update(int x, int delta) {
-            while (x <= n) {
-                treeArr[x] += delta;
-                x += lowbit(x);
+        // 将 idx 位置加上 val
+        void update(int idx, int val) {
+            for(; idx <= n; idx += idx & -idx) {
+                tree[idx] += val;
             }
         }
 
-        private int query(int x) { // 查询区间[0, x]
-            int res = 0;
-            while (x > 0) {
-                res += treeArr[x];
-                x -= lowbit(x);
+        // 求前缀和 query(1...idx)
+        int query(int idx) {
+            int sum = 0;
+            for(; idx > 0; idx -= idx & -idx) {
+                sum += tree[idx];
             }
-            return res;
-        }
-
-        private int query(int l, int r) {
-            return query(r) - query(l - 1);
+            return sum;
         }
     }
-
-
-
-
 }
