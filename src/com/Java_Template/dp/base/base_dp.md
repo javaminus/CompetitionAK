@@ -1,3 +1,73 @@
+## [【牛客周赛E dp好题】](https://ac.nowcoder.com/acm/contest/102896/E)
+
+![1740916150495](assets/1740916150495.png)
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // 读取藏宝库格子的数量 n 和移动次数 k
+        int n = sc.nextInt();
+        int k = sc.nextInt();
+        int[] a = new int[n];
+        // 读取每个格子的权值
+        for (int i = 0; i < n; i++){
+            a[i] = sc.nextInt();
+        }
+        
+        // 定义一个非常小的数，用作负无穷（避免直接使用真正的 -∞）
+        long INF = Long.MIN_VALUE / 2;
+        // dp[i] 表示正好在某次移动后到达第 i 格时获得的最大金币数
+        // 注意：藏宝库格子编号为 1 到 n（初始位置 0 表示在藏宝阁外）
+        long[] dp = new long[n + 1];
+        Arrays.fill(dp, INF);
+        
+        // 第一次移动：从位置 0（藏宝阁外）移动到 1~6 格（若存在）
+        for (int i = 1; i <= n && i <= 6; i++){
+            dp[i] = a[i - 1];
+        }
+        
+        // 处理第 2 至 k 次移动
+        // 每次移动可以前进一步至最多 6 格
+        // 对于当前移动到达的格子 i，其前一个位置 j 必须满足：
+        //      j ∈ [max(上一次移动后最小可能位置, i - 6), i - 1]
+        for (int move = 2; move <= k; move++){
+            long[] newdp = new long[n + 1];
+            Arrays.fill(newdp, INF);
+            // 第 move 次移动后能到达的最小格子编号为 move （每次至少前进一格）
+            // 能到达的最大格子编号为 move * 6（如果每次都走 6 格）
+            int start = move;
+            int end = Math.min(n, move * 6);
+            for (int i = start; i <= end; i++){
+                long best = INF;
+                // 考虑能够到达格子 i 的所有可能前一个格子
+                int lower = Math.max(move - 1, i - 6);
+                for (int j = lower; j < i; j++){
+                    best = Math.max(best, dp[j]);
+                }
+                if (best != INF) {
+                    newdp[i] = best + a[i - 1];
+                }
+            }
+            // 更新dp数组为当前移动状态
+            dp = newdp;
+        }
+        
+        // 在正好 k 次移动后，找到所能获得的最大金币数
+        long ans = INF;
+        int endIdx = Math.min(n, k * 6);
+        for (int i = k; i <= endIdx; i++){
+            ans = Math.max(ans, dp[i]);
+        }
+        System.out.println(ans);
+    }
+}
+```
+
+
+
 ## [3448. 统计可以被最后一个数位整除的子字符串数目](https://leetcode.cn/problems/count-substrings-divisible-by-last-digit/)
 
 > 给你一个只包含数字的字符串 `s` 。
