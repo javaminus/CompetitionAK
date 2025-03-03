@@ -337,6 +337,84 @@ class Solution {
 }
 ```
 
+## [3472. 至多 K 次操作后的最长回文子序列](https://leetcode.cn/problems/longest-palindromic-subsequence-after-at-most-k-operations/)
+
+给你一个字符串 `s` 和一个整数 `k`。
+
+在一次操作中，你可以将任意位置的字符替换为字母表中相邻的字符（字母表是循环的，因此 `'z'` 的下一个字母是 `'a'`）。例如，将 `'a'` 替换为下一个字母结果是 `'b'`，将 `'a'` 替换为上一个字母结果是 `'z'`；同样，将 `'z'` 替换为下一个字母结果是 `'a'`，替换为上一个字母结果是 `'y'`。
+
+返回在进行 **最多** `k` 次操作后，`s` 的 **最长回文子序列** 的长度。
+
+**子序列** 是一个 **非空** 字符串，可以通过删除原字符串中的某些字符（或不删除任何字符）并保持剩余字符的相对顺序得到。
+
+**回文** 是正着读和反着读都相同的字符串。
+
+```java
+import java.util.Arrays;
+
+class Solution { // 注意是子序列
+    public int longestPalindromicSubsequence(String s, int k) {
+        char[] cs = s.toCharArray();
+        int n = cs.length;
+        memo = new int[n][n][k + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+        return dfs(0, n - 1, k, cs);
+    }
+
+    int[][][] memo;
+    private int dfs(int i, int j, int k, char[] s) {
+        if (i >= j) {
+            return j - i + 1;
+        }
+        if (memo[i][j][k] != -1) {
+            return memo[i][j][k];
+        }
+        int res = Math.max(dfs(i + 1, j, k, s), dfs(i, j - 1, k, s));
+        int d = Math.abs(s[i] - s[j]);
+        int cost = Math.min(d, 26 - d);
+        if (cost <= k) {
+            res = Math.max(res, dfs(i + 1, j - 1, k - cost, s) + 2);
+        }
+        return memo[i][j][k] = res;
+    }
+}
+```
+
+改成递推
+
+```java
+class Solution {
+    public int longestPalindromicSubsequence(String s, int k) {
+        char[] cs = s.toCharArray();
+        int n = cs.length;
+        int[][][] dp = new int[k + 1][n][n];
+        for (int p = 0; p <= k; p++) { // 一般把独立的维度单独提出来
+            for (int i = n - 1; i >= 0; i--) {
+                dp[p][i][i] = 1;
+                for (int j = i + 1; j < n; j++) {
+                    int res = Math.max(dp[p][i + 1][j], dp[p][i][j - 1]);
+                    int d = Math.abs(cs[i] - cs[j]);
+                    int cost = Math.min(d, 26 - d);
+                    if (cost <= p) {
+                        res = Math.max(res, dp[p - cost][i + 1][j - 1] + 2);
+                    }
+                    dp[p][i][j] = res;
+                }
+            }
+        }
+        return dp[k][0][n - 1];
+    }
+}
+```
+
+
+
+
+
 # §8.2 其他区间 DP
 
 5\. 最长回文子串
