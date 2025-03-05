@@ -143,7 +143,7 @@ public class Main {
         return res;
     }
 
-    private static long sqrt(long N) { // 二分查找快速开方
+    private static long sqrt(long N) {
         long lo = 1;
         long hi = N;
         long ans = 0;
@@ -214,21 +214,22 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        int x = sc.nextInt();
-        while (x > 10) {
-            int n = Integer.toString(x).length();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < n; i++) {
-                sb.append(1);
-            }
-            x -= Integer.parseInt(sb.toString()) * (Integer.toString(x).charAt(0) - '0');
+        n = sc.nextInt();
+        int[] nums = new int[n + 1];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
         }
-        if (x == 0) {
-            sc.println("YES");
-        }else{
-            sc.println("NO");
+        int[] dp = new int[n];
+        // dp[i] = max(dp[i - 1], dp[j - 1] + i - j + 1);
+        int[] mx = new int[n + 1];
+        // Arrays.fill(mx, -INF);
+        mx[nums[0]] = 1;
+        for (int i = 1; i < n; i++) {
+            dp[i] = Math.max(dp[i - 1], mx[nums[i]] + i);
+            mx[nums[i]] = Math.max(mx[nums[i]], dp[i - 1] - i + 1);
         }
-        
+        sc.println(dp[n - 1]);
     }
 
 

@@ -635,3 +635,125 @@ class Solution {
 }
 ```
 
+[CF1526C1 Potions (Easy Version)](https://codeforces.com/problemset/problem/1526/C1)
+
+> 给你一个长度为 n 的序列 A，要求你找出最长的一个子序列使得这个子序列任意前缀和都非负。
+>
+> 其中 n≤2×103，−109≤ai≤109。
+
+```java
+// 背包解法 O(n^2)  横看成岭侧成峰
+	private static void solve() throws IOException {
+        n = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[] dp = new int[n + 1]; // 表示长度为i的最大和
+        Arrays.fill(dp, -INF);
+        dp[0] = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = n; j > 0; j--) {
+                if (dp[j - 1] + nums[i] < 0) {
+                    continue;
+                }
+                dp[j] = Math.max(dp[j], dp[j - 1] + nums[i]);
+            }
+        }
+        for (int i = n; i >= 0; i--) {
+            if (dp[i] >= 0) {
+                sc.println(i);
+                return;
+            }
+        }
+    }
+```
+
+```java
+// 反悔贪心 O(nlogn)
+	private static void solve() throws IOException {
+        n = sc.nextInt();
+        int[] nums = new int[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> a - b);
+        long sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+            pq.offer(nums[i]);
+            while (sum < 0) {
+                sum -= pq.poll();
+            }
+        }
+        sc.println(pq.size());
+    }
+```
+
+[E. Tetrahedron ](https://codeforces.com/problemset/problem/166/E)
+
+> - 一只蚂蚁站在一个四面体的某个顶点上，求走过 n 条棱后回到原顶点的方案总数。
+> - 答案对 109+7 取模。
+> - Data Range:1≤n≤107。
+>
+> 
+>
+> 题解：
+>
+> 设计状态，fi表示走了i步目前在顶端的方案数，gi表示走了i步目前不在顶端的方案数
+>
+> 方程fi=3gi−1,gi=fi−1+2gi−1
+>
+> 发现还可以滚动掉，爽啊
+
+```java
+	private static void solve() throws IOException {
+        n = sc.nextInt();
+        long f = 0, g = 1;
+        for (int i = 2; i <= n; i++) {
+            long tmp = g * 3;
+            g = (f + g * 2) % Mod;
+            f = tmp % Mod;
+        }
+        sc.println(f);
+    } // 还可以快速幂优化
+```
+
+[C. Mortal Kombat Tower ](https://codeforces.com/problemset/problem/1418/C)
+
+给定 n 个数，你的朋友和你轮流操作，你的朋友先手，从头一次取出 1 个或 2 个数，求你的朋友取出 1 的数量的最小值。 
+
+```java
+	// dp  
+	private static void solve() throws IOException {
+        // dp[i][0] = min(dp[i - 1][1], dp[i - 2][1]) 我
+        // dp[i][1] = min(dp[i - 1][0] + w[i], dp[i - 2][0] + w[i - 1] + w[i]) 朋友
+        n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = Integer.parseInt(ss[i]);
+        }
+        int[][] dp = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], INF);
+        }
+        if (n == 1) {
+            sc.println(nums[0]);
+            return;
+        }
+        dp[0][1] = nums[0];
+        dp[1][1] = nums[0] + nums[1];
+        dp[1][0] = dp[0][1];
+        for (int i = 2; i < n; i++) {
+            dp[i][0] = min(dp[i - 1][1], dp[i - 2][1]);
+            dp[i][1] = min(dp[i - 1][0] + nums[i], dp[i - 2][0] + nums[i - 1] + nums[i]);
+        }
+        sc.println(min(dp[n - 1][0], dp[n - 1][1]));
+    }
+```
+
+
+
