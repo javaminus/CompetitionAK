@@ -1,10 +1,11 @@
 public class Rand {
     public static void main(String[] args) {
-        System.out.println(5);
-        for (int i = 0; i < 5; i++) {
-            int n = generate(2, 10);
+        int T = 1;
+        // System.out.println(T);
+        for (int i = 0; i < T; i++) {
+            int n = generate(5, 20);
             System.out.println(n);
-            printArr(n, 2, n);
+            printArr(n, 0, 50);
         }
     }
     public static int generate(int l, int r) {

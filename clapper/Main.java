@@ -197,7 +197,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -215,22 +215,28 @@ public class Main {
 
     private static void solve() throws IOException {
         n = sc.nextInt();
-        int[] nums = new int[n + 1];
+        int[] nums = new int[n];
         ss = sc.nextLine().split(" ");
         for (int i = 0; i < n; i++) {
             nums[i] = Integer.parseInt(ss[i]);
         }
-        int[] dp = new int[n];
-        // dp[i] = max(dp[i - 1], dp[j - 1] + i - j + 1);
-        int[] mx = new int[n + 1];
-        // Arrays.fill(mx, -INF);
-        mx[nums[0]] = 1;
-        for (int i = 1; i < n; i++) {
-            dp[i] = Math.max(dp[i - 1], mx[nums[i]] + i);
-            mx[nums[i]] = Math.max(mx[nums[i]], dp[i - 1] - i + 1);
+        int ans = 1;
+        for (int i = 0; i < n; i++) {
+            int i0 = i;
+            while (i + 1 < n && nums[i + 1] > nums[i]) {
+                i++;
+            }
+            i++;
+            int i1 = i;
+            while (i + 1 < n && nums[i + 1] > nums[i]) {
+                i++;
+            }
+            ans = Math.max(i - i0, ans);
+            i = i1 - 1;
         }
-        sc.println(dp[n - 1]);
+        sc.println(ans);
     }
+    
 
 
 

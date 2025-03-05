@@ -197,7 +197,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -215,31 +215,36 @@ public class Main {
 
     private static void solve() throws IOException {
         n = sc.nextInt();
-        ss = sc.nextLine().split(" ");
         int[] nums = new int[n];
-        int x = 0;
+        ss = sc.nextLine().split(" ");
         for (int i = 0; i < n; i++) {
             nums[i] = Integer.parseInt(ss[i]);
-            x ^= nums[i];
         }
-        if (x == 0) {
-            sc.println("YES");
-        }else{
-            int cnt = 0, cur = 0;
-            for (int i = 0; i < n; i++) {
-                cur ^= nums[i];
-                if (cur == x) {
-                    cnt++;
-                    cur = 0;
-                }
-            }
-            if (cnt >= 2) {
-                sc.println("YES");
+        int[][] dp = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            dp[i][0] = dp[i][1] = -INF;
+        }
+        dp[0][0] = 1;
+        dp[0][1] = 1;
+        int ans = 1;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > nums[i - 1]) {
+                dp[i][0] = dp[i - 1][0] + 1;
+                dp[i][1] = dp[i - 1][1] + 1;
             }else{
-                sc.println("NO");
+                dp[i][0] = 1;
+                dp[i][1] = 1;
             }
+
+            if (i >= 2 && nums[i - 2] < nums[i]) {
+                dp[i][1] = Math.max(dp[i][1], dp[i - 2][0] + 1);
+            }
+            ans = Math.max(ans, Math.max(dp[i][0], dp[i][1]));
         }
-        
+        sc.println(ans);
     }
-    
+
+
+
+
 }
