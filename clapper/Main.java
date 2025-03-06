@@ -1,5 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -197,7 +198,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -214,29 +215,29 @@ public class Main {
 
 
     private static void solve() throws IOException {
-        n = sc.nextInt();
+        ss = sc.nextLine().split(" ");
+        int n = Integer.parseInt(ss[0]), k = Integer.parseInt(ss[1]), z = Integer.parseInt(ss[2]);
         int[] nums = new int[n];
         ss = sc.nextLine().split(" ");
         for (int i = 0; i < n; i++) {
             nums[i] = Integer.parseInt(ss[i]);
         }
-        int ans = 1;
-        for (int i = 0; i < n; i++) {
-            int i0 = i;
-            while (i + 1 < n && nums[i + 1] > nums[i]) {
-                i++;
+        long[][] dp = new long[n + 1][z + 1];
+        Arrays.fill(dp[0], nums[0]);
+        long ans = 0;
+        for (int i = 0; i <= z; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[j][i] = dp[j - 1][i] + nums[j];
+                if (i != 0 && j != n - 1) {
+                    dp[j][i] = Math.max(dp[j][i], dp[j + 1][i - 1] + nums[j]);
+                }
+                if (j + i * 2 == k) {
+                    ans = Math.max(ans, dp[j][i]);
+                }
             }
-            i++;
-            int i1 = i;
-            while (i + 1 < n && nums[i + 1] > nums[i]) {
-                i++;
-            }
-            ans = Math.max(i - i0, ans);
-            i = i1 - 1;
         }
-        sc.println(ans);
+        System.out.println(ans);
     }
-    
 
 
 
