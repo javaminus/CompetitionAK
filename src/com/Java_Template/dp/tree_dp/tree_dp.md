@@ -6,7 +6,45 @@
 > ​	一般是从自底向上计算的，也就是根据子树返回值来计算父节点的值
 > 	也有自顶向下的写法，见后面
 
-#### [【模板】树的直径（相邻元素不同）](https://leetcode.cn/problems/longest-path-with-different-adjacent-characters/description/)
+## [CF1528A](https://www.luogu.com.cn/problem/CF1528A)
+
+![1741529165118](assets/1741529165118.png)
+
+```java
+   private static void solve() throws IOException {
+        n = sc.nextInt();
+        g = new List[n];
+        L = new long[n];
+        R = new long[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n; i++) {
+            L[i] = sc.nextLong();
+            R[i] = sc.nextLong();
+        }
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        dp = new long[n][2];
+        dfs(0, -1);
+        sc.println(Math.max(dp[0][0], dp[0][1]));
+    }
+    static long[][] dp; //  dp[i][0/1] 表示以 i 为根节点的子树中，i 节点选择 l[i]/r[i] 时答案的最大值。
+    private static void dfs(int x, int fa) {
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x);
+                dp[x][0] += Math.max(dp[y][0] + Math.abs(L[y] - L[x]), dp[y][1] + Math.abs(L[x] - R[y]));
+                dp[x][1] += Math.max(dp[y][1] + Math.abs(R[y] - R[x]), dp[y][0] + Math.abs(R[x] - L[y]));
+            }
+        }
+    }
+```
+
+
+
+##  [【模板】树的直径（相邻元素不同）](https://leetcode.cn/problems/longest-path-with-different-adjacent-characters/description/)
 
 给你一棵 **树**（即一个连通、无向、无环图），根节点是节点 `0` ，这棵树由编号从 `0` 到 `n - 1` 的 `n` 个节点组成。用下标从 **0** 开始、长度为 `n` 的数组 `parent` 来表示这棵树，其中 `parent[i]` 是节点 `i` 的父节点，由于节点 `0` 是根节点，所以 `parent[0] == -1` 。
 

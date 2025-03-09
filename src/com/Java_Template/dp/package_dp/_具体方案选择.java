@@ -3,7 +3,7 @@ package com.Java_Template.dp.package_dp;
 import java.util.ArrayList;
 import java.util.List;
 
-public class 具体方案选择 {
+public class _具体方案选择 {
     public static int knapsack(int[] weights, int[] values, int n, int W, List<Integer> items) {
         int[][] dp = new int[n + 1][W + 1]; // 前i个物品最大容量为j可以得到的最大价值
         boolean[][] keep = new boolean[n + 1][W + 1];

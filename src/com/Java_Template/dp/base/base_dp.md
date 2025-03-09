@@ -2728,5 +2728,46 @@ public class Code05_NodenHeightNotLargerThanm {
 
 ```
 
+## [CF1519D Maximum Sum of Products](https://www.luogu.com.cn/problem/CF1519D)
+
+![1741527912644](assets/1741527912644.png)
+
+![1741527947394](assets/1741527947394.png)
+
+```java
+	private static void solve() throws IOException {
+        n = sc.nextInt();
+        long[] a = new long[n];
+        long[] b = new long[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            a[i] = Long.parseLong(ss[i]);
+        }
+        long tmp = 0, sum = 0;
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            b[i] = Long.parseLong(ss[i]);
+            sum += a[i] * b[i];
+        }
+        // 枚举以单个元素为最小区间的所有区间
+        for (int i = 0; i < n; i++) {
+            long tmp1 = 0;
+            for (int j = i, k = i; j >= 0 && k < n; j--, k++) {
+                tmp1 += (a[j] - a[k]) * (b[k] - b[j]);
+                tmp = Math.max(tmp, tmp1);
+            }
+        }
+        // 枚举以相邻的两个元素为最小区间的所有区间
+        for (int i = 0; i < n; i++) {
+            long tmp2 = 0;
+            for (int j = i, k = i + 1; j >= 0 && k < n; j--, k++) {
+                tmp2 += (a[j] - a[k]) * (b[k] - b[j]);
+                tmp = Math.max(tmp, tmp2);
+            }
+        }
+        sc.println(sum + tmp);
+    }
+```
+
 
 
