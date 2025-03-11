@@ -2769,5 +2769,85 @@ public class Code05_NodenHeightNotLargerThanm {
     }
 ```
 
+> ![1741683249538](assets/1741683249538.png)
+>
+> 直接记录左右的最长递增字串，然后枚举中间值！
 
+> ![1741683311285](assets/1741683311285.png)
+>
+> 只有abc三种字母，观察发现永远的字串abcabcabc的六种排列的一种，直接暴力枚举！
+
+> 题意：给定k & 字符串s ，其中s是一个二进制字符串, k≤106,∣s∣≤106，输出s中包含k个1的子串的个数（我们认为两个子串不同当且仅当它们均非空并且它们出现的位置不同） 
+>
+> 最简单的思路就是找到一个区间，然后乘以左边0的出现次数 * 右边0的出现次数
+>
+> 然而还有简单做法：
+>
+> ```java
+> 	private static void solve() throws IOException {
+>         k = sc.nextInt();
+>         cs = sc.next().toCharArray();
+>         int n = cs.length;
+>         dp = new long[n + 1]; // dp[i]是一个滚动数组，表示到当前位置，i个1出现的次数 比如有101001，那么 dp = {1, 2, 3, 1, 0, 0, 0};
+>         dp[0] = 1;
+>         long ans = 0;
+>         int cnt = 0;
+>         for (int i = 0; i < n; i++) {
+>             cnt += cs[i] - '0';
+>             if (cnt >= k) {
+>                 ans += dp[cnt - k];
+>             }
+>             dp[cnt]++; // 滚动
+>         }
+>         // System.out.println(Arrays.toString(dp));
+>         sc.println(ans);
+>     }
+> ```
+>
+> 
+
+> 题意：给出一个序列和 x，每次可以把序列中的一个 >x 的数与 x 交换，问最少操作多少次使得整个序列升序排序，如果不能输出 `-1`。 
+>
+> 直接贪心，找到最后一个乱序的位置，然后从头开始替换。
+>
+> ```java
+>     private static void solve() throws IOException {
+>         n = sc.nextInt();
+>         long x = sc.nextInt();
+>         ss = sc.nextLine().split(" ");
+>         nums = new long[n];
+>         for (int i = 0; i < n; i++) {
+>             nums[i] = Long.parseLong(ss[i]);
+>         }
+>         int id = 0;
+>         for (int i = 1; i < n; i++) {
+>             if (nums[i] < nums[i - 1]) {
+>                 id = i;
+>             }
+>         }
+>         if (id == 0) {
+>             sc.println(0);
+>             return;
+>         }
+>         int ans = 0;
+>         for (int i = 0; i <= id; i++) {
+>             if (x < nums[i]) {
+>                 long tmp = nums[i];
+>                 nums[i] = x;
+>                 x = tmp;
+>                 ans++;
+>             }
+>         }
+>         boolean flag = true;
+>         for (int i = 1; i < n; i++) {
+>             if (nums[i] < nums[i - 1]) {
+>                 flag = false;
+>                 break;
+>             }
+>         }
+>         sc.println(flag ? ans : -1);
+>     }
+> ```
+>
+> 
 
