@@ -1,7 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -211,19 +210,39 @@ public class Main {
     private static char[] cs;
     private static List<Integer>[] g;
     private static int m, n, k;
-    private static long[] nums, a, b, left, right, dp, f;
+    private static long[] nums, a, b, left, right, dp, f, size;
 
     private static void solve() throws IOException {
-        s = sc.next();
-        int a = 0, b = 0;
-        for (int i = 0; i < s.length(); i++) {
-            if ((i & 1) == 0) {
-                a = a * 10 + s.charAt(i) - '0';
-            } else {
-                b = b * 10 + s.charAt(i) - '0';
+        n = sc.nextInt();
+        g = new List[n];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+            g[x].add(y);
+            g[y].add(x);
+        }
+        dp = new long[n];
+        size = new long[n];
+        dfs(0, -1);
+        sc.println(dp[0]);
+    }
+
+    private static void dfs(int x, int fa) { // dp[i]表示节点i被感染，那么以i为根节点最多可以有多少不被病毒感染的点
+        size[x] = 1;
+        dp[x] = 0;
+        long sum = 0;
+        for (int y : g[x]) {
+            if (y != fa) {
+                dfs(y, x);
+                sum += dp[y];
+                size[x] += size[y];
             }
         }
-        sc.println((a + 1) * (b + 1) - 2);
+        for (int y : g[x]) {
+            if (y != fa) {
+                dp[x] = Math.max(dp[x], sum - dp[y] + size[y] - 1); // 这里的sum - dp[y]就是另一个子树的dp值
+            }
+        }
     }
 
 

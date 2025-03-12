@@ -1401,3 +1401,107 @@ public class Main {
 
 
 
+> ## 题意翻译
+>
+> 给定一个包含 n 个结点的树。
+>
+> 在树上删除 k(1≤k<n≤105) 条边，使删除后的的图中，所有连通块含有节点数的最小值最大。
+>
+> 输出这个最大值。
+>
+> ```java
+> 	private static void solve() throws IOException {
+>         n = sc.nextInt();
+>         k = sc.nextInt();
+>         g = new List[n];
+>         Arrays.setAll(g, e -> new ArrayList<>());
+>         for (int i = 0; i < n - 1; i++) {
+>             int u = sc.nextInt() - 1, v = sc.nextInt() - 1;
+>             g[u].add(v);
+>             g[v].add(u);
+>         }
+>         int l = 1, r = n;
+>         size = new int[n];
+>         while (l <= r) {
+>             int mid = l + (r - l) / 2;
+>             if (check(mid, k)) {
+>                 l = mid + 1;
+>             }else{
+>                 r = mid - 1;
+>             }
+>         }
+>         sc.println(l - 1);
+>     }
+> 
+>     static int sum, tot;
+>     static int[] size;
+>     
+>     private static boolean check(int mid, int k) {
+>         sum = n;
+>         Arrays.fill(size, 0);
+>         tot = 0;
+>         dfs(0, -1, mid);
+>         return tot >= k;
+>     }
+> 
+>     private static void dfs(int x, int fa, int mid) {
+>         size[x]++;
+>         for (int y : g[x]) {
+>             if (y == fa) {
+>                 continue;
+>             }
+>             dfs(y, x, mid);
+>             if (size[y] >= mid && sum - size[y] >= mid) {
+>                 tot++;
+>                 sum -= size[y];
+>             }else{
+>                 size[x] += size[y];
+>             }
+>         }
+>     }
+> ```
+>
+> 
+
+> 给定一棵以1 号节点为根的二叉树，总节点个数为 n。
+>
+> 现在 1 号节点感染了病毒，病毒每一回合都会去感染与该节点直接相连的节点，而你在这一回合里可以选择删除任意一个没有被病毒感染（尚未被删除）的点，这样就断开了它与其直接相连的点得关系.
+>
+> 询问最多可以有多少不被病毒感染的点，被删除的点不算做不被病毒感染的点
+>
+> ```java
+> 	private static void solve() throws IOException {
+>         n = sc.nextInt();
+>         g = new List[n];
+>         Arrays.setAll(g, e -> new ArrayList<>());
+>         for (int i = 0; i < n - 1; i++) {
+>             int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+>             g[x].add(y);
+>             g[y].add(x);
+>         }
+>         dp = new long[n];
+>         size = new long[n];
+>         dfs(0, -1);
+>         sc.println(dp[0]);
+>     }
+> 
+>     private static void dfs(int x, int fa) { // dp[i]表示节点i被感染，那么以i为根节点最多可以有多少不被病毒感染的点
+>         size[x] = 1;
+>         dp[x] = 0;
+>         long sum = 0;
+>         for (int y : g[x]) {
+>             if (y != fa) {
+>                 dfs(y, x);
+>                 sum += dp[y];
+>                 size[x] += size[y];
+>             }
+>         }
+>         for (int y : g[x]) {
+>             if (y != fa) {
+>                 dp[x] = Math.max(dp[x], sum - dp[y] + size[y] - 1); // 这里的sum - dp[y]就是另一个子树的dp值
+>             }
+>         }
+>     }
+> ```
+>
+> 
