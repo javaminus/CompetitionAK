@@ -1,6 +1,8 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -196,7 +198,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
+        // int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -210,39 +212,32 @@ public class Main {
     private static char[] cs;
     private static List<Integer>[] g;
     private static int m, n, k;
-    private static long[] nums, a, b, left, right, dp, f, size;
+    private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
         n = sc.nextInt();
-        g = new List[n];
-        Arrays.setAll(g, e -> new ArrayList<>());
-        for (int i = 0; i < n - 1; i++) {
-            int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
-            g[x].add(y);
-            g[y].add(x);
+        m = sc.nextInt();
+        nums = new long[n];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            nums[i] = Long.parseLong(ss[i]);
         }
-        dp = new long[n];
-        size = new long[n];
-        dfs(0, -1);
-        sc.println(dp[0]);
-    }
-
-    private static void dfs(int x, int fa) { // dp[i]表示节点i被感染，那么以i为根节点最多可以有多少不被病毒感染的点
-        size[x] = 1;
-        dp[x] = 0;
-        long sum = 0;
-        for (int y : g[x]) {
-            if (y != fa) {
-                dfs(y, x);
-                sum += dp[y];
-                size[x] += size[y];
+        long[] f = new long[m];
+        Arrays.sort(nums);
+        long[] cnt = new long[m];
+        for (int i = 0; i < n; i++) {
+            nums[i] %= m;
+            for (int j = 0; j < m; j++) {
+                f[(int) ((nums[i] - j + m) % m)] += cnt[j];
             }
+            cnt[(int) nums[i]]++;
         }
-        for (int y : g[x]) {
-            if (y != fa) {
-                dp[x] = Math.max(dp[x], sum - dp[y] + size[y] - 1); // 这里的sum - dp[y]就是另一个子树的dp值
-            }
+        long ans = 1;
+        for (int i = 0; i < m; i++) {
+            ans *= qpow(i, f[i], m);
+            ans %= m;
         }
+        sc.println(ans);
     }
 
 
