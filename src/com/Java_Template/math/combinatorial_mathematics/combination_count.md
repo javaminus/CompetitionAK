@@ -503,3 +503,126 @@ class Solution {
 }
 ```
 
+> 这个题可以学到太多东西了，一定让你豁然开朗！！！
+
+题目：给你一个排列（1，2，3，...，n），输出第k小的排列。
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 和 PrintWriter 提高输入输出效率
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(new BufferedOutputStream(System.out));
+
+        // 读取测试用例数量
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            // 读取 n 和 k，注意 k 为 1-indexed
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            long k = Long.parseLong(st.nextToken());
+
+            // 预先计算阶乘，fact[i] 表示 i!；n 较大时可能溢出，但一般题目中 n 较小
+            long[] fact = new long[n + 1];
+            fact[0] = 1;
+            boolean overflow = false;
+            for (int i = 1; i <= n; i++) {
+                // 检查乘法是否可能溢出，若溢出则停止计算
+                if (Long.MAX_VALUE / fact[i - 1] < i) {
+                    overflow = true;
+                    break;
+                }
+                fact[i] = fact[i - 1] * i;
+            }
+
+            // 如果 n 较大或者 k 超出所有排列数量，则输出 -1
+            if (!overflow && k > fact[n]) {
+                out.println("-1");
+                continue;
+            } else if (overflow) {
+                // 当发生溢出时，题目数据可以保证不会超过范围（通常 n 会比较小）
+                // 若出现溢出，这里简单处理为不输出结果
+                out.println("-1");
+                continue;
+            }
+
+            // 转换为 0 索引方便计算
+            k--;
+            // 初始化存放可选数字的列表，数字为 1, 2, ..., n
+            List<Integer> numbers = new ArrayList<>();
+            for (int i = 1; i <= n; i++) {
+                numbers.add(i);
+            }
+
+            // 使用贪心算法构造第 k 小的排列
+            StringBuilder sb = new StringBuilder();
+            for (int i = n; i >= 1; i--) {
+                int index = (int) (k / fact[i - 1]);
+                sb.append(numbers.get(index)).append(" ");
+                numbers.remove(index); // 删除下标
+                k %= fact[i - 1];
+            }
+
+            out.println(sb.toString().trim());
+        }
+
+        // 刷新并关闭输出流
+        out.flush();
+        out.close();
+        br.close();
+    }
+}
+
+```
+
+![1741940999432](assets/1741940999432.png)
+
+非常典型的 codeforces 小注意力题。
+
+首先，我们发现当排列为 1 到 n 的正序数列时，S 可以取到最大值。此时，$S(p)=1×n+2×(n−1)+3×(n−2)⋯+n×1$。这是因为区间 [1,1],[1,2],[1,3],…[1,n] 的最小值为 1，共 n 个，区间 [2,2],[2,3],…[2,n] 的最小值为 2，共 n−1 个，以此类推。
+
+我们考虑如下构造过程。假设现在已经构造好了 x+1 到 n 的排列方式，考虑 x 可以插入到哪些位置。将 x 插入到已排好的内容中间，将会导致原先的许多区间贡献变得更小，不如将 x 放在头尾的位置更优。因此，最优排列的构造方案一定是从大往小，每次将当前的数放在头或尾的位置。
+
+一共需决策 n−1 个数，每个数都有可能放在首尾两个位置，因此一共有 2n−1 中方案。超出可以直接输出 `-1`。否则，对 k 进行二进制拆分，根据当前位的值决定该数应该放在头还是尾。可以直接 deque 维护。
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Deque;
+import java.util.LinkedList;
+
+public class Main { // 代码可能有问题，但是思路没问题
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        while (T-- > 0) {
+            String[] input = br.readLine().split(" ");
+            int n = Integer.parseInt(input[0]);
+            long k = Long.parseLong(input[1]) - 1;
+            if (n - 1 < 64 && k >= (1L << (n - 1))) {
+                System.out.println("-1");
+                continue;
+            }
+            Deque<Integer> ans = new LinkedList<>();
+            ans.add(n);
+            for (int i = n - 1; i > 0; --i) {
+                if ((k & 1) == 1) {
+                    ans.addLast(i);
+                } else {
+                    ans.addFirst(i);
+                }
+                k >>= 1;
+            }
+            for (int i : ans) {
+                System.out.print(i + " ");
+            }
+            System.out.println();
+        }
+    }
+}
+```
+

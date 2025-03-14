@@ -1,6 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -198,7 +198,7 @@ public class Main {
     private static int T = 1;
 
     public static void main(String[] args) throws IOException {
-        // int T = sc.nextInt();
+        int T = sc.nextInt();
         while (T-- > 0) {
             solve();
             // sc.bw.flush();
@@ -215,29 +215,23 @@ public class Main {
     private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
-        n = sc.nextInt();
-        m = sc.nextInt();
-        nums = new long[n];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Long.parseLong(ss[i]);
+        int n = sc.nextInt(), k = sc.nextInt();
+        k--;
+        List<Integer> list = new ArrayList<>();
+        long[] f = new long[n + 1];
+        f[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            list.add(i);
+            f[i] = f[i - 1] * i;
         }
-        long[] f = new long[m];
-        Arrays.sort(nums);
-        long[] cnt = new long[m];
-        for (int i = 0; i < n; i++) {
-            nums[i] %= m;
-            for (int j = 0; j < m; j++) {
-                f[(int) ((nums[i] - j + m) % m)] += cnt[j];
-            }
-            cnt[(int) nums[i]]++;
+        StringBuilder sb = new StringBuilder();
+        for (int i = n; i > 0; i--) {
+            int id = (int) (k / f[i - 1]);
+            sb.append(list.get(id)).append(" ");
+            list.remove(id);
+            k %= f[i - 1];
         }
-        long ans = 1;
-        for (int i = 0; i < m; i++) {
-            ans *= qpow(i, f[i], m);
-            ans %= m;
-        }
-        sc.println(ans);
+        System.out.println(sb.toString().trim());
     }
 
 

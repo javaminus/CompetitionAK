@@ -4,10 +4,15 @@
 
 [C. Lucky Days ](https://codeforces.com/problemset/problem/1055/C)
 
-![1725258774553](assets/1725258774553.png)
+![1741833623225](assets/1741833623225.png)
 
 ```java
-public class Main {
+public class Main { 
+    // 首先尽可能让左端点重合，然后有左端点的等式：la + x*ta = lb + y*tb
+    // 变形可得 x*ta + (-y*tb) = lb - la
+    // 发现就是斐蜀定理：如果 a*x + b*y = gcd(a,b)，则x,y一定有整数解
+    // 则有 lb - la = gcd(ta, tb),就起点相同了。
+    // 但是如果左端点不能重合怎么办，尽可能逼近就行。
     private static void solve() throws IOException { // 真的太优雅了！！！
         ss = sc.nextLine().split(" ");
         int la = Integer.parseInt(ss[0]), ra = Integer.parseInt(ss[1]), ta = Integer.parseInt(ss[2]);
@@ -152,3 +157,44 @@ class Solution {
 }
 ```
 
+
+
+> ![1741833057429](assets/1741833057429.png)
+>
+> #题目大意
+>
+> 首先选中一个区间 (x,y)，该区间内数字 1 的个数和与数字 0 的个数和应当相等，由于区间 (x,y) 是区间 (l,r) 的子串，而我们所要求的是对于所有满足条件的区间 (x,y)，一共有多少种区间 (l,r)。
+>
+> # 解析
+>
+> 首先经过简单的模拟，我们发现前缀和可以完好吻合这道题，我们维护一个见到 si=1 则 +1，反之见到 si=0 则 −1的前缀和，每当前缀和在某两位上的值相同时，例如 sumx=sumy，这表明区间 (x+1,y) 内的 1 数量的总和与 0 数量的总和相等，因此区间 (x+1,y) 对答案的贡献为 (x+1)×(n−y+1)，其中 n 为字符串总长度。
+>
+> ```java
+> 	private static void solve() throws IOException { // 经典的不能再经典的套路题了
+>         cs = sc.next().toCharArray();
+>         n = cs.length;
+>         long[] prefixSum = new long[n + 1];
+>         for (int i = 0; i < n; i++) {
+>             prefixSum[i + 1] = prefixSum[i] + (cs[i] == '1' ? 1 : -1);
+>         }
+>         HashMap<Long, List<Integer>> groups= new HashMap<>();
+>         for (int i = 0; i <= n; i++) { // 按照前缀和分组
+>             groups.computeIfAbsent(prefixSum[i], e -> new ArrayList<>()).add(i);
+>         }
+>         long ans = 0;
+>         for (List<Integer> group : groups.values()) {
+>             long sum = 0; // 前缀累计和
+>             for (int i = 0; i < group.size(); i++) {
+>                 int idx = group.get(i);
+>                 if (i > 0) {
+>                     long d = (n - idx + 1) % Mod;
+>                     ans = (ans + sum * d) % Mod;
+>                 }
+>                 sum = (sum + idx + 1) % Mod; // 累加当前下标
+>             }
+>         }
+>         sc.println(ans);
+>     }
+> ```
+>
+> 

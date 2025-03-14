@@ -1,13 +1,11 @@
 public class Rand {
     public static void main(String[] args) {
         int T = 1;
-        System.out.println(T);
+        // System.out.println(T);
         for (int i = 0; i < T; i++) {
-            int n = generate(5, 20);
-            int k = generate(1, n - 1);
-            int z = generate(0, Math.min(5, k));
-            System.out.println(n + " " + k + " " + z);
-            printArr(n, 0, 50);
+            int n = generate(5, 50);
+            int k = generate(1, 100000);
+            System.out.println(n + " " + k);
         }
     }
     public static int generate(int l, int r) {

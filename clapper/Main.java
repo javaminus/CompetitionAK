@@ -1,6 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -211,32 +211,27 @@ public class Main {
     private static String s;
     private static char[] cs;
     private static List<Integer>[] g;
-    private static int m, n;
-
+    private static int m, n, k;
+    private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
-        ss = sc.nextLine().split(" ");
-        int n = Integer.parseInt(ss[0]), k = Integer.parseInt(ss[1]), z = Integer.parseInt(ss[2]);
-        int[] nums = new int[n];
-        ss = sc.nextLine().split(" ");
-        for (int i = 0; i < n; i++) {
-            nums[i] = Integer.parseInt(ss[i]);
+        int n = sc.nextInt(), k = sc.nextInt();
+        k--;
+        List<Integer> list = new ArrayList<>();
+        long[] f = new long[n + 1];
+        f[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            list.add(i);
+            f[i] = f[i - 1] * i;
         }
-        long[][] dp = new long[n + 1][z + 1];
-        Arrays.fill(dp[0], nums[0]);
-        long ans = 0;
-        for (int i = 0; i <= z; i++) {
-            for (int j = 1; j < n; j++) {
-                dp[j][i] = dp[j - 1][i] + nums[j];
-                if (i != 0 && j != n - 1) {
-                    dp[j][i] = Math.max(dp[j][i], dp[j + 1][i - 1] + nums[j]);
-                }
-                if (j + i * 2 == k) {
-                    ans = Math.max(ans, dp[j][i]);
-                }
-            }
+        StringBuilder sb = new StringBuilder();
+        for (int i = n; i > 0; i--) {
+            int id = (int) (k / f[i - 1]);
+            sb.append(list.get(id)).append(" ");
+            list.remove(id);
+            k %= f[i - 1];
         }
-        System.out.println(ans);
+        System.out.println(sb.toString().trim());
     }
 
 
