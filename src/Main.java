@@ -1,8 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private final static int INF = Integer.MAX_VALUE / 2;
@@ -210,28 +208,52 @@ public class Main {
     private static String[] ss;
     private static String s;
     private static char[] cs;
-    private static List<Integer>[] g;
+    private static Set<Integer>[] g;
     private static int m, n, k;
     private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
-        int n = sc.nextInt(), k = sc.nextInt();
-        k--;
-        List<Integer> list = new ArrayList<>();
-        long[] f = new long[n + 1];
-        f[0] = 1;
+        n = sc.nextInt();
+        g = new Set[n + 1];
+        Arrays.setAll(g, e -> new HashSet<>());
         for (int i = 1; i <= n; i++) {
-            list.add(i);
-            f[i] = f[i - 1] * i;
+            int j = sc.nextInt();
+            g[i].add(j);
+            g[j].add(i);
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = n; i > 0; i--) {
-            int id = (int) (k / f[i - 1]);
-            sb.append(list.get(id)).append(" ");
-            list.remove(id);
-            k %= f[i - 1];
+        vis = new boolean[n + 1];
+        int cnt0 = 0, cnt1 = 0;
+        for (int i = 1; i <= n; i++) {
+            isCycle = false;
+            cnt = 0;
+            if (!vis[i]) {
+                dfs(i, -1);
+                if (isCycle && cnt > 2) {
+                    cnt0++;
+                } else {
+                    cnt1++;
+                }
+            }
         }
-        System.out.println(sb.toString().trim());
+        sc.println(cnt0 + Math.min(1, cnt1) + " " + (cnt0 + cnt1));
+
+    }
+    static boolean[] vis = new boolean[n + 1];
+    static boolean isCycle;
+    static int cnt;
+
+    private static void dfs(int x, int fa) {
+        cnt++;
+        vis[x] = true;
+        for (int y : g[x]) {
+            if (y != fa) {
+                if (vis[y]) {
+                    isCycle = true;
+                }else{
+                    dfs(y, x);
+                }
+            }
+        }
     }
 
 
