@@ -136,6 +136,56 @@ public class Code01_BashGameSG {
 
 ```
 
+> 题意：
+>
+> Alice和Bob决定玩一个小游戏。游戏在一个有n个格子的直线上进行，格子标号为1~n，第i个格子里有一个数ai(ai∈[1,n])，并且，每个格子里的数各不相同。
+>
+> 现在在某个格子里有一个硬币。他们可以移动这个硬币，但是要将硬币从i号格子移动到j号格子里，必须满足下列条件：
+>
+> 1. ai<aj
+> 2. ∣i−j∣mod ai=0
+>
+> 由Alice先手移动，谁不能移动硬币谁败。
+>
+> 现在问你当硬币的初始位置为1~n号格子的胜负情况(两人都采取最优策略)
+
+```java
+    private static void solve() throws IOException {
+        int n = sc.nextInt();
+        int[] a = new int[n + 1];
+        ss = sc.nextLine().split(" ");
+        for (int i = 0; i < n; i++) {
+            a[i + 1] = Integer.parseInt(ss[i]);
+        }
+        int[] pos = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            pos[a[i]] = i;
+        }
+        int[] sg = new int[n + 1];
+        // 枚举元素 
+        for (int x = n; x >= 1; x--) {
+            int i = pos[x];
+            int j = i; // v是下标
+            while (j - x > 0) {
+                j -= x;
+            }
+            for (; j <= n; j += x) {
+                if (a[j] > a[i] && sg[j] == 0) {
+                    sg[i] = 1;
+                    break;
+                }
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            if (sg[i] == 1) {
+                sc.print("A");
+            }else{
+                sc.print("B");
+            }
+        }
+    }
+```
+
 
 
 # 【leetcode练习题目】

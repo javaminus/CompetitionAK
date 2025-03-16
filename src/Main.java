@@ -1,262 +1,44 @@
-import java.io.*;
-import java.math.BigInteger;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class Main {
-    private final static int INF = Integer.MAX_VALUE / 2;
-    private final static int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private static final int N = 100005;
+    private static long[] a = new long[N];
+    private static long[] b = new long[N];
+    private static long ans;
 
-    static class Read {
-        BufferedReader bf;
-        StringTokenizer st;
-        BufferedWriter bw;
-
-        public Read() {
-            bf = new BufferedReader(new InputStreamReader(System.in));
-            st = new StringTokenizer("");
-            bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        }
-
-        public String nextLine() throws IOException {
-            return bf.readLine();
-        }
-
-        public String next() throws IOException {
-            while (!st.hasMoreTokens()) {
-                st = new StringTokenizer(bf.readLine());
-            }
-            return st.nextToken();
-        }
-
-        public char nextChar() throws IOException {
-            return next().charAt(0);
-        }
-
-        public int nextInt() throws IOException {
-            return Integer.parseInt(next());
-        }
-
-        public long nextLong() throws IOException {
-            return Long.parseLong(next());
-        }
-
-        public double nextDouble() throws IOException {
-            return Double.parseDouble(next());
-        }
-
-        public float nextFloat() throws IOException {
-            return Float.parseFloat(next());
-        }
-
-        public byte nextByte() throws IOException {
-            return Byte.parseByte(next());
-        }
-
-        public short nextShort() throws IOException {
-            return Short.parseShort(next());
-        }
-
-        public BigInteger nextBigInteger() throws IOException {
-            return new BigInteger(next());
-        }
-
-        public void println(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(int a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(String a) throws IOException {
-            bw.write(a);
-            bw.newLine();
-            return;
-        }
-
-        public void print(String a) throws IOException {
-            bw.write(a);
-            return;
-        }
-
-        public void println(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(long a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-
-        public void print(double a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void print(BigInteger a) throws IOException {
-            bw.write(a.toString());
-            return;
-        }
-
-        public void print(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            return;
-        }
-
-        public void println(char a) throws IOException {
-            bw.write(String.valueOf(a));
-            bw.newLine();
-            return;
-        }
-    }
-
-    static class Pair<T, U> {
-        T fir;
-        U sec;
-        public Pair(T fir, U sec) {
-            this.fir = fir;
-            this.sec = sec;
-        }
-    }
-
-    private static long qpow(long a, long b, long p) {
-        long res = 1L;
-        while (b > 0) {
-            if ((b & 1) == 1) {
-                res = (res * a) % p;
-            }
-            a = a * a % p;
-            b >>= 1;
-        }
-        return res;
-    }
-
-    private static long sqrt(long N) {
-        long lo = 1;
-        long hi = N;
+    private static long read(BufferedReader br) throws IOException {
         long ans = 0;
-        while(lo <= hi) {
-            long mid = (lo + hi) / 2;
-            if (mid <= N / mid) {
-                ans = mid;
-                lo = mid + 1;
-            }  else {
-                hi = mid - 1;
-            }
+        int f = 1;
+        int c = br.read();
+        while (c > '9' || c < '0') {
+            if (c == '-') f = -1;
+            c = br.read();
         }
-        return ans;
-    }
-
-    private static void reverse(char[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            char tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
+        while (c >= '0' && c <= '9') {
+            ans = ans * 10 + c - '0';
+            c = br.read();
         }
+        return ans * f;
     }
-
-    private static void reverse(int[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            int tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
-
-    private static void reverse(long[] s) {
-        int l = 0, r = s.length - 1;
-        while (l <= r) {
-            long tmp = s[l];
-            s[l] = s[r];
-            s[r] = tmp;
-            l++;
-            r--;
-        }
-    }
-
-    static Read sc = new Read();
-    private static final int Mod = (int) 1e9 + 7;
-    private static int T = 1;
-
+    
     public static void main(String[] args) throws IOException {
-        int T = sc.nextInt();
-        while (T-- > 0) {
-            solve();
-            // sc.bw.flush();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(br.readLine());
+        for (int i = 1; i <= n; ++i) {
+            a[i] = read(br);
         }
-        sc.bw.flush();
-        sc.bw.close();
+        for (int i = n; i >= 1; --i) {
+            b[i] = gcd(b[i + 1], a[i]);
+        }
+        for (int i = 1; i <= n; ++i) {
+            ans = gcd(ans, a[i] * b[i + 1]);
+        }
+        System.out.println(ans / b[1]);
     }
 
-    private static String[] ss;
-    private static String s;
-    private static char[] cs;
-    private static Set<Integer>[] g;
-    private static int m, n, k;
-    private static long[] nums, a, b, left, right, dp, f;
-
-    private static void solve() throws IOException {
-        n = sc.nextInt();
-        g = new Set[n + 1];
-        Arrays.setAll(g, e -> new HashSet<>());
-        for (int i = 1; i <= n; i++) {
-            int j = sc.nextInt();
-            g[i].add(j);
-            g[j].add(i);
-        }
-        vis = new boolean[n + 1];
-        int cnt0 = 0, cnt1 = 0;
-        for (int i = 1; i <= n; i++) {
-            isCycle = false;
-            cnt = 0;
-            if (!vis[i]) {
-                dfs(i, -1);
-                if (isCycle && cnt > 2) {
-                    cnt0++;
-                } else {
-                    cnt1++;
-                }
-            }
-        }
-        sc.println(cnt0 + Math.min(1, cnt1) + " " + (cnt0 + cnt1));
-
+    private static long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
     }
-    static boolean[] vis = new boolean[n + 1];
-    static boolean isCycle;
-    static int cnt;
-
-    private static void dfs(int x, int fa) {
-        cnt++;
-        vis[x] = true;
-        for (int y : g[x]) {
-            if (y != fa) {
-                if (vis[y]) {
-                    isCycle = true;
-                }else{
-                    dfs(y, x);
-                }
-            }
-        }
-    }
-
-
-
-
 }
