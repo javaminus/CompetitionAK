@@ -1,6 +1,6 @@
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -215,23 +215,30 @@ public class Main {
     private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
-        int n = sc.nextInt(), k = sc.nextInt();
-        k--;
-        List<Integer> list = new ArrayList<>();
-        long[] f = new long[n + 1];
-        f[0] = 1;
-        for (int i = 1; i <= n; i++) {
-            list.add(i);
-            f[i] = f[i - 1] * i;
+        s = sc.next();
+        int n = s.length();
+        int l = 0, r = n - 1;
+        HashSet<Character> set = new HashSet<>();
+        set.add('l');
+        set.add('q');
+        set.add('b');
+        while (set.contains(s.charAt(l))) {
+            l++;
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = n; i > 0; i--) {
-            int id = (int) (k / f[i - 1]);
-            sb.append(list.get(id)).append(" ");
-            list.remove(id);
-            k %= f[i - 1];
+        while (set.contains(s.charAt(r))) {
+            r--;
         }
-        System.out.println(sb.toString().trim());
+        String str = s.substring(l, r + 1);
+        sc.println(judge(str)?"Yes":"No");
+    }
+
+    private static boolean judge(String s) {
+        int l = 0, r = s.length() - 1;
+        while (l < r && s.charAt(l) == s.charAt(r)) {
+            l++;
+            r--;
+        }
+        return l >= r;
     }
 
 

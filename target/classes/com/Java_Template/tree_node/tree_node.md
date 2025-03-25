@@ -202,6 +202,12 @@ class TreeAncestor { // 推荐模板，理解
         for (int i = 0; i < n; i++) {
             dp[i][0] = parent[i];
         }
+//        for (int i = 0; i < n; i++) { // 这样写不行, 就是交换了循环的内外层，只能节点层在内部
+//            for (int j = 0; j < m - 1; j++) {
+//                int p = dp[i][j];
+//                dp[i][j + 1] = p < 0 ? -1 : dp[p][j];
+//            }
+//        }
         for (int i = 0; i < m - 1; i++) {
             for (int x = 0; x < n; x++) {
                 int p = dp[x][i];
@@ -446,9 +452,9 @@ class TreeAncestor{
         if (y == x) {
             return x;
         }
-        for (int i = dp[x].length - 1; i >= 0; i--) {
+        for (int i = dp[x].length - 1; i >= 0; i--) { // 类似二分查找
             int px = dp[x][i], py = dp[y][i];
-            if (px != py) {
+            if (px != py) { // 如果不相同就往上走，相同就往下走
                 x = px;
                 y = py;
             }
@@ -1501,6 +1507,48 @@ public class Main {
 >                 dp[x] = Math.max(dp[x], sum - dp[y] + size[y] - 1); // 这里的sum - dp[y]就是另一个子树的dp值
 >             }
 >         }
+>     }
+> ```
+>
+> 
+
+> 题意：题目描述
+>
+> Z国共有N个城市,标号1..N.其中1号为首都. 一共有N−1条双向道路,连通了N个城市.其中有些路年久失修了. 现在可以选择一些城市,被选择的城市到首都之间的道路都将被重新修整. 请选择个数最少的若干城市,使得所有损坏的道路都能得到修复.
+>
+> ```java
+>     private static void solve() throws IOException {
+>         n = sc.nextInt();
+>         g = new List[n + 1];
+>         Arrays.setAll(g, e -> new ArrayList<>());
+>         for (int i = 0; i < n - 1; i++) {
+>             int x = sc.nextInt(), y = sc.nextInt(), z = sc.nextInt();
+>             g[x].add(new int[]{y, z});
+>             g[y].add(new int[]{x, z});
+>         }
+>         dfs(1, -1, 0);
+>         sc.println(ans.size());
+>         for (int x : ans) {
+>             sc.print(x + " ");
+>         }
+>     }
+> 
+> 
+>     static List<Integer> ans = new ArrayList<>();
+>     private static boolean dfs(int x, int fa, int z) {
+>         boolean hasSonDamage = false; // 子节点是否有损坏
+>         for (int[] y : g[x]) {
+>             if (y[0] != fa) {
+>                 if (dfs(y[0], x, y[1])) {
+>                     hasSonDamage = true;
+>                 }
+>             }
+>         }
+>         if (z == 2 && !hasSonDamage) { // 当前节点需要修复，并且子节点不需要修复
+>             ans.add(x);
+>             return true;
+>         }
+>         return hasSonDamage;
 >     }
 > ```
 >

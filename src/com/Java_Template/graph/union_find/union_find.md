@@ -31,7 +31,7 @@
                 int l = Integer.parseInt(ss[1]) - 1, r = Integer.parseInt(ss[2]) - 1;
                 for (int i = l; i < r; i++) {
                     union(i, i + 1);
-                    i = find(i) - 1;
+                    i = find(i) - 1; // 我来解释一下为什么这里要-1，因为用的for循环，后面会+1，这里减1正好抵消。
                 }
             }else{
                 int x = Integer.parseInt(ss[1]) - 1;

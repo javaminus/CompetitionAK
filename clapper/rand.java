@@ -1,11 +1,13 @@
 public class Rand {
     public static void main(String[] args) {
-        int T = 1;
-        // System.out.println(T);
+        int T = 10;
+        System.out.println(T);
         for (int i = 0; i < T; i++) {
-            int n = generate(5, 50);
-            int k = generate(1, 100000);
-            System.out.println(n + " " + k);
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < 15; j++) {
+                sb.append((char) ('a' + (int) (Math.random() * 26)));
+            }
+            System.out.println(sb.toString());
         }
     }
     public static int generate(int l, int r) {

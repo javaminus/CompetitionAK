@@ -1,67 +1,52 @@
-import java.io.*;
-import java.util.*;
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 public class Standard {
-    public static void main(String[] args) throws IOException {
-        // 使用 BufferedReader 和 PrintWriter 提高输入输出效率
+    static long ans=0;
+    public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        PrintWriter out = new PrintWriter(new BufferedOutputStream(System.out));
-
-        // 读取测试用例数量
-        int T = Integer.parseInt(br.readLine().trim());
-        while (T-- > 0) {
-            // 读取 n 和 k，注意 k 为 1-indexed
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int n = Integer.parseInt(st.nextToken());
-            long k = Long.parseLong(st.nextToken());
-
-            // 预先计算阶乘，fact[i] 表示 i!；n 较大时可能溢出，但一般题目中 n 较小
-            long[] fact = new long[n + 1];
-            fact[0] = 1;
-            boolean overflow = false;
-            for (int i = 1; i <= n; i++) {
-                // 检查乘法是否可能溢出，若溢出则停止计算
-                if (Long.MAX_VALUE / fact[i - 1] < i) {
-                    overflow = true;
-                    break;
-                }
-                fact[i] = fact[i - 1] * i;
+        PrintWriter out=new PrintWriter(System.out);
+        int n=Integer.parseInt(br.readLine());
+        while (n-->0){
+            if(check(br.readLine())){
+                System.out.println("Yes");
             }
-
-            // 如果 n 较大或者 k 超出所有排列数量，则输出 -1
-            if (!overflow && k > fact[n]) {
-                out.println("-1");
-                continue;
-            } else if (overflow) {
-                // 当发生溢出时，题目数据可以保证不会超过范围（通常 n 会比较小）
-                // 若出现溢出，这里简单处理为不输出结果
-                out.println("-1");
-                continue;
+            else{
+                System.out.println("No");
             }
-
-            // 转换为 0 索引方便计算
-            k--;
-            // 初始化存放可选数字的列表，数字为 1, 2, ..., n
-            List<Integer> numbers = new ArrayList<>();
-            for (int i = 1; i <= n; i++) {
-                numbers.add(i);
-            }
-
-            // 使用贪心算法构造第 k 小的排列
-            StringBuilder sb = new StringBuilder();
-            for (int i = n; i >= 1; i--) {
-                int index = (int) (k / fact[i - 1]);
-                sb.append(numbers.get(index)).append(" ");
-                numbers.remove(index);
-                k %= fact[i - 1];
-            }
-
-            out.println(sb.toString().trim());
         }
-
-        // 刷新并关闭输出流
         out.flush();
         out.close();
-        br.close();
+    }
+    public static  boolean check(String s){
+        int min=Integer.MAX_VALUE,max=Integer.MIN_VALUE;
+        int n=s.length();
+        char[] c=s.toCharArray();
+        for (int i = 0; i < s.length(); i++) {
+            if(c[i]!='l'&&c[i]!='q'&&c[i]!='b'){
+                min=Math.min(min,i);
+                max=Math.max(max,i);
+            }
+        }
+        //如果没有不等于的
+        if(min==Integer.MIN_VALUE) return true;
+        //如果中间不是回文串
+        if(!isReverse(c,min,max))return false;
+        //左侧多于右侧
+        if(min+1>n-max) return false;
+        //如果右侧多于左侧
+        //判断这里是否形成回文
+        for (int i = 0; i < min; i++) {
+            if(c[i]!=c[max+min-1-i]) return false;
+        }
+        return true;
+    }
+    public  static boolean isReverse(char[] c,int l,int r){
+        while(l<r){
+            if(c[l]!=c[r]) return false;
+            l++;
+            r--;
+        }
+        return true;
     }
 }

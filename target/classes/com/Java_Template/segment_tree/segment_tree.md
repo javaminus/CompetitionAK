@@ -14,12 +14,17 @@
 
 ## [1、静态线段树 + 区间和](https://www.luogu.com.cn/problem/P3372)
 
+如题，已知一个数列 {ai}，你需要进行下面两种操作：
+
+1. 将某区间每一个数加上 k。
+2. 求出某区间每一个数的和。
+
 ```java
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
-public class Main {
+public class Main { // 选定区间[x, y]加z
 	// 快读已经删除
     public static void main(String[] args) throws IOException {
         // int T = sc.nextInt();
@@ -120,6 +125,13 @@ public class Main {
 ```
 
 ## [2、静态线段树 + 区间开关灯](https://www.luogu.com.cn/problem/P3870)
+
+现有 n 盏灯排成一排，从左到右依次编号为：1，2，……，n。然后依次执行 m 项操作。
+
+操作分为两种：
+
+1. 指定一个区间 [a,b]，然后改变编号在这个区间内的灯的状态（把开着的灯关上，关着的灯打开）；
+2. 指定一个区间 [a,b]，要求你输出这个区间内有多少盏灯是打开的。
 
 ```java
 import java.io.*;
@@ -228,6 +240,11 @@ public class Main {
 ```
 
 ## [3、静态线段树 + 等差数列修改区间](https://www.luogu.com.cn/problem/P1438)
+
+维护一个数列 $a_i$，支持两种操作：
+
+- `1 l r K D`：给出一个长度等于 r−l+1 的等差数列，首项为 K，公差为 D，并将它对应加到 [l,r] 范围中的每一个数上。即：令 al=al+K,al+1=al+1+K+D…ar=ar+K+(r−l)×D。
+- `2 p`：询问序列的第 p 个数的值 $a_p$。
 
 > 本题正解很明显就是：**线段树**
 >
@@ -343,7 +360,13 @@ public class Main {
 }
 ```
 
-## [4、静态线段树 + 区间修改（累加+赋值） + 区间最大值](https://www.luogu.com.cn/problem/P1438)
+## [4、静态线段树 + 区间修改（累加+赋值） + 区间最大值](https://www.luogu.com.cn/problem/P1253)
+
+给定一个长度为 n 的序列 a，要求支持如下三个操作：
+
+1. 给定区间 [l,r]，将区间内每个数都修改为 x。
+2. 给定区间 [l,r]，将区间内每个数都加上 x。
+3. 给定区间 [l,r]，求区间内的最大值。
 
 > 评测机卡java  9/10  最后1e6过不去
 >
@@ -484,6 +507,12 @@ public class Main {
 
 ## [5、静态线段树 + 区间修改（乘法+加法） + 区间和](https://www.luogu.com.cn/problem/P3373)
 
+如题，已知一个数列，你需要进行下面三种操作：
+
+- 将某区间每一个数乘上 x；
+- 将某区间每一个数加上 x；
+- 求出某区间每一个数的和。
+
 ```java
 import java.io.*;
 import java.math.BigInteger;
@@ -590,6 +619,12 @@ public class Main {
 ```
 
 ## [6、静态线段树 + 单点修改+（区间里面连续区间，有负数）最大值查询](https://www.luogu.com.cn/problem/P4513)
+
+在小新家附近有一条“公园路”，路的一边从南到北依次排着 n 个公园，小白早就看花了眼，自己也不清楚该去哪些公园玩了。
+
+一开始，小白就根据公园的风景给每个公园打了分。小新为了省事，每次遛狗的时候都会事先规定一个范围，小白只可以选择第 a 个和第 b 个公园之间（包括 a,b 两个公园）选择连续的一些公园玩。小白当然希望选出的公园的分数总和尽量高咯。同时，由于一些公园的景观会有所改变，所以，小白的打分也可能会有一些变化。
+
+那么，就请你来帮小白选择公园吧。
 
 ```java
 class Main{ // 又卡我java内存
@@ -3557,12 +3592,12 @@ class Solution { // 在线 + 线段树
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
-## [3410. 删除所有值为某个元素后的最大子数组和](https://leetcode.cn/problems/maximize-subarray-sum-after-removing-all-occurrences-of-one-element/) 
+## [3410. 删除所有值为某个元素后的最大子数组和](https://leetcode.cn/problems/maximize-subarray-sum-after-removing-all-occurrences-of-one-element/)
 
 给你一个数组`nums`,操作可以删除数组中值等于`x`的元素（只能一次），求能得到的最大子数组和为多少？
 
 ```java
-class Solution {
+class Solution { // 单点更新+区间查询，所以需要的是pushDown()
     public long maxSubarraySum(int[] nums) {
         //本质就是53最大子数组和 枚举要删除的数字然后变成0，枚举完了再恢复
         int n=nums.length;
@@ -3572,7 +3607,7 @@ class Solution {
             st.update(1,0,n-1,i,nums[i]);
             map.computeIfAbsent(nums[i],j->new ArrayList<>()).add(i);
         }
-        long max=st.max[1];
+        long max=st.max[1]; // 一个都不删除的情况
         if(max<=0) return max;
         for(var a:map.entrySet()){
             int k=a.getKey();
