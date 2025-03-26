@@ -63,7 +63,7 @@ class Solution {
 
 ```java
 class Solution {
-    public int[][] rangeAddQueries(int n, int[][] queries) { // 二维差分模板
+    public int[][] rangeAddQueries(int n, int[][] queries) { // 二维差分模板  不推荐
         int[][] diff = new int[n + 1][n + 1]; // diff是差分前缀和，表示（0，0）到（n,n）的和，这里是[0，n]闭区间
         int[][] ans = new int[n][n];
         for (int[] q : queries) {

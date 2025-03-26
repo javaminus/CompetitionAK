@@ -3597,6 +3597,139 @@ class Solution { // 在线 + 线段树
 给你一个数组`nums`,操作可以删除数组中值等于`x`的元素（只能一次），求能得到的最大子数组和为多少？
 
 ```java
+import java.util.*;
+
+public class Solution {
+    // 定义一个足够小的负无穷值，保证不会和正常数据冲突
+    static final long NEG_INF = -1000000000000000000L;
+
+    // 线段树节点，存储区间 [l, r] 上的所有信息：
+    // 区间和、区间最佳前缀和、区间最佳后缀和以及区间内最大的子数组和
+    static class Node {
+        int l, r;
+        long sum, prefix, suffix, max;
+
+        public Node(int l, int r) {
+            this.l = l;
+            this.r = r;
+        }
+    }
+
+    // 线段树实现，用于维护数组并查询最大子数组和
+    static class SegmentTree {
+        private Node[] tree;
+        private int n;
+        private int[] arr;
+
+        public SegmentTree(int[] arr) {
+            this.n = arr.length;
+            this.arr = arr;
+            tree = new Node[n * 4];
+            build(1, 0, n - 1);
+        }
+
+        // 递归建树
+        private void build(int idx, int l, int r) {
+            tree[idx] = new Node(l, r);
+            if (l == r) {
+                long val = arr[l];
+                tree[idx].sum = val;
+                tree[idx].prefix = val;
+                tree[idx].suffix = val;
+                tree[idx].max = val;
+                return;
+            }
+            int mid = (l + r) / 2;
+            build(idx * 2, l, mid);
+            build(idx * 2 + 1, mid + 1, r);
+            pushUp(idx);
+        }
+
+        // 合并左右孩子的信息到当前节点
+        private void pushUp(int idx) {
+            Node left = tree[idx * 2];
+            Node right = tree[idx * 2 + 1];
+            tree[idx].sum = left.sum + right.sum;
+            tree[idx].prefix = Math.max(left.prefix, left.sum + right.prefix);
+            tree[idx].suffix = Math.max(right.suffix, right.sum + left.suffix);
+            tree[idx].max = Math.max(Math.max(left.max, right.max), left.suffix + right.prefix);
+        }
+
+        // 单点更新，将下标 pos 的值更新为 val
+        public void updatePoint(int pos, long val) {
+            updatePoint(1, pos, val);
+        }
+
+        private void updatePoint(int idx, int pos, long val) {
+            Node node = tree[idx];
+            if (node.l == node.r) {
+                node.sum = val;
+                node.prefix = val;
+                node.suffix = val;
+                node.max = val;
+                return;
+            }
+            int mid = (node.l + node.r) / 2;
+            if (pos <= mid) {
+                updatePoint(idx * 2, pos, val);
+            } else {
+                updatePoint(idx * 2 + 1, pos, val);
+            }
+            pushUp(idx);
+        }
+
+        // 查询整个数组的最大子数组和
+        public long queryMax() {
+            return tree[1].max;
+        }
+    }
+
+    // 用户可选的删除操作：对于每个在 nums 中出现的数 X，删除所有值为 X 的元素（模拟删除方法为将该位置值更新为 NEG_INF）
+    // 注意：删除后数组不能为空，因此值 X 不能出现在整个数组中（全部删除会导致数组为空）。
+    public static void main(String[] args) {
+        // 示例输入，用户可根据需要修改测试数组
+        int[] nums = {1, -2, 3, 4, -5, 3};
+        int n = nums.length;
+
+        // 记录每个数字出现的所有下标
+        Map<Integer, List<Integer>> posMap = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            posMap.computeIfAbsent(nums[i], k -> new ArrayList<>()).add(i);
+        }
+
+        // 构造线段树，维护原数组信息
+        SegmentTree segTree = new SegmentTree(nums);
+        // 初始不删除任何元素时的最大子数组和
+        long ans = segTree.queryMax();
+
+        // 遍历所有可能的候选删除数 X
+        for (Map.Entry<Integer, List<Integer>> entry : posMap.entrySet()) {
+            int x = entry.getKey();
+            List<Integer> posList = entry.getValue();
+            // 如果删除所有 X 会导致数组为空，则跳过
+            if (posList.size() == n) continue;
+
+            // 模拟删除，将所有位置的值更新为 NEG_INF
+            for (int pos : posList) {
+                segTree.updatePoint(pos, NEG_INF);
+            }
+            // 更新后的最大子数组和
+            long curMax = segTree.queryMax();
+            ans = Math.max(ans, curMax);
+            // 恢复原来的值，撤销删除操作
+            for (int pos : posList) {
+                segTree.updatePoint(pos, nums[pos]);
+            }
+        }
+
+        System.out.println("所有可能得到的数组中的最大子数组和为: " + ans);
+    }
+}
+```
+
+
+
+```java
 class Solution { // 单点更新+区间查询，所以需要的是pushDown()
     public long maxSubarraySum(int[] nums) {
         //本质就是53最大子数组和 枚举要删除的数字然后变成0，枚举完了再恢复

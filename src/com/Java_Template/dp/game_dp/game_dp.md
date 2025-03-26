@@ -133,7 +133,68 @@ public class Code01_BashGameSG {
 > 题意：给你一根长为x的木头，每次只能砍质数p，问先手能赢吗？
 
 ```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
+public class Main {
+    // sg() 函数：解决“砍柴游戏”的必胜判断问题
+    public static void sg() throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine().trim());
+        int[] nArr = new int[T];
+        int maxN = 0;
+        for (int i = 0; i < T; i++) {
+            nArr[i] = Integer.parseInt(br.readLine().trim());
+            if(nArr[i] > maxN) {
+                maxN = nArr[i];
+            }
+        }
+
+        // 预处理素数：埃氏筛
+        boolean[] isPrime = new boolean[maxN + 1];
+        for (int i = 2; i <= maxN; i++) {
+            isPrime[i] = true;
+        }
+        for (int p = 2; p * p <= maxN; p++) {
+            if(isPrime[p]) {
+                for (int multiple = p * p; multiple <= maxN; multiple += p) {
+                    isPrime[multiple] = false;
+                }
+            }
+        }
+
+        // dp[i] = true 表示状态 i 为必胜态，否则为必败
+        boolean[] dp = new boolean[maxN + 1];
+        // 已知状态
+        if(maxN >= 0) dp[0] = false;
+        if(maxN >= 1) dp[1] = false;
+
+        for (int i = 2; i <= maxN; i++) {
+            dp[i] = false;
+            // 枚举所有可能的素数步长 p，注意 p 需满足 2 <= p <= i
+            for (int p = 2; p <= i; p++) {
+                if(isPrime[p]) {
+                    if (!dp[i - p]) { // 若走这一步后对手处于必败状态，则当前状态必胜
+                        dp[i] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 根据 dp 数组输出答案：必胜 (先手赢) 输出 1，否则输出 0
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < T; i++) {
+            sb.append(dp[nArr[i]] ? "1" : "0").append("\n");
+        }
+        System.out.print(sb);
+    }
+
+    public static void main(String[] args) throws IOException {
+        sg();
+    }
+}
 ```
 
 > 题意：
