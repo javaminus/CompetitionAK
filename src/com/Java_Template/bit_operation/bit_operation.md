@@ -319,20 +319,19 @@ class Solution {
 [https://leetcode.cn/problems/number-of-subarrays-with-and-value-of-k/description/](https://leetcode.cn/problems/number-of-subarrays-with-and-value-of-k/description/)
 
 ```java
-import java.util.HashMap;
-
 class Solution {
-    public long countSubarrays(int[] nums, int k) { // 经典logtrick题目, 解法特别多，这是我觉得最简单的解法
-        HashMap<Integer, Integer> prev = new HashMap<>();
-        long ans = 0;
-        for (int x : nums) {
-            HashMap<Integer, Integer> curr = new HashMap<>();
-            for (Integer y : prev.keySet()) {
-                curr.merge(y & x, prev.get(y), Integer::sum);
+    public long countSubarrays(int[] nums, int k) {
+        int n = nums.length;
+        long ans = 0, cnt = 0;
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            cnt += x == k ? 1 : 0;
+            for (int j = i - 1; j >= 0 && (nums[j] & x) != nums[j]; j--) {
+                cnt -= nums[j] == k ? 1 : 0;
+                nums[j] &= x;
+                cnt += nums[j] == k ? 1 : 0;
             }
-            curr.merge(x, 1, Integer::sum);
-            prev = curr;
-            ans += prev.getOrDefault(k, 0);
+            ans += cnt;
         }
         return ans;
     }
@@ -506,28 +505,23 @@ class Solution {
 
 ```java
 class Solution {
-    public int minimumSubarrayLength(int[] nums, int k) {
-        int ans = Integer.MAX_VALUE;
-        List<int[]> ors = new ArrayList<>(); // 保存 (右端点为 i 的子数组 OR, 该子数组左端点的最大值)
-        for (int i = 0; i < nums.length; i++) {
-            ors.add(new int[]{0, i});
-            int j = 0;
-            for (int[] or : ors) {
-                or[0] |= nums[i];
-                if (or[0] >= k) {
-                    ans = Math.min(ans, i - or[1] + 1);
-                }
-                if (ors.get(j)[0] == or[0]) {
-                    ors.get(j)[1] = or[1]; // 原地去重：合并相同值，左端点取靠右的
-                } else {
-                    ors.set(++j, or);
+    public int minimumSubarrayLength(int[] nums, int k) { // 超级容易理解的模板
+        int res = Integer.MAX_VALUE, n = nums.length;
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            if (x >= k) {
+                return 1;
+            }
+            for (int j = i - 1; j >= 0 && (nums[j] | x) != nums[j]; j--) {
+                nums[j] |= x;
+                if (nums[j] >= k) {
+                    res = Math.min(res, i - j + 1);
                 }
             }
-            ors.subList(j + 1, ors.size()).clear(); // 去重：移除多余元素
         }
-        return ans == Integer.MAX_VALUE ? -1 : ans;
+        return res == Integer.MAX_VALUE ? -1 : res;
     }
-} // 发现一个问题没有，就是我们在便利ors的时候，同时也在修改ors。如果是add()、remove()这种操作，就会报错，但是set()是不会报错的。
+}
 ```
 
 2680\. 最大或值
@@ -622,30 +616,21 @@ class Solution {
 [https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/](https://leetcode.cn/problems/smallest-subarrays-with-maximum-bitwise-or/description/)
 
 ```java
-import java.util.*;
-
 class Solution {
     public int[] smallestSubarrays(int[] nums) {
         int n = nums.length;
-        int[] ans = new int[n];
-        List<int[]> ors = new ArrayList<int[]>(); // 按位或的值 + 对应子数组的右端点的最小值
-        for (int i = n - 1; i >= 0; --i) { // 倒叙太牛了
-            ors.add(new int[]{0, i});
-            int k = 0;
-            for (int[] or : ors) {
-                or[0] |= nums[i];
-                if (ors.get(k)[0] == or[0])
-                    ors.get(k)[1] = or[1]; // 合并相同值，下标取最小的
-                else ors.set(++k, or);
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            int x = nums[i];
+            res[i] = 1;
+            for (int j = i - 1; j >= 0 && (nums[j] | x) != nums[j]; j--) {
+                nums[j] |= x;
+                res[j] = i - j + 1;
             }
-            ors.subList(k + 1, ors.size()).clear();
-            // 本题只用到了 ors[0]，如果题目改成任意给定数值，可以在 ors 中查找
-            ans[i] = ors.get(0)[1] - i + 1;
         }
-        return ans;
+        return res;
     }
 }
-
 ```
 
 3108\. 带权图里旅途的最小代价(两种做法：dfs+并查集)
@@ -843,27 +828,19 @@ class Solution {
 [https://leetcode.cn/problems/bitwise-ors-of-subarrays/description/](https://leetcode.cn/problems/bitwise-ors-of-subarrays/description/)
 
 ```java
-import java.util.ArrayList;
 import java.util.HashSet;
 
 class Solution {
-    public int subarrayBitwiseORs(int[] nums) {
-        int n = nums.length;
-        ArrayList<int[]> ors = new ArrayList<int[]>();
+    public int subarrayBitwiseORs(int[] arr) {
+        int n = arr.length;
         HashSet<Integer> set = new HashSet<>();
-        for (int i = n - 1; i >= 0; i--) {
-            ors.add(new int[]{0, i});
-            int k = 0;
-            for (int[] or : ors) {
-                or[0] |= nums[i];
-                if (ors.get(k)[0] == or[0]) {
-                    ors.get(k)[1] = or[1];
-                }else{
-                    ors.set(++k, or);
-                }
-                set.add(or[0]);
+        for (int i = 0; i < n; i++) {
+            int x = arr[i];
+            set.add(x);
+            for (int j = i - 1; j >= 0 && (arr[j] | x) != arr[j]; j--) {
+                arr[j] |= x;
+                set.add(arr[j]);
             }
-            ors.subList(k + 1, ors.size()).clear();
         }
         return set.size();
     }
@@ -907,26 +884,17 @@ Winston 构造了一个如上所示的函数 `func` 。他有一个整数数�
 [https://leetcode.cn/problems/find-a-value-of-a-mysterious-function-closest-to-target/description/](https://leetcode.cn/problems/find-a-value-of-a-mysterious-function-closest-to-target/description/)
 
 ```java
-import java.util.ArrayList;
-
 class Solution {
-    public int closestToTarget(int[] nums, int target) {
-        int n = nums.length;
-        ArrayList<int[]> ands = new ArrayList<>();
+    public int closestToTarget(int[] arr, int target) {
+        int n = arr.length;
         int ans = Integer.MAX_VALUE;
-        for (int i = n - 1; i >= 0; i--) {
-            ands.add(new int[]{nums[i], i}); // 如果是Or运算这里初始化为{0，i}
-            int k = 0;
-            for (int[] and : ands) {
-                and[0] &= nums[i];
-                if (and[0] == ands.get(k)[0]) {
-                    ands.get(k)[1] = and[1];
-                }else{
-                    ands.set(++k, and);
-                }
-                ans = Math.min(ans, Math.abs(and[0] - target));
+        for (int i = 0; i < n; i++) {
+            int x = arr[i];
+            ans = Math.min(ans, Math.abs(arr[i] - target));
+            for (int j = i - 1; j >= 0 && (arr[j] & x) != arr[j]; j--) {
+                arr[j] &= x;
+                ans = Math.min(ans, Math.abs(arr[j] - target));
             }
-            ands.subList(k + 1, ands.size()).clear();
         }
         return ans;
     }
