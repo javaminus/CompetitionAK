@@ -776,6 +776,44 @@ public class Main {
 }
 ```
 
+####【模板】树上直径
+
+```java
+    private static void solve() throws IOException {
+        n = sc.nextInt();
+        g = new List[n + 1];
+        dist = new int[n + 1];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        for (int i = 0; i < n - 1; i++) {
+            int x = sc.nextInt(), y = sc.nextInt();
+            g[x].add(y);
+            g[y].add(x);
+        }
+        k = 0;
+        dfs(1, 0);
+        dist[k] = 0; // 这里的k是起点
+        dfs(k, 0); // 跑完这个dfs之后的k就是终点
+        sc.println(dist[k] >= 3 ? "Yes" : "No");
+    }
+
+    private static int[] dist;
+    // 树上直径
+    static void dfs(int x, int fa) {
+        for (int y : g[x]) {
+            if (y != fa) {
+                dist[y] = dist[x] + 1;
+                if (dist[y] > dist[k]) {
+                    k = y;
+                    dist[k] = dist[y];
+                }
+                dfs(y, x);
+            }
+        }
+    }
+```
+
+
+
 #### [【模板】树的直径(上的核心路径，求任意点到核心路径的最长距离最小)](https://www.luogu.com.cn/problem/P1099)
 
 > 两次dfs求图的直径，从点1出发最远点为x, 然后从点x出发最远点为y。那么路径x-y就图的直径

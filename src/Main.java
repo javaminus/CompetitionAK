@@ -214,7 +214,7 @@ public class Main {
     private static long[] nums, a, b, left, right, dp, f;
 
     private static void solve() throws IOException {
-        
+
     }
 
 
