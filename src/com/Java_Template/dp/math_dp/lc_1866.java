@@ -8,7 +8,7 @@ class lc_1866 { // 第一类斯特林数
     // 圆排列：https://blog.csdn.net/destiny_balabala/article/details/108875315
     private final static long Mod = (long) 1e9 + 7;
     static {
-        dp[0][0] = 1;
+        dp[0][0] = 1; 
         for (int i = 1; i <= 1000; i++) {
             for (int j = 1; j <= i; j++) {
                 dp[i][j] = (dp[i - 1][j - 1] + (i - 1) * dp[i - 1][j]) % Mod;
@@ -19,6 +19,13 @@ class lc_1866 { // 第一类斯特林数
     public int rearrangeSticks(int n, int k) {
         return (int) dp[n][k];
     }
+    
+    // n个人坐k张桌子，不区分桌子，只区分人如何坐的；
+    // dp[i][j]表示i个人坐j个桌子的方案数；
+    // 首先第i个人单独坐一个桌子，那么前i - 1个人坐j - 1张桌子dp[i - 1][j - 1]；
+    // 然后第i个人和别人一起坐，有前i - 1个人坐j张桌子dp[i - 1][j]，然后坐在i- 1个人的左边，有dp[i - 1][j]*(i - 1)种方案；
+    // 总方案数：dp[i][j] = dp[i - 1][j - 1] + (i - 1) * dp[i - 1][j]
+    
 
     // 这个递推式基于组合数学中的「**第一类斯特林数**」的定义，它描述的是如何将 `n` 个不同的物体划分成 `k` 个**非空**的圆排列的方式数。为了理解这个递推式，我们可以逐步分析问题：
     //

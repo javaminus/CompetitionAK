@@ -1,11 +1,14 @@
 package com.Java_Template.string.template;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * https://www.bilibili.com/video/BV1Ag411o7US/?spm_id_from=333.999.0.0&vd_source=607514df4428a309d5130d87a0423d0c
  */
 public class MyKmp {
-    private static int[] getNext(String pattern) { // 求next数组
+    private static int[] getNext(String pattern) { // 求next数组，i下标一定初始化为1
         int n = pattern.length();
         int[] next = new int[n]; // next[0] = 0
         for (int i = 1, j = 0; i < n; i++) {
@@ -34,6 +37,24 @@ public class MyKmp {
             }
         }
         return -1;
+    }
+
+    private static List<Integer> findAll(String s, String pattern, int[] next) {
+        List<Integer> result = new ArrayList<>();
+        int n = s.length();
+        for (int i = 0, j = 0; i < n; i++) {
+            while (j > 0 && s.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1];
+            }
+            if (s.charAt(i) == pattern.charAt(j)) {
+                j++;
+            }
+            if (j == pattern.length()) {
+                result.add(i - j + 1); // 记录匹配位置
+                j = next[j - 1]; // 继续匹配下一个
+            }
+        }
+        return result;
     }
 
     public static void printNext(String s){

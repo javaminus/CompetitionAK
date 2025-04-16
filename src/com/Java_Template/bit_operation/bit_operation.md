@@ -1420,6 +1420,62 @@ class Solution {
 }
 ```
 
+# 【模板】异或前缀和
+
+> 题意：
+>
+> 给定一个长度为 n 的数组和一个长度为 n 的二进制串 s，现有两个操作：
+>
+> 1. `1 l r`，表示将 $l≤i≤r$ 的所有 $s_i$ 取反（0 变 1，1 变 0）；
+> 2. `2 g`($g∈{0,1}$)，表示将所有 $s_i=g$ 的 $a_i$ 求异或和；
+>
+> $1≤n≤10^5,1≤t≤10^4$.
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();
+		int[] a = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			a[i] = Integer.parseInt(ss[i]);
+		}
+		String s = sc.next();
+		int[] xor = new int[n+1];
+		int res0 = 0, res1 = 0;
+		for(int i = 0;i<n;i++) {
+			xor[i+1] = xor[i]^a[i];
+			if(s.charAt(i)=='0') {
+				res0^=a[i];
+			}else {
+				res1^=a[i];
+			}
+		}
+		
+		int q = sc.nextInt();
+		while(q-->0) {
+			ss = sc.nextLine().split(" ");
+			int op = Integer.parseInt(ss[0]);
+			if(op==2) {
+				int x = Integer.parseInt(ss[1]);
+				if(x==0) {
+					sc.print(res0+" ");
+				}else {
+					sc.print(res1+" ");
+				}
+			}else {
+				int l= Integer.parseInt(ss[1]) - 1, r = Integer.parseInt(ss[2]) - 1;
+				res0^=xor[r+1]^xor[l];
+				res1^=xor[r+1]^xor[l];
+			}
+		}
+		sc.print("\n");
+	}
+}
+```
+
+
+
 # §6.4 0-1 字典树（异或字典树）
 
 421\. 数组中两个数的最大异或值（板子）
@@ -2247,7 +2303,7 @@ class Solution {
 > 请问小蓝可以获得的最大分数是多少？
 
 ```java
-public class Main {
+public class Main { // 这题好像不用建树！！！
     static Read sc = new Read();
     private static final int Mod = (int) 1e9 + 7;
     private static int T = 1;

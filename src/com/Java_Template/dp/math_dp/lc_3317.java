@@ -4,6 +4,12 @@ package com.Java_Template.dp.math_dp;
  * 第二类斯特林数
  * 题解：https://leetcode.cn/problems/find-the-number-of-possible-ways-for-an-event/solutions/2948578/zu-he-shu-xue-di-er-lei-si-te-lin-shu-py-e6sv/
  */
+ 
+ 
+ 
+// n个人进m个房间的方案数；
+// 第n个人单独进一个房间：dp[n - 1][m - 1];
+// 第n个人进已经有人的房间：dp[n - 1][m]*m
 public class lc_3317 { // 这里就学一个东西，将i个人划分成 j 个非空集合的方案数（这 j 个集合没有顺序）。递推式如何写？
     private static final int Mod = (int) 1e9 + 7;
     private static final long[][] dp = new long[1001][1001];
