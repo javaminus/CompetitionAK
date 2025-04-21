@@ -1334,7 +1334,7 @@ class Solution { // 递归
     private static int[][] dirs = new int[][]{{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
     public int maxMoves(int kx, int ky, int[][] positions) {
         int n = positions.length;
-        int[][][] dist = new int[n][50][50];
+        int[][][] dist = new int[n][50][50]; // dist[i][x][y]表示坐标（x,y）移动到第i个兵的最少
         for (int i = 0; i < n; i++) {
             int[][] d = dist[i];
             for (int j = 0; j < 50; j++) {

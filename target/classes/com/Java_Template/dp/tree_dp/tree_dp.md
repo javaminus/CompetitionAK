@@ -262,3 +262,103 @@ class Solution {
 }
 ```
 
+## [数形DP  F. Maximum White Subtree ](https://codeforces.com/problemset/problem/1324/F)
+
+- 给定一棵 n 个节点无根树，每个节点 u 有一个颜色 $a_u$，若 $a_u$ 为 0 则 u 是黑点，若 $a_u$ 为 1 则 u 是白点。
+- 对于每个节点 u，选出一个**包含** u 的连通子图，设子图中白点个数为 cnt1，黑点个数为 cnt2，请最大化 cnt1−cnt2。并输出这个值。
+- $1≤n≤2×10^5，0≤a_u≤1$。
+
+```java
+	public static void solve() throws IOException {
+		n = sc.nextInt();
+		ss = sc.nextLine().split(" ");
+		a = new int[n+1];
+		for(int i = 0;i<n;i++) {
+			a[i+1] = Integer.parseInt(ss[i])==1?1:-1;
+		}
+		g = new List[n+1];
+		Arrays.setAll(g, e->new ArrayList<Integer>());
+		for(int i = 0;i<n - 1;i++) {
+			int x = sc.nextInt(), y = sc.nextInt();
+			g[x].add(y);
+			g[y].add(x);
+		}
+		dp1 = new int[n+1];
+		dp2 = new int[n+2];
+		dfs1(1, 0);
+		dfs2(1, 0);
+		for(int i = 1;i<=n;i++) {
+			sc.print(dp2[i]+" ");
+		}
+		
+	}
+	
+	static int[] dp1, dp2;
+	static void dfs1(int x, int fa) {
+		dp1[x]+=a[x];
+		for(int y:g[x]) {
+			if(y!=fa) {
+				dfs1(y, x);
+				dp1[x]+=Math.max(0, dp1[y]);
+			}
+		}
+	}
+	
+	static void dfs2(int x, int fa) { // 换根dp
+		dp2[x] = dp1[x];
+		if(fa!=0) {
+			dp2[x]+=Math.max(0, dp2[fa] - Math.max(0, dp1[x]));
+		}
+		for(int y:g[x]) {
+			if(y!=fa) {
+				dfs2(y, x);
+			}
+		}
+	}
+```
+
+## [CF161D Distance in Tree](https://codeforces.com/problemset/problem/161/D)
+
+输入点数为`N`一棵树
+
+求树上长度恰好为`K`的路径个数
+
+```java
+	public static void solve() throws IOException {
+		n =sc.nextInt();
+		k = sc.nextInt();
+		g = new List[n+1];
+		Arrays.setAll(g, e->new ArrayList<Integer>());
+		for(int i = 0;i<n - 1;i++) {
+			int x = sc.nextInt(), y = sc.nextInt();
+			g[x].add(y);
+			g[y].add(x);
+		}
+		res = 0;
+		dp = new long[n+1][k+1];
+		dfs(1, 0);
+		sc.print(res+"\n");
+	}
+	
+	static long res;
+	static long[][] dp; // 表示到点i距离为j的点个数
+	private static void dfs(int x, int fa) {
+		dp[x][0] = 1;
+		for(int y:g[x]) {
+			if(y!=fa) {
+				dfs(y, x);
+				for(int i = 0;i<k;i++) {
+					res+=dp[x][i]*dp[y][k - i - 1]; // 这里之所以不是k - i，因为x-y之间有了一条边
+				}
+				for(int i = 0;i<k;i++) {
+					dp[x][i+1]+=dp[y][i];
+				}
+			}
+		}
+	}
+```
+
+
+
+
+

@@ -70,15 +70,10 @@ public class Code01_BashGameSG {
 	// 其实把sg表打印之后，也可以发现性质，也就是打表找规律
 	public static String bash2(int n, int m) {
 		int[] sg = new int[n + 1];
-		boolean[] appear = new boolean[m + 1];
-		for (int i = 1; i <= n; i++) {
-			Arrays.fill(appear, false);
-			for (int j = 1; j <= m && i - j >= 0; j++) {
-				appear[sg[i - j]] = true;
-			}
-			for (int s = 0; s <= m; s++) {
-				if (!appear[s]) {
-					sg[i] = s;
+		for(int i = 1;i<=n;i++) {
+			for(int j = 1;j<=Math.min(m, i);j++) {
+				if(sg[i - j]==0) { // dp的写法，更方便理解
+					sg[i] = 1;
 					break;
 				}
 			}

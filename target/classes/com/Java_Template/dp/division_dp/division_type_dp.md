@@ -85,14 +85,14 @@ class Solution {
         if (memo[i][j][k] != -1) {
             return memo[i][j][k];
         }
-        if (k == 0) {
+        if (k == 0) { 
             memo[i][j][k] = (int) (((long) dfs(i - 1, j, 0) + dfs(i - 1, j, 1) + (i > limit ? Mod - dfs(i - limit - 1, j, 1) : 0)) % Mod); // （int） ((long) f %Mod) 这样写才有用，这样没有用的（int）(long)） f %Mod
         }else{ // k==1
             memo[i][j][k] = (int) (((long) dfs(i, j - 1, 0) + dfs(i, j - 1, 1) + (j > limit ? Mod - dfs(i, j - limit - 1, 0) : 0)) % Mod);
         }
         return memo[i][j][k];
     }
-}
+} // 为什么是i - limit - 1,因为大于limit才不合法，等于limit合法！！！
 ```
 2369\. 检查数组是否存在有效划分
 -------------------

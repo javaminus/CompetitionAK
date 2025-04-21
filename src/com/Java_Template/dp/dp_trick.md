@@ -123,3 +123,157 @@ public class Main{
 }
 ```
 
+# CF1476C Longest Simple Cycle【1600】
+
+> 现在给你N条链
+>
+> `T`组输入，每组数据输入一行`N`
+>
+> 接下来3行输入`N`个数据
+>
+> 第一行为第`i`条链的长度
+>
+> 第二行为当前链与上一条链连接的起点
+>
+> 第二行为当前链与上一条链连接的终点
+>
+> 现在需要你求出这个图上的一个最长环，输出这个最大值
+>
+> 保证除了第一条链以外的所有链都与上一条链连接
+>
+> 
+>
+> 题解：三种状态转移
+>
+> ![img](assets/rIAniPFqdxVUuWY.png) 
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();
+		int[] c = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			c[i] = Integer.parseInt(ss[i]);
+		}
+		int[] a = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			a[i] = Integer.parseInt(ss[i]);
+		}
+		int[] b = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			b[i] = Integer.parseInt(ss[i]);
+		}
+		long[] dp = new long[n]; // dp[i]表示在[0, i]中，必选第i条线的最长环
+		long res =0;
+		for(int i = 1;i<n;i++) {
+			if(a[i]==b[i]) {
+				dp[i] = c[i] + 1;
+			}else {
+				dp[i] = Math.max(c[i] + 1 + Math.abs(a[i] - b[i])
+				, dp[i - 1] - Math.abs(a[i] - b[i]) + c[i] + 1);
+			}
+			res = Math.max(res, dp[i]);
+		}
+		sc.print(res+"\n");
+	}
+}
+```
+
+# CF1826D Running Miles【1700】
+
+> 题意：给定一个长度为 n 的数列 a，请找出其中的一个区间$ [l,r]$，最大化区间内的前三大值之和与$ r−l $的差，并求出这个值。 
+>
+> 推理：就是求$b_{i1}+b_{i2}+b_{i3} - (r - l)$的最大值，显然$i1 = l，i3 = r$时最大，变形有$(b_l+l)+b_{l2}+(b_r - r)$，然后就是枚举中间值，预处理左右最大值。
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();
+		int[] b = new int[n];
+		ss  = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			b[i] = Integer.parseInt(ss[i]);
+		}
+		long[] prefixSum = new long[n+1];
+		long[] suffixSum = new long[n+1];
+		suffixSum[n] = Long.MIN_VALUE; // 这里记得初始化！
+		for(int i = 0;i<n;i++) {
+			prefixSum[i+1] = Math.max(prefixSum[i], b[i]+i+1);
+		}
+		for(int i = n - 1;i>=0;i--) {
+			suffixSum[i] = Math.max(suffixSum[i+1], b[i] - i - 1); 
+		}
+		long res = 0;
+		for(int i = 1;i<n - 1;i++) {
+			res = Math.max(res, prefixSum[i] + b[i] + suffixSum[i+1]);
+		}
+		sc.print(res+"\n");
+	}
+}
+```
+
+# CF1626C Monsters And Spells【1700】
+
+> 题意：有 n 个敌人，你需要在第 ki 秒用至少 hi 的攻击力打败这个敌人。
+>
+> 攻击力的计算方式如下：
+>
+> 1. 第一秒时，你有 1 攻击力
+> 2. 对于后面的任意一秒，若前一秒你的攻击力为 x，则这一秒你的攻击力可以为 x+1 或 1
+>
+> 一秒内，如果你的攻击力为 x ，则你就需要消耗 x 的能量。
+>
+> 请问，在你打败所有敌人的情况下，最少需要消耗多少能量。
+>
+> 思路：这题有坑，如果只是分析当前点和上一个点的关系，然后贪心的变化攻击力，就会出问题。
+>
+> `1000000 1000001 1000002 `
+>
+>  `1000000 1 1000001 ` 
+>
+> 这个数据就不行，因为这样到达不了最后一个敌人。所以从后往前，$f[i]$表示当前敌人的最少攻击力。
+
+```java
+pulic class Main{
+    public static void solve() throws IOException {
+		n = sc.nextInt();
+		k = new int[n];
+		h = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			k[i] = Integer.parseInt(ss[i]);
+		}
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			h[i] = Integer.parseInt(ss[i]);
+		}
+		long[] f = new long[n]; // 表示到达第i个点的最小攻击力；
+		f[n - 1] = h[n - 1];
+		for(int i = n - 2;i>=0;i--) {
+			long delta = k[i+1] - k[i];
+			f[i] = Math.max(f[i+1] - delta, h[i]);
+		}
+		long res = calc(1, f[0], f[0]);
+		long pre = f[0];
+		for(int i = 0;i<n - 1;i++) {
+			long delta = k[i+1] - k[i];
+			if(f[i+1]<=delta) {
+				res+=calc(1, f[i+1], f[i+1]);
+				pre = f[i+1];
+			}else {
+				res+=calc(pre+1, pre+delta, delta);
+				pre = pre + delta;
+			}
+		}
+		sc.print(res+"\n");
+	}
+	
+	static long calc(long st, long end, long num) { // 等差数列求和
+		return (st+end)*num/2;
+	}
+}
+```
+
