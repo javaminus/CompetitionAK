@@ -277,3 +277,270 @@ pulic class Main{
 }
 ```
 
+# CF1957C How Does the Rook Move?【1600】
+
+> 头脑风暴：
+>
+> # CF1957C How Does the Rook Move?
+>
+> ## 题目描述
+>
+> 你在一个 $n\times n$ 的棋盘上玩一个游戏。
+>
+> 你每次可以选择在 $(r,c)$ 的位置放置一个**白色的车**，使得放置后所有车无法通过水平或垂直的方向攻击到其它车（无论颜色）。如果 $r\not=c$ 则电脑在 $(c,r)$ 处放一个**黑色的车**，可以证明，如果你的操作合法，电脑操作必定合法。
+>
+> 现在你已经放置了 $k$ 个白色的车（显然电脑也已经进行了对应操作），如果你继续放车直到没有合法的位置放车，则游戏结束。
+>
+> 你希望知道游戏结束时形成的局面的可能性。
+>
+> 答案对 $10^9+7$ 取模。
+>
+> 两个局面不同当且仅当某个位置上的车颜色不同或其中一个局面放了车而另一个没有。
+>
+> ## 输入格式
+>
+> 第一行一个整数 $t$，表示数据组数。
+>
+> 接下来对于每组数据，第一行两个整数 $n,k$。
+>
+> 接下来 $k$ 行，每行两个整数 $r_i,c_i$，表示已经放置的白车的位置。
+>
+> ## 输出格式
+>
+> 共 $t$ 行，每行一个整数，表示答案。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 3
+> 4 1
+> 1 2
+> 8 1
+> 7 6
+> 1000 4
+> 4 4
+> 952 343
+> 222 333
+> 90 91
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 3
+> 331
+> 671968183
+> ```
+>
+> ## 说明/提示
+>
+> 对于全部数据，满足 $ 1 \leq t \leq 10^4 $，$ 1 \leq n \leq 3 \times 10^5 $ , $ 0 \leq k \leq n $，$\sum n\le3\times10^5$。
+
+![1745290919158](assets/1745290919158.png)
+
+解释一下：当填第`i`个值，第一种情况填对角线，前`i - 1`个已经固定，所以填对角线只有一个位置可以填；第二种情况，不填对角线，就是在`i*i`的矩阵随便找个位置，但是不能填对角线，所以有`i - 1`种
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt(), k = sc.nextInt();
+		for(int i = 0;i<k;i++) {
+			int r = sc.nextInt(), c = sc.nextInt();
+			if(r==c) {
+				n--;
+			}else {
+				n-=2;
+			}
+		}
+		sc.print(f[n]+"\n");
+	}
+	
+	static int MX = (int)3e5+1;
+	static long[] f = new long[MX];
+	static long Mod = (long) 1e9+7;
+	static {
+		f[0] = f[1] = 1;
+		for(int i = 2;i<MX;i++) {
+			f[i] = (f[i - 1] + 2*(i - 1)*f[i - 2]%Mod)%Mod;
+		}
+	}
+}
+```
+
+# CF1941E Rudolf and k Bridges【1600】
+
+核心题意：有`n`个桥墩，第`1`个和第`n`个必须选择，然后没相邻两个桥墩的距离不超过` d`。其中 $(i,j1)$ 和$ (i,j2) $之间的距离为 $∣j1−j2∣−1$。 
+
+```java
+// 超时写法O(n^2)
+public class Main{
+    static int d;
+    public static long fun(int[] arr){
+        int n = arr.length;
+		int[] dp = new int[n];
+		Arrays.fill(dp, Integer.MAX_VALUE);
+		dp[0] = 1;
+		for(int i = 1;i<n;i++) {
+			for(int j = i - 1;j >= 0;j--) {
+				if(i - j - 1 > d) {
+					break;
+				}
+				dp[i] = Math.min(dp[i], dp[j] + arr[i] + 1);
+			}
+		}
+		return dp[n - 1];	
+	}
+}
+```
+
+```java
+// 单调队列优化O(n)
+public class Main{
+    static int d;
+    public static long fun(int[] arr){
+        int n = arr.length;
+		long[] dp = new long[n];
+		Arrays.fill(dp, Long.MAX_VALUE);
+		dp[0] = 1;
+		Deque<Integer> q = new LinkedList<>();
+		q.offer(0);
+		for(int i = 1;i<n;i++) {
+			while(!q.isEmpty() && i - q.peek() - 1>d) {
+				q.poll(); // pollFirst();
+			}
+			dp[i] = Math.min(dp[i], dp[q.peek()]+arr[i]+1);
+			while(!q.isEmpty() && dp[q.peekLast()] >= dp[i]) {
+				q.pollLast();
+			}
+			q.offerLast(i);
+		}
+		return dp[n - 1];	
+	}
+}
+```
+
+# CF1282B2 K for the Price of One (Hard Version)【1600】
+
+你有 `p` 元钱，店里有 `n` 个商品，每个商品价值 `ai` 元。当你购买一个商品时，你可以免费得到 `k−1` 个价值小于等于它的商品 `(k≤n)`，但如果商品数量不足 `k−1` 个时则无法免费得到它们。
+
+请求出你能得到商品数量的最大值。
+
+```java
+public static void solve() throws IOException {
+		int n = sc.nextInt(), p = sc.nextInt(), k = sc.nextInt();
+		int[] arr = new int[n+1];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			arr[i+1] = Integer.parseInt(ss[i]);
+		}
+		Arrays.sort(arr);
+		long[] dp = new long[n+1]; // dp[i]表示买前i个物品的钱，这里难想，我定义的是到第i个位置买的最多物品数，哎 >_<
+		Arrays.fill(dp, Long.MAX_VALUE/2);
+		dp[0] = 0;
+		for(int i = 1;i<=n;i++) {
+			if(i>=k) {
+				dp[i] = Math.min(dp[i], dp[i - k] + arr[i]);
+			}else {
+				dp[i] = Math.min(dp[i], dp[i - 1] + arr[i]);
+			}
+		}
+		int res = 0;
+		for(int i = n;i>=0;i--) {
+			if(dp[i]<=p) {
+				res = i;
+				break;
+			}
+		}
+		sc.print(res+"\n");
+	}
+}
+```
+
+# CF1498C Planar Reflections【1600】
+
+> 有 n 个平面，从它们的最左端向右发射一个能量级别为 k 的粒子，问你最后有多少个粒子，答案对 $10^9+7$ 取模。
+>
+> 若一个能级为 k 的粒子穿过一个平面，则它自己会继续原来的方向飞行，能级不改变，平面会生成一个能级为 k−1 的粒子，飞向这个粒子的反方向。
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt(), k = sc.nextInt();
+		long[][] dp = new long[k+1][n+1]; // 表示能量为i的粒子，还需要经过j个屏障
+		long Mod = (long) 1e9+7;
+		for(int i = 1;i<=k;i++) {
+			dp[i][0] = 1;
+		}
+		for(int i = 1;i<=n;i++) {
+			dp[1][i] = 1;
+		}
+		for(int i = 1;i<=k;i++) {
+			for(int j = 1;j<=n;j++) {
+				dp[i][j] = (dp[i][j - 1] + dp[i - 1][n - j])%Mod;
+			}
+		}
+		sc.print(dp[k][n]+"\n");
+	}
+}
+```
+
+# CF219D Choosing Capital for Treeland【1700】
+
+> Treeland 国有 $n$ 个城市，有些城市间存在 **单向** 道路。这个国家一共有 $n - 1$ 条路。我们知道，如果把边视作双向的，那么从任意城市出发能到达任意城市。
+>
+> 城市的委员会最近决定为 Treeland 国选择一个首都，显然首都会是国中的一个城市。委员会将在首都开会，并经常去其他城市（这里不考虑从其他城市回到首都）。因此，如果城市 $a$ 被选为首都，那么所有的道路应该被定向，以使得我们能从城市 $a$ 到达其他城市。所以，有些路可能需要反转方向。
+>
+> 帮助委员会选择首都使得他们需要反转道路的次数最小。
+
+![1745377560145](assets/1745377560145.png)
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();
+		g = new List[n+1];
+		Arrays.setAll(g, e->new ArrayList<>());
+		for(int i = 0;i<n - 1;i++) {
+			int x = sc.nextInt(), y = sc.nextInt();
+			g[x].add(new int[]{y, 0});
+			g[y].add(new int[] {x, 1});
+		}
+		dp = new int[n+1];
+		dp[1] = dfs1(1,  0);
+		dfs2(1, 0);
+		int mn = Integer.MAX_VALUE;
+		for(int i = 1;i<=n;i++) {
+			mn = Math.min(mn, dp[i]);
+		}
+		sc.print(mn+"\n");
+		for(int i = 1;i<=n;i++) {
+			if(dp[i]==mn) {
+				sc.print(i+" ");
+			}
+		}
+	}
+	static int[] dp;
+	
+	static int dfs1(int x, int fa) {
+		int res = 0;
+		for(int[] y:g[x]) {
+			if(y[0]!=fa) {
+				res+=dfs1(y[0], x)+y[1];
+			}
+		}
+		return res;
+	}
+	
+	static void dfs2(int x, int fa) {
+		for(int[] y:g[x]) {
+			if(y[0]!=fa) {
+				dp[y[0]] += dp[x] + (y[1]==1?-1:1); // 先序遍历
+				dfs2(y[0], x);
+			}
+		}
+	}
+}
+```
+
