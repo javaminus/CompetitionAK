@@ -544,3 +544,497 @@ public class Main{
 }
 ```
 
+# CF1875D Jellyfish and Mex【1600】
+
+> 给出一个长度为 n 的序列 a，每次从中删除一个数直到删完，求每次**删数之后**的序列的 `mex` 的和的最小值（$∑n≤5000,a_i≤10^9$）。 
+>
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();
+		ss = sc.nextLine().split(" ");
+		HashMap<Integer, Integer> map = new HashMap<>();
+		int[] a = new int[n];
+		for(int i = 0;i<n;i++) {
+			a[i] = Integer.parseInt(ss[i]);
+			map.merge(a[i], 1, Integer::sum);
+		}
+		Arrays.sort(a);
+		int p = 0; // 当前数组的mex
+		for(int x:a) {
+			if(x<p) {
+				continue;
+			}
+			if(x==p) {
+				p++;
+			}
+			if(x>p) {
+				break;
+			}
+		}
+		// dp[i]表示使mex = i的代价， dp[i] = Math.min(dp[i], dp[j] + (c[i] - 1) * j + i)  i<j
+		long[] dp = new long[p+1];
+		Arrays.fill(dp, Long.MAX_VALUE);
+		dp[p] = 0;
+		for(int i = p - 1;i>=0;i--) {
+			for(int j = i+1;j<=p;j++) {
+				dp[i] = Math.min(dp[i], dp[j] + (map.get(i) - 1)*j + i);
+			}
+		}
+		sc.print(dp[0]+"\n");
+	}
+}
+```
+
+# CF1969C Minimizing the Sum【1700】
+
+> 给你一个长度为 n 的整数数组 a。
+>
+> 你可以执行以下操作：选择数组中的一个元素，并用其邻近元素的值替换它。
+>
+> 你的任务是计算在执行上述操作最多 k 次的情况下，数组的总和可能达到的最小值。=
+
+```java
+import java.io.*;
+import java.util.*;
+
+/**
+ * 题目描述：
+ * 给定一个长度为 n 的数组 a，允许最多进行 K 次操作，每次操作选择一个
+ * 元素并将它替换成其相邻元素的值。
+ * 本题目要求求出经过最多 K 次操作后，数组元素和的最小值。
+ *
+ * 思路：  区间dp
+ * 1. 使用动态规划 dp[i][j] 表示处理到位置 i（1-indexed），用掉 j 次操作时可达到的最小总代价。
+ * 2. 对于每个位置 i，我们尝试将从位置 i 开始连续更新 k 个元素，其中 k 的范围是 0 到 min(K - j, n - i)。
+ *    更新的过程中维护最小值 mn，代表区间 [i, i+k] 内如果全部变成 mn，所需付出的成本为 (k+1) * mn。
+ * 3. 状态转移：dp[i + k][j + k] = min(dp[i + k][j + k], dp[i - 1][j] + (k + 1) * mn)
+ * 4. 最终答案为 dp[n][x] x 从 0 到 K 的最小值。
+ *
+ * 注意：
+ * 1. 本实现使用 1-indexed 数组 a，为防止访问越界，对数组长度开 n+2 的空间。
+ * 2. INF 取值为 9e18，以适应题中数值范围。
+ */
+public class Main {
+    // 定义一个足够大的数，表示无穷大（注意 9e18 作为 long 型的常量）
+    static final long INF = (long) 9e18;
+    
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 和 PrintWriter 进行快速输入输出
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(System.out);
+        
+        int t = Integer.parseInt(br.readLine().trim());
+        while(t-- > 0){
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken());
+            int K = Integer.parseInt(st.nextToken());
+            // 数组 a 使用 1-indexed，下标范围为 1 ... n
+            long[] a = new long[n + 2];  // 多开一个位置，防止后续访问 a[i+k] 越界
+            st = new StringTokenizer(br.readLine());
+            for (int i = 1; i <= n; i++){
+                a[i] = Long.parseLong(st.nextToken());
+            }
+            
+            // 初始化 dp 数组，dp[i][j] 表示处理到位置 i，花费 j 次操作的最小总代价
+            long[][] dp = new long[n + 1][K + 1];
+            for (int i = 0; i <= n; i++){
+                Arrays.fill(dp[i], INF);
+            }
+            // 初始状态：处理 0 个元素且花费 0 次操作，总代价为 0
+            dp[0][0] = 0;
+            
+            // 状态转移，i 表示当前位置 (1-indexed)
+            for (int i = 1; i <= n; i++){
+                // j 表示在当前位置之前花费的操作次数
+                for (int j = 0; j <= K; j++){
+                    if(dp[i - 1][j] == INF) continue;
+                    // k 表示从位置 i 开始连续操作的个数
+                    // k 的取值范围为0到min(K - j, n - i)
+                    int limit = Math.min(K - j, n - i);
+                    long mn = a[i]; // 初始时，区间 [i, i] 的最小值
+                    for (int k = 0; k <= limit; k++){
+                        // 更新区间 [i, i+k] 的最小值
+                        if(k > 0){
+                            mn = Math.min(mn, a[i + k]);
+                        }
+                        // 进行状态转移:
+                        // 将区间 [i, i+k] 全部更新为 mn, 该区间操作次数为 k+1, 总代价 dp[i-1][j] + (k+1)*mn.
+                        dp[i + k][j + k] = Math.min(dp[i + k][j + k], dp[i - 1][j] + (k + 1) * mn);
+                    }
+                }
+            }
+            // 答案为 dp[n][x] 中最小值，x 从 0 到 K
+            long ans = INF;
+            for (int x = 0; x <= K; x++){
+                ans = Math.min(ans, dp[n][x]);
+            }
+            out.println(ans);
+        }
+        out.flush();
+        out.close();
+    }
+}
+```
+
+# CF2096C Wonderful City【1700】
+
+> ## 题目描述
+>
+> 你是古伯兰王国一座城市的骄傲领导者。这座城市有 $n^2$ 栋建筑，排列成 $n$ 行 $n$ 列的网格。位于第 $i$ 行第 $j$ 列的建筑高度为 $h_{i,j}$。
+>
+> 当城市中任意两个相邻建筑的高度都不相同时，这座城市才是美丽的。换句话说，必须满足以下条件：
+> - 不存在位置 $(i,j)$（$1 \leq i \leq n$，$1 \leq j \leq n-1$）使得 $h_{i,j} = h_{i,j+1}$；
+> - 不存在位置 $(i,j)$（$1 \leq i \leq n-1$，$1 \leq j \leq n$）使得 $h_{i,j} = h_{i+1,j}$。
+>
+> A 公司有 $n$ 名工人，B 公司也有 $n$ 名工人。每名工人最多只能被雇佣一次。
+>
+> 雇佣 A 公司的第 $i$ 名工人需要花费 $a_i$ 枚金币。雇佣后，该工人会：
+> - 将第 $i$ 行所有建筑的高度增加 $1$。即，将 $h_{i,1}, h_{i,2}, \ldots, h_{i,n}$ 都增加 $1$。
+>
+> 雇佣 B 公司的第 $j$ 名工人需要花费 $b_j$ 枚金币。雇佣后，该工人会：
+> - 将第 $j$ 列所有建筑的高度增加 $1$。即，将 $h_{1,j}, h_{2,j}, \ldots, h_{n,j}$ 都增加 $1$。
+>
+> 请计算使城市变得美丽所需的最少金币数，如果不可能实现则返回 $-1$。
+>
+> ## 输入格式
+>
+> 每个测试包含多个测试用例。第一行包含测试用例的数量 $t$（$1 \le t \le 100$）。接下来是各个测试用例的描述。
+>
+> 每个测试用例的第一行包含一个整数 $n$（$2 \le n \le 1000$）——网格的大小。
+>
+> 接下来每个测试用例的 $n$ 行中，第 $i$ 行包含 $n$ 个整数 $h_{i,1}, h_{i,2}, \ldots, h_{i,n}$（$1 \le h_{i,j} \le 10^9$）——第 $i$ 行建筑的高度。
+>
+> 每个测试用例的下一行包含 $n$ 个整数 $a_1, a_2, \ldots, a_n$（$1 \le a_i \le 10^9$）——雇佣 A 公司工人的费用。
+>
+> 每个测试用例的下一行包含 $n$ 个整数 $b_1, b_2, \ldots, b_n$（$1 \le b_j \le 10^9$）——雇佣 B 公司工人的费用。
+>
+> 保证所有测试用例的 $n$ 之和不超过 $1000$。
+>
+> ## 输出格式
+>
+> 对于每个测试用例，输出一个整数——所需的最少金币数，如果不可能则输出 $-1$。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 4
+> 2
+> 1 2
+> 2 1
+> 100 100
+> 100 100
+> 4
+> 1 2 1 2
+> 3 2 1 2
+> 1 2 1 1
+> 1 3 1 2
+> 1 2 3 4
+> 5 6 7 8
+> 3
+> 1 2 2
+> 2 2 1
+> 2 1 1
+> 100 100 100
+> 100 100 100
+> 6
+> 8 7 2 8 4 8
+> 7 7 9 7 1 1
+> 8 3 1 1 8 5
+> 6 8 3 1 1 4
+> 1 4 5 1 9 6
+> 7 1 1 6 8 2
+> 11 23 20 79 30 15
+> 15 83 73 57 34 63
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 0
+> 14
+> -1
+> 183
+> ```
+>
+> ## 说明/提示
+>
+> 对于第一个测试用例，可以看到城市已经是美丽的，因此答案为 $0$。
+>
+> 对于第二个测试用例，我们可以雇佣 A 公司的第 $2$ 名工人、A 公司的第 $4$ 名工人和 B 公司的第 $4$ 名工人：
+> - 初始状态：
+> ```
+> 1 2 1 2
+> 3 2 1 2
+> 1 2 1 1
+> 1 3 1 2
+> ```
+> - 雇佣 A 公司第 $2$ 名工人后：
+> ```
+> 1 2 1 2
+> 4 3 2 3
+> 1 2 1 1
+> 1 3 1 2
+> ```
+> - 雇佣 A 公司第 $4$ 名工人后：
+> ```
+> 1 2 1 2
+> 4 3 2 3
+> 1 2 1 1
+> 2 4 2 3
+> ```
+> - 雇佣 B 公司第 $4$ 名工人后：
+> ```
+> 1 2 1 3
+> 4 3 2 4
+> 1 2 1 2
+> 2 4 2 4
+> ```
+>
+> 此时城市变得美丽，雇佣工人的总费用为 $2 + 4 + 8 = 14$，这是可能的最小费用。
+>
+> 对于第三个测试用例，无论如何操作都无法使城市变得美丽，因此答案为 $-1$。
+>
+> 翻译由 DeepSeek V3 完成
+
+```java
+import java.util.*;
+import java.io.*;
+// 行列不互相影响
+public class Main {
+    static final long INF = Long.MAX_VALUE / 2;
+    
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 读取输入
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int t = Integer.parseInt(br.readLine().trim());
+        StringBuilder sb = new StringBuilder();
+        for(int tc = 0; tc < t; tc++){
+            int n = Integer.parseInt(br.readLine().trim());
+            int[][] grid = new int[n][n];
+            for (int i = 0; i < n; i++){
+                String[] parts = br.readLine().split("\\s+");
+                for (int j = 0; j < n; j++){
+                    grid[i][j] = Integer.parseInt(parts[j]);
+                }
+            }
+            
+            long[] a = new long[n];
+            long[] b = new long[n];
+            {
+                String[] parts = br.readLine().split("\\s+");
+                for (int i = 0; i < n; i++){
+                    a[i] = Long.parseLong(parts[i]);
+                }
+            }
+            {
+                String[] parts = br.readLine().split("\\s+");
+                for (int j = 0; j < n; j++){
+                    b[j] = Long.parseLong(parts[j]);
+                }
+            }
+            
+            long verticalCost = solveVertical(n, grid, a);
+            long horizontalCost = solveHorizontal(n, grid, b);
+            
+            if(verticalCost == INF || horizontalCost == INF) {
+                sb.append("-1\n");
+            } else {
+                sb.append(verticalCost + horizontalCost).append("\n");
+            }
+        }
+        System.out.print(sb);
+    }
+    
+    // 针对行的 DP
+    static long solveVertical(int n, int[][] grid, long[] a) {
+        // dp[i][r] 表示处理前 i 行，且第 i 行状态为 r 时的最小总费用
+        long[][] dp = new long[n][2];
+        for (int i = 0; i < n; i++){
+            Arrays.fill(dp[i], INF);
+        }
+        // 对于第一行，0 表示不雇佣工人（不增加高度），1 表示雇佣工人（增加高度）
+        dp[0][0] = 0;
+        dp[0][1] = a[0];
+        
+        // 对每对相邻行 i 和 i+1，根据不同的转移状态来判断是否合法
+        for (int i = 0; i < n - 1; i++){
+            for (int cur = 0; cur < 2; cur++){
+                if(dp[i][cur] == INF) continue;
+                for (int nxt = 0; nxt < 2; nxt++){
+                    if(isValidVerticalPair(grid, i, cur, nxt)) {
+                        dp[i+1][nxt] = Math.min(dp[i+1][nxt], dp[i][cur] + (nxt == 1 ? a[i+1] : 0));
+                    }
+                }
+            }
+        }
+        return Math.min(dp[n-1][0], dp[n-1][1]);
+    }
+    
+    // 检测相邻两行的状态是否合法
+    static boolean isValidVerticalPair(int[][] grid, int i, int cur, int nxt){
+        int n = grid[0].length;
+        if(cur == nxt){
+            // 两行同状态时要求 h[i][j] != h[i+1][j] 对所有 j 成立
+            for (int j = 0; j < n; j++){
+                if(grid[i][j] == grid[i+1][j]) return false;
+            }
+        } else if(cur == 0 && nxt == 1){
+            // 从未增加转为增加时要求 h[i][j] != h[i+1][j] + 1
+            for (int j = 0; j < n; j++){
+                if(grid[i][j] == grid[i+1][j] + 1) return false;
+            }
+        } else if(cur == 1 && nxt == 0){
+            // 从增加转为未增加时要求 h[i][j] != h[i+1][j] - 1
+            for (int j = 0; j < n; j++){
+                if(grid[i][j] == grid[i+1][j] - 1) return false;
+            }
+        }
+        return true;
+    }
+    
+    // 针对列的 DP
+    static long solveHorizontal(int n, int[][] grid, long[] b) {
+        // dp[j][c] 表示处理前 j 列，且第 j 列状态为 c 时的最小费用
+        long[][] dp = new long[n][2];
+        for (int j = 0; j < n; j++){
+            Arrays.fill(dp[j], INF);
+        }
+        dp[0][0] = 0;
+        dp[0][1] = b[0];
+        
+        // 对每对相邻列 j 和 j+1，根据状态转移判断是否合法
+        for (int j = 0; j < n - 1; j++){
+            for (int cur = 0; cur < 2; cur++){
+                if(dp[j][cur] == INF) continue;
+                for (int nxt = 0; nxt < 2; nxt++){
+                    if(isValidHorizontalPair(grid, j, cur, nxt)) {
+                        dp[j+1][nxt] = Math.min(dp[j+1][nxt], dp[j][cur] + (nxt == 1 ? b[j+1] : 0));
+                    }
+                }
+            }
+        }
+        return Math.min(dp[n-1][0], dp[n-1][1]);
+    }
+    
+    // 检查相邻两列是否合法
+    static boolean isValidHorizontalPair(int[][] grid, int j, int cur, int nxt) {
+        int n = grid.length;
+        if(cur == nxt) {
+            // 同状态时要求：对于每一行 i，有 grid[i][j] != grid[i][j+1]
+            for (int i = 0; i < n; i++){
+                if(grid[i][j] == grid[i][j+1]) return false;
+            }
+        } else if(cur == 0 && nxt == 1){
+            // (0, 1) 状态时要求：grid[i][j] != grid[i][j+1] + 1
+            for (int i = 0; i < n; i++){
+                if(grid[i][j] == grid[i][j+1] + 1) return false;
+            }
+        } else if(cur == 1 && nxt == 0){
+            // (1, 0) 状态时要求：grid[i][j] != grid[i][j+1] - 1
+            for (int i = 0; i < n; i++){
+                if(grid[i][j] == grid[i][j+1] - 1) return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+# CF1509C The Sports Festival【】
+
+> # 题解说明
+>
+> 题目要求我们为 n 个学生安排接力赛跑的顺序，使得每一步（即前 i 名跑者）的速度差（最大速度与最小速度之差）的累积和最小。
+>
+> ## 问题描述
+>
+> - 给定 n 个学生，每个学生的跑步速度为 $s_i$。
+> - 定义第 i 阶段的差值 d_i 为：前 i 个跑过的人中，最大速度与最小速度的差，即  
+>   $d_i = max(a₁, a₂, ..., aᵢ) - min(a₁, a₂, ..., aᵢ)$，其中 aⱼ 表示第 j 个参赛的学生的速度。
+> - 要求我们改变学生的跑步顺序，使得总体的差值和 d₁ + d₂ + ... + dₙ 最小。
+>
+> ## 解题思路
+>
+> ### 1. 对速度排序
+> - 首先将所有学生的速度排序。排序后的目的在于让速度相近的学生尽可能地连在一起，从而使每一阶段的差值尽可能小。
+>
+> ### 2. 动态规划（DP）求解
+> - 定义状态 dp[l][r] 表示在有序数组中选取下标区间 [l, r] 内的学生作为已经安排跑步的成员时，所能达到的最小累积差值和。  
+>   (注意：此时“区间”代表的是在排序后的数组中连续的一段。)
+>
+> - **初始状态**：当区间中只有一个学生时，即 dp[i][i] = 0，因为只有一个人时最大值和最小值相等，所以差值为 0。
+>
+> - **状态转移**：  
+>   假设当前选取的区间为 [l, r]，那么下一步可以从左边或者右边扩展：
+>   - 如果将左侧未选中的学生 speeds[l-1] 加入队列，那么新加入时的额外差值为：speeds[r] - speeds[l-1]  
+>     因此更新：$dp[l-1][r] = min(dp[l-1][r], dp[l][r] + speeds[r] - speeds[l-1])$。
+>   - 如果将右侧未选中的学生 speeds[r+1] 加入队列，那么新加入的额外差值为：speeds[r+1] - speeds[l]  
+>     因此更新：$dp[l][r+1] = min(dp[l][r+1], dp[l][r] + speeds[r+1] - speeds[l])$。
+>
+> - 这里额外增加的差值实际上是由于新加入的学生使得已选的最小值或最大值发生改变所导致的。
+>
+> ### 3. 最终答案
+> - 当所有学生都被安排好之后，意味着选取的区间为整个数组，即 [0, n-1]。此时 dp[0][n-1] 就是最优解，即所有阶段累积差值和的最小值。
+>
+> ## 时间复杂度与空间复杂度
+>
+> - 时间复杂度：由于状态 dp[l][r] 的数量为 O(n²)，在每个状态下只进行常数时间的转移，故总时间复杂度为 O(n²)。
+> - 空间复杂度：DP 数组 dp 占用 O(n²) 的空间。
+>
+> 这一思路保证了在题目给出的 n ≤ 2000 的约束下，程序能够在合理时间内求解。
+>
+> 整体思路的核心在于将问题转化为在排序数组上连续区间的扩展问题，这样可以利用动态规划高效地求出最优结果。
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        // 使用 BufferedReader 加快输入速度
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // 读取成员个数 n
+        int n = Integer.parseInt(br.readLine().trim());
+        // 读取所有成员的跑步速度
+        String[] parts = br.readLine().trim().split("\\s+");
+        long[] speeds = new long[n];
+        for (int i = 0; i < n; i++) {
+            speeds[i] = Long.parseLong(parts[i]);
+        }
+        
+        // 对跑步速度进行排序
+        Arrays.sort(speeds);
+        
+        // 定义 dp 数组
+        // dp[l][r] 表示当前已经选取有序区间 [l, r] 内的这些元素作为已经安排跑步的成员
+        // 并且已经累计的差值和的最小值
+        // 选择下一个成员时，新增加的差值为 speeds[r] - speeds[l]
+        long[][] dp = new long[n][n];
+        // INF 表示一个极大的数，用于初始化不可达的状态
+        long INF = Long.MAX_VALUE / 2;
+
+        // 初始化 dp 数组
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp[i], INF);
+            dp[i][i] = 0; // 只有一个人跑，差值为0
+        }
+        for(int i = n - 1;i>=0;i--) {
+        	for(int j = i+1;j<n;j++) {
+        		if(i+1<n) {
+            		dp[i][j] = Math.min(dp[i][j], dp[i+1][j] + speeds[j] - speeds[i]);
+        		}
+        		if(j - 1>=0) {
+        			dp[i][j] = Math.min(dp[i][j], dp[i][j - 1] + speeds[j] - speeds[i]);
+        		}
+        	}
+        }
+        // 最终答案为 dp[0][n-1]，即区间覆盖所有成员时的最小差值和
+        System.out.println(dp[0][n - 1]);
+    }
+}
+```
+

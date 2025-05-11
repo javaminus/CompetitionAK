@@ -34,7 +34,7 @@
           });
   ```
 
-- TreeMap<key, value> 的排序是按照key排序，不是按照value排序的；
+- TreeMap<key, value> 的排序是按照`key`排序，不是按照`value`排序的；
 
 - 48～57为0到9十个阿拉伯数字；65～90为26个大写英文字母，97～122号为26个小写英文字母
 
@@ -62,6 +62,8 @@
   float: 4 bytes
   double: 8 bytes
   boolean: 1 bytes (in arrays)
+
+- 设计小数的运算一定要用`BigDecimal`，而不是用`Double`；
 
 - ![img.png](assets/img.png)
 

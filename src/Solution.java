@@ -1,48 +1,35 @@
+import java.util.Arrays;
+
 class Solution {
-    public long[] resultArray(int[] nums, int k) {
-        long[] res = new long[k];
-        for (int i = 0; i < k; i++) {
-            res[i] = fun(nums, k, i);
+    public int[] concatenatedDivisibility(int[] nums, int k) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        int[] pow10 = new int[n];
+        for (int i = 0; i < n; i++) {
+            pow10[i] = (int) Math.pow(10, Integer.toString(nums[i]).length());
         }
-        return res;
+        int[] ans = new int[n];
+        boolean[][] vis = new boolean[1 << n][k];
+        if (!dfs((1 << n) - 1, 0, nums, pow10, k, vis, ans)) {
+            return new int[0];
+        }
+        return ans;
     }
 
-    public static void main(String[] args) {
-        new Solution().fun(new int[]{1, 2, 3, 4, 5}, 3, 1);
-    }
-    
-    private long fun(int[] nums, int k, int d){
-        int n = nums.length;
-        int[][] dp1 = new int[n][k];
-        int[][] dp2 = new int[n][k];
-        dp1[0][nums[0] % k] = 1;
-        dp2[n - 1][nums[n - 1] % k] = 1;
-        for (int i = 1; i < n; i++) {
-            dp1[i][nums[i] % k] = 1;
-            for (int j = 0; j < k; j++) {
-                dp1[i][j*nums[i]%k] += dp1[i - 1][j];
+    boolean dfs(int s, int x, int[] nums, int[] pow10, int k, boolean[][] vis, int[] ans){
+        if (s == 0) {
+            return x == 0;
+        }
+        if (vis[s][x]) {
+            return false;
+        }
+        vis[s][x] = true;
+        for (int i = 0; i < nums.length; i++) {
+            if (((s >> i) & 1) == 1 && dfs(s ^ (1 << i), (x * pow10[i] + nums[i]) % k, nums, pow10, k, vis, ans)) {
+                ans[nums.length - Integer.bitCount(s)] = nums[i];
+                return true;
             }
         }
-        for (int i = n - 2; i >=0; i--) {
-            dp2[i][nums[i] % k] = 1;
-            for (int j = 0; j < k; j++) {
-                dp2[i][j*nums[i]%k] += dp2[i + 1][j];
-            }
-        }
-        long res = dp1[n - 1][d] + dp2[0][d];
-        for (int i = 1; i < n - 1; i++) {
-            int x = nums[i] % k; // 表示要nums[i]
-            if (x == d) {
-                res++;
-            }
-            for (int p = 0; p < k; p++) {
-                for (int q = 0; q < k; q++) {
-                    if (x * p * q % k == d) {
-                        res += (long) dp1[i - 1][p] * dp2[i + 1][q];
-                    }
-                }
-            }
-        }
-        return res;
+        return false;
     }
 }

@@ -207,3 +207,34 @@ class Solution {
 }
 ```
 
+# CF1526C2 Potions (Hard Version)【1600】
+
+> 给你一个长度为 n 的序列 A，要求你找出最长的一个子序列使得这个`子序列`任意前缀和都非负。 
+
+```java
+public class Main{
+    public static void solve() throws IOException {
+		int n = sc.nextInt();;
+		int[] a = new int[n];
+		ss = sc.nextLine().split(" ");
+		for(int i = 0;i<n;i++) {
+			a[i]  =Integer.parseInt(ss[i]);
+		}
+		PriorityQueue<Integer> pq = new PriorityQueue<>();
+		long sum = 0;
+		int res = 0, len = 0;
+		for(int i = 0;i<n;i++) {
+			sum+=a[i];
+			pq.offer(a[i]);
+			while(sum<0 && !pq.isEmpty()) {
+				sum-=pq.poll();
+				len--;
+			}
+			len++;
+			res = Math.max(res, len);
+		}
+		sc.print(res+"\n");
+	}
+}
+```
+
