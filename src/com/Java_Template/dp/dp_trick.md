@@ -1,4 +1,6 @@
-# CF1695C Zero Path【1700】
+# 【思维dp】
+
+## CF1695C Zero Path【1700】
 
 >  题意：给你一个 n×m (1≤n,m≤1000) 的格点图，每个格子的值要么是 −1，要么是 1，现在问你，是否有一条从 (1,1) 到 (n,m) 的路径，使得路径上经过的格点的值的和为 0。在路径中，只能从 ai,j 移动到 ai+1,j 或是 ai,j+1（向右或是向下走）。 
 >
@@ -56,7 +58,7 @@ public class Main {
 
 ```
 
-# CF1151B Dima and a Bad XOR【1600】
+## CF1151B Dima and a Bad XOR【1600】
 
 > 题意：给你一个grid，每一行选择一个数，如果异或和大于0，则输出这些数的列；
 >
@@ -99,7 +101,7 @@ public class Main{ // 随机化
 public class Main{ // 构造做法，先将第一列异或出来，如果大于0就全部是1；反之枚举每一行，如果有grid[i][j]!=grid[i][0]，那么异或上这个数一定大于0，输出答案。}
 ```
 
-# CF1829G Hits Different【1600】
+## CF1829G Hits Different【1600】
 
 > 题意：如上图的纸杯，若一个纸杯倒下，可以得到对应的权值，同时会使得其上方相邻的两个纸杯倒下。求让纸杯 n（对应权值为 n^2）倒下可以得到的总权值。 
 >
@@ -123,7 +125,7 @@ public class Main{
 }
 ```
 
-# CF1476C Longest Simple Cycle【1600】
+## CF1476C Longest Simple Cycle【1600】
 
 > 现在给你N条链
 >
@@ -182,7 +184,7 @@ public class Main{
 }
 ```
 
-# CF1826D Running Miles【1700】
+## CF1826D Running Miles【1700】
 
 > 题意：给定一个长度为 n 的数列 a，请找出其中的一个区间$ [l,r]$，最大化区间内的前三大值之和与$ r−l $的差，并求出这个值。 
 >
@@ -215,7 +217,7 @@ public class Main{
 }
 ```
 
-# CF1626C Monsters And Spells【1700】
+## CF1626C Monsters And Spells【1700】
 
 > 题意：有 n 个敌人，你需要在第 ki 秒用至少 hi 的攻击力打败这个敌人。
 >
@@ -277,7 +279,7 @@ pulic class Main{
 }
 ```
 
-# CF1957C How Does the Rook Move?【1600】
+## CF1957C How Does the Rook Move?【1600】
 
 > 头脑风暴：
 >
@@ -369,7 +371,7 @@ public class Main{
 }
 ```
 
-# CF1941E Rudolf and k Bridges【1600】
+## CF1941E Rudolf and k Bridges【1600】
 
 核心题意：有`n`个桥墩，第`1`个和第`n`个必须选择，然后没相邻两个桥墩的距离不超过` d`。其中 $(i,j1)$ 和$ (i,j2) $之间的距离为 $∣j1−j2∣−1$。 
 
@@ -421,7 +423,7 @@ public class Main{
 }
 ```
 
-# CF1282B2 K for the Price of One (Hard Version)【1600】
+## CF1282B2 K for the Price of One (Hard Version)【1600】
 
 你有 `p` 元钱，店里有 `n` 个商品，每个商品价值 `ai` 元。当你购买一个商品时，你可以免费得到 `k−1` 个价值小于等于它的商品 `(k≤n)`，但如果商品数量不足 `k−1` 个时则无法免费得到它们。
 
@@ -458,7 +460,7 @@ public static void solve() throws IOException {
 }
 ```
 
-# CF1498C Planar Reflections【1600】
+## CF1498C Planar Reflections【1600】
 
 > 有 n 个平面，从它们的最左端向右发射一个能量级别为 k 的粒子，问你最后有多少个粒子，答案对 $10^9+7$ 取模。
 >
@@ -486,7 +488,7 @@ public class Main{
 }
 ```
 
-# CF219D Choosing Capital for Treeland【1700】
+## CF219D Choosing Capital for Treeland【1700】
 
 > Treeland 国有 $n$ 个城市，有些城市间存在 **单向** 道路。这个国家一共有 $n - 1$ 条路。我们知道，如果把边视作双向的，那么从任意城市出发能到达任意城市。
 >
@@ -544,7 +546,7 @@ public class Main{
 }
 ```
 
-# CF1875D Jellyfish and Mex【1600】
+## CF1875D Jellyfish and Mex【1600】
 
 > 给出一个长度为 n 的序列 a，每次从中删除一个数直到删完，求每次**删数之后**的序列的 `mex` 的和的最小值（$∑n≤5000,a_i≤10^9$）。 
 >
@@ -587,7 +589,7 @@ public class Main{
 }
 ```
 
-# CF1969C Minimizing the Sum【1700】
+## CF1969C Minimizing the Sum【1700】
 
 > 给你一个长度为 n 的整数数组 a。
 >
@@ -678,7 +680,7 @@ public class Main {
 }
 ```
 
-# CF2096C Wonderful City【1700】
+## CF2096C Wonderful City【1700】
 
 > ## 题目描述
 >
@@ -944,7 +946,9 @@ public class Main {
 }
 ```
 
-# CF1509C The Sports Festival【】
+# 【区间dp】
+
+## CF1509C The Sports Festival【1800】
 
 > # 题解说明
 >
@@ -1034,6 +1038,471 @@ public class Main {
         }
         // 最终答案为 dp[0][n-1]，即区间覆盖所有成员时的最小差值和
         System.out.println(dp[0][n - 1]);
+    }
+}
+```
+
+## P1880 [NOI1995] 石子合并【 普及+/提高 】
+
+> ## 题目描述
+>
+> 在一个圆形操场的四周摆放 $N$ 堆石子，现要将石子有次序地合并成一堆，规定每次只能选相邻的 $2$ 堆合并成新的一堆，并将新的一堆的石子数，记为该次合并的得分。
+>
+> 试设计出一个算法,计算出将 $N$ 堆石子合并成 $1$ 堆的最小得分和最大得分。
+>
+> ## 输入格式
+>
+> 数据的第 $1$ 行是正整数 $N$，表示有 $N$ 堆石子。
+>
+> 第 $2$ 行有 $N$ 个整数，第 $i$ 个整数 $a_i$ 表示第 $i$ 堆石子的个数。
+>
+> ## 输出格式
+>
+> 输出共 $2$ 行，第 $1$ 行为最小得分，第 $2$ 行为最大得分。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 4
+> 4 5 9 4
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 43
+> 54
+> ```
+>
+> ## 说明/提示
+>
+> $1\leq N\leq 100$，$0\leq a_i\leq 20$。
+
+```java
+// 错误写法：状态转移为 dp1[i][j] = Math.max(dp1[i][j], dp1[i + 1][j] + sum[i][j]);
+// 但是合并的位置可以由其他位置合并，不是每次只能合并一个小石头。
+// 没有考虑是个环
+public class Main {
+	public static void solve() throws IOException {
+		int n = sc.nextInt();
+		ss = sc.nextLine().split(" ");
+		int[] a = new int[n];
+		for(int i = 0;i<n;i++) {
+			a[i]  =Integer.parseInt(ss[i]);
+		}
+		int[][] sum = new int[n][n];
+        // Precompute the sum for each interval [i, j]
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (i == j) {
+                    sum[i][j] = a[i];
+                } else {
+                    sum[i][j] = sum[i][j - 1] + a[j];
+                }
+            }
+        }
+        
+        // dp1: maximum score for merging stones in the range [i, j]
+        int[][] dp1 = new int[n][n];
+        // Initialize base case: when there's only one pile, no merging cost is needed.
+        for (int i = 0; i < n; i++) {
+            dp1[i][i] = 0;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (i == j) {
+                    // Base case is already set; no need to change.
+                } else {
+                    if (i + 1 < n) {
+                        dp1[i][j] = Math.max(dp1[i][j], dp1[i + 1][j] + sum[i][j]);
+                    }
+                    if (j - 1 >= 0) {
+                        dp1[i][j] = Math.max(dp1[i][j], dp1[i][j - 1] + sum[i][j]);
+                    }
+                }
+            }
+        }
+        
+        // dp2: minimum score for merging stones in the range [i, j]
+        int[][] dp2 = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dp2[i], Integer.MAX_VALUE / 2);
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (i == j) {
+                    dp2[i][i] = 0;
+                } else {
+                    if (i + 1 < n) {
+                        dp2[i][j] = Math.min(dp2[i][j], dp2[i + 1][j] + sum[i][j]);
+                    }
+                    if (j - 1 >= 0) {
+                        dp2[i][j] = Math.min(dp2[i][j], dp2[i][j - 1] + sum[i][j]);
+                    }
+                }
+            }
+        }
+        
+        sc.print(dp2[0][n - 1] + "\n");
+        sc.print(dp1[0][n - 1] + "\n");
+	}
+}
+
+```
+
+```java
+public class Main { // 正确解法：学会环的处理，区间dp先定义长度
+	public static void solve() throws IOException {
+		ss = sc.nextLine().split(" ");
+		int n = Integer.parseInt(ss[0]);
+		ss = sc.nextLine().split(" ");
+		int[] a = new int[n*2];
+		int[] prefixSum = new int[n*2 +1];
+		for(int i = 0;i<n;i++) {
+			a[i] = Integer.parseInt(ss[i]);
+			prefixSum[i+1] = prefixSum[i] + a[i];
+		}
+		for(int i = n;i<n*2;i++) {
+			a[i] = a[i%n];
+			prefixSum[i+1] = prefixSum[i] + a[i];
+		}
+		int[][] dp1 = new int[n*2][n*2];
+		int[][] dp2 = new int[n*2][n*2];
+		// 区间dp一定是先定义长度的！！！！！
+		for(int len = 2;len<=n;len++) {
+			for(int i = 0;i + len - 1 < n*2;i++) { // 比如长度len = 2, 就是下标[1, 2], 有j = i + len - 1
+				int j = i + len - 1;
+				dp1[i][j] = Integer.MAX_VALUE/2;
+				dp2[i][j] = 0;
+				for(int k = i;k<j;k++) { // 这里之所以k<j，因为后面有k+1
+					int cost = prefixSum[j+1] - prefixSum[i];
+					dp1[i][j] = Math.min(dp1[i][j], dp1[i][k] + dp1[k+1][j] + cost);
+					dp2[i][j] = Math.max(dp2[i][j], dp2[i][k] + dp2[k+1][j] + cost);
+				}
+			}
+		}
+		int resMin = Integer.MAX_VALUE;
+		int resMax = 0;
+		for(int i = 0;i <= n - 1;i++) {
+			int j = i + n - 1;
+			resMin = Math.min(resMin, dp1[i][j]);
+			resMax = Math.max(resMax, dp2[i][j]);
+		}
+		sc.print(resMin+"\n");
+		sc.print(resMax+"\n");
+	}
+}
+
+```
+
+## P3146 [USACO16OPEN] 248 G【 普及+/提高 】
+
+> ## 题目描述
+>
+> 贝西喜欢在手机上下载游戏来玩，尽管她确实觉得对于自己巨大的蹄子来说，小小的触摸屏用起来相当笨拙。
+>
+> 她对当前正在玩的这个游戏特别感兴趣。游戏开始时给定一个包含 $N$ 个正整数的序列（$2 \leq N \leq 248$），每个数的范围在 $1 \ldots 40$ 之间。在一次操作中，贝西可以选择两个相邻且相等的数，将它们替换为一个比原数大 1 的数（例如，她可以将两个相邻的 7 替换为一个 8）。游戏的目标是最大化最终序列中的最大数值。请帮助贝西获得尽可能高的分数！
+>
+> ## 输入格式
+>
+> 第一行输入包含 $N$，接下来的 $N$ 行给出游戏开始时序列的 $N$ 个数字。
+>
+> ## 输出格式
+>
+> 请输出贝西能生成的最大整数。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 4
+> 1
+> 1
+> 1
+> 2
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 3
+> ```
+>
+> ## 说明/提示
+>
+> 在示例中，贝西首先合并第二个和第三个 1，得到序列 1 2 2，然后将两个 2 合并为 3。注意，合并前两个 1 并不是最优策略。
+
+```java
+	public static void solve() throws IOException {
+		int n = sc.nextInt();
+		int[] a = new int[n];
+		int res = 0;
+		for(int i = 0;i<n;i++) {
+			a[i] = sc.nextInt();
+			res = Math.max(res, a[i]);
+		}
+		int[][] dp = new int[n][n]; // dp[i][j]表示区间[i, j]可以合并成一个整数，初始化为-1；
+		for(int i = 0;i<n;i++) {
+			Arrays.fill(dp[i], -1);
+			dp[i][i] = a[i];
+		}
+		for(int len = 2;len<=n;len++) { // 长度是[2, n]，不要写成[2, n - 1]
+			for(int i = 0;i+len - 1<n;i++) {
+				int j = i+len - 1;
+				for(int k = i;k+1<=j;k++) {
+					if(dp[i][k]!=-1 &&dp[i][k]==dp[k+1][j]) {
+						dp[i][j] = Math.max(dp[i][j], dp[i][k] + 1);
+					}
+				}
+				res = Math.max(res, dp[i][j]);
+			}
+		}
+		sc.print(res +"\n");	
+	}
+```
+
+## P1063 [NOIP 2006 提高组] 能量项链
+
+```java
+import java.util.Scanner;
+
+/**
+ * P1063 能量项链 - O(n^3) 优化版本（修正数组边界问题）
+ *
+ * 题目描述：
+ * 在 Mars 星球上，每个 Mars 人都随身佩带着一串能量项链，
+ * 项链上有 N 颗能量珠。每颗珠子有一个头标记和尾标记，并满足相邻珠子前一颗珠子的尾标记等于后一颗珠子的头标记。
+ * 当用吸盘夹住相邻两颗珠子进行聚合时：
+ * 设前一珠子的头标记为 m、尾标记为 r，后一珠子的头标记为 r、尾标记为 n，
+ * 聚合后释放的能量为 (m * r * n)，新得到的珠子为 (m, n)。
+ * 聚合操作需不断进行，直至项链上只剩下一颗珠子。
+ *
+ * 解题思路：
+ * 采用扩展数组法构造一个长度为 2*n 的数组 v，其中 v[i] = a[i % n]，
+ * 这样所有连续 n+1 个元素都构成一个有效的线性化方案。
+ * 用 dp[i][j] 表示将区间 [i, j]（对应珠子 i 到 j-1）完全聚合成一个珠子所获得的最大能量，
+ * 状态转移方程为：
+ *    dp[i][j] = max_{i < k < j} ( dp[i][k] + dp[k][j] + v[i]*v[k]*v[j] )
+ *
+ * 注意：这里修正了数组下标越界的问题。内层循环中迭代的范围改为：
+ *      for (int i = 0; i < size - len; i++)
+ * 以确保 j = i + len 不会超过 size - 1。
+ *
+ * 时间复杂度：O(n^3)
+ */
+public class Main {
+    public static void main(String[] args){
+        Scanner in = new Scanner(System.in);
+        int n = in.nextInt();
+        int[] a = new int[n];
+        for (int i = 0; i < n; i++){
+            a[i] = in.nextInt();
+        }
+        
+        // 构造长度为 2*n 的扩展数组 v
+        int size = 2 * n;
+        int[] v = new int[size];
+        for (int i = 0; i < size; i++){
+            v[i] = a[i % n];
+        }
+        
+        // dp[i][j] 表示区间 [i, j] 完全聚合为一个珠子时获得的最大能量，
+        // 对应珠子两端标记分别为 v[i] 和 v[j]
+        // 只计算长度不超过 n 的区间
+        int[][] dp = new int[size][size];
+        
+        // 区间长度至少为 2才有聚合操作
+        for (int len = 2; len <= n; len++){
+            // 修改循环条件，确保 j = i+len 小于 size
+            for (int i = 0; i + len < size ; i++){ // 这里其实至少要长度为3，才能组成两颗珠子，【1，2，3】就是【1，2】【2，3】
+                int j = i + len;
+                // 枚举中间合并点 k
+                for (int k = i + 1; k < j; k++){
+                    // 这里不能写成dp[i][k] + dp[k+1][j],因为第一个珠子和第二个珠子公用一个k
+                    dp[i][j] = Math.max(dp[i][j], dp[i][k] + dp[k][j] + v[i] * v[k] * v[j]);
+                }
+            }
+        }
+        
+        // 从所有可能的断开位置中选出最大能量
+        int ans = 0;
+        for (int i = 0; i < n; i++){
+            ans = Math.max(ans, dp[i][i + n]);
+        }
+        
+        System.out.println(ans);
+    }
+}
+```
+
+## P1005 [NOIP 2007 提高组] 矩阵取数游戏
+
+> # P1005 [NOIP 2007 提高组] 矩阵取数游戏
+>
+> ## 题目描述
+>
+> 帅帅经常跟同学玩一个矩阵取数游戏：对于一个给定的 $n \times m$ 的矩阵，矩阵中的每个元素 $a_{i,j}$ 均为非负整数。游戏规则如下：
+>
+> 1. 每次取数时须从每行各取走一个元素，共 $n$ 个。经过 $m$ 次后取完矩阵内所有元素；
+> 2. 每次取走的各个元素只能是该元素所在行的行首或行尾；
+> 3. 每次取数都有一个得分值，为每行取数的得分之和，每行取数的得分 = 被取走的元素值 $\times 2^i$，其中 $i$ 表示第 $i$ 次取数（从 $1$ 开始编号）；
+> 4. 游戏结束总得分为 $m$ 次取数得分之和。
+>
+> 帅帅想请你帮忙写一个程序，对于任意矩阵，可以求出取数后的最大得分。
+>
+> ## 输入格式
+>
+> 输入文件包括 $n+1$ 行：
+>
+> 第一行为两个用空格隔开的整数 $n$ 和 $m$。
+>
+> 第 $2\sim n+1$ 行为 $n \times m$ 矩阵，其中每行有 $m$ 个用单个空格隔开的非负整数。
+>
+> ## 输出格式
+>
+> 输出文件仅包含 $1$ 行，为一个整数，即输入矩阵取数后的最大得分。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 2 3
+> 1 2 3
+> 3 4 2
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 82
+> ```
+>
+> ## 说明/提示
+>
+> **【数据范围】**
+>
+> 对于 $60\%$ 的数据，满足 $1\le n,m\le 30$，答案不超过 $10^{16}$。  
+> 对于 $100\%$ 的数据，满足 $1\le n,m\le 80$，$0\le a_{i,j}\le1000$。
+>
+> **【题目来源】**
+>
+> NOIP 2007 提高第三题。
+
+```java
+	public static void solve() throws IOException {
+		int n = sc.nextInt(), m = sc.nextInt();
+		int[][] a = new int[n][m];
+		for(int i = 0;i<n;i++) {
+			ss = sc.nextLine().split(" ");
+			for(int j = 0;j<m;j++) {
+				a[i][j] = Integer.parseInt(ss[j]);
+			}
+		}
+		BigInteger res = BigInteger.ZERO;
+		memo = new BigInteger[m][m];
+		for(int i = 0;i<n;i++) {
+			// res.add(f(a[i])); 错误写法，以及后面的qpow中，a.multiply(a)  =>  a=a.multiply(a)
+			res = res.add(f(a[i]));
+		}
+		sc.print(res+"\n");
+		
+	}
+	
+	private static BigInteger f(int[] a) {
+		int n = a.length;
+		for(int i = 0;i<n;i++) {
+			Arrays.fill(memo[i], fuyi);
+		}
+		return dfs(0, n - 1, a);
+	}
+	
+	static BigInteger[][] memo;
+	static BigInteger fuyi = new BigInteger("-1");
+	
+	private static BigInteger dfs(int l, int r, int[] a) {
+		if(l>r) {
+			return BigInteger.ZERO;
+		}
+		if(!memo[l][r].equals(fuyi)) {
+			return memo[l][r];
+		}
+		int n = a.length;
+		int c = n - (r - l);
+		// long res = Math.max(dfs(l+1, r, a) + a[l] * qpow(2, c), dfs(l, r - 1, a) + a[r] * qpow(2, c));
+		BigInteger res1 = dfs(l+1, r, a).add(BigInteger.valueOf(a[l]).multiply(qpow(2, c)));
+		BigInteger res2 = dfs(l, r - 1, a).add(BigInteger.valueOf(a[r]).multiply(qpow(2, c)));
+		if(res1.compareTo(res2) < 0) {
+			return memo[l][r] = res2;
+		}else {
+			return memo[l][r] = res1;
+		}
+	}
+
+	private static BigInteger qpow(int aa, int b) {
+		BigInteger a = BigInteger.valueOf(aa);
+		BigInteger res = BigInteger.ONE;
+		while(b>0) {
+			if((b&1)==1) {
+				res = res.multiply(a);
+			}
+			b>>=1;
+			a = a.multiply(a);
+		}
+		return res;
+	}
+```
+
+## P4170 [CQOI2007] 涂色【 提高+/省选− 】【★★★★★】
+
+> 题目要求给出一个目标颜色序列（例如 "RGBGR"），表示木板上每个单位长度最终需要涂的颜色。初始木板没有任何颜色，每次操作允许你选择一段连续的区域将其全部涂成某一种颜色，后面的操作会覆盖前面的颜色。目标是用最少的涂色次数，把木板涂成目标颜色序列。题目考察的是如何选择合适的涂色区间，以最少的步骤实现颜色覆盖。
+
+```java
+import java.util.Scanner;
+// 神中神！！！
+// 也可以理解为将一个涂满颜色的木板颜色消除
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // 从输入读取目标颜色序列
+        String s = sc.nextLine();
+        int n = s.length();
+        // dp[i][j] 表示将区间 s[i...j] 涂成目标颜色所需的最少操作次数
+        int[][] dp = new int[n][n];
+
+        // 对于单个字符，只需要一次涂色操作
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+
+        // 枚举区间长度，从2到n
+        for (int len = 2; len <= n; len++) {
+            // 枚举区间的起始位置
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;  // 区间结束位置
+                // 基本方案：先将区间 [i, j-1] 涂好，然后单独涂最后一个位置，即 dp[i][j-1] + 1
+                dp[i][j] = dp[i][j - 1] + 1;
+                // 尝试将操作合并：寻找区间内与 s[j] 颜色相同的字符位置 k（i <= k < j）
+                for (int k = i; k < j; k++) {
+                    if (s.charAt(k) == s.charAt(j)) {
+                        // 如果 s[k] 和 s[j] 颜色相同，可以在涂完 [i, k] 后，将区间 [k+1, j-1] 与 s[j] 一并处理
+                        int cost = dp[i][k];
+                        // 注意：如果 k+1 <= j-1，需加上区间 [k+1, j-1] 的涂色次数
+                        if (k + 1 <= j - 1) {
+                            cost += dp[k + 1][j - 1];
+                        }
+                        // 选择最优方案
+                        dp[i][j] = Math.min(dp[i][j], cost);
+                    }
+                }
+            }
+        }
+        // 输出将整个区间 [0, n-1] 涂成目标颜色的最少操作次数
+        System.out.println(dp[0][n - 1]);
+        sc.close();
     }
 }
 ```
