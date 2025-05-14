@@ -1507,3 +1507,213 @@ public class Main {
 }
 ```
 
+## P4302 [SCOI2003] 字符串折叠【★★★★】
+
+> ## 题目描述
+>
+> 折叠的定义如下：
+>
+> 1. 一个字符串可以看成它自身的折叠。记作 ```S = S```
+>
+> 2. ```X(S)``` 是 $X$ 个 ```S``` 连接在一起的串的折叠。记作 ```X(S) = SSSS…S```。
+>
+> 3. 如果 ```A = A’```, ```B = B’```，则 ```AB = A’B’ ```。例如：因为 ```3(A) = AAA```, ```2(B) = BB```，所以 ```3(A)C2(B) = AAACBB```，而 ```2(3(A)C)2(B) = AAACAAACBB```
+>
+> 给一个字符串，求它的最短折叠。
+>
+> 例如 ```AAAAAAAAAABABABCCD``` 的最短折叠为：```9(A)3(AB)CCD```。
+>
+> ## 输入格式
+>
+> 仅一行，即字符串 `S`，长度保证不超过 $100$。
+>
+> ## 输出格式
+>
+> 仅一行，即最短的折叠长度。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> NEERCYESYESYESNEERCYESYESYES
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 14
+> ```
+>
+> ## 说明/提示
+>
+> 一个最短的折叠为：`2(NEERC3(YES))`
+
+```java
+import java.util.Scanner;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.nextLine();
+        System.out.println(foldedLength(s));
+        sc.close();
+    }
+    
+    // 求字符串 s 的最短折叠表达式的长度
+    public static int foldedLength(String s) {
+        int n = s.length();
+        // dp[i][j] 表示子串 s[i..j] 的最短折叠表达式的长度
+        int[][] dp = new int[n][n];
+        
+        // 初始化：单个字符的折叠表达式长度为 1
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+        
+        // 枚举子串长度从 2 到 n
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
+                // 默认直接写出子串，长度为 len
+                dp[i][j] = len;
+                // 尝试拆分子串：A 和 B, dp[i][j] = dp[i][k] + dp[k+1][j]
+                for (int k = i; k < j; k++) {
+                    dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k+1][j]);
+                }
+                // 尝试把子串看成重复模式构成的
+                String sub = s.substring(i, j + 1);
+                int subLen = sub.length();
+                // 枚举可能的重复单元长度
+                for (int k = 1; k <= subLen / 2; k++) {
+                    if (subLen % k != 0) {
+                        continue;
+                    }
+                    if (check(s, i, j, k)) {
+                        int times = subLen / k;
+                        // 表达式形式为: times(模式)
+                        // 其长度 = 数字位数 + 2（括号） + 模式的最短折叠表达式长度
+                        int candidate = String.valueOf(times).length() + 2 + dp[i][i + k - 1];
+                        dp[i][j] = Math.min(dp[i][j], candidate);
+                    }
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+    
+    // 检查 s[i..j] 是否由重复长度为 p 的子串构成
+    private static boolean check(String s, int i, int j, int p) {
+        String pattern = s.substring(i, i + p);
+        for (int k = i; k <= j; k += p) {
+            if (!s.substring(k, k + p).equals(pattern)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+# 【树形dp】
+
+- `tips：一般额外创建dp数组，dfs返回值为void，这样好写很多；`
+
+## P1352 没有上司的舞会
+
+> ## 题目描述
+>
+> 某大学有 $n$ 个职员，编号为 $1\ldots n$。
+>
+> 他们之间有从属关系，也就是说他们的关系就像一棵以校长为根的树，父结点就是子结点的直接上司。
+>
+> 现在有个周年庆宴会，宴会每邀请来一个职员都会增加一定的快乐指数 $r_i$，但是呢，如果某个职员的直接上司来参加舞会了，那么这个职员就无论如何也不肯来参加舞会了。
+>
+> 所以，请你编程计算，邀请哪些职员可以使快乐指数最大，求最大的快乐指数。
+>
+> ## 输入格式
+>
+> 输入的第一行是一个整数 $n$。
+>
+> 第 $2$ 到第 $(n + 1)$ 行，每行一个整数，第 $(i+1)$ 行的整数表示 $i$ 号职员的快乐指数 $r_i$。
+>
+> 第 $(n + 2)$ 到第 $2n$ 行，每行输入一对整数 $l, k$，代表 $k$ 是 $l$ 的直接上司。
+>
+> ## 输出格式
+>
+> 输出一行一个整数代表最大的快乐指数。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 7
+> 1
+> 1
+> 1
+> 1
+> 1
+> 1
+> 1
+> 1 3
+> 2 3
+> 6 4
+> 7 4
+> 4 5
+> 3 5
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 5
+> ```
+>
+> ## 说明/提示
+>
+> #### 数据规模与约定
+>
+> 对于 $100\%$ 的数据，保证 $1\leq n \leq 6 \times 10^3$，$-128 \leq r_i\leq 127$，$1 \leq l, k \leq n$，且给出的关系一定是一棵树。
+
+```java
+	public static void solve() throws IOException {
+		int n = sc.nextInt();
+		int[] a = new int[n];
+		for(int i = 0;i<n;i++) {
+			a[i] = sc.nextInt();
+		}
+		List<Integer>[] g = new List[n];
+		Arrays.setAll(g, e->new ArrayList<>());
+		int[] indegree = new int[n];
+		for(int i = 0;i<n - 1;i++) {
+			int x = sc.nextInt() - 1, y = sc.nextInt() - 1;
+			indegree[y]++;
+			g[x].add(y);
+			g[y].add(x);
+		}
+		dp = new int[n][2];
+		for(int i = 0;i<n;i++) {
+			if(indegree[i]==0) { // 找根节点，入度为0
+				dfs(i, -1, g, a);
+				sc.print(Math.max(dp[i][0], dp[i][1])+"\n");
+				return;
+			}
+		}	
+	}
+	
+	static int[][] dp; // dp[i][0]不选i节点，dp[i][1]选i节点
+	
+	private static void dfs(int x, int fa, List<Integer>[] g, int[] a) { // 有点像打家劫舍
+		dp[x][1] = a[x];
+		dp[x][0] = 0;
+		for(int y:g[x]) {
+			if(y!=fa) {
+				dfs(y, x, g, a);
+				dp[x][1]+=dp[y][0]; // 选了当前节点，不能选子节点
+				dp[x][0]+=Math.max(dp[y][0], dp[y][1]); // 当前节点x不选，那么子节点y可选可不选
+			}
+		}
+	}
+```
+
