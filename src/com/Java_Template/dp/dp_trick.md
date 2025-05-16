@@ -1717,3 +1717,130 @@ public class Solution {
 	}
 ```
 
+## P1273 有线电视网
+
+```java
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.*;
+
+/**
+ * P1273 有线电视网
+ *
+ * 题目描述：
+ * 有线电视网的网络结构构成一棵树，内部节点为转播站，叶子节点为用户。
+ * 每条边有一个传输费用，每个用户愿意支付一定费用观看比赛。
+ * 在不亏本（净收入大于等于0）的情况下，让尽可能多的用户观看比赛。
+ *
+ * 解题思路（树形动态规划）：
+ * dp[u][j] 表示以 u 为根的子树中，选取 j 个用户所能获得的最大净值（用户支付总额减去传输费用）。
+ *
+ * 对于叶子节点（用户端），有：
+ *   dp[u][0] = 0, dp[u][1] = 用户支付的金额。
+ *
+ * 对于转播站节点（内部节点），初始状态为：
+ *   dp[u][0] = 0，其它状态初始化为负无穷。
+ *
+ * 合并子节点时：
+ *   枚举先前在 u 的子树中选取的用户个数 i，以及当前子节点选取的用户个数 j，
+ *   当 j = 0 时，表示不选子节点的用户，不需要支付传输费用；
+ *   当 j >= 1 时，需支付一次从 u 到子节点的传输费用。
+ *
+ * dfs函数采用返回 void，并通过全局 dp 数组保存每个节点的状态。
+ */
+
+    /**
+     * 主解决函数
+     */
+    public static void solve() throws IOException {
+        int n = sc.nextInt(), m = sc.nextInt();
+        // 构造图的邻接表，节点编号 1 到 n
+        List<int[]>[] g = new List[n+1];
+        Arrays.setAll(g, e -> new ArrayList<>());
+        // 注意：前 (n - m) 个节点为转播站，因此读取 (n - m) 行数据
+        for (int i = 0; i < n - m; i++) {
+            int w = sc.nextInt(); // 当前转播站连接的节点数量
+            for (int j = 0; j < w; j++) {
+                int a = sc.nextInt(), c = sc.nextInt();
+                // 构造无向图：双向添加边，后续DFS时防止回溯父节点
+                g[a].add(new int[] { i + 1, c });
+                g[i + 1].add(new int[] { a, c });
+            }
+        }
+        // cost数组存储各个节点的用户支付金额
+        // 对于转播站节点设为 Integer.MIN_VALUE，表示其不是用户
+        int[] cost = new int[n+1];
+        Arrays.fill(cost, Integer.MIN_VALUE);
+        // 用户节点编号为 n-m+1 到 n
+        for (int i = n - m + 1; i <= n; i++) {
+            cost[i] = sc.nextInt();
+        }
+        // dp[i][j] 表示以节点 i 为根的子树中，选取 j 个用户的最大净值
+        dp = new int[n+1][m+1];
+        for (int i = 1; i <= n; i++) {
+            Arrays.fill(dp[i], Integer.MIN_VALUE);
+            dp[i][0] = 0; // 选 0 个用户时净值为 0
+        }
+        // 从根节点 1 开始dfs，父节点设为 0（不存在的节点）
+        dfs(1, 0, g, cost, m);
+        int ans = 0;
+        // 遍历 dp[1][j] 寻找最大 j 满足净值不亏本（>= 0）
+        for (int i = 0; i <= m; i++) {
+            if (dp[1][i] >= 0) {
+                ans = i;
+            }
+        }
+        System.out.println(ans);
+    }
+    
+    /**
+     * DFS函数：更新dp[x]，其中 x 为当前处理的节点；函数返回void，通过全局dp数组传递状态。
+     *
+     * @param x 当前节点
+     * @param fa 父节点，防止回溯
+     * @param g 邻接表表示的图
+     * @param cost 用户支付金额数组：转播站节点为 Integer.MIN_VALUE，用户节点为支付金额
+     * @param m 最多用户个数
+     */
+    private static void dfs(int x, int fa, List<int[]>[] g, int[] cost, int m) {
+        // 如果cost[x]有值（>=0），表示x是用户终端（叶子节点），则可以“选”这个用户
+        if (cost[x] >= 0) {
+            dp[x][1] = cost[x];
+        }
+        // 遍历当前节点x的所有邻接节点
+        for (int[] y : g[x]) {
+            // 如果 y[0] 是父节点，跳过以防回溯
+            if (y[0] != fa) {
+                // 递归处理子节点
+                dfs(y[0], x, g, cost, m);
+                // 合并子节点的状态到当前节点x的dp中
+                int[] temp = new int[m+1];
+                Arrays.fill(temp, Integer.MIN_VALUE);
+                // 双重循环：i 表示原来在dp[x]中选取的用户数，j 表示在dp[y]中选取的用户数
+                for (int i = 0; i <= m; i++) {
+                    if (dp[x][i] == Integer.MIN_VALUE) {
+                        continue;
+                    }
+                    // 情况1：不选子节点y中的用户（j = 0），不需要支付传输费用
+                    temp[i] = Math.max(temp[i], dp[x][i] + dp[y[0]][0]);
+                    // 情况2：选取子节点y中的j个用户，需支付一次传输费用 y[1]
+                    for (int j = 1; j <= m - i; j++) {
+                        if (dp[y[0]][j] == Integer.MIN_VALUE) { 
+                            continue;
+                        }
+                        temp[i+j] = Math.max(temp[i+j], dp[x][i] + dp[y[0]][j] - y[1]);
+                    }
+                }
+                // 更新dp[x]为合并后的结果
+                for (int i = 0; i <= m; i++) {
+                    dp[x][i] = temp[i];
+                }
+            }
+        }
+    }
+
+```
+
