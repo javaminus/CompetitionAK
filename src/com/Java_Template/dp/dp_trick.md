@@ -1844,3 +1844,302 @@ import java.util.*;
 
 ```
 
+## P2014 [CTSC1997] 选课
+
+> ## 题目描述
+>
+> 在大学里每个学生，为了达到一定的学分，必须从很多课程里选择一些课程来学习，在课程里有些课程必须在某些课程之前学习，如高等数学总是在其它课程之前学习。现在有 $N$ 门功课，每门课有个学分，每门课有一门或没有直接先修课（若课程 $a$ 是课程 $b$ 的先修课即只有学完了课程 $a$，才能学习课程 $b$）。一个学生要从这些课程里选择 $M$ 门课程学习，问他能获得的最大学分是多少？
+>
+> ## 输入格式
+>
+> 第一行有两个整数 $NM$ 用空格隔开 $(1 \leq N \leq 300$ , $1 \leq M \leq 300)$。
+>
+> 接下来的 $N$ 行,第 $i+1$ 行包含两个整数 $k_i$ 和 $s_i$, $k_i$ 表示第 $i$ 门课的直接先修课，$s_i$ 表示第 $i$ 门课的学分。若 $k_i=0$ 表示没有直接先修课 $(0 \leq {k_i} \leq N$,$1 \leq {s_i} \leq 20)$。
+>
+> ## 输出格式
+>
+> 只有一行，选 $M$ 门课程的最大学分。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 7  4
+> 2  2
+> 0  1
+> 0  4
+> 2  1
+> 7  1
+> 7  6
+> 2  2
+> 
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 13
+> ```
+
+```java
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    // 最大学科数量常量，根据题目限制
+    static final int MAXN = 305;
+    // 用于表示一个很小的值，作为不可能选取的状态
+    static final int NEG_INF = -1000000000;
+    
+    // 每门课程的学分
+    static int[] credit = new int[MAXN];
+    // 每门课程的直接先修课程编号
+    static int[] pre = new int[MAXN];
+    // 邻接表，存储以 course 为根的孩子课程集合
+    static ArrayList<Integer>[] children = new ArrayList[MAXN];
+    
+    // DP数组，每个节点 computedDP[u][j] 表示在以 u 为根的子树中，
+    // 且确保 u 被选取，选取恰好 j 门课时所获得的最大学分。
+    // dp[u][j] = -infinity 表示不可能的情况。
+    static int[][] dp = new int[MAXN][MAXN];
+    
+    // N 门课程, M 选取的门数
+    static int N, M;
+    
+    public static void main(String[] args) throws Exception {
+        // 使用 BufferedReader 进行快速输入
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        
+        // 初始化 children 数组
+        for (int i = 0; i <= N; i++) {
+            children[i] = new ArrayList<>();
+        }
+        
+        // 读取每门课程的信息
+        // 注意题目中课程编号按 1-indexed 编号
+        for (int i = 1; i <= N; i++) {
+            st = new StringTokenizer(br.readLine());
+            // 直接先修课编号，如果为 0 表示没有先修课
+            pre[i] = Integer.parseInt(st.nextToken());
+            credit[i] = Integer.parseInt(st.nextToken());
+            // 如果存在先修课，构造有向树的关系（父节点到子节点）
+            if (pre[i] != 0) {
+                children[pre[i]].add(i);
+            }
+        }
+        
+        // 存储所有森林中，每棵树根节点对应的dp数组
+        // forestDP[j] 表示在已选课程组合中，选取 j 门课程所能获得的最大学分
+        int[] forestDP = new int[M+1];
+        Arrays.fill(forestDP, NEG_INF);
+        forestDP[0] = 0;
+        
+        // 遍历所有课程，找出没有先修课的课程，即森林的根节点
+        for (int i = 1; i <= N; i++) {
+            if (pre[i] == 0) {
+                // 对这颗树进行DFS，计算dp值
+                dfs(i);
+                // 用当前树的dp数组与整体森林的dp数组合并
+                // 临时数组，用于合并后的状态
+                int[] newForestDP = new int[M+1];
+                Arrays.fill(newForestDP, NEG_INF);
+                // 遍历不选这棵树的状态，保持原数据
+                for (int j = 0; j <= M; j++) {
+                    newForestDP[j] = Math.max(newForestDP[j], forestDP[j]);
+                }
+                // 当前树的dp数组 dp[i][k] 对应选择的 k 门课程（必然包含树根）
+                // 这里注意：dp[i][0]是无效的状态，因为根必须被选取，如果选择此树的话
+                for (int j = M; j >= 0; j--) {
+                    if(forestDP[j] != NEG_INF){
+                        // 对于当前树中可能选取的门数 k，从1开始
+                        for (int k = 1; k <= M - j; k++) {
+                            if(dp[i][k] != NEG_INF) {
+                                newForestDP[j+k] = Math.max(newForestDP[j+k], forestDP[j] + dp[i][k]);
+                            }
+                        }
+                    }
+                }
+                forestDP = newForestDP;
+            }
+        }
+        
+        // 输出选取 M 门课程能获得的最大学分
+        System.out.println(forestDP[M]);
+    }
+    
+    // 使用深度优先搜索（DFS）计算 dp[u]
+    // dp[u][j] 表示在以 u 为根的子树中，选取恰好 j 门课程，并且 u 必须被选中的最大学分
+    static void dfs(int u) {
+        // 初始化 dp[u]，对于所有数量设置为-无穷值
+        Arrays.fill(dp[u], NEG_INF);
+        // 基础状态：只选 u 自己，获得的学分为 credit[u]
+        dp[u][1] = credit[u];
+        
+        // 遍历 u 的所有子节点，每个子节点表示 u 的一个后继课程
+        for (int v : children[u]) {
+            // 递归计算子树 dp 值
+            dfs(v);
+            // 合并 dp[u] 和 dp[v]
+            // newDP 临时数组，保存合并后的结果
+            int[] newDP = new int[M+1];
+            Arrays.fill(newDP, NEG_INF);
+            // 对于当前 u 的选法，考虑不选 v 对应子树的贡献
+            for (int j = 1; j <= M; j++) {
+                if(dp[u][j] != NEG_INF) {
+                    newDP[j] = Math.max(newDP[j], dp[u][j]);
+                }
+            }
+            // 如果选择 v 的子树，也就是说，从 v 选取若干课程，注意 v 必须被选取才能选 v 下的课程
+            // dp[v][k] 表示在子树 v 中选取 k 门课程，且 v 被选取
+            for (int j = 1; j <= M; j++) {
+                if(dp[u][j] != NEG_INF) {
+                    for (int k = 1; k <= M - j; k++) {
+                        if(dp[v][k] != NEG_INF) {
+                            newDP[j+k] = Math.max(newDP[j+k], dp[u][j] + dp[v][k]);
+                        }
+                    }
+                }
+            }
+            // 更新 dp[u] 为合并后的结果
+            // 注意，只需要考虑最多 M 门课程
+            for (int j = 1; j <= M; j++) {
+                dp[u][j] = newDP[j];
+            }
+        }
+    }
+}
+```
+
+
+
+# 【状压dp】
+
+## [1931. 用三种不同颜色为网格涂色[三进制状压染色]](https://leetcode.cn/problems/painting-a-grid-with-three-different-colors/)
+
+> 给你两个整数 `m` 和 `n` 。构造一个 `m x n` 的网格，其中每个单元格最开始是白色。请你用 **红、绿、蓝** 三种颜色为每个单元格涂色。所有单元格都需要被涂色。
+>
+> 涂色方案需要满足：**不存在相邻两个单元格颜色相同的情况** 。返回网格涂色的方法数。因为答案可能非常大， 返回 **对** $10^9 + 7$ **取余** 的结果。
+
+```java
+class Solution {
+    private static final int MOD = 1_000_000_007;
+
+    public int colorTheGrid(int m, int n) {
+        int[] pow3 = new int[m];
+        pow3[0] = 1;
+        for (int i = 1; i < m; i++) {
+            pow3[i] = pow3[i - 1] * 3;
+        }
+
+        List<Integer> valid = new ArrayList<>();
+        next:
+        for (int color = 0; color < pow3[m - 1] * 3; color++) {
+            for (int i = 1; i < m; i++) {
+                if (color / pow3[i] % 3 == color / pow3[i - 1] % 3) { // 相邻颜色相同
+                    continue next;
+                }
+            }
+            valid.add(color);
+        }
+
+        int nv = valid.size();
+        List<Integer>[] nxt = new ArrayList[nv];
+        Arrays.setAll(nxt, i -> new ArrayList<>());
+        for (int i = 0; i < nv; i++) {
+            next2:
+            for (int j = 0; j < nv; j++) {
+                for (int p3 : pow3)
+                    if (valid.get(i) / p3 % 3 == valid.get(j) / p3 % 3) { // 相邻颜色相同
+                        continue next2;
+                    }
+                nxt[i].add(j);
+            }
+        }
+
+        int[][] memo = new int[n][nv];
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+
+        long ans = 0;
+        for (int j = 0; j < nv; j++) {
+            ans += dfs(n - 1, j, nxt, memo);
+        }
+        return (int) (ans % MOD);
+    }
+
+    private int dfs(int i, int j, List<Integer>[] nxt, int[][] memo) {
+        if (i == 0) {
+            return 1; // 找到了一个合法涂色方案
+        }
+        if (memo[i][j] != -1) { // 之前计算过
+            return memo[i][j];
+        }
+        long res = 0;
+        for (int k : nxt[j]) {
+            res += dfs(i - 1, k, nxt, memo);
+        }
+        return memo[i][j] = (int) (res % MOD); // 记忆化
+    }
+}
+```
+
+```java
+class Solution { // 递推
+    private static final int MOD = 1_000_000_007;
+
+    public int colorTheGrid(int m, int n) {
+        int[] pow3 = new int[m];
+        pow3[0] = 1;
+        for (int i = 1; i < m; i++) {
+            pow3[i] = pow3[i - 1] * 3;
+        }
+
+        List<Integer> valid = new ArrayList<>();
+        next:
+        for (int color = 0; color < pow3[m - 1] * 3; color++) {
+            for (int i = 1; i < m; i++) {
+                if (color / pow3[i] % 3 == color / pow3[i - 1] % 3) { // 相邻颜色相同
+                    continue next;
+                }
+            }
+            valid.add(color);
+        }
+
+        int nv = valid.size();
+        List<Integer>[] nxt = new ArrayList[nv];
+        Arrays.setAll(nxt, i -> new ArrayList<>());
+        for (int i = 0; i < nv; i++) {
+            next2:
+            for (int j = 0; j < nv; j++) {
+                for (int p3 : pow3)
+                    if (valid.get(i) / p3 % 3 == valid.get(j) / p3 % 3) { // 相邻颜色相同
+                        continue next2;
+                    }
+                nxt[i].add(j);
+            }
+        }
+
+        int[][] f = new int[n][nv];
+        Arrays.fill(f[0], 1);
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < nv; j++) {
+                for (int k : nxt[j]) {
+                    f[i][j] = (f[i][j] + f[i - 1][k]) % MOD;
+                }
+            }
+        }
+
+        long ans = 0;
+        for (int j = 0; j < nv; j++) {
+            ans += f[n - 1][j];
+        }
+        return (int) (ans % MOD);
+    }
+}
+```
+
