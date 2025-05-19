@@ -2013,10 +2013,124 @@ public class Main {
     }
 }
 ```
+## P4395 [BalticOI 2003] Gem 气垫车
+
+> ## 题目描述
+>
+> 给出一棵树，要求你为树上的结点标上权值，权值可以是任意的正整数 
+>
+> 唯一的限制条件是相邻的两个结点不能标上相同的权值，要求一种方案，使得整棵树的总价值最小。
+>
+> ## 输入格式
+>
+> 先给出一个数字 $N$ 代表树上有 $N$ 个点，$N \le 10000$。
+>
+> 下面 $N-1$ 行，代表两个点相连。
+>
+> ## 输出格式
+>
+> 最小的总权值。
+>
+> ## 输入输出样例 #1
+>
+> ### 输入 #1
+>
+> ```
+> 10 
+> 7 5 
+> 1 2 
+> 1 7 
+> 8 9 
+> 4 1 
+> 9 7 
+> 5 6 
+> 10 2 
+> 9 3
+> ```
+>
+> ### 输出 #1
+>
+> ```
+> 14
+> ```
+>
+> ## 说明/提示
+>
+> 本题已经添加数据，但考虑到题目年代较为久远（毕竟是 2003 年的 BOI 了）以及洛谷神速评测姬，将此题时限修改为 500ms。
+
+```java
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        N = Integer.parseInt(br.readLine().trim());
+        // 构建邻接表
+        adj = new ArrayList[N + 1];
+        for (int i = 1; i <= N; i++) {
+            adj[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < N - 1; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int u = Integer.parseInt(st.nextToken());
+            int v = Integer.parseInt(st.nextToken());
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+        // 值域上界约为 log2(N) + 1
+        maxK = (int)(Math.log(N) / Math.log(2)) + 2;
+        dp = new long[N + 1][maxK + 1];
+        // 从 1 号节点开始 DFS 树形 DP
+        dfs(1, 0);
+        // 根节点取值的最优解
+        long ans = INF;
+        for (int i = 1; i <= maxK; i++) {
+            ans = Math.min(ans, dp[1][i]);
+        }
+        System.out.println(ans);
+    }
+
+    // 树形 DP：计算以 u 为根、父节点为 p 的子树中 dp[u][i]
+    // 表示节点 u 标号为 i 时，子树内总和的最小值
+    static void dfs(int u, int p) {
+        // 初始化：如果 u 自己取值 i，初始代价就是 i
+        for (int i = 1; i <= maxK; i++) {
+            dp[u][i] = i;
+        }
+        // 处理每个孩子 v
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs(v, u);
+
+            // 预处理 v 节点：找到最小值以及次小值及其对应的标号
+            long best = INF, second = INF;
+            int bestColor = -1;
+            for (int j = 1; j <= maxK; j++) {
+                long val = dp[v][j];
+                if (val < best) {
+                    second = best;
+                    best = val;
+                    bestColor = j;
+                } else if (val < second) {
+                    second = val;
+                }
+            }
+            // 将 dp[u] 与子树 v 合并：新的状态 tmp[i]
+            long[] tmp = new long[maxK + 1];
+            for (int i = 1; i <= maxK; i++) {
+                // u 标号为 i，v 子树最佳标号如果和 i 相同则用次优，否则用最优
+                long use = (i == bestColor ? second : best);
+                tmp[i] = dp[u][i] + use;
+                if (tmp[i] > INF) tmp[i] = INF;
+            }
+            // 拷贝回 dp[u]
+            for (int i = 1; i <= maxK; i++) {
+                dp[u][i] = tmp[i];
+            }
+        }
+    }
+```
 
 
 
-# 【状压dp】
+#【状压dp】
 
 ## [1931. 用三种不同颜色为网格涂色[三进制状压染色]](https://leetcode.cn/problems/painting-a-grid-with-three-different-colors/)
 
