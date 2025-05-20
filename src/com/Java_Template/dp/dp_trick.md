@@ -1,3 +1,8 @@
+#【目录】
+[TOC]
+
+
+
 # 【思维dp】
 
 ## CF1695C Zero Path【1700】
@@ -2059,73 +2064,54 @@ public class Main {
 > 本题已经添加数据，但考虑到题目年代较为久远（毕竟是 2003 年的 BOI 了）以及洛谷神速评测姬，将此题时限修改为 500ms。
 
 ```java
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        N = Integer.parseInt(br.readLine().trim());
-        // 构建邻接表
-        adj = new ArrayList[N + 1];
-        for (int i = 1; i <= N; i++) {
-            adj[i] = new ArrayList<>();
-        }
-        for (int i = 0; i < N - 1; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int u = Integer.parseInt(st.nextToken());
-            int v = Integer.parseInt(st.nextToken());
-            adj[u].add(v);
-            adj[v].add(u);
-        }
-        // 值域上界约为 log2(N) + 1
-        maxK = (int)(Math.log(N) / Math.log(2)) + 2;
-        dp = new long[N + 1][maxK + 1];
-        // 从 1 号节点开始 DFS 树形 DP
-        dfs(1, 0);
-        // 根节点取值的最优解
-        long ans = INF;
-        for (int i = 1; i <= maxK; i++) {
-            ans = Math.min(ans, dp[1][i]);
-        }
-        System.out.println(ans);
-    }
-
-    // 树形 DP：计算以 u 为根、父节点为 p 的子树中 dp[u][i]
-    // 表示节点 u 标号为 i 时，子树内总和的最小值
-    static void dfs(int u, int p) {
-        // 初始化：如果 u 自己取值 i，初始代价就是 i
-        for (int i = 1; i <= maxK; i++) {
-            dp[u][i] = i;
-        }
-        // 处理每个孩子 v
-        for (int v : adj[u]) {
-            if (v == p) continue;
-            dfs(v, u);
-
-            // 预处理 v 节点：找到最小值以及次小值及其对应的标号
-            long best = INF, second = INF;
-            int bestColor = -1;
-            for (int j = 1; j <= maxK; j++) {
-                long val = dp[v][j];
-                if (val < best) {
-                    second = best;
-                    best = val;
-                    bestColor = j;
-                } else if (val < second) {
-                    second = val;
-                }
-            }
-            // 将 dp[u] 与子树 v 合并：新的状态 tmp[i]
-            long[] tmp = new long[maxK + 1];
-            for (int i = 1; i <= maxK; i++) {
-                // u 标号为 i，v 子树最佳标号如果和 i 相同则用次优，否则用最优
-                long use = (i == bestColor ? second : best);
-                tmp[i] = dp[u][i] + use;
-                if (tmp[i] > INF) tmp[i] = INF;
-            }
-            // 拷贝回 dp[u]
-            for (int i = 1; i <= maxK; i++) {
-                dp[u][i] = tmp[i];
-            }
-        }
-    }
+	public static void solve() throws IOException {
+		int n = sc.nextInt();
+		List<Integer>[] g = new List[n+1];
+		Arrays.setAll(g, e->new ArrayList<>());
+		for(int i = 0;i<n - 1;i++) {
+			int x = sc.nextInt(), y = sc.nextInt();
+			g[x].add(y);
+			g[y].add(x);
+		}
+		maxK = (int) (Math.log(n)/Math.log(2)) + 2;
+		dp = new long[n+1][maxK+1];
+		dfs(1, 0, g);
+		long res = INF;
+		for(int i = 1;i<=maxK;i++) {
+			res = Math.min(res, dp[1][i]);
+		}
+		sc.print(res+"\n");
+	}
+	
+	static void dfs(int x, int fa, List<Integer>[] g) {
+		for(int i = 1;i<=maxK;i++) { // 这里直接当叶子节点就行
+			dp[x][i] = i;
+		}
+		for(int y:g[x]) {
+			if(y!=fa) {
+				dfs(y, x, g);
+				long best = INF, secBest = INF;
+				int bestColor = -1;
+				for(int i = 1;i<=maxK;i++) {
+					long val = dp[y][i];
+					if(val<best) {
+						secBest = best;
+						best = val;
+						bestColor = i;
+					}else if(val<secBest) {
+						secBest = val;
+					}
+				}
+				long[] tmp = new long[maxK+1];
+				Arrays.fill(tmp, INF);
+				for(int i = 1;i<=maxK;i++) {
+					long use = (i==bestColor ? secBest:best);
+					tmp[i] = Math.min(tmp[i], dp[x][i] + use);
+				}
+				dp[x] = tmp;
+			}
+		}
+	}
 ```
 
 
