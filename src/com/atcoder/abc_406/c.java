@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
+public class c {
     public static void main(String[] args) throws IOException {
         // 使用 BufferedReader 进行快速输入
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

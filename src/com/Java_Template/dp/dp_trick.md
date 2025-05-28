@@ -1830,7 +1830,7 @@ import java.util.*;
                         continue;
                     }
                     // 情况1：不选子节点y中的用户（j = 0），不需要支付传输费用
-                    temp[i] = Math.max(temp[i], dp[x][i] + dp[y[0]][0]);
+                    temp[i] = Math.max(temp[i], dp[x][i] + dp[y[0]][0]); // 这里不用减去y[1]
                     // 情况2：选取子节点y中的j个用户，需支付一次传输费用 y[1]
                     for (int j = 1; j <= m - i; j++) {
                         if (dp[y[0]][j] == Integer.MIN_VALUE) { 
@@ -2112,6 +2112,94 @@ public class Main {
 			}
 		}
 	}
+```
+
+## [3562. 折扣价交易股票的最大利润](https://leetcode.cn/problems/maximum-profit-from-trading-stocks-with-discounts/)
+
+题意：
+
+**简化&抽象题意如下：**
+
+有一棵以员工1为根的有根树，每个节点i有：
+
+- 买入价格 present[i]
+- 卖出价格 future[i]
+
+每人最多只能买一次自己的股票。  
+如果某人的父亲节点也买了自己的股票，那么他可以买自己股票时享受半价（向下取整）。
+
+给定一个总预算 budget，问最多能获得多少利润（利润=卖出价-买入价，总买入花费不超过 budget）。
+
+```java
+import java.util.*;
+
+class Solution {
+    public int maxProfit(int n, int[] present, int[] future, int[][] hierarchy, int budget) {
+        // 构建公司层级关系的邻接表
+        List<Integer>[] g = new ArrayList[n];
+        Arrays.setAll(g, i -> new ArrayList<>());
+        for (int[] e : hierarchy) {
+            g[e[0] - 1].add(e[1] - 1); // 上司到下属的有向边
+        }
+
+        // 从CEO（编号0）开始递归，得到CEO子树的最大利润数组
+        int[][] f0 = dfs(0, g, present, future, budget);
+        // 返回在所有预算下的最大利润
+        return Arrays.stream(f0[0]).max().getAsInt();
+    }
+
+    /**
+     * 
+     * @param x 当前员工编号
+     * @param g 公司层级关系邻接表
+     * @param present 股票当前价格
+     * @param future 股票明日价格
+     * @param budget 剩余预算
+     * @return f[2][budget+1]，f[0]表示父节点未买的情况下的最大利润，f[1]表示父节点已买（可打折）的最大利润
+     */
+    private int[][] dfs(int x, List<Integer>[] g, int[] present, int[] future, int budget) {
+        // subF[k][j] 表示处理完x的所有子树后，k=0父节点未买，k=1父节点已买时，花费j预算的最大利润
+        int[][] subF = new int[2][budget + 1];
+        Arrays.fill(subF[0], Integer.MIN_VALUE / 2); // 初始化为极小值表示该状态不可达
+        Arrays.fill(subF[1], Integer.MIN_VALUE / 2);
+        subF[0][0] = subF[1][0] = 0; // 花费0预算，利润为0
+
+        // 合并所有子节点的dp
+        for (int y : g[x]) {
+            int[][] fy = dfs(y, g, present, future, budget);
+            for (int k = 0; k < 2; k++) {
+                int[] nf = new int[budget + 1];
+                Arrays.fill(nf, Integer.MIN_VALUE / 2);
+                nf[0] = 0;
+                // 枚举子树y的预算jy
+                for (int jy = 0; jy <= budget; jy++) {
+                    int resY = fy[k][jy];
+                    if (resY < 0) { // 优化：该预算不可达，跳过
+                        continue;
+                    }
+                    // 合并子树y的选择
+                    for (int j = jy; j <= budget; j++) {
+                        nf[j] = Math.max(nf[j], subF[k][j - jy] + resY);
+                    }
+                }
+                subF[k] = nf;
+            }
+        }
+
+        int[][] f = new int[2][];
+        for (int k = 0; k < 2; k++) {
+            // 不买x时，子节点只能用父节点未买的状态
+            f[k] = subF[0].clone();
+            // 计算买x的成本（k=0为原价，k=1为半价）
+            int cost = present[x] / (k + 1);
+            // 买x时，子节点的状态切换为父节点已买，可以用折扣
+            for (int j = cost; j <= budget; j++) {
+                f[k][j] = Math.max(f[k][j], subF[1][j - cost] + future[x] - cost);
+            }
+        }
+        return f;
+    }
+}
 ```
 
 

@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
+public class f {
     static int N, Q;
     static ArrayList<Integer>[] tree; // 存储树的邻接表
     static int[] tin, tout; // Euler Tour中的进入时间与离开时间记录
